@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#070d13;color:#dfe9ef;font-family:Inter,system-ui,sans-serif;overflow:hidden}
+a{color:#18D7DF}a:hover{color:#8af0f4}
+button{font-family:inherit}
+[data-sc]::-webkit-scrollbar{width:8px}[data-sc]::-webkit-scrollbar-thumb{background:#1d3242;border-radius:4px}
+@keyframes rp-shim{from{background-position:100% 0}to{background-position:-200% 0}}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;min-height:0">
+<aside data-sc="1" style="flex:none;width:272px;height:100vh;overflow-y:auto;box-sizing:border-box;padding:22px 14px 28px;border-right:1px solid #13222e;background:#081119;display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;align-items:center;gap:10px;padding:0 8px 18px">
+<span style="width:38px;height:38px;flex:none;border-radius:12px;background:url(assets/reckon-emblem.png) center/82% no-repeat,#0a1628;box-shadow:0 6px 16px rgba(35,120,221,.3)"></span>
+<div><div style="font:800 14px/18px Unbounded,sans-serif;color:#fff">RECKON<span style="color:#18D7DF"> PATH</span></div><div style="font:600 11px/14px Inter;color:#6f8797">{{ total }}</div></div>
+</div>
+<sc-for list="{{ pages }}" as="p" hint-placeholder-count="15">
+<sc-if value="{{ p.sep }}" hint-placeholder-val="{{ false }}"><div style="margin:14px 8px 6px;font:800 10px/14px Inter;letter-spacing:.14em;color:#4f6676">{{ p.sepTxt }}</div></sc-if>
+<button onClick="{{ p.pick }}" style="display:flex;align-items:center;gap:10px;width:100%;min-height:40px;padding:6px 10px;border-radius:11px;border:0;background:{{ p.bg }};color:{{ p.fg }};text-align:left;cursor:pointer;transition:background .15s">
+<span style="width:24px;flex:none;font:800 11px/1 Unbounded,sans-serif;color:{{ p.nfg }}">{{ p.n }}</span>
+<span style="flex:1;min-width:0;font:600 13px/17px Inter">{{ p.title }}</span>
+<span style="flex:none;font:700 11px/1 Inter;color:#6f8797">{{ p.cnt }}</span>
+</button>
+</sc-for>
+</aside>
+<main data-sc="1" ref="{{ mainRef }}" style="flex:1;min-width:0;height:100vh;overflow-y:auto;background:#070d13">
+<div style="position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:18px 32px;background:rgba(7,13,19,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #13222e">
+<div style="display:flex;align-items:baseline;gap:14px;min-width:0;flex:1">
+<span style="font:800 34px/1 Unbounded,sans-serif;color:#18D7DF">{{ cur.n }}</span>
+<div style="min-width:0"><div style="font:700 22px/28px Unbounded,sans-serif;color:#fff">{{ cur.title }}</div><div style="font:500 13px/18px Inter;color:#7f98a8;text-wrap:pretty;max-width:760px">{{ cur.desc }}</div></div>
+</div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<button onClick="{{ prev }}" style="height:36px;padding:0 14px;border-radius:10px;border:1px solid #1d3242;background:#0d1b26;color:#dfe9ef;font:700 12px/1 Inter;cursor:pointer;white-space:nowrap;opacity:{{ prevOp }}">← {{ prevT }}</button>
+<button onClick="{{ next }}" style="height:36px;padding:0 14px;border-radius:10px;border:0;background:linear-gradient(135deg,#18D7DF,#647CFF);color:#fff;font:800 12px/1 Inter;cursor:pointer;white-space:nowrap;opacity:{{ nextOp }}">{{ nextT }} →</button>
+</div>
+</div>
+<sc-for list="{{ frames }}" as="f" hint-placeholder-count="2">
+<div style="position:relative;min-height:{{ f.minH }}">
+<sc-if value="{{ f.loading }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:48px;top:40px;display:flex;gap:36px"><span style="display:block;width:410px;height:864px;border-radius:62px;background:linear-gradient(90deg,#0d1b26 0 30%,#15283a 45%,#0d1b26 60%);background-size:300% 100%;animation:rp-shim 1.4s linear infinite"></span><span style="display:block;width:410px;height:864px;border-radius:62px;background:linear-gradient(90deg,#0d1b26 0 30%,#15283a 45%,#0d1b26 60%);background-size:300% 100%;animation:rp-shim 1.4s .2s linear infinite"></span></div></sc-if>
+<iframe src="{{ f.src }}" title="{{ f.k }}" style="display:block;width:100%;height:{{ f.h }};border:0;background:transparent"></iframe>
+</div>
+</sc-for>
+<div style="padding:24px 32px 60px;font:500 12px/18px Inter;color:#4f6676">{{ foot }}</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;,&quot;section&quot;:&quot;Вид&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ru&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ru&quot;,&quot;tsType&quot;:&quot;'ru'|'en'&quot;,&quot;section&quot;:&quot;Вид&quot;},&quot;platform&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ios&quot;,&quot;android&quot;],&quot;default&quot;:&quot;ios&quot;,&quot;tsType&quot;:&quot;'ios'|'android'&quot;,&quot;section&quot;:&quot;Вид&quot;}}">
+const RP_PAGES=[
+ {t:['Вход и онбординг','Sign-in & onboarding'],d:['Сплэш, вход и регистрация, выбор языка, обучение по шагам, первый итог.','Splash, sign-in and sign-up, language choice, step-by-step tutorial, first result.'],src:[['Reckon Path v2.dc.html','f1,f4'],['Reckon Path Extra.dc.html','f29']],c:13},
+ {t:['Главная','Home'],d:['Геро текущего уровня, дейли, событие, быстрые ссылки — все состояния.','Current-level hero, daily, event, quick links — every state.'],src:[['Reckon Path Home.dc.html','f19']],c:8},
+ {t:['Пеленг дня','Daily bearing'],d:['Карточка дня, серия и вехи, календарь, лидерборд дня, восстановление, игра, итог, «Поделиться».','Day card, streak and milestones, calendar, daily board, restore, game, result, share.'],src:[['Reckon Path Home.dc.html','f20']],c:8},
+ {t:['Уровни','Levels'],d:['Миры, строки уровней, лист «Уровень N», закрытые уровни, «К текущему».','Worlds, level rows, level sheet, locked levels, “To current”.'],src:[['Reckon Path Home.dc.html','f21']],c:4},
+ {t:['Игра и механика','Game & mechanics'],d:['Плоское поле, бомбы, маяк, буй, туман, порядок целей, режимы подсказки, пауза, карточки элементов, игра по коду и карта события.','Flat board, bombs, beacon, buoy, fog, target order, hint modes, pause, element cards, code and event games.'],src:[['Reckon Path v2.dc.html','f5'],['Reckon Path Mechanics.dc.html','f10,f11'],['Reckon Path Extra.dc.html','f31']],c:20},
+ {t:['Итоги уровня','Level results'],d:['Победа и поражение: рекорд, удвоение, продолжение за рекламу или ◆, «Не продолжать», «Как заработать».','Win and loss: best, double, continue for ad or ◆, “Don’t continue”, how to earn.'],src:[['Reckon Path v2.dc.html','f6'],['Reckon Path Mechanics.dc.html','f12']],c:8},
+ {t:['Арена','Arena'],d:['Главная арены, закрытая и офлайн, правила при первом входе, редактор карты, обучение арены.','Arena home, locked and offline, first-visit rules, map editor, arena tutorial.'],src:[['Reckon Path Arena.dc.html','f13,f14'],['Reckon Path Extra.dc.html','f30']],c:13},
+ {t:['Поиск, матч, итог','Search, match, result'],d:['Радар, VS, живой матч со всеми событиями, асинхрон, итоги, сбои и история матча.','Radar, VS, live match with all events, async, results, failures and match history.'],src:[['Reckon Path Arena.dc.html','f15'],['Reckon Path Arena Match.dc.html','f16,f17'],['Reckon Path Extra.dc.html','f32']],c:27},
+ {t:['Лидерборды и сезон','Leaderboards & season'],d:['Вкладки «Неделя / Сезон / Дейли» × «Все / Страна / Друзья», пусто, итог сезона.','Week / Season / Daily × All / Country / Friends, empty, season summary.'],src:[['Reckon Path Arena Match.dc.html','f18']],c:3},
+ {t:['Витрина','Showroom'],d:['Каталог, превью с живым полем, покупка, наборы, ошибки, «Как заработать».','Catalogue, live-board preview, purchase, bundles, errors, how to earn.'],src:[['Reckon Path Shop.dc.html','f22']],c:8},
+ {t:['Профиль и друзья','Profile & friends'],d:['Профиль, гость, коллекция, ник, достижения, чужой профиль, друзья, заявки, вызов.','Profile, guest, collection, nickname, achievements, other profile, friends, requests, challenge.'],src:[['Reckon Path Profile.dc.html','f23,f24']],c:12},
+ {t:['События и редактор','Events & editor'],d:['Событие и его состояния, мои уровни, «Поделиться», «Играть по коду».','Event and its states, my levels, share, play by code.'],src:[['Reckon Path Settings.dc.html','f27']],c:6},
+ {t:['Настройки и аккаунт','Settings & account'],d:['Настройки RU и EN, привязка, конфликт аккаунтов, удаление.','Settings in RU and EN, linking, account conflict, deletion.'],src:[['Reckon Path Settings.dc.html','f25,f26']],c:7},
+ {t:['Системные и состояния','System & states'],d:['Обновления, техработы, бан, ошибки, ATT и push, статистика, загрузка, ошибки покупки, бейджи на табах.','Updates, maintenance, ban, errors, ATT and push, stats, loading, purchase errors, tab badges.'],src:[['Reckon Path Settings.dc.html','f28'],['Reckon Path Extra.dc.html','f33']],c:13},
+ {t:['Архив черновиков','Draft archive'],d:['Ранние версии Главной, Уровней, Арены, Витрины и Профиля. Заменены страницами выше.','Early Home, Levels, Arena, Showroom and Profile drafts. Superseded by the pages above.'],src:[['Reckon Path v2.dc.html','f2,f3,f7,f8,f9']],c:9,archive:true}];
+class Component extends DCLogic {
+  state={page:(()=>{try{const v=parseInt(localStorage.getItem('rp-hub-page'),10);return v>=0&&v<RP_PAGES.length?v:0;}catch(e){return 0;}})(),hs:{}};
+  componentDidMount(){this._onMsg=e=>{const d=e&&e.data;if(!d||!d.rpH||!d.rpK)return;if(this.state.hs[d.rpK]===d.rpH)return;this.setState(s=>({hs:Object.assign({},s.hs,{[d.rpK]:d.rpH})}));};window.addEventListener('message',this._onMsg);}
+  componentWillUnmount(){window.removeEventListener('message',this._onMsg);}
+  go(i){if(i<0||i>=RP_PAGES.length)return;try{localStorage.setItem('rp-hub-page',String(i));}catch(e){}this.setState({page:i});if(this._main)this._main.scrollTop=0;}
+  renderVals(){const en=this.props.lang==='en',T=x=>en?x[1]:x[0],p=this.state.page,P=RP_PAGES[p];
+    const q='&theme='+(this.props.theme==='light'?'light':'dark')+'&lang='+(en?'en':'ru')+'&os='+(this.props.platform==='android'?'android':'ios');
+    const tot=RP_PAGES.filter(x=>!x.archive).reduce((a,x)=>a+x.c,0);
+    return {total:(en?tot+' screens · ':tot+' экранов · ')+(RP_PAGES.length-1)+(en?' pages':' страниц'),
+      pages:RP_PAGES.map((x,i)=>({n:String(i+1).padStart(2,'0'),title:T(x.t),cnt:String(x.c),bg:i===p?'linear-gradient(135deg,rgba(24,215,223,.18),rgba(100,124,255,.14))':'transparent',fg:i===p?'#fff':'#b7c8d3',nfg:i===p?'#18D7DF':'#4f6676',sep:!!x.archive,sepTxt:en?'ARCHIVE':'АРХИВ',pick:()=>this.go(i)})),
+      cur:{n:String(p+1).padStart(2,'0'),title:T(P.t),desc:T(P.d)+' · '+P.c+(en?' screens':' экранов')},
+      frames:P.src.map(([f,ids],j)=>{const k=p+'-'+j,h=this.state.hs[k];return {k,src:encodeURI(f)+'?only='+ids+'&k='+k+q,h:(h?h:960)+'px',minH:(h?h:960)+'px',loading:!h};}),
+      mainRef:el=>{this._main=el;},
+      prev:()=>this.go(p-1),next:()=>this.go(p+1),prevOp:p>0?1:.35,nextOp:p<RP_PAGES.length-1?1:.35,prevT:p>0?T(RP_PAGES[p-1].t):'—',nextT:p<RP_PAGES.length-1?T(RP_PAGES[p+1].t):'—',
+      foot:en?'Every page shows the screens from their source files. Screens stay interactive. Theme, language and platform — in Tweaks.':'Каждая страница собирает экраны из исходных файлов. Экраны остаются интерактивными. Тема, язык и платформа — в Tweaks.'};}
+}
+</script>
+</body>
+</html>

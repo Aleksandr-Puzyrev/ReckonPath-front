@@ -1,0 +1,7 @@
+# Use the project's Node (.nvmrc) when nvm is available — git GUIs and other shells may start on another version.
+if [ -s "$HOME/.nvm/nvm.sh" ] && [ -f .nvmrc ]; then
+  . "$HOME/.nvm/nvm.sh"
+  nvm use >/dev/null
+fi
+
+npx lint-staged

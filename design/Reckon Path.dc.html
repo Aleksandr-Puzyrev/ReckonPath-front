@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
+<style>
+html{background:#070d13}
+body{margin:0;min-height:100vh;background:#070d13;color:#dfe9ef;font-family:Inter,system-ui,sans-serif}
+a{color:#18D7DF}a:hover{color:#8af0f4}
+button{font-family:inherit;-webkit-tap-highlight-color:transparent}
+[data-scroll]::-webkit-scrollbar{display:none}
+[data-rp],[data-theme="dark"]{--bg:#06131E;--surface:#0D202D;--sunken:#122D3C;--text:#F2F8FB;--text2:#91A8B8;--border:#213C4D;--cyan:#18D7DF;--blue:#647CFF;--pink:#FF5D9A;--success:#3ED49B;--warn:#FFC84E;--danger:#FF6D72;--em:#3ED49B;--coin:#FFC84E;--trophy:#FFD36D;--elev1:0 10px 28px rgba(0,0,0,.30);--elev2:0 14px 40px rgba(0,0,0,.40);--glass:rgba(13,32,45,.74);--grid:rgba(24,215,223,.05);--overlay:rgba(0,0,0,.66);--c1:#2B687D;--c2:#1D4D61;--c3:#133444;--cellnum:#F2F8FB}
+[data-rp][data-theme="light"],[data-theme="light"]{--bg:#EEF5F8;--surface:#FFFFFF;--sunken:#E7F0F5;--text:#102534;--text2:#536878;--border:#D5E2E9;--cyan:#0FB8C0;--blue:#5068F5;--pink:#F24C8C;--success:#1FB27E;--warn:#E0A21E;--danger:#E5484F;--em:#12B886;--coin:#E0A21E;--trophy:#C98A1E;--elev1:0 8px 24px rgba(32,69,91,.10);--elev2:0 14px 40px rgba(20,55,75,.18);--glass:rgba(255,255,255,.78);--grid:rgba(16,37,52,.05);--overlay:rgba(4,15,24,.62);--c1:#DFF8FA;--c2:#BFE4EA;--c3:#8EC8D2;--cellnum:#103044}
+[data-rp][data-lang="en"] [data-l="ru"]{display:none!important}
+[data-rp]:not([data-lang="en"]) [data-l="en"]{display:none!important}
+[data-rp][data-os-mode="android"] [data-os="ios"]{display:none!important}
+[data-rp]:not([data-os-mode="android"]) [data-os="android"]{display:none!important}
+@keyframes rp-pulse{0%{transform:scale(.55);opacity:.95}100%{transform:scale(1.35);opacity:0}}
+@keyframes rp-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes rp-flow{from{background-position:0 0,0 0}to{background-position:22px 22px,0 0}}
+@keyframes rp-glow{0%,100%{opacity:1}50%{opacity:.75}}
+@keyframes rp-dot{0%,100%{opacity:.3;transform:scale(.7)}40%{opacity:1;transform:scale(1.1)}}
+@keyframes rp-ping{0%{transform:scale(.55);opacity:.8}100%{transform:scale(1.7);opacity:0}}
+@keyframes rp-star{0%{transform:translateY(-28px) scale(.4);opacity:0}60%{transform:translateY(0) scale(1.18);opacity:1}100%{transform:scale(1);opacity:1}}
+.dv-turn{padding:44px 48px 48px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#18D7DF;color:#06131E;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 Inter,system-ui,sans-serif;color:#dfe9ef}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:12px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.1);color:#fff;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:500 12px/1.35 Inter,system-ui,sans-serif;color:rgba(223,233,239,.62);max-width:410px}
+.dv-opt:target .dv-oid{background:#18D7DF;color:#06131E}
+.dv-next{margin:28px 0 0;font:12px/1.5 Inter,system-ui,sans-serif;color:rgba(223,233,239,.5)}
+</style>
+</helmet>
+<section class="dv-turn" id="t1" data-rp="1" data-theme="{{ theme }}" data-lang="{{ lang }}" data-os-mode="{{ os }}">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Reckon Path — первый проход: поле + ключевые экраны кампании</span></div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;max-width:1340px;margin:0 0 40px">
+<div style="background:#0d1a24;border:1px solid #1d3242;border-radius:16px;padding:18px 20px">
+<div style="font:800 11px/14px Inter;letter-spacing:.12em;color:#18D7DF;text-transform:uppercase">Основа</div>
+<p style="margin:8px 0 0;font:500 13px/19px Inter;color:#b7c8d3;text-wrap:pretty">Токены, типографика (Unbounded + Inter), шкала, отступы и правила экранов — из ТЗ, часть 3–4. Базовый фрейм 390×844. Весь интерфейс плоский и спокойный («тихая гавань»), объём только у поля.</p>
+</div>
+<div style="background:#0d1a24;border:1px solid #1d3242;border-radius:16px;padding:18px 20px">
+<div style="font:800 11px/14px Inter;letter-spacing:.12em;color:#FFC84E;text-transform:uppercase">Что расходится с ТЗ</div>
+<p style="margin:8px 0 0;font:500 13px/19px Inter;color:#b7c8d3;text-wrap:pretty">В брифе PELENGE, морской мир и «изометрию не берём». По вашему выбору — Reckon Path и изометрический остров как на иконке. Элементы ТЗ совпадают с логотипом: ручей, мост, скалы, ×2 (мель → песок), цель → пин.</p>
+</div>
+<div style="background:#0d1a24;border:1px solid #1d3242;border-radius:16px;padding:18px 20px">
+<div style="font:800 11px/14px Inter;letter-spacing:.12em;color:#3ED49B;text-transform:uppercase">Как сохранить читаемость</div>
+<p style="margin:8px 0 0;font:500 13px/19px Inter;color:#b7c8d3;text-wrap:pretty">Числа всегда стоят вертикально над плиткой, при любом наклоне поля. Открытые клетки светятся — это «тропа» игрока, как на логотипе. HOT/WARM/COLD отличаются и цветом, и толщиной обводки. Скрытые клетки, цель и бомба выглядят одинаково.</p>
+</div>
+<div style="background:#0d1a24;border:1px solid #1d3242;border-radius:16px;padding:18px 20px">
+<div style="font:800 11px/14px Inter;letter-spacing:.12em;color:#FF5D9A;text-transform:uppercase">Твики и интерактив</div>
+<p style="margin:8px 0 0;font:500 13px/19px Inter;color:#b7c8d3;text-wrap:pretty">В панели Tweaks: тема, RU/EN, iOS/Android и тип поля для экранов S1–S9. Поля 1a–1c и S7 играбельны: пеленг считается по правилам движка (ручей 3, ×2 — 2, мост 1, заборы и скалы). Долгий тап ставит флажок.</p>
+</div>
+</div>
+
+<div style="font:700 18px/24px Unbounded,sans-serif;color:#fff;margin:0 0 6px">Направления поля</div>
+<div style="font:500 13px/18px Inter;color:rgba(223,233,239,.55);margin:0 0 20px">Уровень 32 «Мостки через течение», 6×6, 8 ходов. Цель одна, найдите её.</div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Плоское стекло — по ТЗ. Максимум читаемости и зоны тапа 52 pt; лучше всего для 9×9.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="3" width="3" height="9" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5ZM3.4 6.8a6.5 6.5 0 0 1 9.2 0l-1.1 1.1a5 5 0 0 0-7 0L3.4 6.8ZM1.1 4.5a9.8 9.8 0 0 1 13.8 0l-1.1 1.1a8.2 8.2 0 0 0-11.6 0L1.1 4.5Z"></path></svg><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 12 0 3a12 12 0 0 1 16 0L8 12Z"></path></svg><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M12 0v12H0Z"></path></svg><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:12px;padding:6px 16px 30px">
+<div style="display:flex;align-items:center;gap:8px">
+<button aria-label="pause" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;padding:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5v14M15 5v14"></path></svg></button>
+<div style="flex:1;text-align:center;min-width:0"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Мир 3 · Течения</span><span data-l="en">World 3 · Currents</span></div><div style="font:700 20px/26px Unbounded,sans-serif;margin-top:2px"><span data-l="ru">Уровень 32</span><span data-l="en">Level 32</span></div></div>
+<button aria-label="restart" onClick="{{ ga.reset }}" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;padding:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"></path></svg></button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:8px">
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Ходы</span><span data-l="en">Moves</span></div><div style="font:700 20px/24px Unbounded,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px;color:{{ ga.movesColor }}">{{ ga.moves }}</div></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Цели</span><span data-l="en">Signals</span></div><div style="font:700 20px/24px Unbounded,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px">{{ ga.found }}</div></div>
+<div style="background:var(--sunken);border:1px solid var(--border);border-radius:18px;padding:10px 12px"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Подсказка</span><span data-l="en">Hint</span></div><div style="display:flex;align-items:center;gap:6px;font:700 16px/24px Inter;margin-top:4px"><span data-l="ru">Число</span><span data-l="en">Number</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--cyan)"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg></div></div>
+</div>
+<div style="position:relative;height:8px;border-radius:4px;background:var(--sunken);margin:4px 0 12px"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,#18D7DF,#FFC84E);transition:width .3s;width:{{ ga.pct }}%"></div><span style="position:absolute;left:50%;top:-3px;width:2px;height:14px;background:var(--text);opacity:.45"></span><span style="position:absolute;left:25%;top:-3px;width:2px;height:14px;background:var(--text);opacity:.45"></span><span style="position:absolute;left:50%;top:14px;transform:translateX(-50%);font:700 11px/1 Inter;color:var(--text2)">3★</span><span style="position:absolute;left:25%;top:14px;transform:translateX(-50%);font:700 11px/1 Inter;color:var(--text2)">2★</span></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">{{ ga.board }}</div>
+<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:12px 12px 12px 16px;box-shadow:var(--elev1)">
+<div style="flex:1;min-width:0"><div style="font:700 19px/24px Unbounded,sans-serif;color:{{ ga.col }}">{{ ga.big }}</div><div style="font:500 13px/18px Inter;color:var(--text2);margin-top:3px">{{ ga.sub }}</div></div>
+<sc-if value="{{ ga.done }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ga.reset }}" style="height:44px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--sunken);color:var(--text);font:800 13px/18px Inter;cursor:pointer"><span data-l="ru">Заново</span><span data-l="en">Retry</span></button></sc-if>
+<button aria-label="flag" onClick="{{ ga.toggleFlag }}" style="width:56px;height:56px;border-radius:16px;border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;flex:none;padding:0;background:{{ ga.flagBg }};color:{{ ga.flagColor }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4M6 4h11l-2.5 4L17 12H6"></path></svg></button>
+</div>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Изометрический остров — как иконка. Самый «вау», но клетка ~37 pt: подходит до 7×7, для 8×8–9×9 нужна лупа.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="3" width="3" height="9" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5ZM3.4 6.8a6.5 6.5 0 0 1 9.2 0l-1.1 1.1a5 5 0 0 0-7 0L3.4 6.8ZM1.1 4.5a9.8 9.8 0 0 1 13.8 0l-1.1 1.1a8.2 8.2 0 0 0-11.6 0L1.1 4.5Z"></path></svg><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 12 0 3a12 12 0 0 1 16 0L8 12Z"></path></svg><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M12 0v12H0Z"></path></svg><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:12px;padding:6px 16px 30px">
+<div style="display:flex;align-items:center;gap:8px">
+<button aria-label="pause" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;padding:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5v14M15 5v14"></path></svg></button>
+<div style="flex:1;text-align:center;min-width:0"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Мир 3 · Течения</span><span data-l="en">World 3 · Currents</span></div><div style="font:700 20px/26px Unbounded,sans-serif;margin-top:2px"><span data-l="ru">Уровень 32</span><span data-l="en">Level 32</span></div></div>
+<button aria-label="restart" onClick="{{ gb.reset }}" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;padding:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"></path></svg></button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:8px">
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Ходы</span><span data-l="en">Moves</span></div><div style="font:700 20px/24px Unbounded,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px;color:{{ gb.movesColor }}">{{ gb.moves }}</div></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Цели</span><span data-l="en">Signals</span></div><div style="font:700 20px/24px Unbounded,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px">{{ gb.found }}</div></div>
+<div style="background:var(--sunken);border:1px solid var(--border);border-radius:18px;padding:10px 12px"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Подсказка</span><span data-l="en">Hint</span></div><div style="display:flex;align-items:center;gap:6px;font:700 16px/24px Inter;margin-top:4px"><span data-l="ru">Число</span><span data-l="en">Number</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--cyan)"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg></div></div>
+</div>
+<div style="position:relative;height:8px;border-radius:4px;background:var(--sunken);margin:4px 0 12px"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,#18D7DF,#FFC84E);transition:width .3s;width:{{ gb.pct }}%"></div><span style="position:absolute;left:50%;top:-3px;width:2px;height:14px;background:var(--text);opacity:.45"></span><span style="position:absolute;left:25%;top:-3px;width:2px;height:14px;background:var(--text);opacity:.45"></span><span style="position:absolute;left:50%;top:14px;transform:translateX(-50%);font:700 11px/1 Inter;color:var(--text2)">3★</span><span style="position:absolute;left:25%;top:14px;transform:translateX(-50%);font:700 11px/1 Inter;color:var(--text2)">2★</span></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">{{ gb.board }}</div>
+<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:12px 12px 12px 16px;box-shadow:var(--elev1)">
+<div style="flex:1;min-width:0"><div style="font:700 19px/24px Unbounded,sans-serif;color:{{ gb.col }}">{{ gb.big }}</div><div style="font:500 13px/18px Inter;color:var(--text2);margin-top:3px">{{ gb.sub }}</div></div>
+<sc-if value="{{ gb.done }}" hint-placeholder-val="{{ false }}"><button onClick="{{ gb.reset }}" style="height:44px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--sunken);color:var(--text);font:800 13px/18px Inter;cursor:pointer"><span data-l="ru">Заново</span><span data-l="en">Retry</span></button></sc-if>
+<button aria-label="flag" onClick="{{ gb.toggleFlag }}" style="width:56px;height:56px;border-radius:16px;border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;flex:none;padding:0;background:{{ gb.flagBg }};color:{{ gb.flagColor }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4M6 4h11l-2.5 4L17 12H6"></path></svg></button>
+</div>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1c">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Вид 3/4 — компромисс. Объём, трава и ручьи из логотипа, клетка ~50 pt, сетка прямая и легко читается.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="3" width="3" height="9" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 11.5 5.6 9a3.4 3.4 0 0 1 4.8 0L8 11.5ZM3.4 6.8a6.5 6.5 0 0 1 9.2 0l-1.1 1.1a5 5 0 0 0-7 0L3.4 6.8ZM1.1 4.5a9.8 9.8 0 0 1 13.8 0l-1.1 1.1a8.2 8.2 0 0 0-11.6 0L1.1 4.5Z"></path></svg><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 12 0 3a12 12 0 0 1 16 0L8 12Z"></path></svg><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M12 0v12H0Z"></path></svg><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:12px;padding:6px 16px 30px">
+<div style="display:flex;align-items:center;gap:8px">
+<button aria-label="pause" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;padding:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5v14M15 5v14"></path></svg></button>
+<div style="flex:1;text-align:center;min-width:0"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Мир 3 · Течения</span><span data-l="en">World 3 · Currents</span></div><div style="font:700 20px/26px Unbounded,sans-serif;margin-top:2px"><span data-l="ru">Уровень 32</span><span data-l="en">Level 32</span></div></div>
+<button aria-label="restart" onClick="{{ gc.reset }}" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;padding:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"></path></svg></button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:8px">
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Ходы</span><span data-l="en">Moves</span></div><div style="font:700 20px/24px Unbounded,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px;color:{{ gc.movesColor }}">{{ gc.moves }}</div></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Цели</span><span data-l="en">Signals</span></div><div style="font:700 20px/24px Unbounded,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px">{{ gc.found }}</div></div>
+<div style="background:var(--sunken);border:1px solid var(--border);border-radius:18px;padding:10px 12px"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Подсказка</span><span data-l="en">Hint</span></div><div style="display:flex;align-items:center;gap:6px;font:700 16px/24px Inter;margin-top:4px"><span data-l="ru">Число</span><span data-l="en">Number</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--cyan)"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg></div></div>
+</div>
+<div style="position:relative;height:8px;border-radius:4px;background:var(--sunken);margin:4px 0 12px"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,#18D7DF,#FFC84E);transition:width .3s;width:{{ gc.pct }}%"></div><span style="position:absolute;left:50%;top:-3px;width:2px;height:14px;background:var(--text);opacity:.45"></span><span style="position:absolute;left:25%;top:-3px;width:2px;height:14px;background:var(--text);opacity:.45"></span><span style="position:absolute;left:50%;top:14px;transform:translateX(-50%);font:700 11px/1 Inter;color:var(--text2)">3★</span><span style="position:absolute;left:25%;top:14px;transform:translateX(-50%);font:700 11px/1 Inter;color:var(--text2)">2★</span></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">{{ gc.board }}</div>
+<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:12px 12px 12px 16px;box-shadow:var(--elev1)">
+<div style="flex:1;min-width:0"><div style="font:700 19px/24px Unbounded,sans-serif;color:{{ gc.col }}">{{ gc.big }}</div><div style="font:500 13px/18px Inter;color:var(--text2);margin-top:3px">{{ gc.sub }}</div></div>
+<sc-if value="{{ gc.done }}" hint-placeholder-val="{{ false }}"><button onClick="{{ gc.reset }}" style="height:44px;padding:0 14px;border:1px solid var(--border);border-radius:14px;background:var(--sunken);color:var(--text);font:800 13px/18px Inter;cursor:pointer"><span data-l="ru">Заново</span><span data-l="en">Retry</span></button></sc-if>
+<button aria-label="flag" onClick="{{ gc.toggleFlag }}" style="width:56px;height:56px;border-radius:16px;border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;flex:none;padding:0;background:{{ gc.flagBg }};color:{{ gc.flagColor }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4M6 4h11l-2.5 4L17 12H6"></path></svg></button>
+</div>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+</div>
+
+<div style="font:700 18px/24px Unbounded,sans-serif;color:#fff;margin:56px 0 6px">Ключевые экраны</div>
+<div style="font:500 13px/18px Inter;color:rgba(223,233,239,.55);margin:0 0 20px">Сплэш → обучение → главная → уровни → игра → итог. Тип поля переключается твиком «board» (по умолчанию 1b).</div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="s1" data-screen-label="S1 Splash">
+<div class="dv-olabel"><a class="dv-oid" href="#s1">S1</a>Сплэш. Всегда тёмный. Знак раскрывается сонарной волной, не дольше 2,5 с.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div data-theme="dark" style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(70% 45% at 50% 44%,rgba(40,120,255,.22),transparent 70%),#06131E">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="3" width="3" height="9" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;left:50%;top:44%;width:0;height:0">
+<span style="position:absolute;left:-150px;top:-150px;width:300px;height:300px;border-radius:50%;border:1.5px solid rgba(24,215,223,.55);animation:rp-ping 3s ease-out infinite"></span>
+<span style="position:absolute;left:-150px;top:-150px;width:300px;height:300px;border-radius:50%;border:1.5px solid rgba(100,124,255,.5);animation:rp-ping 3s 1s ease-out infinite"></span>
+<span style="position:absolute;left:-150px;top:-150px;width:300px;height:300px;border-radius:50%;border:1.5px solid rgba(24,215,223,.4);animation:rp-ping 3s 2s ease-out infinite"></span>
+<img src="assets/reckon-logo.png" alt="Reckon Path" style="position:absolute;left:-150px;top:-150px;width:300px;height:300px;mix-blend-mode:lighten;border-radius:40px"></img>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:92px;display:flex;flex-direction:column;align-items:center;gap:12px">
+<div style="width:120px;height:4px;border-radius:2px;background:#122D3C;overflow:hidden"><div style="width:62%;height:100%;border-radius:2px;background:linear-gradient(90deg,#18D7DF,#647CFF)"></div></div>
+<div style="font:800 11px/14px Inter;letter-spacing:.14em;color:#91A8B8">SIGNAL HUNT</div>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:#F2F8FB;opacity:.5"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:#F2F8FB;opacity:.4"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="s2" data-screen-label="S2 Onboarding 1">
+<div class="dv-olabel"><a class="dv-oid" href="#s2">S2</a>Обучение, шаг 1. Никаких слайдов: поле затемнено, одна клетка пульсирует.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:16px;padding:10px 16px 34px">
+<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Обучение</span><span data-l="en">Tutorial</span></div><div style="font:500 13px/18px Inter;color:var(--text2);margin-top:2px"><span data-l="ru">Шаг 1 из 3</span><span data-l="en">Step 1 of 3</span></div></div><button style="height:36px;padding:0 14px;border:0;border-radius:10px;background:transparent;color:var(--text2);font:800 13px/18px Inter;cursor:pointer"><span data-l="ru">Пропустить</span><span data-l="en">Skip</span></button></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">{{ onb1 }}</div>
+<div style="position:relative;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:20px;box-shadow:var(--elev2)">
+<span style="position:absolute;left:50%;top:-8px;width:16px;height:16px;margin-left:-8px;transform:rotate(45deg);background:var(--surface);border-left:1px solid var(--border);border-top:1px solid var(--border)"></span>
+<div style="font:800 22px/28px Inter;letter-spacing:-.01em"><span data-l="ru">Тапни по клетке</span><span data-l="en">Tap a tile</span></div>
+<div style="font:500 17px/24px Inter;color:var(--text2);margin-top:6px;text-wrap:pretty"><span data-l="ru">Где-то на поле спрятан сигнал. Каждый тап покажет, сколько до него шагов.</span><span data-l="en">A signal is hidden somewhere on the board. Each tap tells you how many steps away it is.</span></div>
+<div style="display:flex;gap:6px;margin-top:16px"><span style="width:22px;height:6px;border-radius:3px;background:var(--cyan)"></span><span style="width:6px;height:6px;border-radius:3px;background:var(--border)"></span><span style="width:6px;height:6px;border-radius:3px;background:var(--border)"></span></div>
+</div>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="s3" data-screen-label="S3 Onboarding 2">
+<div class="dv-olabel"><a class="dv-oid" href="#s3">S3</a>Шаг 2. Появилось число, по клеткам пробегает путь до сигнала (без диагоналей).</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:16px;padding:10px 16px 34px">
+<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Обучение</span><span data-l="en">Tutorial</span></div><div style="font:500 13px/18px Inter;color:var(--text2);margin-top:2px"><span data-l="ru">Шаг 2 из 3</span><span data-l="en">Step 2 of 3</span></div></div><button style="height:36px;padding:0 14px;border:0;border-radius:10px;background:transparent;color:var(--text2);font:800 13px/18px Inter;cursor:pointer"><span data-l="ru">Пропустить</span><span data-l="en">Skip</span></button></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">{{ onb2 }}</div>
+<div style="position:relative;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:20px;box-shadow:var(--elev2)">
+<span style="position:absolute;left:50%;top:-8px;width:16px;height:16px;margin-left:-8px;transform:rotate(45deg);background:var(--surface);border-left:1px solid var(--border);border-top:1px solid var(--border)"></span>
+<div style="font:800 22px/28px Inter;letter-spacing:-.01em"><span data-l="ru">Сигнал в 4 шагах</span><span data-l="en">The signal is 4 steps away</span></div>
+<div style="font:500 17px/24px Inter;color:var(--text2);margin-top:6px;text-wrap:pretty"><span data-l="ru">Число — это кратчайший путь до сигнала по соседним клеткам. Диагонали не считаются.</span><span data-l="en">The number is the shortest path to the signal through neighbouring tiles. No diagonals.</span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px"><div style="display:flex;gap:6px"><span style="width:6px;height:6px;border-radius:3px;background:var(--border)"></span><span style="width:22px;height:6px;border-radius:3px;background:var(--cyan)"></span><span style="width:6px;height:6px;border-radius:3px;background:var(--border)"></span></div><button style="height:48px;padding:0 24px;border:0;border-radius:14px;background:linear-gradient(135deg,#18D7DF,#647CFF);color:#fff;font:800 15px/20px Inter;letter-spacing:.02em;box-shadow:0 11px 23px rgba(75,130,222,.28);cursor:pointer"><span data-l="ru">Далее</span><span data-l="en">Next</span></button></div>
+</div>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="s4" data-screen-label="S4 Onboarding 3">
+<div class="dv-olabel"><a class="dv-oid" href="#s4">S4</a>Шаг 3. Подсвечены соседи первой клетки: «тапни ближе». Дальше игрок ищет сам.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:16px;padding:10px 16px 34px">
+<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Обучение</span><span data-l="en">Tutorial</span></div><div style="font:500 13px/18px Inter;color:var(--text2);margin-top:2px"><span data-l="ru">Шаг 3 из 3</span><span data-l="en">Step 3 of 3</span></div></div><button style="height:36px;padding:0 14px;border:0;border-radius:10px;background:transparent;color:var(--text2);font:800 13px/18px Inter;cursor:pointer"><span data-l="ru">Пропустить</span><span data-l="en">Skip</span></button></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">{{ onb3 }}</div>
+<div style="position:relative;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:20px;box-shadow:var(--elev2)">
+<span style="position:absolute;left:50%;top:-8px;width:16px;height:16px;margin-left:-8px;transform:rotate(45deg);background:var(--surface);border-left:1px solid var(--border);border-top:1px solid var(--border)"></span>
+<div style="font:800 22px/28px Inter;letter-spacing:-.01em"><span data-l="ru">Тапни ближе</span><span data-l="en">Tap closer</span></div>
+<div style="font:500 17px/24px Inter;color:var(--text2);margin-top:6px;text-wrap:pretty"><span data-l="ru">Проверь соседнюю клетку. Число стало меньше — значит, теплее.</span><span data-l="en">Try a neighbouring tile. A smaller number means you’re getting warmer.</span></div>
+<div style="display:flex;gap:6px;margin-top:16px"><span style="width:6px;height:6px;border-radius:3px;background:var(--border)"></span><span style="width:6px;height:6px;border-radius:3px;background:var(--border)"></span><span style="width:22px;height:6px;border-radius:3px;background:var(--cyan)"></span></div>
+</div>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="s5" data-screen-label="S5 Home">
+<div class="dv-olabel"><a class="dv-oid" href="#s5">S5</a>Главная. Игра в один тап: превью поля в геро не интерактивно, тап по нему = «Играть».</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="3" width="3" height="9" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;height:56px;z-index:30;display:flex;align-items:center;gap:8px;padding:0 16px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
+<span style="width:36px;height:36px;border-radius:11px;flex:none;background:url(assets/reckon-logo.png) 50% 28%/190% no-repeat,#0a1628;box-shadow:0 6px 16px rgba(35,120,221,.3)"></span>
+<div style="margin-right:auto;min-width:0;overflow:hidden"><div style="font:800 14px/18px Unbounded,sans-serif;letter-spacing:0;white-space:nowrap">RECKON<span style="color:var(--cyan)"> PATH</span></div><div style="font:800 10px/12px Inter;letter-spacing:.14em;color:var(--text2)">SIGNAL HUNT</div></div>
+<span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 8px;border-radius:12px;background:var(--surface);border:1px solid var(--border);white-space:nowrap;flex:none;font:700 12px/1 Unbounded,sans-serif;font-variant-numeric:tabular-nums"><span style="width:10px;height:10px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#8AF5C8,#12B886)"></span>2 640</span>
+<span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 8px;border-radius:12px;background:var(--surface);border:1px solid var(--border);white-space:nowrap;flex:none;font:700 12px/1 Unbounded,sans-serif;font-variant-numeric:tabular-nums"><span style="width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,#FFE59A 0 35%,#FFC84E 36% 60%,#D99337 61%)"></span>18 420</span>
+</div>
+<div data-scroll="1" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:122px 16px 130px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+<div style="position:relative;flex:none;border-radius:28px;padding:20px;color:#fff;overflow:hidden;background:radial-gradient(60% 50% at 18% 0%,rgba(255,255,255,.22),transparent 70%),linear-gradient(145deg,#102E43,#187E9D 48%,#6653B8);box-shadow:0 25px 55px rgba(40,75,125,.25)">
+<div style="display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:rgba(255,255,255,.75);text-transform:uppercase"><span data-l="ru">Текущая игра</span><span data-l="en">Current game</span></div><span style="flex:none;height:30px;display:flex;align-items:center;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.14);font:800 12px/1 Inter;letter-spacing:.04em"><span data-l="ru">8 ХОДОВ</span><span data-l="en">8 MOVES</span></span></div><div style="font:800 40px/44px Unbounded,sans-serif;letter-spacing:-.02em;margin-top:6px;white-space:nowrap"><span data-l="ru">Уровень 32</span><span data-l="en">Level 32</span></div><div style="font:500 13px/18px Inter;color:rgba(255,255,255,.75);margin-top:4px"><span data-l="ru">Мостки через течение · Мир 3</span><span data-l="en">Boardwalk over the current · World 3</span></div></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+<span style="display:flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:8px;background:rgba(255,255,255,.12);font:600 12px/1 Inter"><span style="width:10px;height:10px;border-radius:3px;background:linear-gradient(145deg,#8CEAF0,#217DA2)"></span><span data-l="ru">ручей</span><span data-l="en">stream</span></span>
+<span style="display:flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:8px;background:rgba(255,255,255,.12);font:600 12px/1 Inter"><span style="width:10px;height:10px;border-radius:3px;background:repeating-linear-gradient(90deg,#E4C083 0 3px,#9C6C3D 3px 4px)"></span><span data-l="ru">мост</span><span data-l="en">bridge</span></span>
+<span style="display:flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:8px;background:rgba(255,255,255,.12);font:600 12px/1 Inter"><span style="width:12px;height:3px;border-radius:2px;background:#FFC84E;box-shadow:0 0 6px #FFC84E"></span><span data-l="ru">забор</span><span data-l="en">fence</span></span>
+<span style="display:flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:8px;background:rgba(255,255,255,.12);font:600 12px/1 Inter"><span style="width:10px;height:10px;border-radius:3px;background:linear-gradient(145deg,#FFD36D,#8C5624)"></span>×2</span>
+<span style="display:flex;align-items:center;gap:6px;height:26px;padding:0 9px;border-radius:8px;background:rgba(255,255,255,.12);font:600 12px/1 Inter"><span style="width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#D3DBE0,#4A5864)"></span><span data-l="ru">скала</span><span data-l="en">rock</span></span>
+</div>
+<a href="#s7" style="display:block;margin:16px 0 10px;text-decoration:none">{{ heroBoard }}</a>
+<div style="display:flex;align-items:center;gap:10px"><span style="height:30px;display:flex;align-items:center;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.12);font:800 11px/1 Inter;letter-spacing:.12em">SIGNAL HUNT</span><a href="#s7" style="flex:1;height:56px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:linear-gradient(135deg,#18D7DF,#647CFF);color:#fff;text-decoration:none;font:800 17px/22px Inter;letter-spacing:.04em;box-shadow:0 11px 23px rgba(10,20,60,.35)"><span data-l="ru">ИГРАТЬ</span><span data-l="en">PLAY</span></a></div>
+</div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:14px 14px 14px 16px;box-shadow:var(--elev1)">
+<div style="flex:1;min-width:0"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Пеленг дня · 27 сентября</span><span data-l="en">Daily bearing · Sep 27</span></div><div style="font:700 16px/22px Inter;margin-top:4px"><span data-l="ru">Сегодня ещё не сыгран</span><span data-l="en">Not played yet today</span></div><div style="font:500 13px/18px Inter;color:var(--text2);margin-top:2px;font-variant-numeric:tabular-nums"><span data-l="ru">Новый через 05:12:40</span><span data-l="en">New one in 05:12:40</span></div></div>
+<div style="flex:none;display:flex;flex-direction:column;align-items:center;width:56px"><svg width="28" height="28" viewBox="0 0 24 24" fill="#FF9F3D"><path d="M12 22c-4.2 0-7-2.8-7-6.4 0-3.5 2.6-5.3 3.8-8.6 1.6 1.4 2.4 3 2.5 4.5C12.9 10 14 8 14 5.5c3.2 2.3 5 5.8 5 9.8C19 19.1 16.2 22 12 22z"></path></svg><span style="font:700 20px/24px Unbounded,sans-serif">7</span><span style="font:600 12px/16px Inter;color:var(--text2)"><span data-l="ru">дней</span><span data-l="en">days</span></span></div>
+</div>
+<div style="flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:14px 16px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--text2)"><span data-l="ru">АРЕНА · PvP</span><span data-l="en">ARENA · PvP</span></div><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><span style="width:28px;height:28px;border-radius:50%;background:radial-gradient(circle,#FFE59A 0 30%,#FFC84E 32% 58%,#B8862A 60%);box-shadow:0 0 0 2px rgba(255,200,78,.3)"></span><div><div style="font:700 16px/20px Inter">GOLD II</div><div style="font:600 12px/16px Inter;color:var(--trophy);font-variant-numeric:tabular-nums">2 640</div></div></div></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:14px 16px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--text2)"><span data-l="ru">ВИТРИНА</span><span data-l="en">SHOP</span></div><div style="font:700 16px/20px Inter;margin-top:8px">Storm Signal</div><span style="display:inline-flex;align-items:center;height:22px;margin-top:6px;padding:0 8px;border-radius:6px;background:linear-gradient(135deg,#FF4F9D,#FF7B69);color:#fff;font:800 11px/1 Inter;letter-spacing:.06em"><span data-l="ru">6 ДНЕЙ</span><span data-l="en">6 DAYS</span></span></div>
+</div>
+<div style="flex:none"><div style="display:flex;align-items:baseline;justify-content:space-between;margin:0 0 8px"><span style="font:800 11px/14px Inter;letter-spacing:.12em"><span data-l="ru">СЕГОДНЯ</span><span data-l="en">TODAY</span></span><span style="font:500 13px/18px Inter;color:var(--text2)"><span data-l="ru">быстрый обзор</span><span data-l="en">at a glance</span></span></div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px"><div style="font:600 12px/16px Inter;color:var(--text2)"><span data-l="ru">Серия</span><span data-l="en">Streak</span></div><div style="font:700 20px/24px Unbounded,sans-serif;margin-top:4px">7</div></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px"><div style="font:600 12px/16px Inter;color:var(--text2)"><span data-l="ru">Кубки</span><span data-l="en">Trophies</span></div><div style="font:700 20px/24px Unbounded,sans-serif;margin-top:4px;font-variant-numeric:tabular-nums">2 640</div></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px"><div style="font:600 12px/16px Inter;color:var(--text2)"><span data-l="ru">Неделя</span><span data-l="en">Weekly</span></div><div style="font:700 20px/24px Unbounded,sans-serif;margin-top:4px">#42</div></div>
+</div></div>
+</div>
+<div style="position:absolute;left:10px;right:10px;bottom:30px;height:64px;border-radius:20px;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--border);box-shadow:var(--elev2);display:flex;padding:6px;gap:2px;z-index:30;box-sizing:border-box">
+<a href="#s5" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;background:var(--sunken);color:var(--cyan);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 5.5v13l10.5-6.5z"></path></svg><span data-l="ru">ИГРА</span><span data-l="en">PLAY</span></a>
+<a href="#s6" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text2);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 19c3.5 0 3.5-5 7-5s3.5-7 7-7"></path><circle cx="5" cy="19" r="2"></circle><circle cx="19" cy="7" r="2"></circle></svg><span data-l="ru">УРОВНИ</span><span data-l="en">LEVELS</span></a>
+<a href="#s5" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text2);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l14 14M19 5L5 19M4 9V4h5M20 15v5h-5"></path></svg><span data-l="ru">АРЕНА</span><span data-l="en">ARENA</span></a>
+<a href="#s5" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text2);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg><span data-l="ru">ВИТРИНА</span><span data-l="en">SHOP</span></a>
+<a href="#s5" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text2);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.5"></circle><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5"></path></svg><span data-l="ru">ПРОФИЛЬ</span><span data-l="en">PROFILE</span></a>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="s6" data-screen-label="S6 Levels">
+<div class="dv-olabel"><a class="dv-oid" href="#s6">S6</a>Уровни. Миры с обложками (заглушки под иллюстрации 358×96), автопрокрутка к текущему уровню.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="3" width="3" height="9" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;height:56px;z-index:30;display:flex;align-items:center;gap:8px;padding:0 16px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)">
+<span style="width:36px;height:36px;border-radius:11px;flex:none;background:url(assets/reckon-logo.png) 50% 28%/190% no-repeat,#0a1628;box-shadow:0 6px 16px rgba(35,120,221,.3)"></span>
+<div style="margin-right:auto;min-width:0;overflow:hidden"><div style="font:800 14px/18px Unbounded,sans-serif;letter-spacing:0;white-space:nowrap">RECKON<span style="color:var(--cyan)"> PATH</span></div><div style="font:800 10px/12px Inter;letter-spacing:.14em;color:var(--text2)">SIGNAL HUNT</div></div>
+<span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 8px;border-radius:12px;background:var(--surface);border:1px solid var(--border);white-space:nowrap;flex:none;font:700 12px/1 Unbounded,sans-serif"><span style="width:10px;height:10px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#8AF5C8,#12B886)"></span>2 640</span>
+<span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 8px;border-radius:12px;background:var(--surface);border:1px solid var(--border);white-space:nowrap;flex:none;font:700 12px/1 Unbounded,sans-serif"><span style="width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,#FFE59A 0 35%,#FFC84E 36% 60%,#D99337 61%)"></span>18 420</span>
+</div>
+<div data-scroll="1" style="position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;padding:122px 16px 130px;box-sizing:border-box;display:flex;flex-direction:column;gap:8px">
+<div style="flex:none;display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px"><div><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Путь сигнала</span><span data-l="en">Signal path</span></div><div style="font:800 32px/36px Unbounded,sans-serif;letter-spacing:-.02em;margin-top:4px"><span data-l="ru">Уровни</span><span data-l="en">Levels</span></div></div><span style="display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:10px;background:var(--sunken);font:700 14px/1 Unbounded,sans-serif"><svg width="16" height="16" viewBox="0 0 24 24" fill="#FFC84E"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"></path></svg>84 / 300</span></div>
+<div style="flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+<button style="height:48px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:800 15px/20px Inter;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"></path></svg><span data-l="ru">Редактор</span><span data-l="en">Editor</span></button>
+<button style="height:48px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:800 15px/20px Inter;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"></path></svg><span data-l="ru">Играть по коду</span><span data-l="en">Play by code</span></button>
+</div>
+<div style="flex:none;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 14px 10px 10px">
+<span style="width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#36D4B0,#5E86FF);color:#fff;font:800 18px/1 Unbounded,sans-serif">2</span>
+<div style="flex:1;min-width:0"><div style="font:700 16px/22px Inter"><span data-l="ru">Мир 2 · Рифы</span><span data-l="en">World 2 · Reefs</span></div><div style="font:500 13px/18px Inter;color:var(--text2)"><span data-l="ru">Заборы · 13–24 · пройден</span><span data-l="en">Fences · 13–24 · complete</span></div></div>
+<span style="font:700 14px/1 Unbounded,sans-serif;color:var(--text2)">★ 30/36</span>
+</div>
+<div style="flex:none;border-radius:22px;overflow:hidden;border:1px solid var(--border);margin-top:8px">
+<div style="position:relative;height:96px;padding:14px 16px;box-sizing:border-box;color:#fff;background:repeating-linear-gradient(170deg,rgba(255,255,255,0) 0 14px,rgba(140,234,240,.10) 14px 16px),linear-gradient(120deg,#0b2d4a,#155e86 55%,#1b8aa6)">
+<span style="position:absolute;right:14px;bottom:-14px;font:800 76px/1 Unbounded,sans-serif;color:rgba(255,255,255,.1)">03</span>
+<span style="position:absolute;right:12px;top:10px;font:600 10px/1 ui-monospace,Menlo,monospace;color:rgba(255,255,255,.5)">cover 358×96</span>
+<div style="font:800 11px/14px Inter;letter-spacing:.12em;color:rgba(255,255,255,.75)"><span data-l="ru">МИР 3 · 25–36</span><span data-l="en">WORLD 3 · 25–36</span></div>
+<div style="font:700 26px/30px Unbounded,sans-serif;margin-top:4px"><span data-l="ru">Течения</span><span data-l="en">Currents</span></div>
+<div style="font:500 13px/18px Inter;color:rgba(255,255,255,.75)"><span data-l="ru">Ручей и мост · ★ 17 / 36</span><span data-l="en">Stream &amp; bridge · ★ 17 / 36</span></div>
+</div>
+</div>
+<div style="flex:none;height:72px;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:0 14px 0 8px;box-sizing:border-box">
+<span style="width:56px;height:56px;flex:none;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#36D4B0,#5E86FF);color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+<div style="flex:1;min-width:0"><div style="font:700 16px/22px Inter;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">30 · <span data-l="ru">Отдых на берегу</span><span data-l="en">Shore break</span></div><div style="font:500 13px/18px Inter;color:var(--text2)"><span data-l="ru">6×6 · 1 цель · ручей</span><span data-l="en">6×6 · 1 signal · stream</span></div></div>
+<span style="font:14px/1 Inter;letter-spacing:1px;color:#FFC84E">★★<span style="color:var(--border)">★</span></span>
+</div>
+<div style="flex:none;height:72px;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:0 14px 0 8px;box-sizing:border-box">
+<span style="width:56px;height:56px;flex:none;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#36D4B0,#5E86FF);color:#fff"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+<div style="flex:1;min-width:0"><div style="font:700 16px/22px Inter;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">31 · <span data-l="ru">Первые мостки</span><span data-l="en">First boardwalk</span></div><div style="font:500 13px/18px Inter;color:var(--text2)"><span data-l="ru">6×6 · 1 цель · мост</span><span data-l="en">6×6 · 1 signal · bridge</span></div></div>
+<span style="font:14px/1 Inter;letter-spacing:1px;color:#FFC84E">★★★</span>
+</div>
+<a href="#s7" style="flex:none;height:72px;display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--pink);border-radius:18px;padding:0 10px 0 8px;box-sizing:border-box;color:var(--text);text-decoration:none;box-shadow:0 10px 26px color-mix(in srgb,var(--pink) 22%,transparent)">
+<span style="width:56px;height:56px;flex:none;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,#FF4F9D,#FF7B69);color:#fff;font:800 20px/1 Unbounded,sans-serif">32</span>
+<div style="flex:1;min-width:0"><div style="font:700 16px/22px Inter;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span data-l="ru">Мостки через течение</span><span data-l="en">Boardwalk over the current</span></div><div style="font:500 13px/18px Inter;color:var(--text2)"><span data-l="ru">6×6 · ручей, мост, забор</span><span data-l="en">6×6 · stream, bridge, fence</span></div></div>
+<span style="flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,#FF4F9D,#FF7B69);color:#fff"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"></path></svg></span>
+</a>
+<div style="flex:none;height:72px;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:0 14px 0 8px;box-sizing:border-box">
+<span style="width:56px;height:56px;flex:none;border-radius:16px;display:grid;place-items:center;background:var(--sunken);color:var(--text2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="3"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+<div style="flex:1;min-width:0;color:var(--text2)"><div style="font:700 16px/22px Inter">33 · <span data-l="ru">Мост или вброд</span><span data-l="en">Bridge or ford</span></div><div style="font:500 13px/18px Inter"><span data-l="ru">6×6 · 1 цель · мост</span><span data-l="en">6×6 · 1 signal · bridge</span></div></div>
+</div>
+<div style="flex:none;height:72px;display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:0 14px 0 8px;box-sizing:border-box">
+<span style="width:56px;height:56px;flex:none;border-radius:16px;display:grid;place-items:center;background:var(--sunken);color:var(--text2)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="3"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+<div style="flex:1;min-width:0;color:var(--text2)"><div style="font:700 16px/22px Inter">34 · <span data-l="ru">Два берега</span><span data-l="en">Two banks</span></div><div style="font:500 13px/18px Inter"><span data-l="ru">6×6 · 1 цель · ×2</span><span data-l="en">6×6 · 1 signal · ×2</span></div></div>
+</div>
+<div style="flex:none;position:relative;height:72px;border-radius:22px;overflow:hidden;margin-top:8px;padding:14px 16px;box-sizing:border-box;color:#fff;filter:grayscale(1);opacity:.6;background:linear-gradient(120deg,#1b3f6a,#2a6aa0 55%,#b98a3b)">
+<div style="font:700 16px/22px Inter"><span data-l="ru">Мир 4 · Стая</span><span data-l="en">World 4 · School</span></div><div style="font:500 13px/18px Inter;opacity:.85"><span data-l="ru">Пройди мир 3, чтобы открыть</span><span data-l="en">Beat world 3 to unlock</span></div>
+</div>
+</div>
+<div style="position:absolute;left:10px;right:10px;bottom:30px;height:64px;border-radius:20px;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--border);box-shadow:var(--elev2);display:flex;padding:6px;gap:2px;z-index:30;box-sizing:border-box">
+<a href="#s5" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text2);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 5.5v13l10.5-6.5z"></path></svg><span data-l="ru">ИГРА</span><span data-l="en">PLAY</span></a>
+<a href="#s6" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;background:var(--sunken);color:var(--cyan);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 19c3.5 0 3.5-5 7-5s3.5-7 7-7"></path><circle cx="5" cy="19" r="2" fill="currentColor"></circle><circle cx="19" cy="7" r="2" fill="currentColor"></circle></svg><span data-l="ru">УРОВНИ</span><span data-l="en">LEVELS</span></a>
+<a href="#s6" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text2);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l14 14M19 5L5 19M4 9V4h5M20 15v5h-5"></path></svg><span data-l="ru">АРЕНА</span><span data-l="en">ARENA</span></a>
+<a href="#s6" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text2);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6L5 8z"></path><path d="M9 8a3 3 0 0 1 6 0"></path></svg><span data-l="ru">ВИТРИНА</span><span data-l="en">SHOP</span></a>
+<a href="#s6" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;color:var(--text2);text-decoration:none;font:800 10px/13px Inter;letter-spacing:.04em"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.5"></circle><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5"></path></svg><span data-l="ru">ПРОФИЛЬ</span><span data-l="en">PROFILE</span></a>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="s7" data-screen-label="S7 Game">
+<div class="dv-olabel"><a class="dv-oid" href="#s7">S7</a>Игра — играбельна. Найдите сигнал или потратьте все ходы, чтобы увидеть итог. Долгий тап — флажок.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-radial-gradient(circle at 50% 52%,var(--grid) 0 1px,transparent 1px 72px),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"></rect><rect x="5" y="5.5" width="3" height="6.5" rx="1"></rect><rect x="10" y="3" width="3" height="9" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:12px;padding:6px 16px 30px">
+<div style="display:flex;align-items:center;gap:8px">
+<button aria-label="pause" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;padding:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5v14M15 5v14"></path></svg></button>
+<div style="flex:1;text-align:center;min-width:0"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Мир 3 · Течения</span><span data-l="en">World 3 · Currents</span></div><div style="font:700 20px/26px Unbounded,sans-serif;margin-top:2px"><span data-l="ru">Уровень 32</span><span data-l="en">Level 32</span></div></div>
+<button aria-label="restart" onClick="{{ gf.reset }}" style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:grid;place-items:center;cursor:pointer;flex:none;padding:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"></path></svg></button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:8px">
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Ходы</span><span data-l="en">Moves</span></div><div style="font:700 20px/24px Unbounded,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px;color:{{ gf.movesColor }}">{{ gf.moves }}</div></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px;box-shadow:var(--elev1)"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Цели</span><span data-l="en">Signals</span></div><div style="font:700 20px/24px Unbounded,sans-serif;font-variant-numeric:tabular-nums;margin-top:4px">{{ gf.found }}</div></div>
+<div style="background:var(--sunken);border:1px solid var(--border);border-radius:18px;padding:10px 12px"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Подсказка</span><span data-l="en">Hint</span></div><div style="display:flex;align-items:center;gap:6px;font:700 16px/24px Inter;margin-top:4px"><span data-l="ru">Число</span><span data-l="en">Number</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="color:var(--cyan)"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg></div></div>
+</div>
+<div style="position:relative;height:8px;border-radius:4px;background:var(--sunken);margin:4px 0 12px"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,#18D7DF,#FFC84E);transition:width .3s;width:{{ gf.pct }}%"></div><span style="position:absolute;left:50%;top:-3px;width:2px;height:14px;background:var(--text);opacity:.45"></span><span style="position:absolute;left:25%;top:-3px;width:2px;height:14px;background:var(--text);opacity:.45"></span><span style="position:absolute;left:50%;top:14px;transform:translateX(-50%);font:700 11px/1 Inter;color:var(--text2)">3★</span><span style="position:absolute;left:25%;top:14px;transform:translateX(-50%);font:700 11px/1 Inter;color:var(--text2)">2★</span></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">{{ gf.board }}</div>
+<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:12px 12px 12px 16px;box-shadow:var(--elev1)">
+<div style="flex:1;min-width:0"><div style="font:700 19px/24px Unbounded,sans-serif;color:{{ gf.col }}">{{ gf.big }}</div><div style="font:500 13px/18px Inter;color:var(--text2);margin-top:3px">{{ gf.sub }}</div></div>
+<button aria-label="flag" onClick="{{ gf.toggleFlag }}" style="width:56px;height:56px;border-radius:16px;border:1px solid var(--border);display:grid;place-items:center;cursor:pointer;flex:none;padding:0;background:{{ gf.flagBg }};color:{{ gf.flagColor }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4M6 4h11l-2.5 4L17 12H6"></path></svg></button>
+</div>
+</div>
+<sc-if value="{{ gf.won }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:20;background:var(--overlay)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:21;border-radius:28px 28px 0 0;background:var(--surface);box-shadow:0 -20px 60px rgba(0,0,0,.45);padding:10px 20px 34px;display:flex;flex-direction:column;align-items:center;gap:12px">
+<span style="width:36px;height:5px;border-radius:3px;background:var(--border)"></span>
+<div style="font:800 28px/34px Unbounded,sans-serif;letter-spacing:-.02em;margin-top:8px;white-space:nowrap"><span data-l="ru">СИГНАЛ НАЙДЕН</span><span data-l="en">SIGNAL FOUND</span></div>
+<div style="display:flex;gap:10px;align-items:flex-end"><svg width="44" height="44" viewBox="0 0 24 24" style="color:{{ gf.s1 }};animation:rp-star .5s both"><path fill="currentColor" d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"></path></svg><svg width="56" height="56" viewBox="0 0 24 24" style="color:{{ gf.s2 }};animation:rp-star .5s .2s both"><path fill="currentColor" d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"></path></svg><svg width="44" height="44" viewBox="0 0 24 24" style="color:{{ gf.s3 }};animation:rp-star .5s .4s both"><path fill="currentColor" d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"></path></svg></div>
+<div style="font:500 15px/22px Inter;color:var(--text2)">{{ gf.usedText }}</div>
+<button onClick="{{ gf.reset }}" style="width:100%;height:56px;border:0;border-radius:14px;background:linear-gradient(135deg,#18D7DF,#647CFF);color:#fff;font:800 17px/22px Inter;letter-spacing:.04em;box-shadow:0 11px 23px rgba(75,130,222,.28);cursor:pointer;margin-top:6px"><span data-l="ru">ДАЛЬШЕ</span><span data-l="en">NEXT</span></button>
+<button onClick="{{ gf.reset }}" style="width:100%;height:48px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:800 15px/20px Inter;cursor:pointer"><span data-l="ru">Ещё раз</span><span data-l="en">Play again</span></button>
+</div>
+</sc-if>
+<sc-if value="{{ gf.lost }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;z-index:20;background:var(--overlay)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:21;border-radius:28px 28px 0 0;background:var(--surface);box-shadow:0 -20px 60px rgba(0,0,0,.45);padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+<span style="align-self:center;width:36px;height:5px;border-radius:3px;background:var(--border)"></span>
+<div style="font:700 26px/30px Unbounded,sans-serif;margin-top:6px"><span data-l="ru">Ходы закончились</span><span data-l="en">Out of moves</span></div>
+<div style="font:500 15px/22px Inter;color:var(--text2);margin-top:-6px"><span data-l="ru">Почти! Попробуешь ещё?</span><span data-l="en">So close! Try again?</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button onClick="{{ gf.cont }}" style="height:56px;border:0;border-radius:14px;background:linear-gradient(135deg,#FFD36D,#FFB23E);color:#3a2606;font:800 15px/18px Inter;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"></path></svg><span data-l="ru">+3 хода</span><span data-l="en">+3 moves</span></button>
+<button onClick="{{ gf.cont }}" style="height:56px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:800 15px/18px Inter;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><span style="width:11px;height:11px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#8AF5C8,#12B886)"></span>15 · <span data-l="ru">+3 хода</span><span data-l="en">+3 moves</span></button>
+</div>
+<div style="font:600 12px/16px Inter;color:var(--text2);text-align:center"><span data-l="ru">После продолжения — максимум 1★</span><span data-l="en">After continuing — 1★ max</span></div>
+<button onClick="{{ gf.reset }}" style="height:48px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:800 15px/20px Inter;cursor:pointer"><span data-l="ru">Начать заново</span><span data-l="en">Restart</span></button>
+</div>
+</sc-if>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="s8" data-screen-label="S8 Win">
+<div class="dv-olabel"><a class="dv-oid" href="#s8">S8</a>Победа. Лист на 90% высоты: путь игрока, звёзды падают по одной, награды без «монетного дождя».</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;inset:0;z-index:20;background:var(--overlay)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:90%;z-index:21;border-radius:28px 28px 0 0;background:radial-gradient(80% 40% at 50% 12%,color-mix(in srgb,#FFC84E 16%,transparent),transparent 70%),var(--surface);box-shadow:0 -20px 60px rgba(0,0,0,.45);padding:10px 20px 34px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:12px">
+<span style="width:36px;height:5px;border-radius:3px;background:var(--border)"></span>
+<div style="margin-top:6px">{{ winMini }}</div>
+<div style="font:800 28px/34px Unbounded,sans-serif;letter-spacing:-.02em;text-align:center;white-space:nowrap"><span data-l="ru">СИГНАЛ НАЙДЕН</span><span data-l="en">SIGNAL FOUND</span></div>
+<div style="display:flex;gap:10px;align-items:flex-end"><svg width="48" height="48" viewBox="0 0 24 24" style="color:#FFC84E;filter:drop-shadow(0 4px 10px rgba(255,200,78,.45));animation:rp-star .5s both"><path fill="currentColor" d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"></path></svg><svg width="60" height="60" viewBox="0 0 24 24" style="color:#FFC84E;filter:drop-shadow(0 4px 10px rgba(255,200,78,.45));animation:rp-star .5s .25s both"><path fill="currentColor" d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"></path></svg><svg width="48" height="48" viewBox="0 0 24 24" style="color:#FFC84E;filter:drop-shadow(0 4px 10px rgba(255,200,78,.45));animation:rp-star .5s .5s both"><path fill="currentColor" d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"></path></svg></div>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center"><span style="font:500 15px/22px Inter;color:var(--text2)"><span data-l="ru">4 хода из 8 · лучший: 4</span><span data-l="en">4 of 8 moves · best: 4</span></span><span style="height:24px;display:flex;align-items:center;padding:0 8px;border-radius:6px;background:color-mix(in srgb,var(--success) 16%,transparent);color:var(--success);font:800 12px/1 Inter"><span data-l="ru">Новый рекорд!</span><span data-l="en">New best!</span></span></div>
+<div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<div style="display:flex;align-items:center;gap:10px;background:var(--sunken);border-radius:18px;padding:12px 14px"><span style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#FFE59A 0 35%,#FFC84E 36% 60%,#D99337 61%)"></span><div><div style="font:700 20px/24px Unbounded,sans-serif">+50</div><div style="font:600 12px/16px Inter;color:var(--text2)"><span data-l="ru">монеты</span><span data-l="en">coins</span></div></div></div>
+<div style="display:flex;align-items:center;gap:10px;background:var(--sunken);border-radius:18px;padding:12px 14px"><span style="width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:linear-gradient(135deg,#18D7DF,#647CFF);color:#fff;font:800 9px/1 Inter">XP</span><div><div style="font:700 20px/24px Unbounded,sans-serif">+40</div><div style="font:600 12px/16px Inter;color:var(--text2)"><span data-l="ru">опыт</span><span data-l="en">experience</span></div></div></div>
+</div>
+<button style="width:100%;height:48px;border:0;border-radius:14px;background:linear-gradient(135deg,#FFD36D,#FFB23E);color:#3a2606;font:800 15px/20px Inter;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"></path></svg><span data-l="ru">Удвоить монеты за рекламу</span><span data-l="en">Double coins for an ad</span></button>
+<div style="flex:1"></div>
+<a href="#s7" style="width:100%;height:56px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:linear-gradient(135deg,#18D7DF,#647CFF);color:#fff;text-decoration:none;font:800 17px/22px Inter;letter-spacing:.04em;box-shadow:0 11px 23px rgba(75,130,222,.28)"><span data-l="ru">ДАЛЬШЕ · УРОВЕНЬ 33</span><span data-l="en">NEXT · LEVEL 33</span></a>
+<div style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button style="height:48px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:800 15px/20px Inter;cursor:pointer"><span data-l="ru">Ещё раз</span><span data-l="en">Play again</span></button>
+<a href="#s6" style="height:48px;display:flex;align-items:center;justify-content:center;border-radius:14px;color:var(--text2);text-decoration:none;font:800 15px/20px Inter"><span data-l="ru">К уровням</span><span data-l="en">To levels</span></a>
+</div>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="s9" data-screen-label="S9 Lose">
+<div class="dv-olabel"><a class="dv-oid" href="#s9">S9</a>Поражение. Тон дружелюбный, продолжение — за рекламу или ◆ 15, «Начать заново» бесплатно.</div>
+<div style="width:410px;height:864px;padding:10px;border-radius:62px;background:#030507;box-shadow:0 0 0 1.5px #26323d,0 30px 60px rgba(0,0,0,.5);box-sizing:border-box">
+<div style="position:relative;width:390px;height:844px;border-radius:52px;overflow:hidden;color:var(--text);font-family:Inter,system-ui,sans-serif;background:radial-gradient(90% 45% at 50% 0%,color-mix(in srgb,var(--cyan) 12%,transparent),transparent 70%),repeating-linear-gradient(0deg,var(--grid) 0 1px,transparent 1px 36px),repeating-linear-gradient(90deg,var(--grid) 0 1px,transparent 1px 36px),var(--bg)">
+<div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:40;pointer-events:none;color:var(--text)"><div data-os="ios" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:4px 32px 0 44px;font:600 16px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:25px;height:12px;border:1.5px solid currentColor;border-radius:4px;padding:1.5px;box-sizing:border-box"><span style="display:block;width:75%;height:100%;background:currentColor;border-radius:1px"></span></span></div><span data-os="ios" style="position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:20px;background:#000"></span><div data-os="android" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font:500 14px/1 Inter,sans-serif"><span>9:41</span><span style="display:block;width:8px;height:13px;border-radius:2px;background:currentColor"></span></div><span data-os="android" style="position:absolute;left:50%;top:15px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#000"></span></div>
+<div style="position:absolute;top:54px;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:12px;padding:6px 16px 30px">
+<div style="display:flex;align-items:center;gap:8px">
+<span style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 5v14M15 5v14"></path></svg></span>
+<div style="flex:1;text-align:center"><div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--cyan);text-transform:uppercase"><span data-l="ru">Мир 3 · Течения</span><span data-l="en">World 3 · Currents</span></div><div style="font:700 20px/26px Unbounded,sans-serif;margin-top:2px"><span data-l="ru">Уровень 32</span><span data-l="en">Level 32</span></div></div>
+<span style="width:44px;height:44px;border-radius:999px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;flex:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"></path></svg></span>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:8px">
+<div style="background:var(--surface);border:1px solid var(--danger);border-radius:18px;padding:10px 12px"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Ходы</span><span data-l="en">Moves</span></div><div style="font:700 20px/24px Unbounded,sans-serif;margin-top:4px;color:var(--danger)">0 / 8</div></div>
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:10px 12px"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Цели</span><span data-l="en">Signals</span></div><div style="font:700 20px/24px Unbounded,sans-serif;margin-top:4px">0 / 1</div></div>
+<div style="background:var(--sunken);border:1px solid var(--border);border-radius:18px;padding:10px 12px"><div style="font:800 11px/14px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)"><span data-l="ru">Подсказка</span><span data-l="en">Hint</span></div><div style="font:700 16px/24px Inter;margin-top:4px"><span data-l="ru">Число</span><span data-l="en">Number</span></div></div>
+</div>
+<div style="flex:1;display:flex;align-items:flex-start;justify-content:center;min-height:0;padding-top:24px">{{ loseBoard }}</div>
+</div>
+<div style="position:absolute;inset:0;z-index:20;background:var(--overlay)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:21;border-radius:28px 28px 0 0;background:var(--surface);box-shadow:0 -20px 60px rgba(0,0,0,.45);padding:10px 20px 34px;display:flex;flex-direction:column;gap:12px">
+<span style="align-self:center;width:36px;height:5px;border-radius:3px;background:var(--border)"></span>
+<div style="font:700 26px/30px Unbounded,sans-serif;margin-top:6px"><span data-l="ru">Ходы закончились</span><span data-l="en">Out of moves</span></div>
+<div style="font:500 15px/22px Inter;color:var(--text2);margin-top:-6px"><span data-l="ru">Найдено 0 из 1. Почти! Попробуешь ещё?</span><span data-l="en">Found 0 of 1. So close! Try again?</span></div>
+<div style="font:800 11px/14px Inter;letter-spacing:.12em;color:var(--text2);margin-top:4px"><span data-l="ru">+3 ХОДА</span><span data-l="en">+3 MOVES</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button style="height:60px;border:0;border-radius:14px;background:linear-gradient(135deg,#FFD36D,#FFB23E);color:#3a2606;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;padding:0 10px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"></path></svg><span style="text-align:left"><span style="display:block;font:800 15px/18px Inter"><span data-l="ru">Реклама</span><span data-l="en">Watch ad</span></span><span style="display:block;font:600 12px/16px Inter;opacity:.75"><span data-l="ru">осталось 1 сегодня</span><span data-l="en">1 left today</span></span></span></button>
+<button style="height:60px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font:700 20px/1 Unbounded,sans-serif"><span style="width:13px;height:13px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#8AF5C8,#12B886)"></span>15</button>
+</div>
+<div style="font:600 12px/16px Inter;color:var(--text2);text-align:center"><span data-l="ru">После продолжения — максимум 1★</span><span data-l="en">After continuing — 1★ max</span></div>
+<button style="height:48px;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);font:800 15px/20px Inter;cursor:pointer"><span data-l="ru">Начать заново</span><span data-l="en">Restart</span></button>
+<a href="#s6" style="height:44px;display:flex;align-items:center;justify-content:center;color:var(--text2);text-decoration:none;font:800 15px/20px Inter"><span data-l="ru">К уровням</span><span data-l="en">To levels</span></a>
+</div>
+<span data-os="ios" style="position:absolute;bottom:8px;left:50%;width:134px;margin-left:-67px;height:5px;border-radius:3px;background:var(--text);opacity:.5;z-index:40"></span><span data-os="android" style="position:absolute;bottom:10px;left:50%;width:100px;margin-left:-50px;height:4px;border-radius:2px;background:var(--text);opacity:.4;z-index:40"></span>
+</div>
+</div>
+</div>
+</div>
+
+<p class="dv-next">Дальше: «берём <a class="dv-oid" href="#1c">1c</a> для кампании, <a class="dv-oid" href="#1b">1b</a> для витрины и главной» · «добавь бомбу, маяк и туман на поле» · «следующие экраны: арена, VS, матч, витрина»</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;,&quot;section&quot;:&quot;Вид&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ru&quot;,&quot;en&quot;],&quot;default&quot;:&quot;ru&quot;,&quot;tsType&quot;:&quot;'ru'|'en'&quot;,&quot;section&quot;:&quot;Вид&quot;},&quot;platform&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ios&quot;,&quot;android&quot;],&quot;default&quot;:&quot;ios&quot;,&quot;tsType&quot;:&quot;'ios'|'android'&quot;,&quot;section&quot;:&quot;Вид&quot;},&quot;board&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;iso&quot;,&quot;obl&quot;,&quot;flat&quot;],&quot;default&quot;:&quot;iso&quot;,&quot;tsType&quot;:&quot;'iso'|'obl'|'flat'&quot;,&quot;section&quot;:&quot;Экраны S1–S9&quot;}}">
+const LVL={rows:6,cols:6,limit:8,stars:[4,6],target:[[1,5]],stream:[[0,3],[1,3],[2,3],[3,3],[4,3],[5,3]],bridge:[[2,3]],heavy:[[5,0],[3,5]],rock:[[0,0],[4,1]],fences:[[[1,4],[2,4]],[[1,5],[2,5]],[[3,2],[3,3]]]};
+const ONB={rows:4,cols:4,limit:99,stars:[99,99],target:[[1,2]],stream:[],bridge:[],heavy:[],rock:[],fences:[]};
+function prep(lv){const k=(r,c)=>r*lv.cols+c,n=lv.rows*lv.cols,type=Array(n).fill('n');
+  lv.stream.forEach(p=>type[k(...p)]='s');lv.bridge.forEach(p=>type[k(...p)]='b');lv.heavy.forEach(p=>type[k(...p)]='h');lv.rock.forEach(p=>type[k(...p)]='r');
+  const fence=new Set(lv.fences.map(([a,b])=>{const i=k(...a),j=k(...b);return Math.min(i,j)+'-'+Math.max(i,j);}));
+  return Object.assign({},lv,{n,type,fence,targets:lv.target.map(p=>k(...p))});}
+const PL=prep(LVL),PO=prep(ONB),COST={n:1,s:3,b:1,h:2};
+function dists(P,from){const d=Array(P.n).fill(Infinity),done=Array(P.n).fill(false);d[from]=0;
+  for(;;){let u=-1;for(let i=0;i<P.n;i++)if(!done[i]&&d[i]<Infinity&&(u<0||d[i]<d[u]))u=i;if(u<0)break;done[u]=true;
+    const r=Math.floor(u/P.cols),c=u%P.cols;
+    for(const [rr,cc] of [[r-1,c],[r+1,c],[r,c-1],[r,c+1]]){if(rr<0||cc<0||rr>=P.rows||cc>=P.cols)continue;const v=rr*P.cols+cc;if(P.type[v]==='r')continue;if(P.fence.has(Math.min(u,v)+'-'+Math.max(u,v)))continue;const nd=d[u]+COST[P.type[v]];if(nd<d[v])d[v]=nd;}}
+  return d;}
+const bearing=(P,i,found)=>{const d=dists(P,i);return Math.min(...P.targets.filter(t=>!found.includes(t)).map(t=>d[t]));};
+const fresh=()=>({rev:{},order:[],found:[],flags:{},used:0,extra:0,flagMode:false,cont:false});
+function applyTap(P,g,i){if(P.type[i]==='r'||g.rev[i]!=null)return;g.used++;if(P.targets.includes(i)){g.found.push(i);g.rev[i]='T';}else g.rev[i]=bearing(P,i,g.found);g.order.push(i);delete g.flags[i];}
+const sim=(P,taps)=>{const g=fresh();taps.forEach(i=>applyTap(P,g,i));return g;};
+const WIN=sim(PL,[12,8,4,11]),LOSE=sim(PL,[30,32,20,14,8,26,34,12]);
+const tone=v=>v<=2?'hot':v<=4?'warm':'cold';
+const TONE={hot:'#FF6D5D',warm:'#FFB65D',cold:'#5FB8FF'},TW={hot:3,warm:2,cold:1};
+const pl=(n,a,b,c)=>{const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<10||h>=20)?b:c;};
+const coord=(P,i)=>'ABCDEFGHI'[i%P.cols]+(Math.floor(i/P.cols)+1);
+function segs(dx,dy,list){const o=[];let k=0;list.forEach(([n,c])=>{for(let j=0;j<n;j++){k++;o.push(dx*k+'px '+dy*k+'px 0 '+c);}});return o;}
+const GEO={iso:{t:'scale(1,0.5774) rotate(45deg)',inv:'rotate(-45deg) scale(1,1.732)',dx:1,dy:1,k:0.8165,wf:1.4142,hf:0.8165},
+  obl:{t:'scale(1,0.74)',inv:'scale(1,1.3514)',dx:0,dy:1,k:0.74,wf:1,hf:0.74},
+  flat:{t:'none',inv:'none',dx:0,dy:1,k:1,wf:1,hf:1}};
+const WAVES='repeating-linear-gradient(120deg,rgba(255,255,255,0) 0 7px,rgba(255,255,255,.32) 7px 9px)';
+const TOPS={grass:'linear-gradient(145deg,#9BE870,#62C24C 55%,#46A23E)',path:'linear-gradient(145deg,#F4FEFF,#C4F4F8 55%,#92E2EC)',glass:'linear-gradient(145deg,var(--c1),var(--c2) 55%,var(--c3))',
+  stream:WAVES+',linear-gradient(145deg,#8CEAF0,#31BFD0 55%,#217DA2)',bridge:'repeating-linear-gradient(90deg,#E4C083 0 6px,#B98A55 6px 7px,#9C6C3D 7px 8px)',
+  heavy:'repeating-linear-gradient(160deg,rgba(255,255,255,0) 0 5px,rgba(255,255,255,.18) 5px 6px),linear-gradient(145deg,#FFD36D,#D99337 60%,#8C5624)',
+  rock:'linear-gradient(135deg,#D3DBE0,#9AA7B0 40%,#6E7C87 52%,#4A5864)',target:'linear-gradient(145deg,#FFF0A7,#FFB65D 55%,#FF6F61)'};
+const SZ={game:{iso:250,obl:350,flat:358},hero:{iso:180,obl:250,flat:230},onb:{iso:262,obl:330,flat:330},mini:{iso:150,obl:200,flat:170}};
+
+class Component extends DCLogic {
+  state={games:{a:fresh(),b:fresh(),c:fresh(),f:fresh()},press:null};
+  upd(key,fn){this.setState(s=>{const g=JSON.parse(JSON.stringify(s.games[key]));const r=fn(g);return {games:Object.assign({},s.games,{[key]:r||g})};});}
+  isDone(g){return g.found.length===PL.targets.length||g.used>=PL.limit+g.extra;}
+  tap(key,i){const g0=this.state.games[key];if(this.isDone(g0))return;
+    this.upd(key,g=>{if(g.flagMode){if(g.rev[i]==null){if(g.flags[i])delete g.flags[i];else g.flags[i]=true;}return;}applyTap(PL,g,i);});}
+  flag(key,i){const g0=this.state.games[key];if(this.isDone(g0)||g0.rev[i]!=null)return;this.upd(key,g=>{if(g.flags[i])delete g.flags[i];else g.flags[i]=true;});}
+  board(P,g,o){
+    const e=React.createElement,mode=o.mode,m=GEO[mode],terra=mode!=='flat',L=o.L;
+    const pad=mode==='iso'?6:8,gap=mode==='iso'?3:mode==='obl'?4:(P.cols<=4?8:6),rad=mode==='iso'?5:mode==='obl'?8:(P.cols<=4?16:12);
+    const cs=(L-2*pad-(P.cols-1)*gap)/P.cols,cT=mode==='flat'?4:(o.mini?5:8),sT=mode==='flat'?0:(o.mini?9:16);
+    const last=g.order[g.order.length-1],fs=Math.max(12,Math.min(28,cs*(mode==='iso'?0.5:0.45)));
+    const W=L*m.wf,Hd=L*m.hf,H=Hd+(sT+cT+6)*m.k;
+    const bb=(key,kids)=>e('div',{key,style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',transform:m.inv,pointerEvents:'none'}},kids);
+    const cells=[];
+    for(let i=0;i<P.n;i++){
+      const r=Math.floor(i/P.cols),c=i%P.cols,t=P.type[i],v=g.rev[i],rev=v!=null,isT=v==='T';
+      let top,side,raise=0,num=terra?'#0E3346':'var(--cellnum)',plaque=false,filter;
+      if(isT){top=TOPS.target;side=[[cT,'#C2553F']];}
+      else if(t==='r'){top=TOPS.rock;raise=mode==='flat'?0:(o.mini?3:6);side=[[cT+raise,'#46535E']];}
+      else if(t==='s'){top=TOPS.stream;side=[[cT,'#1D7FA0']];plaque=true;}
+      else if(t==='b'){top=TOPS.bridge;side=[[cT,'#6B4A2C']];plaque=true;}
+      else if(t==='h'){top=TOPS.heavy;side=[[cT,'#9A6427']];num='#3d2408';}
+      else{top=terra?(rev?TOPS.path:TOPS.grass):TOPS.glass;side=terra?[[2,'#3C8C34'],[cT-2,'#6B4526']]:[[cT,'rgba(4,20,30,.45)']];if(!terra&&rev)filter='saturate(.85) brightness(1.08)';}
+      if(terra&&(t==='s')&&r===P.rows-1)side=[[3,'#8CEAF0'],[cT+sT-3,'#3BB7D4']];
+      const hl=o.hl&&o.hl.includes(i),pIdx=o.path?o.path.indexOf(i):-1;
+      if(o.dim&&!hl&&!rev)filter='brightness(.42) saturate(.6)';
+      const pressed=o.key&&this.state.press===o.key+':'+i;
+      let layers=segs(m.dx,m.dy,side);if(pressed)layers=layers.slice(0,Math.max(1,layers.length-3));
+      const ins=[],glow=[];
+      if(rev&&!isT){const tn=tone(v);ins.push('inset 0 0 0 '+TW[tn]+'px '+TONE[tn]);if(i===last)ins.push('inset 0 0 0 '+(TW[tn]+2)+'px rgba(255,255,255,.95)');if(tn==='hot')glow.push('0 0 16px rgba(255,104,93,.55)');}
+      if(isT)glow.push('0 0 22px rgba(255,160,80,.75)');
+      const tr=[];if(raise)tr.push(mode==='iso'?'translate('+(-raise)+'px,'+(-raise)+'px)':'translate(0,'+(-raise)+'px)');
+      if(pressed)tr.push(mode==='iso'?'translate(2px,2px)':mode==='flat'?'translate(0,3px) scale(.96)':'translate(0,2px)');
+      const kids=[];
+      if(isT){
+        kids.push(e('div',{key:'ring',style:{position:'absolute',inset:'14%',borderRadius:'50%',border:'2px solid rgba(255,255,255,.9)',animation:'rp-pulse 2s ease-out infinite',pointerEvents:'none'}}));
+        kids.push(bb('pin',e('div',{style:{animation:'rp-bob 2s ease-in-out infinite'}},e('div',{style:{width:fs*1.15,height:fs*1.15,borderRadius:'50% 50% 50% 0',transform:'translateY(-45%) rotate(-45deg)',background:'radial-gradient(circle at 50% 50%,#fff 0 22%,transparent 24%),linear-gradient(135deg,#FF7A7A,#E0283F)',boxShadow:'0 4px 10px rgba(120,0,20,.45)'}}))));
+      } else if(rev){
+        kids.push(bb('n',e('span',{style:{font:'800 '+fs+'px/1 Unbounded, sans-serif',fontVariantNumeric:'tabular-nums',color:plaque?'#fff':num,background:plaque?'rgba(6,19,30,.55)':'transparent',padding:plaque?'3px 6px':0,borderRadius:8,textShadow:terra&&!plaque?'0 1px 0 rgba(255,255,255,.6)':'none',whiteSpace:'nowrap'}},String(v),t==='h'?e('span',{style:{fontSize:fs*0.45,marginLeft:2,verticalAlign:'top',fontFamily:'Inter'}},'×2'):null)));
+      }
+      if(t==='h'&&!rev)kids.push(bb('x2',e('span',{style:{font:'800 '+Math.max(11,fs*0.6)+'px/1 Inter, sans-serif',color:'rgba(61,36,8,.78)'}},'×2')));
+      if(g.flags[i]&&!rev)kids.push(bb('f',e('div',{style:{position:'relative',width:fs,height:fs*1.1,transform:'translateY(-20%)'}},e('span',{style:{position:'absolute',left:'22%',top:0,bottom:0,width:2,borderRadius:1,background:'#fff'}}),e('span',{style:{position:'absolute',left:'calc(22% + 2px)',top:0,width:'62%',height:'52%',background:'#FF5D9A',clipPath:'polygon(0 0,100% 50%,0 100%)'}}))));
+      if(hl)kids.push(e('div',{key:'hl',style:{position:'absolute',inset:'-6%',borderRadius:'50%',border:'3px solid #18D7DF',boxShadow:'0 0 14px #18D7DF',animation:'rp-pulse 1.6s ease-out infinite',pointerEvents:'none'}}));
+      if(pIdx>=0)kids.push(e('div',{key:'pd',style:{position:'absolute',inset:'32%',borderRadius:'50%',background:'#18D7DF',boxShadow:'0 0 12px 3px rgba(24,215,223,.8)',animation:'rp-dot 2.4s '+(pIdx*0.3)+'s ease-in-out infinite',pointerEvents:'none'}}));
+      const inter=!!o.key&&t!=='r',key=o.key;
+      cells.push(e('div',{key:i,
+        onClick:inter?()=>{if(this._lpf){this._lpf=false;return;}this.tap(key,i);}:undefined,
+        onPointerDown:inter?()=>{this._lpf=false;clearTimeout(this._lp);this._lp=setTimeout(()=>{this._lpf=true;this.flag(key,i);},400);this.setState({press:key+':'+i});}:undefined,
+        onPointerUp:inter?()=>{clearTimeout(this._lp);this.setState({press:null});}:undefined,
+        onPointerLeave:inter?()=>{clearTimeout(this._lp);if(this.state.press)this.setState({press:null});}:undefined,
+        onContextMenu:inter?ev=>ev.preventDefault():undefined,
+        style:{position:'absolute',left:pad+c*(cs+gap),top:pad+r*(cs+gap),width:cs,height:cs,borderRadius:rad,background:top,backgroundSize:t==='s'?'22px 22px,100% 100%':undefined,animation:t==='s'?'rp-flow 4s linear infinite':undefined,
+          borderTop:t==='b'?'2px solid #5B3A22':undefined,borderBottom:t==='b'?'2px solid #5B3A22':undefined,boxSizing:'border-box',
+          boxShadow:[...ins,...layers,...glow].join(',')||'none',transform:tr.join(' ')||'none',filter,cursor:inter?'pointer':'default',
+          transition:'transform 80ms, box-shadow 80ms, filter 200ms',userSelect:'none',WebkitUserSelect:'none',touchAction:'manipulation'}},kids));
+    }
+    const th=mode==='flat'?4:3.5;
+    const fences=P.fences.map(([a,b],j)=>{const [r1,c1]=a,[r2,c2]=b;let st;
+      if(r1===r2){const c=Math.min(c1,c2);st={left:pad+(c+1)*cs+c*gap+gap/2-th/2,top:pad+r1*(cs+gap)+cs*.12,width:th,height:cs*.76};}
+      else{const r=Math.min(r1,r2);st={top:pad+(r+1)*cs+r*gap+gap/2-th/2,left:pad+c1*(cs+gap)+cs*.12,height:th,width:cs*.76};}
+      const post={position:'absolute',width:th*2,height:th*2,borderRadius:'50%',background:'#FFE39A',left:'50%',marginLeft:-th};
+      return e('div',{key:'f'+j,style:Object.assign({position:'absolute',borderRadius:4,background:'#FFC84E',pointerEvents:'none',animation:'rp-glow 3s ease-in-out infinite',
+        transform:mode==='iso'?'translate(-3px,-3px)':mode==='obl'?'translate(0,-3px)':'none',
+        boxShadow:['0 0 10px rgba(255,200,78,.8)',...(mode==='flat'?[]:segs(m.dx,m.dy,[[3,'#B8862A']]))].join(',')},st)},
+        e('span',{style:Object.assign({},post,r1===r2?{top:-th/2}:{top:'50%',marginTop:-th,left:-th/2,marginLeft:0})}),
+        e('span',{style:Object.assign({},post,r1===r2?{bottom:-th/2}:{top:'50%',marginTop:-th,left:'auto',right:-th/2,marginLeft:0})}));});
+    const slab=[...(sT?segs(m.dx,m.dy,terra?[[3,'#3C8C34'],[sT-3,'#5A3820']]:[[sT,'#061722']]):[]),mode==='flat'?'0 18px 34px rgba(0,0,0,.22)':'0 0 0 transparent'].join(',');
+    const grid=e('div',{style:{position:'absolute',left:(W-L)/2,top:(Hd-L)/2,width:L,height:L,transform:m.t,transformOrigin:'50% 50%',borderRadius:mode==='iso'?8:mode==='obl'?14:24,
+      background:terra?'#1F3419':'linear-gradient(145deg,#183E52,#081F2F)',boxShadow:slab}},cells,fences);
+    const glowEl=terra?e('div',{style:{position:'absolute',left:'-10%',right:'-10%',top:'20%',height:'100%',background:'radial-gradient(closest-side,rgba(24,215,223,.22),transparent)',pointerEvents:'none'}}):null;
+    return e('div',{style:{position:'relative',width:W,height:H,margin:'0 auto',flex:'none'}},glowEl,grid);
+  }
+  gv(key,mode,L){
+    const g=this.state.games[key],en=this.props.lang==='en',lim=PL.limit+g.extra,left=Math.max(0,lim-g.used);
+    const won=g.found.length===PL.targets.length,lost=!won&&left<=0,last=g.order[g.order.length-1];
+    let big,sub,col='var(--text)';
+    if(last==null){big=en?'Tap any tile':'Тапни по клетке';sub=en?'The number shows steps to the signal':'Число покажет шаги до сигнала';}
+    else if(g.rev[last]==='T'){big=coord(PL,last)+(en?' · signal!':' · сигнал!');sub=en?('Found in '+g.used+' moves'):('Найден за '+g.used+' '+pl(g.used,'ход','хода','ходов'));col='#FFB65D';}
+    else{const v=g.rev[last],tn=tone(v);big=coord(PL,last)+' → '+v;sub=(en?('Signal is '+v+' step'+(v===1?'':'s')+' away · '):('Сигнал в '+v+' '+pl(v,'шаге','шагах','шагах')+' · '))+(en?{hot:'hot',warm:'warm',cold:'cold'}:{hot:'горячо',warm:'тепло',cold:'холодно'})[tn];col=TONE[tn];}
+    if(lost)sub=en?'Out of moves':'Ходы закончились';
+    let stars=g.used<=PL.stars[0]?3:g.used<=PL.stars[1]?2:1;if(g.cont)stars=1;
+    const sc=n=>stars>=n?'#FFC84E':'var(--border)';
+    return {board:this.board(PL,g,{mode,L,key}),moves:left+' / '+lim,movesColor:left<=1?'var(--danger)':left<=3?'var(--warn)':'var(--text)',
+      found:g.found.length+' / '+PL.targets.length,pct:Math.round(left/lim*100),big,sub,col,
+      flagBg:g.flagMode?'#FF5D9A':'var(--sunken)',flagColor:g.flagMode?'#fff':'var(--text)',won,lost,done:won||lost,s1:sc(1),s2:sc(2),s3:sc(3),
+      usedText:en?(g.used+' of '+lim+' moves'):(g.used+' '+pl(g.used,'ход','хода','ходов')+' из '+lim),
+      toggleFlag:()=>this.upd(key,x=>{x.flagMode=!x.flagMode;}),reset:()=>this.upd(key,()=>fresh()),cont:()=>this.upd(key,x=>{x.extra+=3;x.cont=true;})};
+  }
+  renderVals(){
+    const mode=['flat','iso','obl'].includes(this.props.board)?this.props.board:'iso',sz=k=>SZ[k][mode];
+    return {theme:this.props.theme==='light'?'light':'dark',lang:this.props.lang==='en'?'en':'ru',os:this.props.platform==='android'?'android':'ios',
+      ga:this.gv('a','flat',SZ.game.flat),gb:this.gv('b','iso',SZ.game.iso),gc:this.gv('c','obl',SZ.game.obl),gf:this.gv('f',mode,sz('game')),
+      heroBoard:this.board(PL,fresh(),{mode,L:sz('hero'),mini:true}),
+      onb1:this.board(PO,fresh(),{mode,L:sz('onb'),hl:[12],dim:true}),
+      onb2:this.board(PO,sim(PO,[12]),{mode,L:sz('onb'),path:[13,14,10,6]}),
+      onb3:this.board(PO,sim(PO,[12]),{mode,L:sz('onb'),hl:[8,13],dim:true}),
+      winMini:this.board(PL,WIN,{mode,L:sz('mini'),mini:true}),
+      loseBoard:this.board(PL,LOSE,{mode,L:sz('game')})};
+  }
+}
+</script>
+</body>
+</html>

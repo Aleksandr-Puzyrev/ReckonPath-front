@@ -1,41 +1,50 @@
-This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
+# Reckon Path — mobile client
+
+Reckon Path is a turn-based logic game for iOS and Android: the player finds hidden targets on a grid by bearing (shortest-path distance). This repository is the Expo / React Native client and its pure TypeScript game engine. The Go backend and the admin panel are separate and out of scope.
+
+Always communicate with the developer in Russian — questions, plans, reports. Code identifiers, commit messages, and test names are in English.
+
+## Work only from the requirements — never invent
+
+* Requirements live in `docs/` — start at `docs/README.md` (spec index, design index, decisions, source priority).
+* Anything the spec, design, or decisions do not state is a question for the developer, not an assumption. Before coding a feature, run the `clarify-task` skill and wait for explicit confirmation.
+* The spec calls the product «PELENGE» — the former working title; the product name is Reckon Path.
+
+## Project rules
+
+Mandatory rules live in `.claude/rules/` (index: `.claude/rules/README.md`). General rules load every session; layer rules (engine, data, state, forms, UI, animations, i18n, tests) load when their files are touched — read them explicitly when planning. Project skills: `.claude/skills/README.md`. Review agent: `.claude/agents/code-reviewer.md`.
 
 ## Expo has changed — do not trust your training data
 
-Expo ships breaking changes every SDK release. APIs you remember are likely renamed, moved, or removed. Before writing any code that touches an Expo, EAS, or React Native API:
+The project runs Expo SDK 57. Expo ships breaking changes every SDK release. Before writing code that touches an Expo, EAS, or React Native API:
 
-1. Read the major version of the `expo` package in `package.json`.
-2. Fetch the matching versioned docs: `https://docs.expo.dev/versions/v<major>.0.0/`
-3. For anything else, fetch https://docs.expo.dev/llms.txt — an index of all Expo docs with corrections to common LLM misconceptions. Follow its links to the specific page you need; never answer from memory.
+1. Confirm the `expo` major version in `package.json`.
+2. Read the versioned docs: `https://docs.expo.dev/versions/v57.0.0/`.
+3. For anything else, use `https://docs.expo.dev/llms.txt` and follow its links; never answer from memory.
 
 ## Commands
 
-Use `bunx` instead of `npx` if the project uses bun (`bun.lock` present).
+The package manager is npm (`package-lock.json`). Node is pinned in `.nvmrc` (22.23.0). The agent's shell may start on another default Node, so prefix every Node/npm/npx command with `source ~/.nvm/nvm.sh && nvm use >/dev/null && …`.
 
 ```bash
-npx expo install <package>  # ALWAYS use instead of npm/yarn/pnpm/bun add — resolves SDK-compatible versions
-npx expo start              # start the dev server
-npx expo lint               # lint
-npx tsc --noEmit            # typecheck
+npx expo install <package>  # ALWAYS instead of npm install <package> — resolves SDK-compatible versions
+npx expo start              # dev server
+npm run lint                # ESLint over the whole project (expo lint .)
+npm run typecheck           # tsc --noEmit
+npm test                    # Jest: projects "app" (jest-expo) and "engine" (node)
+npm run format              # Prettier write; format:check to verify
 npx expo-doctor             # diagnose dependency and config issues
 npx expo install --fix      # fix incompatible package versions
 ```
 
-Run lint and typecheck before declaring any task done.
+Run lint, typecheck, format check, and tests before declaring any task done. The Claude commit hook enforces them; husky + lint-staged format staged files on human commits.
 
-## Navigation & Routing
+## Navigation and native code
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
+* Expo Router; routes live in `src/app/` (thin route files only). The rest of the code follows Feature-Sliced Design — see `.claude/rules/06-rule-architecture-fsd.md`. Import `Link`, `router`, `useLocalSearchParams` from `expo-router`. Docs: https://docs.expo.dev/router/introduction.md
+* `ios/` and `android/` are generated (Continuous Native Generation) — never create or edit them; configure native behaviour in app config and config plugins.
+* Libraries with native code need a development build (`npx expo run:ios|android` or `npx eas-cli@latest build --profile development`); Expo Go is not enough.
 
 ## Building with EAS
 
-Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
-Docs: https://docs.expo.dev/eas/index.md
-
-## Rules
-
-- If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
-- Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+EAS builds, signs, submits, and ships OTA updates (`eas build`, `eas submit`, `eas update`). Run it as `npx eas-cli@latest <command>`. Profiles and channels are defined in spec Part 8 §12.1. Docs: https://docs.expo.dev/eas/index.md
