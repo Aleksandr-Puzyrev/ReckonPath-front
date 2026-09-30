@@ -31,10 +31,18 @@ const COLOR_LITERAL =
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ["dist/*", "coverage/*", ".expo/*", ".claude/*", "docs/*", "design/*"],
+    ignores: [
+      "dist/*",
+      "coverage/*",
+      ".expo/*",
+      ".claude/*",
+      "docs/*",
+      "design/*",
+      "ios/*",
+      "android/*",
+    ],
   },
 
-  // TypeScript and general code style (rule 08)
   {
     files: ["**/*.ts", "**/*.tsx"],
     rules: {
@@ -65,7 +73,6 @@ module.exports = defineConfig([
     },
   },
 
-  // FSD import direction (rule 06)
   {
     files: ["src/**/*.{ts,tsx}", "packages/**/*.{ts,tsx}"],
     plugins: { boundaries },
@@ -100,7 +107,6 @@ module.exports = defineConfig([
     },
   },
 
-  // Engine purity (rule 09)
   {
     files: ["packages/engine/**/*.ts"],
     rules: {
@@ -140,7 +146,6 @@ module.exports = defineConfig([
     },
   },
 
-  // Colors only from theme tokens (rule 13)
   {
     files: ["src/**/*.{ts,tsx}"],
     ignores: ["src/shared/theme/**"],
@@ -157,7 +162,6 @@ module.exports = defineConfig([
     },
   },
 
-  // No user-visible literals in JSX (rule 15)
   {
     files: ["src/**/*.tsx"],
     ...i18next.configs["flat/recommended"],
@@ -174,7 +178,6 @@ module.exports = defineConfig([
     },
   },
 
-  // kebab-case file and folder names (rule 07); Expo Router files in src/app keep router conventions
   {
     files: ["src/**/*.{ts,tsx}", "packages/**/*.{ts,tsx}"],
     ignores: ["src/app/**"],
@@ -189,7 +192,11 @@ module.exports = defineConfig([
     },
   },
 
-  // Tests
+  {
+    files: ["jest/**/*.js"],
+    languageOptions: { globals: { jest: "readonly" } },
+  },
+
   {
     files: ["**/*.test.{ts,tsx}"],
     rules: {

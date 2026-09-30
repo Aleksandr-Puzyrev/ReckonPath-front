@@ -21,7 +21,7 @@ Source: spec Part 8 §12.3, Part 1 §12.3, Part 11 (scenarios and edge cases).
 | Maestro | E2E flows on iOS and Android |
 | Storybook (on-device) | Component catalogue and screenshot comparison |
 
-Jest and RNTL are configured (`jest.config.js`): project `app` (`jest-expo`, tests under `src/`) and project `engine` (Node environment, tests under `packages/engine/`). `npm test` runs both with `--passWithNoTests`. msw, Maestro, and Storybook are installed by the first task that needs them.
+Jest and RNTL are configured (`jest.config.js`): project `app` (`jest-expo`, tests under `src/`) and project `engine` (Node environment, tests under `packages/engine/`). `npm test` runs both with `--passWithNoTests`. The `app` project loads `react-native-unistyles/mocks` and the theme configuration (`src/shared/theme/unistyles.ts`) in `setupFiles`, and maps `*.svg` to `jest/svg-mock.js`. Tests that check texts set the language explicitly (`i18n.changeLanguage`). msw, Maestro, and Storybook are installed by the first task that needs them.
 
 ## Coverage targets (Part 8 §12.3)
 

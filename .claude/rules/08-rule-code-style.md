@@ -50,9 +50,12 @@ Prettier is the formatter (`docs/decisions/0003-infrastructure-setup.md` #5): do
 
 ## Comments
 
-* Comments explain "why", not "what".
-* Unfinished work only as `// TODO: <what remains>` in English.
-* A behaviour that implements a specific spec rule may cite it: `// Spec Part 6 §2.2: bomb on the last move loses`.
+Developer preference (`docs/decisions/0005-code-conventions.md`): as few comments as possible.
+
+* Write a comment only for a non-obvious "why" that someone could otherwise break: an ordering requirement, a library workaround, a type cast, a lint suppression.
+* Such a comment is in English with a Russian translation in parentheses: `// The shadow is outside: overflow hidden would cut it off (тень снаружи: overflow hidden её обрежет).`
+* No descriptive comments, file headers, section headers, or spec references — the name and the code say "what"; traceability lives in `docs/decisions/` and the task summary.
+* Unfinished work only as `// TODO: <what remains>` — English only, no translation.
 
 ## Done checks
 

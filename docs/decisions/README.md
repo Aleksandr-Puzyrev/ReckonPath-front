@@ -9,6 +9,8 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0001 | [`0001-project-setup.md`](0001-project-setup.md) | Product name, repository layout, scope, naming, source priority, language |
 | 0002 | [`0002-setup-follow-ups.md`](0002-setup-follow-ups.md) | Routes in `src/app/` + FSD app layer in `src/application/`, hand-written tokens (no Figma), design as main UI reference with prototypes as fallback, Node 22 |
 | 0003 | [`0003-infrastructure-setup.md`](0003-infrastructure-setup.md) | Stage 0 tooling: empty root screen, no web, template package cleanup, dev packages, double quotes + semicolons, scope limits |
+| 0004 | [`0004-ui-foundation.md`](0004-ui-foundation.md) | Dev builds, system theme, `bg.glass` token, design-style active tab, Google Fonts packages, UI-foundation scope |
+| 0005 | [`0005-code-conventions.md`](0005-code-conventions.md) | Comments: only non-obvious "why", English + Russian translation in parentheses; TODO in English; keep slice `index.ts` |
 
 ## Template
 

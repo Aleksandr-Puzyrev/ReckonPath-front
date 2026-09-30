@@ -11,6 +11,8 @@ paths:
 
 Source: spec Part 3 (design system), Part 4 (screens), Part 8 §3 (styles), Part 1 §8 (UI/UX). The design in `design/` is the main reference for screens; the spec defines token names, scale, and rules. Where the design has gaps, consult the prototypes and ask (`05-rule-task-clarification.md`).
 
+Unistyles 3 is the only styling system (`docs/decisions/0004-ui-foundation.md` #13): no Tailwind/NativeWind, Tamagui, Restyle, or styled-components, and no `StyleSheet.create` from `react-native` (its constants such as `absoluteFill` are fine).
+
 ## Tokens are the only source of style values
 
 * Colors, gradients, spacing, radii, elevation, typography, sizes, durations — only from theme tokens. Color literals, raw spacing, and raw font sizes in components are forbidden (linted once lint is configured).
@@ -22,7 +24,8 @@ Source: spec Part 3 (design system), Part 4 (screens), Part 8 §3 (styles), Part
 
 ## Themes
 
-* Light and dark, default dark (Part 1 §1.2). `adaptiveThemes` + manual choice via `UnistylesRuntime.setTheme`, choice persisted in `useSettingsStore`.
+* Light and dark, following the system theme (`adaptiveThemes`; `docs/decisions/0004-ui-foundation.md` #2 supersedes Part 1 §1.2). Manual choice via `UnistylesRuntime.setTheme`, persisted in `useSettingsStore`, comes with the settings screen.
+* Project tokens outside spec Part 3 exist only by decision: `bg.glass` (0004 #3).
 * Status bar and Android system bar follow the theme.
 * Every screen and component is checked in both themes.
 

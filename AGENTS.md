@@ -43,7 +43,14 @@ Run lint, typecheck, format check, and tests before declaring any task done. The
 
 * Expo Router; routes live in `src/app/` (thin route files only). The rest of the code follows Feature-Sliced Design — see `.claude/rules/06-rule-architecture-fsd.md`. Import `Link`, `router`, `useLocalSearchParams` from `expo-router`. Docs: https://docs.expo.dev/router/introduction.md
 * `ios/` and `android/` are generated (Continuous Native Generation) — never create or edit them; configure native behaviour in app config and config plugins.
-* Libraries with native code need a development build (`npx expo run:ios|android` or `npx eas-cli@latest build --profile development`); Expo Go is not enough.
+* **Expo Go cannot run this app** (Unistyles has native code). Run a local development build (`docs/decisions/0004-ui-foundation.md` #1):
+  * iOS: `LANG=en_US.UTF-8 npx expo run:ios --device "<simulator name>"` (CocoaPods needs UTF-8).
+  * Android: `JAVA_HOME="$(/usr/libexec/java_home -v 17)" ANDROID_HOME="$HOME/Library/Android/sdk" npx expo run:android`. React Native needs **JDK 17**: the system Java 8 is too old, and Android Studio's bundled JDK 25 breaks the CMake step («A restricted method in java.lang.System has been called»).
+  * Rebuild after adding a library with native code or changing app config / config plugins.
+  * Day to day, with the dev build already installed: `npm start` (= `expo start --dev-client`), then `i` / `a`; live reload works as usual. `npm run ios` / `npm run android` (= `expo run:*`) build and install the dev build — needed once and after native changes. Expo Go fails with «NitroModules could not be found».
+  * Agents verify screens on a **Debug** build; a Release build (`--configuration Release`) currently crashes at launch (missing `ReactNativeDependencies.framework`) — do not install it over the dev build.
+  * Android builds need NDK 27.1.12297006 installed in the Android SDK.
+* The app entry is `index.ts` (not `expo-router/entry`): it configures Unistyles before any route loads.
 
 ## Building with EAS
 
