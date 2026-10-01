@@ -1,0 +1,457 @@
+[
+  {
+    "kind": "game",
+    "name": "distance-empty-board-4x4",
+    "note": "4x4, no elements, target [3,3]: distance = Manhattan. heatD = 6 (from [0,0]); hotMax = max(2, ceil(0.2*6)=2) = 2, warmMax = max(3, ceil(0.45*6)=3) = 3. [0,0]=6 cold, [2,2]=2 hot, [0,3]=3 warm.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [2, 2]
+      },
+      {
+        "tap": [0, 3]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "kind": "distance",
+          "value": 6,
+          "heat": "cold"
+        },
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "value": 2,
+          "heat": "hot"
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 3],
+          "value": 3,
+          "heat": "warm"
+        }
+      ],
+      "state": {
+        "movesUsed": 3,
+        "status": "playing"
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-5x5-one-tap-lvl-01",
+    "note": "LVL-01: 5x5, target [4,4], limit 8. Tap [2,2]: 2+2 = 4. heatD = 8 -> hot <=2, warm <=4 -> warm. One move spent.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "moveLimit": 8
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "value": 4,
+          "heat": "warm"
+        }
+      ],
+      "state": {
+        "movesUsed": 1,
+        "status": "playing"
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-fence-detour-lvl-04",
+    "note": "LVL-04: fences [0,2]|[0,3] and [1,2]|[1,3]. From [0,2]: [1,2]=1, [2,2]=2, [2,3]=3, [1,3]=4, [0,3]=5 (Manhattan would be 1). From [2,3]: [1,3]=1, [0,3]=2.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 3]],
+      "probeMode": "distance",
+      "fences": [
+        [
+          [0, 2],
+          [0, 3]
+        ],
+        [
+          [1, 2],
+          [1, 3]
+        ]
+      ],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [2, 3]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 2],
+          "value": 5
+        },
+        {
+          "type": "reveal",
+          "cell": [2, 3],
+          "value": 2
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-stream-cheaper-than-detour-lvl-05",
+    "note": "LVL-05: stream [0,1], heavy [1,1], target [0,2]. From [0,0]: via stream 3+1 = 4; via [1,0]=1,[1,1]=3 (heavy 2),[1,2]=4,[0,2]=5; via row 2 = 6. Minimum 4.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 2]],
+      "probeMode": "distance",
+      "streams": [[0, 1]],
+      "heavy": [[1, 1]],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 4
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-stream-dearer-than-detour",
+    "note": "Streams [0,1],[0,2], target [0,3]. From [0,0]: along the streams 3+3+1 = 7; detour [1,0]=1,[1,1]=2,[1,2]=3,[1,3]=4,[0,3]=5. Minimum 5.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 3]],
+      "probeMode": "distance",
+      "streams": [
+        [0, 1],
+        [0, 2]
+      ],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 5
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-bridge",
+    "note": "Same streams with bridges on both: entering a bridged stream costs 1. From [0,0]: 1+1+1 = 3.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 3]],
+      "probeMode": "distance",
+      "streams": [
+        [0, 1],
+        [0, 2]
+      ],
+      "bridges": [
+        [0, 1],
+        [0, 2]
+      ],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 3
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-heavy",
+    "note": "Heavy [0,1] (enter cost 2), target [0,2]. From [0,0]: direct 2+1 = 3; detour via row 1 = 4. Minimum 3.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 2]],
+      "probeMode": "distance",
+      "heavy": [[0, 1]],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 3
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-rocks",
+    "note": "Rocks [0,1],[1,1], target [0,2]. From [0,0]: [1,0]=1,[2,0]=2,[2,1]=3,[2,2]=4,[1,2]=5,[0,2]=6.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 2]],
+      "probeMode": "distance",
+      "rocks": [
+        [0, 1],
+        [1, 1]
+      ],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 6
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-target-on-stream-lvl-06",
+    "note": "LVL-06: target [0,1] on a stream. From [0,0] and from [1,1] the last step enters the stream: 3 (not 1). The reverse distance target->[0,0] would be 1: distance is asymmetric, tap->target is used.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 1]],
+      "probeMode": "distance",
+      "streams": [[0, 1]],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [1, 1]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 3
+        },
+        {
+          "type": "reveal",
+          "cell": [1, 1],
+          "value": 3
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-start-cell-cost-not-counted",
+    "note": "Tap [0,0] is a stream, target [0,1] open: the start cell cost is not counted, value = enter [0,1] = 1.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 1]],
+      "probeMode": "distance",
+      "streams": [[0, 0]],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 1
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-multiple-targets",
+    "note": "Targets [0,3],[3,0]: nearest unfound. [0,0] -> min(3,3) = 3; [1,2] -> min(1+1=2, 2+2=4) = 2.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [
+        [0, 3],
+        [3, 0]
+      ],
+      "probeMode": "distance",
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [1, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 3
+        },
+        {
+          "type": "reveal",
+          "cell": [1, 2],
+          "value": 2
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "distance-after-target-found-lvl-07",
+    "note": "LVL-07: targets [0,3],[3,0]. [0,1] -> min(2,4) = 2 (epoch 0). Find [0,3] -> left 1, epoch 1. [0,2] -> only [3,0] left: 3+2 = 5 (epoch 1). The old answer at [0,1] keeps epoch 0 (stale, not recomputed).",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [
+        [0, 3],
+        [3, 0]
+      ],
+      "probeMode": "distance",
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 1],
+          "value": 2,
+          "epoch": 0
+        },
+        {
+          "type": "targetFound",
+          "cell": [0, 3],
+          "left": 1
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 2],
+          "value": 5,
+          "epoch": 1
+        }
+      ],
+      "state": {
+        "epoch": 1,
+        "movesUsed": 3
+      },
+      "reveals": [
+        {
+          "cell": [0, 1],
+          "value": 2,
+          "epoch": 0
+        }
+      ]
+    }
+  }
+]

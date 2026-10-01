@@ -1,0 +1,486 @@
+[
+  {
+    "kind": "formula",
+    "name": "trophies-delta-minus-500-win",
+    "note": "Δ = 2500-3000 = -500: win = clamp(round(30 - 20) = 10, 10, 50) = 10.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 2500,
+      "outcome": "win",
+      "kind": "ranked"
+    },
+    "expect": 10
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-minus-500-loss",
+    "note": "loss = -clamp(round(30 + 20) = 50) = -50.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 2500,
+      "outcome": "loss",
+      "kind": "ranked"
+    },
+    "expect": -50
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-minus-500-draw",
+    "note": "draw = clamp(round(-500/50) = -10, -5, 5) = -5.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 2500,
+      "outcome": "draw",
+      "kind": "ranked"
+    },
+    "expect": -5
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-minus-1-win",
+    "note": "Δ = -1: win = round(30 - 0.04 = 29.96) = 30.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 2999,
+      "outcome": "win",
+      "kind": "ranked"
+    },
+    "expect": 30
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-minus-1-draw",
+    "note": "draw = round(-0.02) = 0 (not -0).",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 2999,
+      "outcome": "draw",
+      "kind": "ranked"
+    },
+    "expect": 0
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-0-loss",
+    "note": "Δ = 0: loss = -30.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 3000,
+      "outcome": "loss",
+      "kind": "ranked"
+    },
+    "expect": -30
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-100-win",
+    "note": "Spec example: 2640 vs 2740, Δ = 100: win = round(34) = 34.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 2640,
+      "opponentTrophies": 2740,
+      "outcome": "win",
+      "kind": "ranked"
+    },
+    "expect": 34
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-100-loss",
+    "note": "loss = -round(30 - 4 = 26) = -26.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 2640,
+      "opponentTrophies": 2740,
+      "outcome": "loss",
+      "kind": "ranked"
+    },
+    "expect": -26
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-100-draw",
+    "note": "draw = round(2) = 2.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 2640,
+      "opponentTrophies": 2740,
+      "outcome": "draw",
+      "kind": "ranked"
+    },
+    "expect": 2
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-1000-win",
+    "note": "Δ = 1000: win = clamp(70) = 50.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 4000,
+      "outcome": "win",
+      "kind": "ranked"
+    },
+    "expect": 50
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-delta-1000-loss",
+    "note": "loss = -clamp(round(30 - 40 = -10), 10, 50) = -10.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 4000,
+      "outcome": "loss",
+      "kind": "ranked"
+    },
+    "expect": -10
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-draw-half-rounds-away-positive",
+    "note": "Δ = 25: draw = round(0.5) = 1 (half away from zero).",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 3025,
+      "outcome": "draw",
+      "kind": "ranked"
+    },
+    "expect": 1
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-draw-half-rounds-away-negative",
+    "note": "Δ = -25: draw = round(-0.5) = -1 (half away from zero, not 0).",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 3000,
+      "opponentTrophies": 2975,
+      "outcome": "draw",
+      "kind": "ranked"
+    },
+    "expect": -1
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-bronze-loss-cap",
+    "note": "Me 700 (Bronze), opponent 200: Δ = -500, loss = -50 -> capped to -15 in Bronze.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 700,
+      "opponentTrophies": 200,
+      "outcome": "loss",
+      "kind": "ranked"
+    },
+    "expect": -15
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-bronze-cap-before-bot-half",
+    "note": "Decision 0006 #19: Bronze loss vs a bot. Δ = -500 -> loss -50 -> Bronze cap -15 first -> × 0.5 = -7.5 -> round half away from zero = -8.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 700,
+      "opponentTrophies": 200,
+      "outcome": "loss",
+      "kind": "bot"
+    },
+    "expect": -8
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-bronze-cap-before-async-half",
+    "note": "Same rule for async: -50 -> -15 -> -8.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 700,
+      "opponentTrophies": 200,
+      "outcome": "loss",
+      "kind": "async"
+    },
+    "expect": -8
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-bot-halves-win",
+    "note": "Bot match: 34 × 0.5 = 17.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 2640,
+      "opponentTrophies": 2740,
+      "outcome": "win",
+      "kind": "bot"
+    },
+    "expect": 17
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-async-halves-loss",
+    "note": "Async: -26 × 0.5 = -13.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 2640,
+      "opponentTrophies": 2740,
+      "outcome": "loss",
+      "kind": "async"
+    },
+    "expect": -13
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-friendly-is-zero",
+    "note": "Friendly match -> 0.",
+    "fn": "trophyDelta",
+    "input": {
+      "myTrophies": 2640,
+      "opponentTrophies": 2740,
+      "outcome": "win",
+      "kind": "friendly"
+    },
+    "expect": 0
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-season-floor",
+    "note": "2010 - 30 = 1980 < floor 2000 -> 2000.",
+    "fn": "applyTrophies",
+    "input": {
+      "trophies": 2010,
+      "delta": -30,
+      "seasonFloor": 2000
+    },
+    "expect": 2000
+  },
+  {
+    "kind": "formula",
+    "name": "trophies-never-negative",
+    "note": "10 - 30 = -20 -> 0.",
+    "fn": "applyTrophies",
+    "input": {
+      "trophies": 10,
+      "delta": -30,
+      "seasonFloor": 0
+    },
+    "expect": 0
+  },
+  {
+    "kind": "formula",
+    "name": "league-bronze-upper-bound",
+    "note": "799 < 800 -> bronze.",
+    "fn": "leagueOf",
+    "input": {
+      "trophies": 799
+    },
+    "expect": "bronze"
+  },
+  {
+    "kind": "formula",
+    "name": "league-silver-lower-bound",
+    "note": "800 -> silver.",
+    "fn": "leagueOf",
+    "input": {
+      "trophies": 800
+    },
+    "expect": "silver"
+  },
+  {
+    "kind": "formula",
+    "name": "league-gold-lower-bound",
+    "note": "2000 -> gold.",
+    "fn": "leagueOf",
+    "input": {
+      "trophies": 2000
+    },
+    "expect": "gold"
+  },
+  {
+    "kind": "formula",
+    "name": "league-master-lower-bound",
+    "note": "5600 -> master.",
+    "fn": "leagueOf",
+    "input": {
+      "trophies": 5600
+    },
+    "expect": "master"
+  },
+  {
+    "kind": "formula",
+    "name": "division-bronze-iii-upper",
+    "note": "Bronze third = 800/3 = 266.67; floor(266/266.67) = 0 -> III.",
+    "fn": "divisionOf",
+    "input": {
+      "trophies": 266
+    },
+    "expect": "III"
+  },
+  {
+    "kind": "formula",
+    "name": "division-bronze-ii-lower",
+    "note": "floor(267/266.67) = 1 -> II.",
+    "fn": "divisionOf",
+    "input": {
+      "trophies": 267
+    },
+    "expect": "II"
+  },
+  {
+    "kind": "formula",
+    "name": "division-bronze-i-lower",
+    "note": "floor(534/266.67) = 2 -> I.",
+    "fn": "divisionOf",
+    "input": {
+      "trophies": 534
+    },
+    "expect": "I"
+  },
+  {
+    "kind": "formula",
+    "name": "division-silver-ii-lower",
+    "note": "Silver third = 400: floor((1200-800)/400) = 1 -> II.",
+    "fn": "divisionOf",
+    "input": {
+      "trophies": 1200
+    },
+    "expect": "II"
+  },
+  {
+    "kind": "formula",
+    "name": "division-silver-i-upper",
+    "note": "floor((1999-800)/400) = 2 -> I.",
+    "fn": "divisionOf",
+    "input": {
+      "trophies": 1999
+    },
+    "expect": "I"
+  },
+  {
+    "kind": "formula",
+    "name": "division-master-none",
+    "note": "Master has no divisions -> null.",
+    "fn": "divisionOf",
+    "input": {
+      "trophies": 6000
+    },
+    "expect": null
+  },
+  {
+    "kind": "formula",
+    "name": "season-reset-at-threshold",
+    "note": "2000 is not > 2000 -> unchanged.",
+    "fn": "seasonReset",
+    "input": {
+      "trophies": 2000
+    },
+    "expect": 2000
+  },
+  {
+    "kind": "formula",
+    "name": "season-reset-halves-excess",
+    "note": "3001 -> 2000 + floor(1001/2) = 2500.",
+    "fn": "seasonReset",
+    "input": {
+      "trophies": 3001
+    },
+    "expect": 2500
+  },
+  {
+    "kind": "formula",
+    "name": "season-reset-below-threshold",
+    "note": "1500 -> unchanged.",
+    "fn": "seasonReset",
+    "input": {
+      "trophies": 1500
+    },
+    "expect": 1500
+  },
+  {
+    "kind": "formula",
+    "name": "rp-win",
+    "note": "Win -> 10 RP.",
+    "fn": "rankPoints",
+    "input": {
+      "outcome": "win",
+      "kind": "ranked"
+    },
+    "expect": 10
+  },
+  {
+    "kind": "formula",
+    "name": "rp-bot-loss-rounds-up",
+    "note": "Bot loss: ceil(3 × 0.5 = 1.5) = 2.",
+    "fn": "rankPoints",
+    "input": {
+      "outcome": "loss",
+      "kind": "bot"
+    },
+    "expect": 2
+  },
+  {
+    "kind": "formula",
+    "name": "rp-friendly",
+    "note": "Friendly -> 0.",
+    "fn": "rankPoints",
+    "input": {
+      "outcome": "draw",
+      "kind": "friendly"
+    },
+    "expect": 0
+  },
+  {
+    "kind": "formula",
+    "name": "track-step-boundary",
+    "note": "50 RP -> step 1.",
+    "fn": "trackStep",
+    "input": {
+      "rp": 50
+    },
+    "expect": 1
+  },
+  {
+    "kind": "formula",
+    "name": "track-step-cap",
+    "note": "2000 RP -> capped at 30 steps.",
+    "fn": "trackStep",
+    "input": {
+      "rp": 2000
+    },
+    "expect": 30
+  },
+  {
+    "kind": "formula",
+    "name": "xp-to-next-level-1",
+    "note": "50 + 25 × 0 = 50.",
+    "fn": "xpToNext",
+    "input": {
+      "level": 1
+    },
+    "expect": 50
+  },
+  {
+    "kind": "formula",
+    "name": "xp-to-next-level-10",
+    "note": "50 + 25 × 9 = 275.",
+    "fn": "xpToNext",
+    "input": {
+      "level": 10
+    },
+    "expect": 275
+  },
+  {
+    "kind": "formula",
+    "name": "xp-to-next-level-30",
+    "note": "50 + 25 × 29 = 775.",
+    "fn": "xpToNext",
+    "input": {
+      "level": 30
+    },
+    "expect": 775
+  }
+]

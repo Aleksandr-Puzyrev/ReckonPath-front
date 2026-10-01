@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "level/v2",
+  "type": "object",
+  "required": ["v", "id", "rows", "cols", "targets", "probeMode"],
+  "properties": {
+    "v": { "const": 2 },
+    "id": { "type": "string", "pattern": "^(c|d|e|u)-[a-z0-9-]{1,40}$" },
+    "title": {
+      "type": "object",
+      "properties": {
+        "ru": { "type": "string", "maxLength": 40 },
+        "en": { "type": "string", "maxLength": 40 }
+      }
+    },
+    "world": { "type": "integer", "minimum": 1, "maximum": 8 },
+    "rows": { "type": "integer", "minimum": 4, "maximum": 9 },
+    "cols": { "type": "integer", "minimum": 4, "maximum": 9 },
+    "targets": { "$ref": "#/$defs/cells", "minItems": 1, "maxItems": 5 },
+    "bombs": { "$ref": "#/$defs/cells", "maxItems": 5 },
+    "streams": { "$ref": "#/$defs/cells" },
+    "bridges": { "$ref": "#/$defs/cells" },
+    "heavy": { "$ref": "#/$defs/cells" },
+    "rocks": { "$ref": "#/$defs/cells" },
+    "fences": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": { "$ref": "#/$defs/cell" },
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "beacons": { "$ref": "#/$defs/cells" },
+    "buoys": { "$ref": "#/$defs/cells" },
+    "targetOrder": { "type": "boolean" },
+    "fog": { "type": ["integer", "null"] },
+    "probeMode": { "enum": ["distance", "direction", "hotcold"] },
+    "moveLimit": { "type": ["integer", "null"], "minimum": 1, "maximum": 99 },
+    "stars": {
+      "type": ["array", "null"],
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "bombHint": { "type": "boolean", "default": true },
+    "introduces": {
+      "enum": [
+        null,
+        "fence",
+        "stream",
+        "multi",
+        "bomb",
+        "rock",
+        "heavy",
+        "bridge",
+        "direction",
+        "hotcold"
+      ]
+    }
+  },
+  "$defs": {
+    "cell": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 8 },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "cells": { "type": "array", "items": { "$ref": "#/$defs/cell" }, "uniqueItems": true }
+  }
+}

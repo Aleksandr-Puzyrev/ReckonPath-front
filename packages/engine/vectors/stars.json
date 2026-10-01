@@ -1,0 +1,259 @@
+[
+  {
+    "kind": "game",
+    "name": "stars-three-at-threshold-lvl-12",
+    "note": "LVL-12: thresholds [8,10], limit 12. 7 misses + target = 8 moves <= 8 -> 3 stars.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "moveLimit": 12,
+      "stars": [8, 10]
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [1, 0]
+      },
+      {
+        "tap": [1, 1]
+      },
+      {
+        "tap": [4, 4]
+      }
+    ],
+    "expect": {
+      "state": {
+        "status": "won"
+      },
+      "winStars": 3
+    }
+  },
+  {
+    "kind": "game",
+    "name": "stars-two-just-over-lvl-12",
+    "note": "8 misses + target = 9 moves: > 8, <= 10 -> 2 stars.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "moveLimit": 12,
+      "stars": [8, 10]
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [1, 0]
+      },
+      {
+        "tap": [1, 1]
+      },
+      {
+        "tap": [1, 2]
+      },
+      {
+        "tap": [4, 4]
+      }
+    ],
+    "expect": {
+      "state": {
+        "status": "won"
+      },
+      "winStars": 2
+    }
+  },
+  {
+    "kind": "game",
+    "name": "stars-two-at-second-threshold",
+    "note": "9 misses + target = 10 moves <= 10 -> 2 stars.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "moveLimit": 12,
+      "stars": [8, 10]
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [1, 0]
+      },
+      {
+        "tap": [1, 1]
+      },
+      {
+        "tap": [1, 2]
+      },
+      {
+        "tap": [1, 3]
+      },
+      {
+        "tap": [4, 4]
+      }
+    ],
+    "expect": {
+      "state": {
+        "status": "won"
+      },
+      "winStars": 2
+    }
+  },
+  {
+    "kind": "game",
+    "name": "stars-one-at-limit-lvl-12",
+    "note": "11 misses + target = 12 moves = limit; the win check comes first -> won, 12 > 10 -> 1 star.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "moveLimit": 12,
+      "stars": [8, 10]
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [1, 0]
+      },
+      {
+        "tap": [1, 1]
+      },
+      {
+        "tap": [1, 2]
+      },
+      {
+        "tap": [1, 3]
+      },
+      {
+        "tap": [1, 4]
+      },
+      {
+        "tap": [2, 0]
+      },
+      {
+        "tap": [4, 4]
+      }
+    ],
+    "expect": {
+      "state": {
+        "status": "won"
+      },
+      "winStars": 1
+    }
+  },
+  {
+    "kind": "game",
+    "name": "stars-bomb-counts-two-lvl-12",
+    "note": "Bomb [3,0] (2 moves) + 6 misses + target = 9 moves -> 2 stars.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "moveLimit": 12,
+      "stars": [8, 10],
+      "bombs": [[3, 0]]
+    },
+    "actions": [
+      {
+        "tap": [3, 0]
+      },
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [1, 0]
+      },
+      {
+        "tap": [4, 4]
+      }
+    ],
+    "expect": {
+      "state": {
+        "status": "won"
+      },
+      "winStars": 2
+    }
+  }
+]

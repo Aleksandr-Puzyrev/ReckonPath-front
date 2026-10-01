@@ -15,7 +15,7 @@ Before asking anything, the agent must look up the answer itself: decisions → 
 ## What must be checked
 
 1. **Spec coverage.** Which spec sections define the task? Is anything the task needs not stated there?
-2. **Spec ↔ design conflicts and design gaps.** Layout, texts, states, colors, element order. Every conflict is reported. The design is not fully worked out: where a screen, state, or interaction is missing or inconsistent, look at how the prototype does it (`../peleng/src/game/`, `../arena/src/game/`) and ask with that as an option: «В дизайне нет X; в прототипе сделано так — …; делаем так же или иначе?».
+2. **Spec ↔ design conflicts and design gaps.** Layout, texts, states, colors, element order. Every conflict is reported. The design is not fully worked out: where a screen, state, or interaction is missing or inconsistent, look at how the prototype does it (`../peleng/src/game/`) and ask with that as an option: «В дизайне нет X; в прототипе сделано так — …; делаем так же или иначе?».
 3. **Flow, step by step.** Entry points, first view, every action and its result (success, error, cancel, offline), exits. Every branch.
 4. **Game rules.** Exact behaviour per spec Part 6, including edge cases from Part 11. No rule is implemented from memory of "how such games work".
 5. **Data and API.** Endpoints and payloads from spec Part 7. If an endpoint or field is missing — ask: mock, wait, or agree a contract.

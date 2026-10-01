@@ -1,0 +1,258 @@
+[
+  {
+    "kind": "game",
+    "name": "bomb-hint-right-neighbour-lvl-bn1",
+    "note": "LVL-BN1: bomb [2,3] is the E neighbour of [2,2] -> bombNear true; one move spent.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[2, 3]],
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "value": 4,
+          "bombNear": true
+        }
+      ],
+      "state": {
+        "movesUsed": 1
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-hint-diagonal-lvl-bn2",
+    "note": "LVL-BN2: bomb [1,3] is diagonal to [2,2] -> not an N4 neighbour -> false.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[1, 3]],
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "bombNear": false
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-hint-through-fence-lvl-bn3",
+    "note": "LVL-BN3: fence between [2,2] and bomb [2,3]: neighbourhood is by grid, fences do not break it -> true.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[2, 3]],
+      "fences": [
+        [
+          [2, 2],
+          [2, 3]
+        ]
+      ],
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "bombNear": true
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-hint-exploded-bomb-lvl-bn4",
+    "note": "LVL-BN4: [2,2] -> true. Bomb [2,3] explodes. [1,3] is also its neighbour but exploded bombs do not count -> false. The earlier badge at [2,2] stays.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[2, 3]],
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      },
+      {
+        "tap": [2, 3]
+      },
+      {
+        "tap": [1, 3]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "bombNear": true
+        },
+        {
+          "type": "bomb",
+          "cell": [2, 3],
+          "penalty": 2
+        },
+        {
+          "type": "reveal",
+          "cell": [1, 3],
+          "bombNear": false
+        }
+      ],
+      "reveals": [
+        {
+          "cell": [2, 2],
+          "bombNear": true
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-hint-on-found-target-lvl-bn5",
+    "note": "LVL-BN5: target [4,4] with bomb [4,3] next to it -> the target reveal has bombNear true.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[4, 3]],
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [4, 4]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "targetFound",
+          "cell": [4, 4],
+          "left": 0
+        },
+        {
+          "type": "win",
+          "moves": 1
+        }
+      ],
+      "reveals": [
+        {
+          "cell": [4, 4],
+          "kind": "target",
+          "bombNear": true
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-hint-disabled-lvl-bn6",
+    "note": "LVL-BN6: bombHint false -> bombNear always false.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[2, 3]],
+      "bombHint": false,
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "bombNear": false
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-reveal-has-no-hint",
+    "note": "Part 6 §2.4: the bomb itself carries no bombNear and no probe: its reveal is exactly { kind: bomb }, even with another bomb next to it.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [
+        [0, 0],
+        [0, 1]
+      ],
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "bomb",
+          "cell": [0, 0],
+          "penalty": 2
+        }
+      ],
+      "reveals": [
+        {
+          "cell": [0, 0],
+          "kind": "bomb"
+        }
+      ]
+    }
+  }
+]

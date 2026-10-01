@@ -1,0 +1,25 @@
+[
+  {
+    "kind": "prng",
+    "name": "mulberry32-2026-09-26",
+    "note": "Part 6 §6.2: first 10 outputs for key '2026-09-26'. Computed with the prototype daily.js implementation (hashString + mulberry32), independent of this engine.",
+    "key": "2026-09-26",
+    "expect": {
+      "seed": 2362601272,
+      "u32": [
+        1945697411, 3124099504, 1188622617, 107752441, 3614290025, 2336644378, 61614786, 917933331,
+        2281793888, 2017619012
+      ]
+    }
+  },
+  {
+    "kind": "prng",
+    "name": "fnv1a-known-values",
+    "note": "Published FNV-1a-32 reference values: '' -> 0x811c9dc5 (2166136261), 'a' -> 0xe40c292c (3826002220). u32 = first mulberry32 outputs are not checked here.",
+    "key": "a",
+    "expect": {
+      "seed": 3826002220,
+      "u32": []
+    }
+  }
+]

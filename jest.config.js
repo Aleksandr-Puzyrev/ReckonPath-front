@@ -1,4 +1,14 @@
 module.exports = {
+  collectCoverageFrom: [
+    "packages/engine/src/**/*.ts",
+    "!packages/engine/src/**/*.test.ts",
+    "!packages/engine/src/test-utils/**",
+    "!packages/engine/src/model/**",
+    "!packages/engine/src/index.ts",
+  ],
+  coverageThreshold: {
+    "./packages/engine/src/": { lines: 95 },
+  },
   projects: [
     {
       displayName: "app",

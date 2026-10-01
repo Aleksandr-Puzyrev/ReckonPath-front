@@ -15,7 +15,7 @@ A lower-priority instruction must not override, weaken, or bypass a higher one.
 
 ## Requirement sources
 
-Requirements come only from the sources in `docs/README.md`, in this order: decisions (`docs/decisions/`) → spec Part 6 (engine, normative) → the rest of the spec (`docs/spec/`) → design (`design/`, the main UI reference). Prototypes (`../peleng`, `../arena`) are advisory only: consulted where the design has gaps, never a source of a decision by themselves — the developer decides.
+Requirements come only from the sources in `docs/README.md`, in this order: decisions (`docs/decisions/`) → spec Part 6 (engine, normative) → the rest of the spec (`docs/spec/`) → design (`design/`, the main UI reference). The prototype (`../peleng`) is advisory only: consulted where the design has gaps, never a source of a decision by itself — the developer decides.
 
 * The agent must not invent a requirement, a behaviour, a text, a number, a color, or a size that none of these sources states.
 * On a conflict between sources, or a gap, the agent must stop and ask the developer (`05-rule-task-clarification.md`) — never pick "the most likely" option silently.

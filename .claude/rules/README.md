@@ -14,7 +14,7 @@ Rules hold operational constraints only. Product requirements live in `docs/` (s
 | 06 | `06-rule-architecture-fsd.md` | always | Stack, Feature-Sliced layers, import direction, directory layout |
 | 07 | `07-rule-naming-conventions.md` | always | kebab-case files, suffixes, components, variables, types, stores, queries |
 | 08 | `08-rule-code-style.md` | always | Minimal code, TypeScript strict, React rules, errors, comments, done-checks |
-| 09 | `09-rule-game-engine.md` | `packages/engine/**` | Pure deterministic engine, reducer contract, test vectors |
+| 09 | `09-rule-game-engine.md` | `packages/engine/**` | Pure deterministic engine, reducer contract, spec names and topic modules, test vectors |
 | 10 | `10-rule-data-layer-tanstack-query.md` | `src/**/api/**` | Generated OpenAPI client, query/mutation factories, offline, idempotency |
 | 11 | `11-rule-state-zustand-mmkv.md` | `src/**/model/**`, `*-store.ts` | Where state lives, store design, persistence and migrations |
 | 12 | `12-rule-forms-react-hook-form-zod.md` | `*-schema.ts`, `*-form*.tsx` | Forms and validation |

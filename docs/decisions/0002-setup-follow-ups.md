@@ -6,7 +6,7 @@ Date: 2026-09-30. Asked by: Claude Code configuration setup. Answered by: develo
 | --- | --- | --- | --- |
 | 1 | Routes in root `app/` (spec) vs Expo Router's `src/app/` precedence | Routes stay in **`src/app/`**; the FSD app layer (providers, bootstrap, guards) lives in **`src/application/`**. Resolves the open item in 0001. | Part 8 §5.2 |
 | 2 | Token pipeline: spec expects Figma Variables → Tokens Studio → Style Dictionary | **There is no Figma.** Design tokens are written by hand in `src/shared/theme/` with the spec's names and values (Part 3 §2–§4, §8). The Figma/Style Dictionary pipeline (Part 3 §12.1, Part 8 §3.2) does not apply. | Part 3 §12, Part 8 §3.2 |
-| 3 | Role of the design and the prototypes | **The design (`design/`) is the main reference for building screens and UI.** It is not fully worked out, so gaps and inconsistencies are expected. In those cases, consult the prototypes (`../peleng` — campaign/daily/editor web prototype, `../arena` — PvP prototype) for how it was done, and **ask the developer** which way to go. Prototypes are read-only and never decide on their own. | Part 1 §1 (prototype «Пеленг», concept v82) |
+| 3 | Role of the design and the prototypes | **The design (`design/`) is the main reference for building screens and UI.** It is not fully worked out, so gaps and inconsistencies are expected. In those cases, consult the prototype (`../peleng` — campaign/daily/editor web prototype; `../arena` turned out to be a different game, see 0007) for how it was done, and **ask the developer** which way to go. Prototypes are read-only and never decide on their own. | Part 1 §1 (prototype «Пеленг», concept v82) |
 | 4 | Node version | Node **22.23.0**, pinned in `.nvmrc`; tooling switches via nvm. | — |
 
 ## Consequences

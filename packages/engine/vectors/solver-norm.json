@@ -1,0 +1,191 @@
+[
+  {
+    "kind": "norm",
+    "name": "norm-4x4-one-target",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "distance",
+      "id": "u-norm-1",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[2, 1]]
+    },
+    "expect": {
+      "normSum": 96
+    }
+  },
+  {
+    "kind": "norm",
+    "name": "norm-5x5-with-bomb",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "distance",
+      "id": "u-norm-2",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[3, 1]],
+      "bombs": [[2, 2]]
+    },
+    "expect": {
+      "normSum": 96
+    }
+  },
+  {
+    "kind": "norm",
+    "name": "norm-6x6-fence-stream-two-targets",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "distance",
+      "id": "u-norm-3",
+      "rows": 6,
+      "cols": 6,
+      "targets": [
+        [1, 4],
+        [4, 1]
+      ],
+      "streams": [
+        [0, 2],
+        [1, 2],
+        [2, 2]
+      ],
+      "fences": [
+        [
+          [3, 3],
+          [3, 4]
+        ],
+        [
+          [4, 3],
+          [4, 4]
+        ]
+      ],
+      "bombs": [[5, 5]]
+    },
+    "expect": {
+      "normSum": 192
+    }
+  },
+  {
+    "kind": "norm",
+    "name": "norm-direction-mode",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "direction",
+      "id": "u-norm-4",
+      "rows": 6,
+      "cols": 6,
+      "targets": [[4, 2]],
+      "heavy": [[2, 2]]
+    },
+    "expect": {
+      "normSum": 120
+    }
+  },
+  {
+    "kind": "norm",
+    "name": "norm-hotcold-mode",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "hotcold",
+      "id": "u-norm-5",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[1, 3]]
+    },
+    "expect": {
+      "normSum": 136
+    }
+  },
+  {
+    "kind": "norm",
+    "name": "norm-target-order",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "distance",
+      "id": "u-norm-6",
+      "rows": 5,
+      "cols": 5,
+      "targets": [
+        [3, 3],
+        [1, 1]
+      ],
+      "targetOrder": true
+    },
+    "expect": {
+      "normSum": 186
+    }
+  },
+  {
+    "kind": "norm",
+    "name": "norm-beacons-and-buoys",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "distance",
+      "id": "u-norm-7",
+      "rows": 6,
+      "cols": 6,
+      "targets": [[4, 4]],
+      "beacons": [[0, 0]],
+      "buoys": [[2, 2]],
+      "bombs": [[1, 4]]
+    },
+    "expect": {
+      "normSum": 64
+    }
+  },
+  {
+    "kind": "norm",
+    "name": "norm-bomb-hint-off",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "distance",
+      "id": "u-norm-8",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[3, 1]],
+      "bombs": [
+        [2, 2],
+        [0, 4]
+      ],
+      "bombHint": false
+    },
+    "expect": {
+      "normSum": 130
+    }
+  },
+  {
+    "kind": "norm",
+    "name": "norm-9x9-three-targets",
+    "note": "GOLDEN (decision 0007 #9): pinned from the TS implementation of packages/engine/docs/solver.md; guards TS↔Go parity, not solver quality.",
+    "level": {
+      "v": 2,
+      "probeMode": "distance",
+      "id": "u-norm-9",
+      "rows": 9,
+      "cols": 9,
+      "targets": [
+        [6, 3],
+        [2, 6],
+        [4, 4]
+      ],
+      "bombs": [
+        [3, 3],
+        [2, 5]
+      ],
+      "rocks": [
+        [0, 0],
+        [8, 8]
+      ]
+    },
+    "expect": {
+      "normSum": 297
+    }
+  }
+]

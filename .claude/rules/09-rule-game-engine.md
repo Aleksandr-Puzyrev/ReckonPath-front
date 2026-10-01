@@ -26,13 +26,20 @@ The engine is the single implementation of the game rules on the client. **Spec 
 * Formulas (stars, trophies, leagues, RP, XP — Part 6 §5), validator with all error codes, returning all errors (Part 6 §6.1), PRNG FNV-1a-32 + mulberry32 (Part 6 §6.2), daily generator (§6.3), level codes (§7.2) — each as specified.
 * Engine input from outside (level JSON, level codes, remote config) is validated with zod against Part 6 §7 schemas at the boundary, before it reaches the engine.
 
+## Naming and file structure (exception to `07-rule-naming-conventions.md`)
+
+Decision `docs/decisions/0009-engine-refactor.md` #2–3:
+
+* Function names from the Part 6 pseudocode stay as written (`applyTap`, `bombNear`, `probeValue`, `stars`, `xpToNext`), so the code and the Go engine can be read side by side with the spec; the existing engine API in the same style (`leagueOf`, `divisionOf`, `heatOf`, `moveLimitOf`, `xpFor`) is not renamed either. The verb + object rule of `07` applies to new engine functions the spec does not name.
+* Engine modules group one topic each (`game/game.ts`, `probe/probe.ts`, `grid/grid.ts`) instead of one function per file. A module that mixes unrelated topics is split (e.g. `formulas/` → `league.ts`, `trophies.ts`, `rewards.ts`).
+
 ## When the spec is unclear
 
 If the pseudocode, a formula, or an edge case is ambiguous or missing (including cases listed in Part 11), stop and ask — never fill in "typical puzzle game" behaviour. Record the answer in `docs/decisions/` and add a test vector for it.
 
 ## Prototypes
 
-`../peleng/src/game/` (web prototype: `engine.js`, `levels.js`, `daily.js`, `levelCode.js`) and `../arena/src/game/` (PvP prototype) are the prototypes the spec refers to (`docs/decisions/0002-setup-follow-ups.md` #3). They live outside this repository, are read-only, and must never be edited. They may be consulted for porting and test-vector material, but where they differ from Part 6, Part 6 wins, and the difference is reported to the developer.
+`../peleng/src/game/` (web prototype: `engine.js`, `levels.js`, `daily.js`, `levelCode.js`) is the prototype the spec refers to (`docs/decisions/0002-setup-follow-ups.md` #3); `../arena` is a different game and is not used (0007). It lives outside this repository, is read-only, and must never be edited. It may be consulted for porting and test-vector material, but where they differ from Part 6, Part 6 wins, and the difference is reported to the developer.
 
 ## Tests
 

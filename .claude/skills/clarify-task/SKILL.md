@@ -18,7 +18,7 @@ Implements `.claude/rules/05-rule-task-clarification.md`. The goal: every behavi
    * acceptance: Part 12 (epics, DoR/DoD).
 3. `Grep` each heading and read only those sections.
 4. UI task: find the screen via `design/README.md`, read only its fragment (`data-screen-label`) or its image in `design/shots/`; note both themes.
-5. Design gaps: where the design lacks a screen, state, or interaction, or contradicts itself, look at the prototype (`../peleng/src/game/` for campaign/daily/editor, `../arena/src/game/` for PvP; read-only) and bring its behaviour as an option in the questions — never adopt it silently.
+5. Design gaps: where the design lacks a screen, state, or interaction, or contradicts itself, look at the prototype (`../peleng/src/game/`, read-only; there is no PvP prototype) and bring its behaviour as an option in the questions — never adopt it silently.
 6. Existing code: check what is already implemented and reusable.
 
 ## 2. Build the requirement map

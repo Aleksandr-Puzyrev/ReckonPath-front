@@ -1,0 +1,824 @@
+[
+  {
+    "kind": "game",
+    "name": "tap-repeat-lvl-02",
+    "note": "LVL-02: second tap on an open cell -> alreadyRevealed, no move spent.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 5
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 6
+        },
+        {
+          "type": "alreadyRevealed",
+          "cell": [0, 0]
+        }
+      ],
+      "state": {
+        "movesUsed": 1
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "tap-rock-lvl-03",
+    "note": "LVL-03: tap on a rock -> blocked, no move spent, nothing revealed.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "rocks": [[1, 1]],
+      "moveLimit": 5
+    },
+    "actions": [
+      {
+        "tap": [1, 1]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "blocked",
+          "cell": [1, 1]
+        }
+      ],
+      "state": {
+        "movesUsed": 0,
+        "status": "playing"
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-in-the-middle-lvl-08",
+    "note": "LVL-08: limit 5, bomb [0,4]: bomb costs 2 -> movesUsed 2 (3 left), no probe, game continues.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[0, 4]],
+      "moveLimit": 5
+    },
+    "actions": [
+      {
+        "tap": [0, 4]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "bomb",
+          "cell": [0, 4],
+          "penalty": 2
+        }
+      ],
+      "state": {
+        "movesUsed": 2,
+        "status": "playing"
+      },
+      "reveals": [
+        {
+          "cell": [0, 4],
+          "kind": "bomb"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-on-penultimate-move-loses-lvl-10",
+    "note": "Spec Part 6 §9 example / LVL-10: limit 2. [0,0] -> 6 cold (movesUsed 1). Bomb [0,3] -> 1+2 = 3 >= 2 -> capped to 2, lost.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "bombs": [[0, 3]],
+      "moveLimit": 2,
+      "stars": [1, 2]
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 3]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 6,
+          "heat": "cold"
+        },
+        {
+          "type": "bomb",
+          "cell": [0, 3],
+          "penalty": 2
+        },
+        {
+          "type": "lose"
+        }
+      ],
+      "state": {
+        "movesUsed": 2,
+        "status": "lost"
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "bomb-on-last-move-loses-lvl-09",
+    "note": "LVL-09: limit 1, bomb first: 0+2 = 2 >= 1 -> capped to 1 (0 left, not -1), lost.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "bombs": [[0, 3]],
+      "moveLimit": 1
+    },
+    "actions": [
+      {
+        "tap": [0, 3]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "bomb",
+          "cell": [0, 3],
+          "penalty": 2
+        },
+        {
+          "type": "lose"
+        }
+      ],
+      "state": {
+        "movesUsed": 1,
+        "status": "lost"
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "last-target-on-last-move-wins-lvl-11",
+    "note": "LVL-11: limit 2: [0,0] then target [3,3] -> movesUsed 2 = limit, but the win check comes before the limit check -> won. stars = null (no thresholds).",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 2
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [3, 3]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 6
+        },
+        {
+          "type": "targetFound",
+          "cell": [3, 3],
+          "left": 0
+        },
+        {
+          "type": "win",
+          "moves": 2,
+          "stars": null
+        }
+      ],
+      "state": {
+        "movesUsed": 2,
+        "status": "won"
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "continue-then-second-loss-lvl-13-15",
+    "note": "LVL-13/15: limit 1. [0,0] -> lost (movesUsed 1). Continue -> bonus 3, limit 4, playing. [0,1],[0,2] -> movesUsed 3; [1,0] -> 4 >= 4 -> lost. A second continue is not allowed.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 1
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "continue": true
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [1, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0]
+        },
+        {
+          "type": "lose"
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 1]
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 2]
+        },
+        {
+          "type": "reveal",
+          "cell": [1, 0]
+        },
+        {
+          "type": "lose"
+        }
+      ],
+      "state": {
+        "movesUsed": 4,
+        "bonusMoves": 3,
+        "continued": true,
+        "status": "lost"
+      },
+      "canContinue": false
+    }
+  },
+  {
+    "kind": "game",
+    "name": "win-after-continue-is-one-star-lvl-13",
+    "note": "LVL-13: stars [1,1], limit 1. [0,0] -> lost; continue; target [3,3] -> movesUsed 2, won. continued = true -> 1 star regardless of moves.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 1,
+      "stars": [1, 1]
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "continue": true
+      },
+      {
+        "tap": [3, 3]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0]
+        },
+        {
+          "type": "lose"
+        },
+        {
+          "type": "targetFound",
+          "cell": [3, 3],
+          "left": 0
+        },
+        {
+          "type": "win",
+          "moves": 2,
+          "stars": 1
+        }
+      ],
+      "state": {
+        "status": "won",
+        "continued": true
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "beacons-revealed-free-next-to-bomb-lvl-fx1",
+    "note": "LVL-FX1: beacons [0,0],[2,2] are revealed at start for free (movesUsed 0). [0,0] -> 8, bomb [0,1] is an N4 neighbour -> bombNear true; [2,2] -> 4, no neighbouring bomb.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[0, 1]],
+      "beacons": [
+        [0, 0],
+        [2, 2]
+      ],
+      "moveLimit": 10
+    },
+    "actions": [],
+    "expect": {
+      "events": [],
+      "state": {
+        "movesUsed": 0,
+        "status": "playing"
+      },
+      "reveals": [
+        {
+          "cell": [0, 0],
+          "kind": "distance",
+          "value": 8,
+          "bombNear": true,
+          "beacon": true
+        },
+        {
+          "cell": [2, 2],
+          "kind": "distance",
+          "value": 4,
+          "bombNear": false,
+          "beacon": true
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "beacons-do-not-start-hotcold-lvl-fx1",
+    "note": "LVL-FX1: hot/cold level with beacon [0,0]. lastValue stays null after beacons, so the first player tap [2,2] (value 4) is 'none'.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "hotcold",
+      "beacons": [[0, 0]],
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "kind": "hotcold",
+          "cmp": "none",
+          "value": 4
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "two-beacons-in-hotcold-all-none",
+    "note": "Hot/cold with beacons [0,0] (8) and [2,2] (4): beacons never compare with each other, both are 'none'; lastValue stays null, so the first tap [4,2] (2) is 'none' too.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "hotcold",
+      "beacons": [
+        [0, 0],
+        [2, 2]
+      ],
+      "moveLimit": 10
+    },
+    "actions": [
+      {
+        "tap": [4, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [4, 2],
+          "kind": "hotcold",
+          "cmp": "none",
+          "value": 2
+        }
+      ],
+      "reveals": [
+        {
+          "cell": [0, 0],
+          "cmp": "none",
+          "value": 8,
+          "beacon": true
+        },
+        {
+          "cell": [2, 2],
+          "cmp": "none",
+          "value": 4,
+          "beacon": true
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "fog-keeps-every-reveal-lvl-fx4",
+    "note": "LVL-FX4 / Part 6 §2.5: fog = 3 only limits what the UI shows; the engine stores every reveal. Target [4,4]: [0,0]=8, [0,1]=7, [0,2]=6, [0,3]=5, [0,4]=4, [1,0]=7 -- all six stay in state, moves 6.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "fog": 3,
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [1, 0]
+      }
+    ],
+    "expect": {
+      "state": {
+        "movesUsed": 6,
+        "status": "playing"
+      },
+      "reveals": [
+        {
+          "cell": [0, 0],
+          "value": 8
+        },
+        {
+          "cell": [0, 1],
+          "value": 7
+        },
+        {
+          "cell": [0, 2],
+          "value": 6
+        },
+        {
+          "cell": [0, 3],
+          "value": 5
+        },
+        {
+          "cell": [0, 4],
+          "value": 4
+        },
+        {
+          "cell": [1, 0],
+          "value": 7
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "pvp-has-no-move-limit",
+    "note": "Part 6 §2.3: PvP runs with moveLimit = null even if the map says 1: two taps -> movesUsed 2, still playing, no 'lose'.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "moveLimit": 1
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 1]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 8
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 1],
+          "value": 7
+        }
+      ],
+      "state": {
+        "movesUsed": 2,
+        "status": "playing"
+      }
+    },
+    "variant": "pvp"
+  },
+  {
+    "kind": "game",
+    "name": "buoy-on-last-move-lvl-fx2",
+    "note": "LVL-FX2: limit 1, buoy [0,0]: -1 move, +3 to the limit before the limit check -> limit 4 > movesUsed 1, no loss. The buoy cell shows a probe (6).",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "buoys": [[0, 0]],
+      "moveLimit": 1
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "buoy",
+          "cell": [0, 0],
+          "bonus": 3
+        }
+      ],
+      "state": {
+        "movesUsed": 1,
+        "bonusMoves": 3,
+        "status": "playing"
+      },
+      "reveals": [
+        {
+          "cell": [0, 0],
+          "kind": "distance",
+          "value": 6,
+          "buoy": true
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "buoy-then-continue-lvl-fx3",
+    "note": "LVL-FX3: limit 1 + buoy 3 = 4. After [0,0] (buoy), [0,1],[0,2],[0,3] -> movesUsed 4 -> lost. Continue adds 3 more: bonusMoves 6, limit 1+3+3 = 7.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "buoys": [[0, 0]],
+      "moveLimit": 1
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "continue": true
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "buoy",
+          "cell": [0, 0],
+          "bonus": 3
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 1]
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 2]
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 3]
+        },
+        {
+          "type": "lose"
+        }
+      ],
+      "state": {
+        "movesUsed": 4,
+        "bonusMoves": 6,
+        "continued": true,
+        "status": "playing"
+      }
+    }
+  },
+  {
+    "kind": "game",
+    "name": "target-order-lvl-fx5",
+    "note": "LVL-FX5: targetOrder, #1 = [3,3], #2 = [0,3]. [0,2] probes #1 only: 3+1 = 4 (not 1 to #2). Tapping #2 first finds it with order 2. [0,0] then probes #1: 6.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [
+        [3, 3],
+        [0, 3]
+      ],
+      "probeMode": "distance",
+      "targetOrder": true,
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 2]
+      },
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 2],
+          "value": 4
+        },
+        {
+          "type": "targetFound",
+          "cell": [0, 3],
+          "left": 1
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 6
+        }
+      ],
+      "reveals": [
+        {
+          "cell": [0, 3],
+          "kind": "target",
+          "order": 2
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "pvp-bomb-skips-next-turn",
+    "note": "Part 6 §2.3: PvP bomb costs a normal move (movesUsed 1) and emits skipNext = 1 instead of a penalty; PvP always probes by distance even if the level says 'direction': [0,0] -> 8.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "direction",
+      "bombs": [[0, 4]],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "bomb",
+          "cell": [0, 4],
+          "skipNext": 1
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "kind": "distance",
+          "value": 8
+        }
+      ],
+      "state": {
+        "movesUsed": 2,
+        "status": "playing"
+      }
+    },
+    "variant": "pvp"
+  },
+  {
+    "kind": "game",
+    "name": "tap-after-game-over-is-ignored",
+    "note": "After the win the status is not 'playing': a further tap returns no events and changes nothing.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 3
+    },
+    "actions": [
+      {
+        "tap": [3, 3]
+      },
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "targetFound",
+          "cell": [3, 3],
+          "left": 0
+        },
+        {
+          "type": "win",
+          "moves": 1
+        }
+      ],
+      "state": {
+        "movesUsed": 1,
+        "status": "won"
+      }
+    }
+  }
+]

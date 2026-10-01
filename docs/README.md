@@ -8,7 +8,7 @@ Where every requirement for Reckon Path lives. Agents start here to locate the o
 | Specification, original single file | [`PELENGE_TZ.md`](PELENGE_TZ.md) | Same content as `spec/`; `.docx`/`.pdf`/`.html` copies are not used by agents |
 | Design (screens, both themes) | [`../design/README.md`](../design/README.md) | Visual reference; the spec wins on conflict |
 | Decisions and answers to clarifying questions | [`decisions/`](decisions/) | Binding; extends the spec |
-| Prototypes (outside the repo, read-only) | `../peleng/src/game/` (campaign, daily, editor, level codes), `../arena/src/game/` (PvP) | Advisory only: consulted where the design has gaps; the developer decides |
+| Prototypes (outside the repo, read-only) | `../peleng/src/game/` (campaign, daily, editor, level codes); `../arena` is a different game and is not used (0007) | Advisory only: consulted where the design has gaps; the developer decides |
 
 ## Source priority
 

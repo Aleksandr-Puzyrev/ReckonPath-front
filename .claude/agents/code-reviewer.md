@@ -24,7 +24,7 @@ Lint, type check, and tests are mechanical — run them once (`npx expo lint`, `
 * **Requirements** — `00`, `05`: nothing invented; spec ↔ design conflicts and design gaps were asked, not decided silently (prototype behaviour adopted only with a recorded decision); answers recorded in `docs/decisions/`.
 * **Scope** — `03`: no backend/admin code; nothing outside the task.
 * **Architecture** — `06`: correct layer and slice; imports only downward; no sideways slice imports; public API via `index.ts`; route files thin; no new library without approval; no edits to `ios/`/`android/`.
-* **Naming** — `07`: kebab-case files with suffixes; spec domain terms; props `I<Component>`.
+* **Naming** — `07`: kebab-case files with suffixes; spec domain terms; props `I<Component>`; engine names and topic modules follow the `09` exception.
 * **Style** — `08`: minimal code; no `any`, `!`, unjustified `as`; no manual memoization; no ternary chains; no magic values; no `console.log`; no empty `catch`.
 * **Engine** — `09`: purity (no React/RN/Expo, no `Date.now`/`Math.random`); pseudocode order of Part 6 kept; contract names unchanged; vectors for new behaviour.
 * **Data** — `10`: factories + hooks; idempotency keys; no optimistic currency; no server data in stores; no invented endpoints.

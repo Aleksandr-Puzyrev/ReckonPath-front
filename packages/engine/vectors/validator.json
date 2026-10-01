@@ -1,0 +1,547 @@
+[
+  {
+    "kind": "validate",
+    "name": "validate-valid-level",
+    "note": "A clean 5x5 level passes with no errors.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "bombs": [[0, 4]],
+      "streams": [[2, 2]],
+      "moveLimit": 10
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": []
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-size-pvp-format",
+    "note": "PvP Bronze format is 5x5; a 7x7 map -> SIZE.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 7,
+      "cols": 7,
+      "targets": [[4, 4]],
+      "probeMode": "distance"
+    },
+    "context": {
+      "kind": "pvp",
+      "format": {
+        "size": 5,
+        "targets": 1,
+        "limits": {
+          "fences": 3,
+          "streams": 3,
+          "heavy": 1,
+          "rocks": 2,
+          "bridges": 1,
+          "bombs": 2
+        }
+      }
+    },
+    "expect": {
+      "codes": ["SIZE"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-out-of-bounds",
+    "note": "4x4 board, target [5,5] (schema allows 0-8) -> OUT_OF_BOUNDS.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[5, 5]],
+      "probeMode": "distance"
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["OUT_OF_BOUNDS"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-duplicate-kind",
+    "note": "[1,1] is both stream and heavy: one type per cell -> DUPLICATE.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "streams": [[1, 1]],
+      "heavy": [[1, 1]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["DUPLICATE"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-fence-not-adjacent",
+    "note": "Fence [0,0]|[0,2] joins non-neighbours -> FENCE_NOT_ADJACENT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "fences": [
+        [
+          [0, 0],
+          [0, 2]
+        ]
+      ]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["FENCE_NOT_ADJACENT"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-not-connected",
+    "note": "Rocks [0,1],[1,0] cut off [0,0] -> NOT_CONNECTED.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "rocks": [
+        [0, 1],
+        [1, 0]
+      ]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["NOT_CONNECTED"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-target-count-pvp",
+    "note": "PvP format needs exactly 1 target; 2 given -> TARGET_COUNT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [
+        [4, 4],
+        [0, 0]
+      ],
+      "probeMode": "distance"
+    },
+    "context": {
+      "kind": "pvp",
+      "format": {
+        "size": 5,
+        "targets": 1,
+        "limits": {
+          "fences": 3,
+          "streams": 3,
+          "heavy": 1,
+          "rocks": 2,
+          "bridges": 1,
+          "bombs": 2
+        }
+      }
+    },
+    "expect": {
+      "codes": ["TARGET_COUNT"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-target-on-rock",
+    "note": "Target on a rock -> TARGET_ON_ROCK.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "rocks": [[3, 3]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["TARGET_ON_ROCK"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-bomb-on-rock",
+    "note": "Bomb on a rock -> BOMB_ON_ROCK.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "rocks": [[1, 1]],
+      "bombs": [[1, 1]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BOMB_ON_ROCK"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-bomb-on-target",
+    "note": "Bomb and target on one cell -> BOMB_ON_TARGET.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "bombs": [[3, 3]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BOMB_ON_TARGET"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-bridge-not-on-stream",
+    "note": "Bridge on an open cell -> BRIDGE_NOT_ON_STREAM.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "bridges": [[1, 1]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BRIDGE_NOT_ON_STREAM"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-too-many-bombs",
+    "note": "4x4 = 16 passable -> limit min(5, floor(16/12) = 1) = 1; 2 bombs -> TOO_MANY_BOMBS.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "bombs": [
+        [0, 0],
+        [0, 1]
+      ]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["TOO_MANY_BOMBS"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-too-many-rocks",
+    "note": "4x4 -> max floor(16 × 0.25) = 4 rocks; row 3 + [2,0] = 5 -> TOO_MANY_ROCKS (the rest stays connected).",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[0, 3]],
+      "probeMode": "distance",
+      "rocks": [
+        [3, 0],
+        [3, 1],
+        [3, 2],
+        [3, 3],
+        [2, 0]
+      ]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["TOO_MANY_ROCKS"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-element-limit-pvp",
+    "note": "Bronze allows 3 streams; 4 given -> ELEMENT_LIMIT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "streams": [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [0, 3]
+      ]
+    },
+    "context": {
+      "kind": "pvp",
+      "format": {
+        "size": 5,
+        "targets": 1,
+        "limits": {
+          "fences": 3,
+          "streams": 3,
+          "heavy": 1,
+          "rocks": 2,
+          "bridges": 1,
+          "bombs": 2
+        }
+      }
+    },
+    "expect": {
+      "codes": ["ELEMENT_LIMIT"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-beacon-on-hidden",
+    "note": "Beacon on a target -> BEACON_ON_HIDDEN.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "beacons": [[3, 3]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BEACON_ON_HIDDEN"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-beacon-on-rock",
+    "note": "Beacon on a rock -> BEACON_ON_ROCK.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "rocks": [[1, 1]],
+      "beacons": [[1, 1]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BEACON_ON_ROCK"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-beacon-limit",
+    "note": "4 beacons (> 3) -> BEACON_LIMIT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "beacons": [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [0, 3]
+      ]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BEACON_LIMIT"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-buoy-overlap",
+    "note": "Buoy on a target -> BUOY_OVERLAP.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "buoys": [[3, 3]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BUOY_OVERLAP"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-buoy-limit",
+    "note": "3 buoys (> 2) -> BUOY_LIMIT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "buoys": [
+        [0, 0],
+        [0, 1],
+        [0, 2]
+      ]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BUOY_LIMIT"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-fog-range",
+    "note": "fog 5 is outside 2-4 -> FOG_RANGE.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "fog": 5
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["FOG_RANGE"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-order-single-target",
+    "note": "targetOrder with one target -> ORDER_SINGLE_TARGET.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "targetOrder": true
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["ORDER_SINGLE_TARGET"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-feature-in-pvp",
+    "note": "A beacon on a PvP map -> FEATURE_IN_PVP.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "beacons": [[0, 0]]
+    },
+    "context": {
+      "kind": "pvp",
+      "format": {
+        "size": 5,
+        "targets": 1,
+        "limits": {
+          "fences": 3,
+          "streams": 3,
+          "heavy": 1,
+          "rocks": 2,
+          "bridges": 1,
+          "bombs": 2
+        }
+      }
+    },
+    "expect": {
+      "codes": ["FEATURE_IN_PVP"]
+    }
+  },
+  {
+    "kind": "validate",
+    "name": "validate-returns-all-errors",
+    "note": "The validator returns every error, not the first: bomb on target and bridge off stream together.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "bombs": [[3, 3]],
+      "bridges": [[1, 1]]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "expect": {
+      "codes": ["BOMB_ON_TARGET", "BRIDGE_NOT_ON_STREAM"]
+    }
+  }
+]

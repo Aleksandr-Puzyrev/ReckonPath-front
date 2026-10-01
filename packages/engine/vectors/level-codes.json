@@ -1,0 +1,272 @@
+[
+  {
+    "kind": "crc8",
+    "name": "crc8-check-value",
+    "note": "Published check value of CRC-8/SMBUS: '123456789' -> 0xf4.",
+    "input": "123456789",
+    "expect": "f4"
+  },
+  {
+    "kind": "crc8",
+    "name": "crc8-empty",
+    "note": "Empty input -> 0x00 (init 0, no xorout).",
+    "input": "",
+    "expect": "00"
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-rp2-all-fields",
+    "note": "RP2 code built independently in Python (zlib raw deflate level 9, CRC-8/SMBUS over the base64url text). Every compact key maps to its level field; id = 'u-' + FNV-1a-32(payload) in base 36.",
+    "code": "RP2-LY5NDoIwEIXv8tazoC246DncERZQixIRkvKTGELiWTyBJ9Ar1Bs5A24m37zJm_cWzLCa0MEuCBMs4vP7iO_4iS8QPOs4hrJpsRIC7IHgtjnC5nlKaUG54lkQKlE0aeFBOCG1XZUoZ1H-fBE2lAhfhbOda2G2abYlZArRblzg1ATvxqbvuFELq7hv5XZftiXf94dGlp5bjmHy_I4zDV85ri7bwa8_-d4",
+    "expect": {
+      "level": {
+        "v": 2,
+        "id": "u-133oux5",
+        "title": {
+          "ru": "Тропа",
+          "en": "Trail"
+        },
+        "rows": 6,
+        "cols": 6,
+        "targets": [
+          [4, 4],
+          [1, 4]
+        ],
+        "bombs": [[2, 2]],
+        "streams": [
+          [0, 1],
+          [1, 1]
+        ],
+        "bridges": [[1, 1]],
+        "heavy": [[3, 0]],
+        "rocks": [[5, 0]],
+        "fences": [
+          [
+            [0, 2],
+            [0, 3]
+          ]
+        ],
+        "probeMode": "direction",
+        "moveLimit": 12,
+        "beacons": [[5, 5]],
+        "buoys": [[3, 3]],
+        "targetOrder": true,
+        "fog": 3,
+        "bombHint": false
+      }
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-rp2-minimal",
+    "note": "Minimal RP2 code (Python-built): only required keys.",
+    "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKtQA-41",
+    "expect": {
+      "level": {
+        "v": 2,
+        "id": "u-ybwxw9",
+        "rows": 5,
+        "cols": 5,
+        "targets": [[2, 3]],
+        "probeMode": "distance"
+      }
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-rp2-ignores-challenge",
+    "note": "Key x (challenge) is reserved and ignored (decision 0008 #4).",
+    "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKOkoVSlbVSrn5ZanFSlbmtbUA-98",
+    "expect": {
+      "level": {
+        "v": 2,
+        "id": "u-m0eqbi",
+        "rows": 5,
+        "cols": 5,
+        "targets": [[2, 3]],
+        "probeMode": "distance"
+      }
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-rp2-newer-version",
+    "note": "v = 3 > supported 2 -> CODE_NEWER.",
+    "code": "RP2-q1YqU7Iy1lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKtQA-10",
+    "expect": {
+      "error": "CODE_NEWER"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-rp2-unknown-key",
+    "note": "Unknown key zz -> made by a newer app -> CODE_NEWER.",
+    "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKOkpVVUpWhrUA-d3",
+    "expect": {
+      "error": "CODE_NEWER"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-rp2-prototype-key",
+    "note": "Key 'constructor' exists on Object.prototype but is not a compact key -> CODE_NEWER (own keys only).",
+    "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0SY6JrGxOkq5SlZKKZnFJYl5yalKQAX5ecUlRaXJJflADYa1AA-dc",
+    "expect": {
+      "error": "CODE_NEWER"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-rp2-bad-crc",
+    "note": "The CRC suffix does not match the payload -> CODE_INVALID.",
+    "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKtQA-00",
+    "expect": {
+      "error": "CODE_INVALID"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-wrong-prefix",
+    "note": "Unknown prefix -> CODE_INVALID.",
+    "code": "XYZ-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKtQA-00",
+    "expect": {
+      "error": "CODE_INVALID"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-too-long",
+    "note": "Longer than 600 characters -> CODE_INVALID.",
+    "code": "RP2-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-00",
+    "expect": {
+      "error": "CODE_INVALID"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-rp2-invalid-level",
+    "note": "Valid code, but the level fails the validator (target on a rock) -> CODE_INVALID.",
+    "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKOkrZcKlaAA-14",
+    "expect": {
+      "error": "CODE_INVALID"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-not-deflate",
+    "note": "Payload is not deflate data (CRC matches) -> CODE_INVALID.",
+    "code": "RP2-AAAA-ee",
+    "expect": {
+      "error": "CODE_INVALID"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-peleng1",
+    "note": "Prototype PELENG1 code (base64url of JSON, built in Python as levelCode.js does): w -> fences, k -> streams, n -> title.ru, probe mode distance.",
+    "code": "PELENG1-eyJ2IjogMSwgIm4iOiAi0KLQuNGF0LDRjyDQsdGD0YXRgtCwIiwgInIiOiA1LCAiYyI6IDUsICJ0IjogW1s0LCA0XV0sICJ3IjogW1tbMSwgMV0sIFsxLCAyXV1dLCAiayI6IFtbMywgM11dLCAiY2giOiBudWxsfQ",
+    "expect": {
+      "level": {
+        "v": 2,
+        "id": "u-1hlxmj8",
+        "title": {
+          "ru": "Тихая бухта"
+        },
+        "rows": 5,
+        "cols": 5,
+        "targets": [[4, 4]],
+        "fences": [
+          [
+            [1, 1],
+            [1, 2]
+          ]
+        ],
+        "streams": [[3, 3]],
+        "probeMode": "distance"
+      }
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-peleng1-too-small",
+    "note": "Prototype allowed 2x3 boards; v2 needs at least 4x4 -> CODE_INVALID.",
+    "code": "PELENG1-eyJ2IjogMSwgIm4iOiAi0JzQuNC90LgiLCAiciI6IDIsICJjIjogMywgInQiOiBbWzEsIDJdXSwgInciOiBbXSwgImsiOiBbXX0",
+    "expect": {
+      "error": "CODE_INVALID"
+    }
+  },
+  {
+    "kind": "codeRoundTrip",
+    "name": "round-trip-all-fields",
+    "note": "encode then decode returns the same level with the id derived from the code.",
+    "level": {
+      "v": 2,
+      "id": "u-any",
+      "title": {
+        "ru": "Тропа",
+        "en": "Trail"
+      },
+      "rows": 6,
+      "cols": 6,
+      "targets": [
+        [4, 4],
+        [1, 4]
+      ],
+      "bombs": [[2, 2]],
+      "streams": [
+        [0, 1],
+        [1, 1]
+      ],
+      "bridges": [[1, 1]],
+      "heavy": [[3, 0]],
+      "rocks": [[5, 0]],
+      "fences": [
+        [
+          [0, 2],
+          [0, 3]
+        ]
+      ],
+      "probeMode": "direction",
+      "moveLimit": 12,
+      "beacons": [[5, 5]],
+      "buoys": [[3, 3]],
+      "targetOrder": true,
+      "fog": 3,
+      "bombHint": false
+    }
+  },
+  {
+    "kind": "codeRoundTrip",
+    "name": "round-trip-minimal",
+    "note": "Minimal level round trip.",
+    "level": {
+      "v": 2,
+      "id": "u-any",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "hotcold"
+    }
+  },
+  {
+    "kind": "codeDecode",
+    "name": "decode-peleng1-long-title",
+    "note": "Title of 41 characters (39 + emoji + 1): cut to 40 UTF-16 units would split the emoji's surrogate pair, so the emoji is dropped -> 39 characters.",
+    "code": "PELENG1-eyJ2IjogMSwgIm4iOiAi0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw0LDQsNCw8J-YgNCxIiwgInIiOiA1LCAiYyI6IDUsICJ0IjogW1s0LCA0XV19",
+    "expect": {
+      "level": {
+        "v": 2,
+        "id": "u-7d9zg5",
+        "title": {
+          "ru": "ааааааааааааааааааааааааааааааааааааааа"
+        },
+        "rows": 5,
+        "cols": 5,
+        "targets": [[4, 4]],
+        "fences": [],
+        "streams": [],
+        "probeMode": "distance"
+      }
+    }
+  }
+]

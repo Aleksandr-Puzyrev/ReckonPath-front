@@ -1,0 +1,380 @@
+[
+  {
+    "kind": "game",
+    "name": "heat-thresholds-5x5",
+    "note": "5x5 empty, target [4,4]: heatD = 8 -> hotMax 2, warmMax max(3, ceil(3.6)=4) = 4 (<=2 / 3-4 / >=5, as Part 6 §3.1 states). [4,2]=2 hot, [4,1]=3 warm, [0,4]=4 warm, [1,1]=6 cold, [0,0]=8 cold.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [4, 2]
+      },
+      {
+        "tap": [4, 1]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [1, 1]
+      },
+      {
+        "tap": [0, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [4, 2],
+          "value": 2,
+          "heat": "hot"
+        },
+        {
+          "type": "reveal",
+          "cell": [4, 1],
+          "value": 3,
+          "heat": "warm"
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 4],
+          "value": 4,
+          "heat": "warm"
+        },
+        {
+          "type": "reveal",
+          "cell": [1, 1],
+          "value": 6,
+          "heat": "cold"
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 8,
+          "heat": "cold"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "heat-thresholds-9x9",
+    "note": "9x9 empty, target [8,8]: heatD = 16 -> hotMax max(2, ceil(3.2)=4) = 4, warmMax max(5, ceil(7.2)=8) = 8. [8,4]=4 hot, [8,3]=5 warm, [4,4]=8 warm, [4,3]=9 cold.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 9,
+      "cols": 9,
+      "targets": [[8, 8]],
+      "probeMode": "distance",
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [8, 4]
+      },
+      {
+        "tap": [8, 3]
+      },
+      {
+        "tap": [4, 4]
+      },
+      {
+        "tap": [4, 3]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [8, 4],
+          "value": 4,
+          "heat": "hot"
+        },
+        {
+          "type": "reveal",
+          "cell": [8, 3],
+          "value": 5,
+          "heat": "warm"
+        },
+        {
+          "type": "reveal",
+          "cell": [4, 4],
+          "value": 8,
+          "heat": "warm"
+        },
+        {
+          "type": "reveal",
+          "cell": [4, 3],
+          "value": 9,
+          "heat": "cold"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "heat-thresholds-follow-stream-costs",
+    "note": "5x5, target [4,4], stream column 1. heatD = 10 (from [0,0]: enter [0,1] 3, then 7 steps of 1; the col-0 route is also 10). hotMax 2, warmMax max(3, ceil(4.5)=5) = 5. [0,3]=5 is warm here (it would be cold on an empty 5x5); [0,0]=10 cold; [4,2]=2 hot.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "streams": [
+        [0, 1],
+        [1, 1],
+        [2, 1],
+        [3, 1],
+        [4, 1]
+      ],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [4, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 3],
+          "value": 5,
+          "heat": "warm"
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "value": 10,
+          "heat": "cold"
+        },
+        {
+          "type": "reveal",
+          "cell": [4, 2],
+          "value": 2,
+          "heat": "hot"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "direction-tie-order-lvl-21",
+    "note": "LVL-21 / Part 6 §3.2: target [4,4]. Neighbour metric = probe FROM the neighbour. [2,2]: N 5, E 3, S 3, W 5 -> tie E/S -> E (order N,E,S,W). [0,0]: E 7, S 7 -> E. [0,4]: S 3, W 5 -> S. [4,0]: N 5, E 3 -> E.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "direction",
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      },
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [4, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "kind": "direction",
+          "dir": "E"
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "dir": "E"
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 4],
+          "dir": "S"
+        },
+        {
+          "type": "reveal",
+          "cell": [4, 0],
+          "dir": "E"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "direction-ignores-fenced-neighbour",
+    "note": "Fence [2,2]|[2,3]: E is not a neighbour. N [1,2] = 5, S [3,2] = 3, W [2,1] = 5 -> S.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "direction",
+      "fences": [
+        [
+          [2, 2],
+          [2, 3]
+        ]
+      ],
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [2, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [2, 2],
+          "kind": "direction",
+          "dir": "S"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "hotcold-first-bomb-then-compare-lvl-22",
+    "note": "LVL-22: target [4,4], bomb [0,4]. [0,0] -> first tap, none (8). Bomb: lastValue unchanged. [1,1] = 6 < 8 -> warmer. [0,1] = 7 > 6 -> colder. [1,0] = 7 = 7 -> same.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "hotcold",
+      "bombs": [[0, 4]],
+      "moveLimit": 20
+    },
+    "actions": [
+      {
+        "tap": [0, 0]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [1, 1]
+      },
+      {
+        "tap": [0, 1]
+      },
+      {
+        "tap": [1, 0]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 0],
+          "kind": "hotcold",
+          "cmp": "none",
+          "value": 8
+        },
+        {
+          "type": "bomb",
+          "cell": [0, 4],
+          "penalty": 2
+        },
+        {
+          "type": "reveal",
+          "cell": [1, 1],
+          "cmp": "warmer",
+          "value": 6
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 1],
+          "cmp": "colder",
+          "value": 7
+        },
+        {
+          "type": "reveal",
+          "cell": [1, 0],
+          "cmp": "same",
+          "value": 7
+        }
+      ]
+    }
+  },
+  {
+    "kind": "game",
+    "name": "hotcold-resets-after-target",
+    "note": "Part 6 §3.3: after a target is found lastValue resets. Targets [4,4],[0,4]. [0,3] -> none (min(5,1) = 1). Find [0,4]. [0,2] -> none again (6 to [4,4]).",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [
+        [4, 4],
+        [0, 4]
+      ],
+      "probeMode": "hotcold",
+      "moveLimit": null
+    },
+    "actions": [
+      {
+        "tap": [0, 3]
+      },
+      {
+        "tap": [0, 4]
+      },
+      {
+        "tap": [0, 2]
+      }
+    ],
+    "expect": {
+      "events": [
+        {
+          "type": "reveal",
+          "cell": [0, 3],
+          "cmp": "none",
+          "value": 1
+        },
+        {
+          "type": "targetFound",
+          "cell": [0, 4],
+          "left": 1
+        },
+        {
+          "type": "reveal",
+          "cell": [0, 2],
+          "cmp": "none",
+          "value": 6
+        }
+      ]
+    }
+  }
+]

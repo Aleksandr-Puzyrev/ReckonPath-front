@@ -1,0 +1,93 @@
+[
+  {
+    "kind": "dailyTier",
+    "name": "tier-epoch-day",
+    "note": "2026-10-01 is day 0 of the default epoch -> tier 1; Thursday.",
+    "dateKey": "2026-10-01",
+    "expect": {
+      "tier": 1,
+      "weekend": false
+    }
+  },
+  {
+    "kind": "dailyTier",
+    "name": "tier-last-day-of-week-one",
+    "note": "Day 6 -> floor(6/7) = 0 -> tier 1.",
+    "dateKey": "2026-10-07",
+    "expect": {
+      "tier": 1,
+      "weekend": false
+    }
+  },
+  {
+    "kind": "dailyTier",
+    "name": "tier-two-starts-on-day-seven",
+    "note": "Day 7 -> tier 2; Thursday.",
+    "dateKey": "2026-10-08",
+    "expect": {
+      "tier": 2,
+      "weekend": false
+    }
+  },
+  {
+    "kind": "dailyTier",
+    "name": "tier-three",
+    "note": "Day 14 -> tier 3.",
+    "dateKey": "2026-10-15",
+    "expect": {
+      "tier": 3,
+      "weekend": false
+    }
+  },
+  {
+    "kind": "dailyTier",
+    "name": "tier-capped-at-twenty",
+    "note": "2027-03-01 is day 151 -> 1 + 21 = 22 -> capped at 20; Monday.",
+    "dateKey": "2027-03-01",
+    "expect": {
+      "tier": 20,
+      "weekend": false
+    }
+  },
+  {
+    "kind": "dailyTier",
+    "name": "tier-before-epoch",
+    "note": "A date before the epoch counts as day 0 -> tier 1.",
+    "dateKey": "2026-09-30",
+    "expect": {
+      "tier": 1,
+      "weekend": false
+    }
+  },
+  {
+    "kind": "dailyTier",
+    "name": "tier-custom-epoch",
+    "note": "Epoch 2026-09-01: 2026-10-01 is day 30 -> 1 + 4 = 5.",
+    "dateKey": "2026-10-01",
+    "expect": {
+      "tier": 5,
+      "weekend": false
+    },
+    "epochKey": "2026-09-01"
+  },
+  {
+    "kind": "dailyTier",
+    "name": "weekend-saturday",
+    "note": "2026-10-03 is a Saturday (UTC).",
+    "dateKey": "2026-10-03",
+    "expect": {
+      "tier": 1,
+      "weekend": true
+    }
+  },
+  {
+    "kind": "dailyTier",
+    "name": "weekend-sunday",
+    "note": "2026-10-04 is a Sunday (UTC).",
+    "dateKey": "2026-10-04",
+    "expect": {
+      "tier": 1,
+      "weekend": true
+    }
+  }
+]

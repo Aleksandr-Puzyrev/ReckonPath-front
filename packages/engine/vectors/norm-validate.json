@@ -1,0 +1,236 @@
+[
+  {
+    "kind": "normValidate",
+    "name": "trivial-below-three",
+    "note": "custom: normSum 95 -> norm 2.97 < 3 -> TRIVIAL (normSum < 96).",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance"
+    },
+    "context": {
+      "kind": "custom"
+    },
+    "normSum": 95,
+    "expect": {
+      "codes": ["TRIVIAL"]
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "trivial-at-three",
+    "note": "custom: normSum 96 -> norm exactly 3 -> not trivial.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance"
+    },
+    "context": {
+      "kind": "custom"
+    },
+    "normSum": 96,
+    "expect": {
+      "codes": []
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "trivial-in-pvp",
+    "note": "pvp: normSum 64 -> norm 2 -> TRIVIAL.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance"
+    },
+    "context": {
+      "kind": "pvp",
+      "format": {
+        "size": 4,
+        "targets": 1,
+        "limits": {}
+      }
+    },
+    "normSum": 64,
+    "expect": {
+      "codes": ["TRIVIAL"]
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "move-limit-enough",
+    "note": "campaign: norm 2 -> ceil(1.2·2) = ceil(2.4) = 3; moveLimit 3 is enough.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 3
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "normSum": 64,
+    "expect": {
+      "codes": []
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "move-limit-too-low",
+    "note": "campaign: norm 2 -> needs 3; moveLimit 2 -> MOVE_LIMIT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 2
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "normSum": 64,
+    "expect": {
+      "codes": ["MOVE_LIMIT"]
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "move-limit-exact-boundary",
+    "note": "campaign: normSum 80 -> norm 2.5 -> 1.2·2.5 = 3 exactly -> ceil = 3 (integer form ceil(12·80/320) = 3); moveLimit 3 passes.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 3
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "normSum": 80,
+    "expect": {
+      "codes": []
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "move-limit-stars-inverted",
+    "note": "campaign: stars [3,2] (3★ threshold above 2★) -> MOVE_LIMIT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 5,
+      "stars": [3, 2]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "normSum": 64,
+    "expect": {
+      "codes": ["MOVE_LIMIT"]
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "move-limit-stars-above-limit",
+    "note": "campaign: stars [2,6] with moveLimit 5 -> MOVE_LIMIT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 5,
+      "stars": [2, 6]
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "normSum": 64,
+    "expect": {
+      "codes": ["MOVE_LIMIT"]
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "move-limit-missing-limit",
+    "note": "campaign without a move limit -> MOVE_LIMIT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance"
+    },
+    "context": {
+      "kind": "campaign"
+    },
+    "normSum": 64,
+    "expect": {
+      "codes": ["MOVE_LIMIT"]
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "move-limit-in-daily",
+    "note": "daily follows the same rule: norm 2, moveLimit 2 -> MOVE_LIMIT.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 2
+    },
+    "context": {
+      "kind": "daily"
+    },
+    "normSum": 64,
+    "expect": {
+      "codes": ["MOVE_LIMIT"]
+    }
+  },
+  {
+    "kind": "normValidate",
+    "name": "custom-has-no-move-limit-rule",
+    "note": "custom levels are not checked for MOVE_LIMIT: moveLimit 1, norm 6.25 -> no errors.",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 4,
+      "cols": 4,
+      "targets": [[3, 3]],
+      "probeMode": "distance",
+      "moveLimit": 1
+    },
+    "context": {
+      "kind": "custom"
+    },
+    "normSum": 200,
+    "expect": {
+      "codes": []
+    }
+  }
+]

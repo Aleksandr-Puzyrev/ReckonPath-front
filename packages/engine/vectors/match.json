@@ -1,0 +1,3580 @@
+[
+  {
+    "kind": "match",
+    "name": "match-normal-tap-pvp-01",
+    "note": "PVP-01: A taps a normal cell -> turnsUsed A 1, turn passes to B.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "turnsUsed": {
+        "A": 1,
+        "B": 0
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "current": "B"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-bomb-gives-two-turns-pvp-03",
+    "note": "PVP-03: A hits a bomb (skip A = 1, turn to B). After B's turn the loop sees skip A > 0: A's turn is skipped (turnsUsed A 2), B moves again. After B's second turn A moves: order B, B, A.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "bomb"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "current": "A"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-mutual-bombs-cancel-pvp-04",
+    "note": "PVP-04: A bomb (skip A 1) -> B. B bomb (skip B 1): next = A, skip A -> 0 (A 2), next = B, skip B -> 0 (B 2), next = A -> A moves. Mutual skips cancel.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "bomb"
+      },
+      {
+        "player": "B",
+        "outcome": "bomb"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "current": "A"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-timeout-pvp-05",
+    "note": "PVP-05: A times out -> turn counted (A 1), timeouts in a row 1, turn to B.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "timeout"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "turnsUsed": {
+        "A": 1,
+        "B": 0
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 1,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "current": "B"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-three-timeouts-afk-pvp-06",
+    "note": "PVP-06: the third timeout in a row of A -> B wins, reason afk.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "timeout"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "timeout"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "timeout"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 3,
+        "B": 2
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "winner": "B",
+      "reason": "afk"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-move-resets-timeouts-pvp-07",
+    "note": "PVP-07: two timeouts, then a move in time resets the counter to 0.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "timeout"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "timeout"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "turnsUsed": {
+        "A": 3,
+        "B": 2
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "current": "B"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-final-turn-pvp-09",
+    "note": "PVP-09: A finds the 2nd target with turnsUsed A 2 > B 1 and skip B 0 -> finalTurn, current B.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "finalTurn",
+      "turnsUsed": {
+        "A": 2,
+        "B": 1
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      },
+      "found": {
+        "A": 2,
+        "B": 0
+      },
+      "current": "B"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-final-turn-draw-pvp-10",
+    "note": "PVP-10: in finalTurn B finds its last target -> draw (winner null), reason targets.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 2,
+        "B": 2
+      },
+      "winner": null,
+      "reason": "targets"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-final-turn-miss-pvp-11",
+    "note": "PVP-11: in finalTurn B misses -> A wins.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 2,
+        "B": 0
+      },
+      "winner": "A",
+      "reason": "targets"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-final-turn-bomb-pvp-11",
+    "note": "PVP-11: in finalTurn B hits a bomb -> A wins (the final turn is over).",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "bomb"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 2,
+        "B": 0
+      },
+      "winner": "A",
+      "reason": "targets"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-final-turn-timeout-pvp-11",
+    "note": "PVP-11: in finalTurn B times out -> A wins.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "timeout"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 2,
+        "B": 0
+      },
+      "winner": "A",
+      "reason": "targets"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-second-player-wins-at-once-pvp-12",
+    "note": "PVP-12: B (second) finds the last target with turnsUsed B 2 = A 2 -> no final turn, B wins immediately.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 0,
+        "B": 2
+      },
+      "winner": "B",
+      "reason": "targets"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-skip-eats-final-turn-pvp-13",
+    "note": "PVP-13: B's bomb skip. A target (A 1), B bomb (B 1, skip B 1), A target (A 2, all found): turnsUsed B 1 < 2 but skip B > 0 -> skip consumed (B 2) -> A wins at once.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "bomb"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 2,
+        "B": 0
+      },
+      "winner": "A",
+      "reason": "targets"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-turn-limit-winner-pvp-14",
+    "note": "PVP-14 with maxTurns 2: both reach 2 turns; A found 1, B 0 -> A wins, reason turnLimit.",
+    "targets": 2,
+    "maxTurns": 2,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 1,
+        "B": 0
+      },
+      "winner": "A",
+      "reason": "turnLimit"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-turn-limit-draw-pvp-14",
+    "note": "PVP-14 with maxTurns 2: equal targets -> draw, reason turnLimit.",
+    "targets": 2,
+    "maxTurns": 2,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "winner": null,
+      "reason": "turnLimit"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-surrender-pvp-15",
+    "note": "PVP-15: B surrenders at any moment -> A wins, reason surrender.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "surrender": "B"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "turnsUsed": {
+        "A": 1,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "winner": "A",
+      "reason": "surrender"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-two-bombs-in-a-row",
+    "note": "Part 1 §5.4: two bombs on two own turns = two skips. A bomb -> B, B (A skipped); A bomb again -> B, B.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "bomb"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "bomb"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "turnsUsed": {
+        "A": 4,
+        "B": 4
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "current": "A"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-first-player-b",
+    "note": "The first player is B (server draw): B moves first.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "B",
+    "turns": [
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "turnsUsed": {
+        "A": 0,
+        "B": 1
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "current": "A"
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-turn-limit-40-b-wins-pvp-14",
+    "note": "PVP-14 at the real limit: B finds 1 target, then 40 turns each -> B wins, turnLimit.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "B",
+      "reason": "turnLimit",
+      "turnsUsed": {
+        "A": 40,
+        "B": 40
+      },
+      "found": {
+        "A": 0,
+        "B": 1
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-turn-limit-40-draw-pvp-14",
+    "note": "PVP-14: one target each, 40 turns each -> draw, turnLimit.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": null,
+      "reason": "turnLimit",
+      "turnsUsed": {
+        "A": 40,
+        "B": 40
+      },
+      "found": {
+        "A": 1,
+        "B": 1
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-bomb-on-last-turn-pvp-14",
+    "note": "A hits a bomb on its 40th turn: the skip is never used, B plays its 40th turn -> turnLimit draw.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "bomb"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": null,
+      "reason": "turnLimit",
+      "turnsUsed": {
+        "A": 40,
+        "B": 40
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-targets-on-turn-40-final-turn",
+    "note": "A finds the last target on its 40th turn: the target check comes before the turn limit -> finalTurn for B (39 turns).",
+    "targets": 1,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "finalTurn",
+      "current": "B",
+      "turnsUsed": {
+        "A": 40,
+        "B": 39
+      },
+      "found": {
+        "A": 1,
+        "B": 0
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-final-turn-on-turn-40-draw",
+    "note": "B finds its last target in the final turn at 40/40 -> draw by targets, not turnLimit.",
+    "targets": 1,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": null,
+      "reason": "targets",
+      "turnsUsed": {
+        "A": 40,
+        "B": 40
+      },
+      "found": {
+        "A": 1,
+        "B": 1
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-second-player-wins-on-turn-40",
+    "note": "B finds the last target on its 40th turn, A also has 40 -> B wins by targets at once.",
+    "targets": 1,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "B",
+      "reason": "targets",
+      "turnsUsed": {
+        "A": 40,
+        "B": 40
+      },
+      "found": {
+        "A": 0,
+        "B": 1
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-final-turn-partial-target-pvp-11",
+    "note": "PVP-11: in the final turn B finds a target but not the last one -> A wins.",
+    "targets": 3,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "A",
+      "reason": "targets",
+      "turnsUsed": {
+        "A": 3,
+        "B": 3
+      },
+      "found": {
+        "A": 3,
+        "B": 2
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-single-target-first-turn-pvp-09",
+    "note": "PVP-09 with one target: A finds it on turn 1 -> finalTurn for B.",
+    "targets": 1,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "finalTurn",
+      "current": "B",
+      "turnsUsed": {
+        "A": 1,
+        "B": 0
+      },
+      "found": {
+        "A": 1,
+        "B": 0
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-second-player-wins-with-pending-skip-pvp-12",
+    "note": "A hits a bomb (skip pending), B finds its only target: B has as many turns as A -> B wins at once, the skip is irrelevant.",
+    "targets": 1,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "bomb"
+      },
+      {
+        "player": "B",
+        "outcome": "target"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "B",
+      "reason": "targets",
+      "turnsUsed": {
+        "A": 1,
+        "B": 1
+      },
+      "found": {
+        "A": 0,
+        "B": 1
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-first-b-bomb-pvp-03",
+    "note": "PVP-03 with B first: B hits a bomb -> A, A, then B.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "B",
+    "turns": [
+      {
+        "player": "B",
+        "outcome": "bomb"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "current": "B",
+      "turnsUsed": {
+        "A": 2,
+        "B": 2
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-b-afk-pvp-06",
+    "note": "PVP-06 for B: three B timeouts in a row -> A wins, afk.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "timeout"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "timeout"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "timeout"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "A",
+      "reason": "afk",
+      "turnsUsed": {
+        "A": 3,
+        "B": 3
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-bomb-resets-timeouts-pvp-07",
+    "note": "A bomb is a move made in time: it resets the timeout row; skipped turns do not count as timeouts.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "timeout"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "bomb"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "timeout"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "timeout"
+      }
+    ],
+    "expect": {
+      "state": "playing",
+      "current": "B",
+      "turnsUsed": {
+        "A": 5,
+        "B": 4
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      },
+      "skip": {
+        "A": 0,
+        "B": 0
+      },
+      "timeoutsRow": {
+        "A": 2,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-afk-after-opponent-bomb-pvp-17",
+    "note": "PVP-17: A keeps timing out while B hits a bomb -> the third A timeout ends the match, afk.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "timeout"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "timeout"
+      },
+      {
+        "player": "B",
+        "outcome": "bomb"
+      },
+      {
+        "player": "A",
+        "outcome": "timeout"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "B",
+      "reason": "afk",
+      "turnsUsed": {
+        "A": 3,
+        "B": 2
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-surrender-before-first-turn-pvp-15",
+    "note": "PVP-15: B surrenders before any turn -> A wins.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "surrender": "B"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "A",
+      "reason": "surrender",
+      "turnsUsed": {
+        "A": 0,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-surrender-off-turn-pvp-15",
+    "note": "PVP-15: A surrenders during B's turn -> B wins.",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "surrender": "A"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "B",
+      "reason": "surrender",
+      "turnsUsed": {
+        "A": 1,
+        "B": 0
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-surrender-in-final-turn",
+    "note": "B surrenders in its final turn -> A wins, surrender.",
+    "targets": 1,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "surrender": "B"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "A",
+      "reason": "surrender",
+      "turnsUsed": {
+        "A": 1,
+        "B": 0
+      },
+      "found": {
+        "A": 1,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-finisher-surrenders-in-final-turn",
+    "note": "A (who found all targets) surrenders during B's final turn -> B wins, surrender (surrender always loses).",
+    "targets": 1,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "surrender": "A"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "B",
+      "reason": "surrender",
+      "turnsUsed": {
+        "A": 1,
+        "B": 0
+      },
+      "found": {
+        "A": 1,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-afk-in-final-turn",
+    "note": "B times out a third time in a row in its final turn -> A wins with reason afk (the AFK check comes first in endTurn; decision 0008 #14).",
+    "targets": 1,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "timeout"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "timeout"
+      },
+      {
+        "player": "A",
+        "outcome": "target"
+      },
+      {
+        "player": "B",
+        "outcome": "timeout"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": "A",
+      "reason": "afk",
+      "turnsUsed": {
+        "A": 3,
+        "B": 3
+      },
+      "found": {
+        "A": 1,
+        "B": 0
+      }
+    }
+  },
+  {
+    "kind": "match",
+    "name": "match-skip-reaches-turn-limit",
+    "note": "B hits a bomb on its 39th turn; A plays its 40th, B's skip takes B to 40 -> the match ends at once by turnLimit, A gets no 41st turn (decision 0008 #15).",
+    "targets": 2,
+    "maxTurns": 40,
+    "first": "A",
+    "turns": [
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "normal"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      },
+      {
+        "player": "B",
+        "outcome": "bomb"
+      },
+      {
+        "player": "A",
+        "outcome": "normal"
+      }
+    ],
+    "expect": {
+      "state": "ended",
+      "winner": null,
+      "reason": "turnLimit",
+      "turnsUsed": {
+        "A": 40,
+        "B": 40
+      },
+      "found": {
+        "A": 0,
+        "B": 0
+      }
+    }
+  }
+]

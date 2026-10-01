@@ -25,7 +25,7 @@ Run only after `clarify-task` is confirmed. Rules in force: `13-rule-ui-unistyle
 | Unicode glyphs, emoji icons | SVG icon components |
 | Hard-coded RU/EN text (`data-l="ru"` / `data-l="en"`) | i18n keys from Part 5; design text ≠ Part 5 text → Part 5 wins, report the difference |
 
-Missing tokens, texts, or states are collected and asked in one batch — do not guess. For a missing or inconsistent piece of the design, check how the prototype (`../peleng`, `../arena`, read-only) handles it and offer that as an option in the question.
+Missing tokens, texts, or states are collected and asked in one batch — do not guess. For a missing or inconsistent piece of the design, check how the prototype (`../peleng`, read-only) handles it and offer that as an option in the question.
 
 ## 3. Build
 
