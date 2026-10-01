@@ -1,0 +1,44 @@
+import { stars } from "@reckon-path/engine";
+import type { GameEvent, Idx } from "@reckon-path/engine";
+
+import { useGameSessionStore } from "@entities/level";
+import { useProgressStore } from "@entities/progress";
+import { haptic } from "@shared/haptics";
+import { motion } from "@shared/theme";
+
+import { hapticsForEvents } from "./haptics-for-events";
+
+export interface TapOutcome {
+  events: GameEvent[];
+  isRecord: boolean;
+}
+
+let inputLockedUntil = 0;
+
+const IGNORED: TapOutcome = { events: [], isRecord: false };
+
+export const tapCell = (cell: Idx): TapOutcome => {
+  if (Date.now() < inputLockedUntil) return IGNORED;
+
+  const session = useGameSessionStore.getState();
+  const events = session.tap(cell);
+  haptic(...hapticsForEvents(events));
+
+  if (events.some(({ type }) => type === "targetFound")) {
+    inputLockedUntil = Date.now() + motion.animation.targetInputLock;
+  }
+
+  const { game, levelId } = useGameSessionStore.getState();
+  const isWin = events.some(({ type }) => type === "win");
+  if (!isWin || game === null || levelId === null) return { events, isRecord: false };
+
+  const isRecord = useProgressStore
+    .getState()
+    .recordWin(levelId, { stars: stars(game), moves: game.movesUsed });
+  useGameSessionStore.getState().finish();
+  return { events, isRecord };
+};
+
+export const unlockTapInput = () => {
+  inputLockedUntil = 0;
+};

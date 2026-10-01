@@ -1,0 +1,212 @@
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import type { ReactNode } from "react";
+
+import { useGameSessionStore } from "@entities/level";
+import { useProgressStore } from "@entities/progress";
+import { unlockTapInput } from "@features/tap-cell";
+import { i18n } from "@shared/i18n";
+
+import PlayScreen from "./play-screen";
+
+const mockParams = { mode: "campaign", id: "c-a" };
+const mockRouter = { back: jest.fn(), replace: jest.fn(), canGoBack: () => true };
+
+jest.mock("expo-router", () => ({
+  useLocalSearchParams: () => mockParams,
+  get router() {
+    return mockRouter;
+  },
+}));
+jest.mock("@shared/haptics", () => ({ haptic: jest.fn() }));
+jest.mock("@shared/ui/sheet", () => ({
+  Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
+    isOpen ? children : null,
+}));
+jest.mock("@entities/level/model/test-levels", () =>
+  jest.requireActual("../test-utils/test-levels"),
+);
+jest.mock("@widgets/board", () => jest.requireActual("../test-utils/fake-board"));
+
+const BOMB = 3;
+const TARGET = 15;
+
+const tap = async (...cells: number[]) => {
+  for (const cell of cells) {
+    await fireEvent.press(screen.getByTestId(`cell-${cell}`));
+    await act(async () => jest.advanceTimersByTime(300));
+  }
+};
+
+const BOARD_LAYOUT = { nativeEvent: { layout: { width: 358, height: 358 } } };
+
+const renderScreen = async () => {
+  const view = await render(<PlayScreen />);
+  const area = screen.queryByTestId("board-area");
+  if (area !== null) await fireEvent(area, "layout", BOARD_LAYOUT);
+  return view;
+};
+
+const settle = () => act(async () => jest.advanceTimersByTime(1000));
+
+describe("PlayScreen", () => {
+  beforeAll(async () => {
+    await i18n.changeLanguage("ru");
+  });
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockParams.mode = "campaign";
+    mockParams.id = "c-a";
+    mockRouter.replace.mockClear();
+    unlockTapInput();
+    useGameSessionStore.getState().reset();
+    useProgressStore.getState().reset();
+  });
+
+  afterEach(() => jest.useRealTimers());
+
+  test("shows an error state for an unknown level", async () => {
+    mockParams.id = "c-missing";
+    await renderScreen();
+    expect(screen.getByText("Уровень не найден")).toBeOnTheScreen();
+  });
+
+  test("shows an error state for a mode other than the campaign", async () => {
+    mockParams.mode = "daily";
+    await renderScreen();
+    expect(screen.getByText("Уровень не найден")).toBeOnTheScreen();
+  });
+
+  test("spends a move and shows the bearing of a tapped cell (LVL-01)", async () => {
+    await renderScreen();
+    expect(screen.getByText("4 / 4")).toBeOnTheScreen();
+    await tap(0);
+    expect(screen.getByText("3 / 4")).toBeOnTheScreen();
+    expect(screen.getByText(/^A1 → 6/)).toBeOnTheScreen();
+  });
+
+  test("spends nothing on an opened cell (LVL-02)", async () => {
+    await renderScreen();
+    await tap(0, 0);
+    expect(screen.getByText("3 / 4")).toBeOnTheScreen();
+  });
+
+  test("costs two moves for a bomb and counts only unexploded bombs (LVL-08)", async () => {
+    await renderScreen();
+    await tap(BOMB);
+    expect(screen.getByText("2 / 4")).toBeOnTheScreen();
+    expect(screen.getByText("× 0")).toBeOnTheScreen();
+    expect(screen.getByText("D1 · бомба!")).toBeOnTheScreen();
+  });
+
+  test("shows the lose sheet after the explosion when the last move is a bomb (LVL-09)", async () => {
+    await renderScreen();
+    await tap(0, 1, BOMB);
+    expect(screen.getByText("0 / 4")).toBeOnTheScreen();
+    await settle();
+    expect(screen.getByText("Последний ход — бомба")).toBeOnTheScreen();
+    expect(screen.getByText("Найдено 0 из 1")).toBeOnTheScreen();
+  });
+
+  test("shows the lose sheet when the moves run out", async () => {
+    await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    expect(screen.getByText("Ходы закончились")).toBeOnTheScreen();
+  });
+
+  test("continues once with three moves, then offers only a restart (LVL-13, LVL-15)", async () => {
+    await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await fireEvent.press(screen.getByTestId("continue-dev"));
+    expect(screen.getByText("3 / 7")).toBeOnTheScreen();
+
+    await tap(5, 6, 7);
+    await settle();
+    expect(screen.getByText("Ходы закончились")).toBeOnTheScreen();
+    expect(screen.queryByTestId("continue-dev")).toBeNull();
+    expect(screen.getByText("Начать заново")).toBeOnTheScreen();
+  });
+
+  test("shows the targets and bombs after declining to continue", async () => {
+    await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await fireEvent.press(screen.getByText("Не продолжать"));
+    expect(screen.getByTestId("hidden-shown")).toBeOnTheScreen();
+  });
+
+  test("wins with stars and moves to the next level (LVL-11, LVL-12)", async () => {
+    await renderScreen();
+    await tap(TARGET);
+    await settle();
+    expect(screen.getByText("Уровень 1 пройден")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Звёзды: 3 из 3")).toBeOnTheScreen();
+    expect(screen.getByText("1 из 4 · лучший: 1")).toBeOnTheScreen();
+    expect(useProgressStore.getState().best["c-a"]).toEqual({ stars: 3, moves: 1 });
+
+    await fireEvent.press(screen.getByText("Дальше"));
+    expect(mockRouter.replace).toHaveBeenCalledWith({
+      pathname: "/play/[mode]/[id]",
+      params: { mode: "campaign", id: "c-b" },
+    });
+  });
+
+  test("gives at most one star after a continue (LVL-13)", async () => {
+    await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await fireEvent.press(screen.getByTestId("continue-dev"));
+    await tap(TARGET);
+    await settle();
+    expect(screen.getByLabelText("Звёзды: 1 из 3")).toBeOnTheScreen();
+  });
+
+  test("places a flag by long press or in flag mode without spending a move (LVL-20)", async () => {
+    await renderScreen();
+    await fireEvent(screen.getByTestId("cell-5"), "longPress");
+    expect(useGameSessionStore.getState().flags).toEqual([5]);
+
+    await fireEvent.press(screen.getByTestId("flag-mode"));
+    await tap(6);
+    expect(useGameSessionStore.getState().flags).toEqual([5, 6]);
+    expect(screen.getByText("4 / 4")).toBeOnTheScreen();
+  });
+
+  test("asks before restarting a started game", async () => {
+    await renderScreen();
+    await tap(0);
+    await fireEvent.press(screen.getByTestId("restart"));
+    await fireEvent.press(screen.getByText("Заново"));
+    expect(screen.getByText("4 / 4")).toBeOnTheScreen();
+  });
+
+  test("restarts an untouched game without asking", async () => {
+    await renderScreen();
+    await fireEvent.press(screen.getByTestId("restart"));
+    expect(screen.queryByText("Начать заново? Ходы сбросятся")).toBeNull();
+  });
+
+  test("offers to continue a saved game and restores it exactly (LVL-19)", async () => {
+    const first = await renderScreen();
+    await tap(0);
+    await fireEvent(screen.getByTestId("cell-5"), "longPress");
+    await first.unmount();
+    useGameSessionStore.setState({ game: null });
+
+    await renderScreen();
+    expect(screen.getByText("Продолжить или начать заново?")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText("Продолжить"));
+    expect(screen.getByText("3 / 4")).toBeOnTheScreen();
+    expect(useGameSessionStore.getState().flags).toEqual([5]);
+  });
+
+  test("opens and closes the pause menu", async () => {
+    await renderScreen();
+    await fireEvent.press(screen.getByTestId("pause"));
+    expect(screen.getByText("Пауза · партия сохранится")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText("Продолжить"));
+    expect(screen.queryByText("Пауза · партия сохранится")).toBeNull();
+  });
+});

@@ -1,3 +1,4 @@
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -23,8 +24,10 @@ const AppProviders = ({ children }: IAppProviders) => {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <StatusBar style="auto" />
-        {children}
+        <BottomSheetModalProvider>
+          <StatusBar style="auto" />
+          {children}
+        </BottomSheetModalProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

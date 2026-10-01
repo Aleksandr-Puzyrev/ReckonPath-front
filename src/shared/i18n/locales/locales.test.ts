@@ -9,9 +9,16 @@ const collectKeys = (value: unknown, prefix = ""): string[] => {
   );
 };
 
+// Languages have different plural forms, so keys are compared without the form suffix (у языков разные формы множественного числа, поэтому ключи сравниваются без суффикса формы).
+const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
+
+const baseKeys = (locale: unknown) => [
+  ...new Set(collectKeys(locale).map((key) => key.replace(PLURAL_SUFFIX, ""))),
+];
+
 describe("locales", () => {
   test("RU and EN define the same keys", () => {
-    expect(collectKeys(ru).sort()).toEqual(collectKeys(en).sort());
+    expect(baseKeys(ru).sort()).toEqual(baseKeys(en).sort());
   });
 
   test("no translation is empty", () => {

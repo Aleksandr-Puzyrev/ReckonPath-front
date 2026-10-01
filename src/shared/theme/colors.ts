@@ -32,6 +32,11 @@ export const lightColors = {
     danger: "#E5484F",
     info: "#3D8BFF",
   },
+  feedback: {
+    hot: "#FF5A4E",
+    warm: "#FF9F3D",
+    cold: "#3D9BF0",
+  },
   currency: {
     emerald: "#12B886",
     coin: "#E0A21E",
@@ -88,6 +93,11 @@ export const darkColors: ThemeColors = {
     warning: "#FFC84E",
     danger: "#FF6D72",
     info: "#6FA8FF",
+  },
+  feedback: {
+    hot: "#FF6D5D",
+    warm: "#FFB65D",
+    cold: "#5FB8FF",
   },
   currency: {
     emerald: "#3ED49B",

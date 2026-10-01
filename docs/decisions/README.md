@@ -15,6 +15,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0007 | [`0007-engine-stage-b.md`](0007-engine-stage-b.md) | Solver scoring and bomb model, tie-breaking, daily EPOCH as a parameter, Part 6 wins over Part 1 for daily tiers, golden vectors for the solver |
 | 0008 | [`0008-engine-stage-c.md`](0008-engine-stage-c.md) | Level codes `RP2-` with fflate and CRC-8/SMBUS; no match state machine in the engine — match vectors for Go, replayed in TS by a test-only reference; turn limit re-checked after skipped turns |
 | 0009 | [`0009-engine-refactor.md`](0009-engine-refactor.md) | PvP map norm with bomb penalty 1; spec names and topic modules in the engine (exception to rule 07) |
+| 0010 | [`0010-play-screen.md`](0010-play-screen.md) | Stage 1 split into four tasks; board + play screen first; continue stubs; unexploded bomb counter; design colours for the light board; relative heat |
 
 ## Template
 

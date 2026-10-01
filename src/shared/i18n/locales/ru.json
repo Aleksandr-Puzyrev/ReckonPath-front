@@ -5,5 +5,142 @@
     "arena": "Арена",
     "shop": "Витрина",
     "profile": "Профиль"
+  },
+  "common": {
+    "cancel": "Отмена"
+  },
+  "home": {
+    "level": "Уровень {{n}}",
+    "play": "Играть",
+    "continue": "Продолжить"
+  },
+  "play": {
+    "hud": {
+      "moves": "Ходы",
+      "targets": "Цели",
+      "bombs": "Бомбы",
+      "buoys": "Буи",
+      "count": "× {{count}}"
+    },
+    "mode": {
+      "distance": "Число",
+      "direction": "Курс",
+      "hotcold": "Горячо-холодно",
+      "fog": "{{mode}} · туман"
+    },
+    "probe": {
+      "hot": "горячо",
+      "warm": "тепло",
+      "cold": "холодно",
+      "warmer": "теплее",
+      "colder": "холоднее",
+      "same": "так же",
+      "none": "—"
+    },
+    "dir": {
+      "N": "вверх",
+      "E": "вправо",
+      "S": "вниз",
+      "W": "влево"
+    },
+    "last": "{{cell}} → {{value}} · {{heat}}",
+    "panel": {
+      "idle": "Тапни по клетке",
+      "idleDistance": "Число покажет шаги до сигнала",
+      "idleBeacons": "Маяки уже показывают пеленг",
+      "idleDirection": "Стрелка покажет, где ближе к сигналу",
+      "idleHotcold": "Каждый тап сравнивается с прошлым",
+      "distance_one": "Сигнал в {{count}} шаге",
+      "distance_few": "Сигнал в {{count}} шагах",
+      "distance_many": "Сигнал в {{count}} шагах",
+      "distance_other": "Сигнал в {{count}} шага",
+      "order_one": "До цели №{{n}}: {{count}} шаг",
+      "order_few": "До цели №{{n}}: {{count}} шага",
+      "order_many": "До цели №{{n}}: {{count}} шагов",
+      "order_other": "До цели №{{n}}: {{count}} шага",
+      "direction": "{{cell}} · курс {{dir}}",
+      "directionSub": "Ближе к сигналу — {{dir}}",
+      "hotcold": "{{cell}} · {{cmp}}",
+      "hotcoldFirst": "Первый тап — сравнивать не с чем",
+      "hotcoldSub": "По сравнению с прошлым тапом",
+      "target": "{{cell}} · сигнал!",
+      "targetsLeft": "Осталось найти: {{count}} · старые числа посерели",
+      "allFound": "Все сигналы найдены",
+      "bomb": "{{cell}} · бомба!",
+      "buoy": "Буй: +3 хода · {{text}}",
+      "bombNear": "{{text}} · рядом бомба",
+      "fog": "{{text}} · туман: видно {{count}}"
+    },
+    "bomb": "Бум. Минус два хода",
+    "found": "Сигнал найден!",
+    "flagMode": "Флажок",
+    "tooltip": {
+      "distance": "{{cell}}: пеленг {{value}}",
+      "stale": "{{text}} (до находки цели)",
+      "direction": "{{cell}}: курс {{dir}}",
+      "hotcold": "{{cell}}: {{cmp}}",
+      "target": "{{cell}}: сигнал",
+      "bomb": "{{cell}}: бомба",
+      "bombNear": "{{text}} · рядом бомба"
+    },
+    "cell": {
+      "label": "Клетка {{cell}}",
+      "closed": "закрыта",
+      "flag": "флажок",
+      "stream": "ручей",
+      "bridge": "мост",
+      "heavy": "мель",
+      "rock": "скала",
+      "bearing": "пеленг {{value}}",
+      "open": "открыть"
+    },
+    "pause": {
+      "title": "Пауза · партия сохранится",
+      "resume": "Продолжить",
+      "restart": "Начать заново",
+      "rules": "Правила",
+      "sound": "Звуки",
+      "music": "Музыка",
+      "exit": "К уровням"
+    },
+    "header": {
+      "pause": "Пауза",
+      "restart": "Заново"
+    },
+    "restartConfirm": "Начать заново? Ходы сбросятся",
+    "restartAction": "Заново",
+    "resumeTitle": "Продолжить или начать заново?",
+    "notFound": "Уровень не найден",
+    "game": {
+      "bombNear": "рядом бомба"
+    }
+  },
+  "result": {
+    "win": {
+      "eyebrow": "Уровень {{n}} пройден",
+      "title": "Сигнал найден",
+      "moves": "{{used}} из {{limit}} · лучший: {{best}}",
+      "movesUnlimited": "Ходов: {{used}} · лучший: {{best}}",
+      "record": "Новый рекорд!",
+      "next": "Дальше",
+      "again": "Ещё раз"
+    },
+    "lose": {
+      "title": "Ходы закончились",
+      "bombTitle": "Последний ход — бомба",
+      "found": "Найдено {{found}} из {{total}}",
+      "decline": "Не продолжать"
+    },
+    "continue": {
+      "title": "+3 хода",
+      "ad": "+3 хода за рекламу",
+      "gems": "+3 хода",
+      "dev": "+3 хода · dev",
+      "note": "После продолжения — не больше 1★"
+    },
+    "stars": "Звёзды: {{count}} из 3"
+  },
+  "ads": {
+    "unavailable": "Реклама сейчас недоступна"
   }
 }

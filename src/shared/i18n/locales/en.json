@@ -5,5 +5,138 @@
     "arena": "Arena",
     "shop": "Shop",
     "profile": "Profile"
+  },
+  "common": {
+    "cancel": "Cancel"
+  },
+  "home": {
+    "level": "Level {{n}}",
+    "play": "Play",
+    "continue": "Continue"
+  },
+  "play": {
+    "hud": {
+      "moves": "Moves",
+      "targets": "Signals",
+      "bombs": "Bombs",
+      "buoys": "Buoys",
+      "count": "× {{count}}"
+    },
+    "mode": {
+      "distance": "Number",
+      "direction": "Course",
+      "hotcold": "Hot-cold",
+      "fog": "{{mode}} · fog"
+    },
+    "probe": {
+      "hot": "hot",
+      "warm": "warm",
+      "cold": "cold",
+      "warmer": "warmer",
+      "colder": "colder",
+      "same": "same",
+      "none": "—"
+    },
+    "dir": {
+      "N": "up",
+      "E": "right",
+      "S": "down",
+      "W": "left"
+    },
+    "last": "{{cell}} → {{value}} · {{heat}}",
+    "panel": {
+      "idle": "Tap any tile",
+      "idleDistance": "The number shows steps to the signal",
+      "idleBeacons": "Beacons already show bearings",
+      "idleDirection": "The arrow points toward the signal",
+      "idleHotcold": "Each tap is compared with the previous one",
+      "distance_one": "Signal is {{count}} step away",
+      "distance_other": "Signal is {{count}} steps away",
+      "order_one": "To signal #{{n}}: {{count}} step",
+      "order_other": "To signal #{{n}}: {{count}} steps",
+      "direction": "{{cell}} · course {{dir}}",
+      "directionSub": "Signal is closer {{dir}}",
+      "hotcold": "{{cell}} · {{cmp}}",
+      "hotcoldFirst": "First tap — nothing to compare",
+      "hotcoldSub": "Compared with your previous tap",
+      "target": "{{cell}} · signal!",
+      "targetsLeft": "{{count}} more to find · old numbers are greyed",
+      "allFound": "All signals found",
+      "bomb": "{{cell}} · bomb!",
+      "buoy": "Buoy: +3 moves · {{text}}",
+      "bombNear": "{{text}} · bomb nearby",
+      "fog": "{{text}} · fog: last {{count}}"
+    },
+    "bomb": "Boom. Minus two moves",
+    "found": "Signal found!",
+    "flagMode": "Flag",
+    "tooltip": {
+      "distance": "{{cell}}: bearing {{value}}",
+      "stale": "{{text}} (before the find)",
+      "direction": "{{cell}}: course {{dir}}",
+      "hotcold": "{{cell}}: {{cmp}}",
+      "target": "{{cell}}: signal",
+      "bomb": "{{cell}}: bomb",
+      "bombNear": "{{text}} · bomb nearby"
+    },
+    "cell": {
+      "label": "Tile {{cell}}",
+      "closed": "closed",
+      "flag": "flag",
+      "stream": "stream",
+      "bridge": "bridge",
+      "heavy": "shallows",
+      "rock": "rock",
+      "bearing": "bearing {{value}}",
+      "open": "open"
+    },
+    "pause": {
+      "title": "Paused · progress is saved",
+      "resume": "Continue",
+      "restart": "Start over",
+      "rules": "Rules",
+      "sound": "Sounds",
+      "music": "Music",
+      "exit": "To levels"
+    },
+    "header": {
+      "pause": "Pause",
+      "restart": "Restart"
+    },
+    "restartConfirm": "Start over? Your moves will reset",
+    "restartAction": "Restart",
+    "resumeTitle": "Continue or start over?",
+    "notFound": "Level not found",
+    "game": {
+      "bombNear": "bomb nearby"
+    }
+  },
+  "result": {
+    "win": {
+      "eyebrow": "Level {{n}} cleared",
+      "title": "Signal found",
+      "moves": "{{used}} of {{limit}} · best: {{best}}",
+      "movesUnlimited": "Moves: {{used}} · best: {{best}}",
+      "record": "New record!",
+      "next": "Next",
+      "again": "Play again"
+    },
+    "lose": {
+      "title": "Out of moves",
+      "bombTitle": "Last move hit a bomb",
+      "found": "Found {{found}} of {{total}}",
+      "decline": "Don't continue"
+    },
+    "continue": {
+      "title": "+3 moves",
+      "ad": "+3 moves for an ad",
+      "gems": "+3 moves",
+      "dev": "+3 moves · dev",
+      "note": "After continuing — 1★ at most"
+    },
+    "stars": "Stars: {{count}} of 3"
+  },
+  "ads": {
+    "unavailable": "No ad available right now"
   }
 }
