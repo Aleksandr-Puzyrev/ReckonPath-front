@@ -202,6 +202,27 @@ describe("PlayScreen", () => {
     expect(useGameSessionStore.getState().flags).toEqual([5]);
   });
 
+  test("ends a lost attempt when leaving, so it is not offered again", async () => {
+    const first = await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await fireEvent.press(screen.getByText("К уровням"));
+    expect(useGameSessionStore.getState().levelId).toBeNull();
+    await first.unmount();
+
+    await renderScreen();
+    expect(screen.queryByText("Продолжить или начать заново?")).toBeNull();
+    expect(screen.getByText("4 / 4")).toBeOnTheScreen();
+  });
+
+  test("keeps a game in progress when leaving from the pause menu", async () => {
+    await renderScreen();
+    await tap(0);
+    await fireEvent.press(screen.getByTestId("pause"));
+    await fireEvent.press(screen.getByText("К уровням"));
+    expect(useGameSessionStore.getState().actions).toHaveLength(1);
+  });
+
   test("opens and closes the pause menu", async () => {
     await renderScreen();
     await fireEvent.press(screen.getByTestId("pause"));

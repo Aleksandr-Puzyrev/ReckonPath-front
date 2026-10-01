@@ -9,7 +9,7 @@ import { styles } from "./star-bar-styles";
 
 interface IStarBar {
   share: number;
-  marks: { three: number; two: number };
+  marks: { three: number; two: number | null };
 }
 
 const PERCENT = 100;
@@ -27,17 +27,21 @@ const StarBar = ({ share, marks }: IStarBar) => {
       <View style={styles.track}>
         <View style={[styles.fill, { width: `${share * PERCENT}%` }]} />
       </View>
-      {MARKS.map(({ stars, key }) => (
-        <View key={key} style={[styles.mark, { left: `${marks[key] * PERCENT}%` }]}>
-          <View style={styles.tick} />
-          <View style={styles.markLabel}>
-            <Text variant="caption" style={styles.markText}>
-              {stars}
-            </Text>
-            <StarIcon width={iconSize} height={iconSize} color={theme.colors.text.secondary} />
+      {MARKS.map(({ stars, key }) => {
+        const share = marks[key];
+        if (share === null) return null;
+        return (
+          <View key={key} style={[styles.mark, { left: `${share * PERCENT}%` }]}>
+            <View style={styles.tick} />
+            <View style={styles.markLabel}>
+              <Text variant="caption" style={styles.markText}>
+                {stars}
+              </Text>
+              <StarIcon width={iconSize} height={iconSize} color={theme.colors.text.secondary} />
+            </View>
           </View>
-        </View>
-      ))}
+        );
+      })}
     </View>
   );
 };

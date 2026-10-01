@@ -1,27 +1,17 @@
 import type { Idx } from "@reckon-path/engine";
 
-interface SizeLayout {
-  padding: number;
-  gap: number;
-  radius: number;
-}
-
-// Frame padding, cell gap, and cell radius by board size (отступ рамки, зазор и радиус клетки по размеру поля).
-const LAYOUT_BY_SIZE: Record<number, SizeLayout> = {
-  4: { padding: 10, gap: 8, radius: 16 },
-  5: { padding: 10, gap: 6, radius: 14 },
-  6: { padding: 8, gap: 6, radius: 12 },
-  7: { padding: 8, gap: 5, radius: 12 },
-  8: { padding: 8, gap: 4, radius: 10 },
-  9: { padding: 6, gap: 4, radius: 9 },
-};
-
-const DEFAULT_LAYOUT: SizeLayout = { padding: 6, gap: 4, radius: 9 };
-const FONT_SHARE = 0.45;
-const MIN_FONT = 14;
-const MAX_FONT = 28;
+// Board proportions from the design's board renderer (пропорции поля из отрисовщика поля в дизайне).
+const PADDING = 8;
+const GAP = { small: 8, medium: 7, large: 6 };
+const SMALL_BOARD = 4;
+const MEDIUM_BOARD = 5;
+const CELL_RADIUS_SHARE = 0.24;
+const FRAME_RADIUS = { small: 20, regular: 24 };
+const FONT_SHARE = 0.42;
+const MIN_FONT = 12;
+const MAX_FONT = 26;
 const FENCE_LENGTH_SHARE = 0.7;
-const FENCE_THICKNESS = { small: 5, regular: 4, large: 3 };
+const FENCE_THICKNESS = { small: 5, regular: 4 };
 export const MAX_BOARD_WIDTH = 400;
 
 export interface BoardGeometry {
@@ -32,21 +22,23 @@ export interface BoardGeometry {
   padding: number;
   gap: number;
   radius: number;
+  frameRadius: number;
   cell: number;
   fontSize: number;
   fenceLength: number;
   fenceThickness: number;
 }
 
-const fenceThicknessFor = (size: number) => {
-  if (size <= 5) return FENCE_THICKNESS.small;
-  if (size >= 9) return FENCE_THICKNESS.large;
-  return FENCE_THICKNESS.regular;
+const gapFor = (size: number) => {
+  if (size <= SMALL_BOARD) return GAP.small;
+  if (size <= MEDIUM_BOARD) return GAP.medium;
+  return GAP.large;
 };
 
 export const computeBoardGeometry = (rows: number, cols: number, available: number) => {
   const size = Math.max(rows, cols);
-  const { padding, gap, radius } = LAYOUT_BY_SIZE[size] ?? DEFAULT_LAYOUT;
+  const padding = PADDING;
+  const gap = gapFor(size);
   const width = Math.min(available, MAX_BOARD_WIDTH);
   const cell = (width - 2 * padding - (size - 1) * gap) / size;
 
@@ -57,11 +49,12 @@ export const computeBoardGeometry = (rows: number, cols: number, available: numb
     height: 2 * padding + rows * cell + (rows - 1) * gap,
     padding,
     gap,
-    radius,
+    radius: Math.round(cell * CELL_RADIUS_SHARE),
+    frameRadius: size <= SMALL_BOARD ? FRAME_RADIUS.small : FRAME_RADIUS.regular,
     cell,
     fontSize: Math.min(MAX_FONT, Math.max(MIN_FONT, cell * FONT_SHARE)),
     fenceLength: cell * FENCE_LENGTH_SHARE,
-    fenceThickness: fenceThicknessFor(size),
+    fenceThickness: size <= MEDIUM_BOARD ? FENCE_THICKNESS.small : FENCE_THICKNESS.regular,
   } satisfies BoardGeometry;
 };
 

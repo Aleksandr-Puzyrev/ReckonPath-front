@@ -24,7 +24,7 @@ Unistyles 3 is the only styling system (`docs/decisions/0004-ui-foundation.md` #
 
 ## Themes
 
-* Light and dark, following the system theme (`adaptiveThemes`; `docs/decisions/0004-ui-foundation.md` #2 supersedes Part 1 §1.2). Manual choice via `UnistylesRuntime.setTheme`, persisted in `useSettingsStore`, comes with the settings screen.
+* Light and dark, following the system theme (`docs/decisions/0004-ui-foundation.md` #2 supersedes Part 1 §1.2) through React Native `Appearance` and `useSystemTheme` in `shared/theme`, not Unistyles `adaptiveThemes`, which misses switches on Android (`docs/decisions/0010-play-screen.md` #17). Manual choice via `UnistylesRuntime.setTheme`, persisted in `useSettingsStore`, comes with the settings screen.
 * Project tokens outside spec Part 3 exist only by decision: `bg.glass` (0004 #3).
 * Status bar and Android system bar follow the theme.
 * Every screen and component is checked in both themes.

@@ -22,7 +22,17 @@ Date: 2026-10-01. Asked by: play screen (clarify-task). Answered by: developer.
 
 ## Implementation notes
 
-* Board geometry (padding, gap, radius, number size) follows the Part 3 §4.2 table, as Part 8 §8.2 prescribes; the design mock uses slightly different gaps (8/7/6). Board colours are the default `skin.json` (Part 8 §3.4) with the design values (#7).
+* Board geometry follows the design (developer's choice, #19). Board colours are the default `skin.json` (Part 8 §3.4) with the design values (#7).
 * The saved game is the action log (taps, continue) plus flags, replayed through the engine on resume, so restoring is exact and needs no serialisation of engine state.
 * Simplified until task (4): no sound or Lottie; reveal pop, cell and board shake, and the danger pulse of the moves counter are Reanimated/Skia; no HUD «−2» pop, no stream waves, pressed cell is a tint instead of the 3 pt press; the star bar fill is `accent.cyan` (the design's cyan → gold gradient has no token).
 * `feedback.hot/warm/cold` (Part 3 §2.3) were added to the theme for the answer line under the board.
+
+## Answered after implementation
+
+| # | Question | Decision | Spec reference |
+| --- | --- | --- | --- |
+| 16 | Plural forms on Hermes | Approved: `@formatjs/intl-pluralrules`, forced polyfill with `ru` and `en` data (Hermes lacks full `Intl.PluralRules`, i18next fell back to the `other` form). | Part 8 §11 |
+| 17 | Theme does not follow a system switch on Android | The theme follows React Native `Appearance` (`useSystemTheme`, `initialTheme`) instead of Unistyles `adaptiveThemes`, which missed switches back on Android. Behaviour is unchanged: the app follows the system theme (0004 #2). | Part 1 §1.2, NET-13 |
+| 18 | Star marks after a continue | Hidden: after a continue the result is at most 1★. With equal thresholds only the 3★ mark is shown. | Part 1 §3.3 |
+| 19 | Board geometry: Part 3 §4.2 table or the design | **The design**: padding 8, gap 8 / 7 / 6 (≤4 / 5 / larger boards), cell radius 0.24 · cell, numbers 0.42 · cell within 12–26 pt, frame radius 20 (4×4) / 24, fences 5 pt up to 5×5, else 4 pt; width min(available, 400). Hit-test and the rest of the logic work from the same geometry. | Part 3 §4.2, Part 8 §8.2 |
+| 20 | Leaving a lost game | **Leaving ends the attempt** (Part 6 §4.1 `lost → finished`): «К уровням» from the lose sheet or after «Не продолжать» drops the saved game, so the next entry starts the level anew. A game in progress is still saved when leaving from the pause menu. | Part 6 §4.1, Part 1 §3.4 |

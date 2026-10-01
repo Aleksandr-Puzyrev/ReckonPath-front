@@ -42,7 +42,7 @@ const BoardCanvas = ({
   onCellPress,
   onCellLongPress,
 }: IBoardCanvas) => {
-  const { theme, rt } = useUnistyles();
+  const { rt } = useUnistyles();
   const numberFont = useFont(numberFontSource, geometry.fontSize);
   const labelFont = useFont(labelFontSource, geometry.fontSize * LABEL_FONT_SHARE);
   const scene = createBoardScene(board, geometry, {
@@ -51,9 +51,7 @@ const BoardCanvas = ({
     font: numberFont,
     labelFont,
   });
-  const staticPicture = createPicture((canvas) =>
-    drawStaticLayer(canvas, scene, theme.radius.board),
-  );
+  const staticPicture = createPicture((canvas) => drawStaticLayer(canvas, scene));
 
   const cellPicture = useDerivedValue(() =>
     createPicture((canvas) =>

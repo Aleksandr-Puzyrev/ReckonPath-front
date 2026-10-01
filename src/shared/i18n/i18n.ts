@@ -1,3 +1,5 @@
+import "./plural-rules-polyfill";
+
 import { getLocales } from "expo-localization";
 import { createInstance } from "i18next";
 import { initReactI18next } from "react-i18next";

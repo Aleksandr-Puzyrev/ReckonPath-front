@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { UnistylesRuntime, useUnistyles } from "react-native-unistyles";
 
 import "@shared/i18n";
+import { useSystemTheme } from "@shared/theme";
 
 import { styles } from "./app-providers-styles";
 
@@ -16,6 +17,7 @@ interface IAppProviders {
 
 const AppProviders = ({ children }: IAppProviders) => {
   const { theme } = useUnistyles();
+  useSystemTheme();
 
   useEffect(() => {
     UnistylesRuntime.setRootViewBackgroundColor(theme.colors.bg.base);

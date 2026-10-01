@@ -83,7 +83,12 @@ const Board = ({ size, fx, showHidden, onCellPress, onCellLongPress }: IBoard) =
   };
 
   return (
-    <View style={[styles.board, { width: geometry.width, height: geometry.height }]}>
+    <View
+      style={[
+        styles.board,
+        { width: geometry.width, height: geometry.height, borderRadius: geometry.frameRadius },
+      ]}
+    >
       <BoardCanvas
         board={board}
         geometry={geometry}

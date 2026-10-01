@@ -30,11 +30,13 @@ export const hudValuesOf = (game: GameState) => {
     buoysLeft: board.buoys.filter((buoy) => !revealed.has(buoy)).length,
     hasBuoys: board.buoys.length > 0,
     starMarks:
-      limit === null || thresholds === null
+      // After a continue the result is at most 1★, so the star marks no longer apply (после продолжения максимум 1★, отметки звёзд больше не нужны).
+      limit === null || thresholds === null || game.continued
         ? null
         : {
             three: (limit - thresholds[0]) / limit,
-            two: (limit - thresholds[1]) / limit,
+            // Equal thresholds leave no room for two stars (при равных порогах двух звёзд не бывает).
+            two: thresholds[1] === thresholds[0] ? null : (limit - thresholds[1]) / limit,
           },
     movesShare: limit === null || movesLeft === null ? null : movesLeft / limit,
   };

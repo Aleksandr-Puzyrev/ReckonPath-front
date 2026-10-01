@@ -57,9 +57,9 @@ const drawCell = (canvas: SkCanvas, scene: BoardScene, idx: number) => {
   }
 };
 
-export const drawStaticLayer = (canvas: SkCanvas, scene: BoardScene, frameRadius: number) => {
+export const drawStaticLayer = (canvas: SkCanvas, scene: BoardScene) => {
   "worklet";
-  const { width, height } = scene.geometry;
+  const { width, height, frameRadius } = scene.geometry;
   canvas.drawRRect(
     roundRect(0, 0, width, height, frameRadius),
     diagonalGradient(0, 0, Math.max(width, height), scene.skin.frame),

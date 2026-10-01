@@ -31,6 +31,9 @@ const hasEvent = (events: readonly GameEvent[], type: GameEvent["type"]) =>
   events.some((event) => event.type === type);
 
 const exitToLevels = () => {
+  // Leaving a lost game ends the attempt, so it is not offered again (выход из проигранной партии завершает попытку, и её больше не предлагают продолжить).
+  const session = useGameSessionStore.getState();
+  if (session.game?.status === "lost") session.finish();
   if (router.canGoBack()) router.back();
   else router.replace(LEVELS_ROUTE);
 };

@@ -1,4 +1,4 @@
-import { applyTap, createBoard, initGame, levelSchema } from "@reckon-path/engine";
+import { applyTap, continueGame, createBoard, initGame, levelSchema } from "@reckon-path/engine";
 
 import { hudValuesOf, movesToneOf } from "./hud-values";
 
@@ -29,6 +29,34 @@ describe("hudValuesOf", () => {
   test("shows only unexploded bombs", () => {
     const values = hudValuesOf(applyTap(makeGame(), 4).state);
     expect(values).toMatchObject({ bombsLeft: 0, hasBombs: true, movesLeft: 10 });
+  });
+});
+
+describe("hudValuesOf with equal star thresholds", () => {
+  test("shows only the three-star mark", () => {
+    const level = levelSchema.parse({
+      v: 2,
+      id: "u-equal",
+      rows: 4,
+      cols: 4,
+      targets: [[3, 3]],
+      probeMode: "distance",
+      moveLimit: 5,
+      stars: [3, 3],
+    });
+    const { board, rules } = createBoard(level);
+    expect(hudValuesOf(initGame(board, rules)).starMarks).toEqual({ three: 0.4, two: null });
+  });
+});
+
+describe("hudValuesOf after a continue", () => {
+  test("drops the star marks", () => {
+    const lost = [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12].reduce(
+      (game, cell) => applyTap(game, cell).state,
+      makeGame(),
+    );
+    expect(lost.status).toBe("lost");
+    expect(hudValuesOf(continueGame(lost)).starMarks).toBeNull();
   });
 });
 

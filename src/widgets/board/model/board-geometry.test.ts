@@ -1,20 +1,24 @@
 import { cellOrigin, computeBoardGeometry, hitTest } from "./board-geometry";
 
 describe("computeBoardGeometry", () => {
-  test("uses the design-system layout for a 5×5 board", () => {
+  test("follows the design proportions for a 5×5 board", () => {
     const geometry = computeBoardGeometry(5, 5, 358);
-    expect(geometry).toMatchObject({ padding: 10, gap: 6, radius: 14 });
+    expect(geometry).toMatchObject({ padding: 8, gap: 7, radius: 15, frameRadius: 24 });
     expect(geometry.cell).toBeCloseTo(62.8);
     expect(geometry.width).toBeCloseTo(358);
+  });
+
+  test("uses wider gaps and a smaller frame radius on a 4×4 board", () => {
+    expect(computeBoardGeometry(4, 4, 358)).toMatchObject({ gap: 8, frameRadius: 20 });
   });
 
   test("never grows wider than 400 pt", () => {
     expect(computeBoardGeometry(9, 9, 600).width).toBeCloseTo(400);
   });
 
-  test("keeps board numbers between 14 and 28 pt", () => {
-    expect(computeBoardGeometry(4, 4, 400).fontSize).toBe(28);
-    expect(computeBoardGeometry(9, 9, 300).fontSize).toBe(14);
+  test("keeps board numbers between 12 and 26 pt", () => {
+    expect(computeBoardGeometry(4, 4, 400).fontSize).toBe(26);
+    expect(computeBoardGeometry(9, 9, 300).fontSize).toBe(12);
   });
 });
 

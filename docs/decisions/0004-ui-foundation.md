@@ -5,7 +5,7 @@ Date: 2026-09-30. Asked by: UI foundation task (clarify-task). Answered by: deve
 | # | Question | Decision | Spec reference |
 | --- | --- | --- | --- |
 | 1 | How the app runs once Unistyles (no Expo Go support) is added | **Local development builds** (`npx expo run:ios` / `run:android`) with `expo-dev-client`. The agent drives the simulators itself and checks screens by screenshots. | Part 8 §1.1, §2.1 |
-| 2 | Default theme: Part 1 §1.2 «по умолчанию тёмная» vs Part 8 §3.4 `adaptiveThemes` | **Follow the system theme** (`adaptiveThemes`); manual choice comes later with the settings screen. Supersedes the default in Part 1 §1.2. | Part 1 §1.2, Part 8 §3.4, §11 |
+| 2 | Default theme: Part 1 §1.2 «по умолчанию тёмная» vs Part 8 §3.4 `adaptiveThemes` | **Follow the system theme** (`adaptiveThemes`; implementation superseded by 0010 #17 — `Appearance`, same behaviour); manual choice comes later with the settings screen. Supersedes the default in Part 1 §1.2. | Part 1 §1.2, Part 8 §3.4, §11 |
 | 3 | Tab bar background: spec `bg.surface` (opaque) + blur vs design `--glass` (translucent) | **New token `bg.glass`** with design values: dark `rgba(13,32,45,0.74)`, light `rgba(255,255,255,0.78)`. Used by the tab bar now, later by the top bar and sheets. | Part 3 §2.1, §4.5; design `_parts.txt` NAVS |
 | 4 | Active tab icon: spec «filled-иконка» vs design (outline icon, `bg.sunken` + `accent.cyan`) | **As in the design.** Filled variants are added only if the designer draws them. | Part 3 §7.2 |
 | 5 | Font source | **`@expo-google-fonts/inter` and `@expo-google-fonts/unbounded`**, embedded via the `expo-font` config plugin. Weights: Inter 500/600/700/800, Unbounded 700/800. | Part 8 §2.1 |
