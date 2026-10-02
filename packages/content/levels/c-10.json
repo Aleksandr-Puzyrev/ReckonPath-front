@@ -1,0 +1,15 @@
+{
+  "v": 2,
+  "id": "c-10",
+  "title": {
+    "ru": "Передышка",
+    "en": "Breather"
+  },
+  "world": 1,
+  "rows": 4,
+  "cols": 4,
+  "targets": [[2, 3]],
+  "probeMode": "distance",
+  "moveLimit": 6,
+  "stars": [3, 3]
+}

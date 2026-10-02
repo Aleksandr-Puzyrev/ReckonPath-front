@@ -22,9 +22,15 @@ const PLAYERS: Record<HapticKind, () => Promise<void>> = {
 };
 
 let lastPlayedAt = Number.NEGATIVE_INFINITY;
+let isEnabled = true;
 
-// TODO: respect the vibration setting once the settings store exists
+// The setting lives in the settings store; the app layer passes it here, shared code cannot read stores (настройка живёт в сторе настроек; её передаёт слой приложения).
+export const setHapticsEnabled = (enabled: boolean) => {
+  isEnabled = enabled;
+};
+
 export const haptic = (...kinds: HapticKind[]) => {
+  if (!isEnabled) return;
   const now = Date.now();
   if (now - lastPlayedAt < THROTTLE_MS) return;
   lastPlayedAt = now;

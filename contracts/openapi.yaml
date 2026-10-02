@@ -1,0 +1,525 @@
+openapi: 3.1.0
+info:
+  title: Reckon Path API
+  version: 1.0.0
+  description: >
+    Stage 2 subset of spec Part 7 (decision 0014 #2): bootstrap, guest auth, profile,
+    attempts, progress, continue, daily, streak. Written from Part 7 by the client team,
+    reviewed by the backend. Fields not stated in Part 7 are not added.
+servers:
+  - url: "{baseUrl}/v1"
+    variables:
+      baseUrl:
+        default: ""
+security:
+  - bearer: []
+
+paths:
+  /bootstrap:
+    get:
+      operationId: getBootstrap
+      security: [{}, { bearer: [] }]
+      responses:
+        "200":
+          description: Start-up data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Bootstrap" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/guest:
+    post:
+      operationId: authGuest
+      security: [{}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deviceId, platform]
+              properties:
+                deviceId: { type: string }
+                platform: { $ref: "#/components/schemas/Platform" }
+                integrityToken: { type: string }
+      responses:
+        "201":
+          description: Guest session
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/refresh:
+    post:
+      operationId: authRefresh
+      security: [{}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefreshRequest" }
+      responses:
+        "200":
+          description: New token pair
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenPair" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/logout:
+    post:
+      operationId: authLogout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefreshRequest" }
+      responses:
+        "204": { description: Signed out }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me:
+    get:
+      operationId: getMe
+      responses:
+        "200":
+          description: Current player
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /attempts:batch:
+    post:
+      operationId: postAttemptsBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [attempts]
+              properties:
+                attempts:
+                  type: array
+                  maxItems: 50
+                  items: { $ref: "#/components/schemas/Attempt" }
+      responses:
+        "200":
+          description: Result per attempt and the final state
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [results, progress, wallet]
+                properties:
+                  results:
+                    type: array
+                    items: { $ref: "#/components/schemas/AttemptResult" }
+                  progress:
+                    type: object
+                    required: [currentLevel, totalStars]
+                    properties:
+                      currentLevel: { type: integer }
+                      totalStars: { type: integer }
+                  wallet: { $ref: "#/components/schemas/Wallet" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /progress:
+    get:
+      operationId: getProgress
+      responses:
+        "200":
+          description: Campaign progress
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [currentLevel, levels, worldsCompleted]
+                properties:
+                  currentLevel: { type: integer }
+                  levels:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, bestStars, bestMoves]
+                      properties:
+                        id: { type: string }
+                        bestStars: { type: integer }
+                        bestMoves: { type: integer }
+                  worldsCompleted:
+                    type: array
+                    items: { type: integer }
+        default: { $ref: "#/components/responses/Error" }
+
+  /continue:
+    post:
+      operationId: postContinue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [attemptId, method]
+                  properties:
+                    attemptId: { type: string }
+                    method: { type: string, const: emeralds }
+                - type: object
+                  required: [attemptId, method, adIntentId]
+                  properties:
+                    attemptId: { type: string }
+                    method: { type: string, const: ad }
+                    adIntentId: { type: string }
+      responses:
+        "200":
+          description: Continue granted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [granted, bonusMoves, wallet]
+                properties:
+                  granted: { type: boolean }
+                  bonusMoves: { type: integer }
+                  wallet: { $ref: "#/components/schemas/Wallet" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /daily/{date}:
+    get:
+      operationId: getDaily
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Daily level of the date
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [date, override, leaderboardPreview, me]
+                properties:
+                  date: { type: string, format: date }
+                  override:
+                    description: Level v2 (contracts/schemas/level.schema.json) or null
+                    oneOf:
+                      - type: "null"
+                      - type: object
+                  leaderboardPreview:
+                    type: object
+                    required: [top, median]
+                    properties:
+                      top:
+                        description: Not detailed in Part 7
+                        type: array
+                        items: { type: object }
+                      median: { type: number }
+                  me:
+                    type: object
+                    required: [played]
+                    properties:
+                      played: { type: boolean }
+                      result: { type: [string, "null"] }
+                      rank: { type: [integer, "null"] }
+        default: { $ref: "#/components/responses/Error" }
+
+  /streak:
+    get:
+      operationId: getStreak
+      responses:
+        "200":
+          description: Streak state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StreakState" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /streak/restore:
+    post:
+      operationId: postStreakRestore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [method]
+                  properties:
+                    method: { type: string, const: emeralds }
+                - type: object
+                  required: [method, adIntentId]
+                  properties:
+                    method: { type: string, const: ad }
+                    adIntentId: { type: string }
+      responses:
+        "200":
+          description: Restored streak
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [streak, wallet]
+                properties:
+                  streak: { $ref: "#/components/schemas/Streak" }
+                  wallet: { $ref: "#/components/schemas/Wallet" }
+        default: { $ref: "#/components/responses/Error" }
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+
+  responses:
+    Error:
+      description: Error envelope (Part 7 §1, codes in §2)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  schemas:
+    Platform:
+      type: string
+      enum: [ios, android]
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code]
+          properties:
+            code: { $ref: "#/components/schemas/ErrorCode" }
+            message: { type: string }
+            details:
+              type: object
+              additionalProperties: true
+
+    ErrorCode:
+      type: string
+      enum:
+        - VALIDATION
+        - UNAUTHORIZED
+        - SESSION_REVOKED
+        - BANNED
+        - FORBIDDEN
+        - NOT_FOUND
+        - IDEMPOTENCY_MISMATCH
+        - ALREADY_OWNED
+        - IN_MATCH
+        - ALREADY_QUEUED
+        - NICK_TAKEN
+        - ACCOUNT_CONFLICT
+        - INSUFFICIENT_FUNDS
+        - OFFER_ENDED
+        - SOLD_OUT
+        - PRICE_CHANGED
+        - LIMIT_REACHED
+        - MAP_INVALID
+        - ATTEMPT_REJECTED
+        - STREAK_NOT_RESTORABLE
+        - FRIENDS_LIMIT
+        - LINK_REQUIRED
+        - UPGRADE_REQUIRED
+        - RATE_LIMITED
+        - MAINTENANCE
+        - INTERNAL
+
+    Bootstrap:
+      type: object
+      required:
+        [serverTime, version, maintenance, config, contentVersion, adsNetwork, dayKey, nextDayAt]
+      properties:
+        serverTime: { type: string, format: date-time }
+        version:
+          type: object
+          required: [min, recommended, storeUrl]
+          properties:
+            min: { type: string }
+            recommended: { type: string }
+            storeUrl: { type: string }
+            message: { type: string }
+        maintenance:
+          description: null when there is no maintenance; shape follows the MAINTENANCE error details
+          oneOf:
+            - type: "null"
+            - type: object
+              properties:
+                until: { type: string, format: date-time }
+                message: { type: string }
+        config:
+          type: object
+          additionalProperties: true
+        contentVersion: { type: string }
+        adsNetwork: { type: string }
+        dayKey: { type: string, format: date }
+        nextDayAt: { type: string, format: date-time }
+
+    TokenPair:
+      type: object
+      required: [accessToken, refreshToken, expiresIn]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn: { type: integer }
+
+    Session:
+      allOf:
+        - $ref: "#/components/schemas/TokenPair"
+        - type: object
+          required: [user]
+          properties:
+            user:
+              type: object
+              required: [id, nickname, isGuest]
+              properties:
+                id: { type: string }
+                nickname: { type: string }
+                isGuest: { type: boolean }
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+
+    Wallet:
+      type: object
+      required: [emeralds, coins]
+      properties:
+        emeralds: { type: integer }
+        coins: { type: integer }
+
+    Me:
+      type: object
+      required:
+        [
+          id,
+          nickname,
+          isGuest,
+          providers,
+          level,
+          xp,
+          xpToNext,
+          wallet,
+          arena,
+          loadout,
+          flags,
+          friendCode,
+        ]
+      properties:
+        id: { type: string }
+        nickname: { type: string }
+        isGuest: { type: boolean }
+        providers:
+          type: array
+          items: { type: string }
+        level: { type: integer }
+        xp: { type: integer }
+        xpToNext: { type: integer }
+        wallet: { $ref: "#/components/schemas/Wallet" }
+        arena:
+          type: object
+          required: [trophies, league, division, peak, rp, seasonId]
+          properties:
+            trophies: { type: integer }
+            league: { type: string }
+            division: { type: integer }
+            peak: { type: integer }
+            rp: { type: integer }
+            seasonId: { type: integer }
+        loadout:
+          type: object
+          additionalProperties: true
+        flags:
+          type: object
+          properties:
+            nickChangeFreeAvailable: { type: boolean }
+            nickChangeAvailableAt: { type: [string, "null"], format: date-time }
+            deletionScheduledAt: { type: [string, "null"], format: date-time }
+        friendCode: { type: string }
+
+    Cell:
+      type: array
+      prefixItems:
+        - { type: integer }
+        - { type: integer }
+      minItems: 2
+      maxItems: 2
+
+    Attempt:
+      type: object
+      required: [attemptId, mode, ref, taps, claimed]
+      properties:
+        attemptId: { type: string }
+        mode: { type: string, enum: [campaign, daily] }
+        ref: { type: string }
+        contentVersion: { type: string }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+        durationMs: { type: integer }
+        taps:
+          type: array
+          items: { $ref: "#/components/schemas/Cell" }
+        continued: { type: boolean }
+        continueMethod: { type: [string, "null"] }
+        claimed:
+          type: object
+          required: [result, movesUsed, stars]
+          properties:
+            result: { type: string, enum: [won, lost] }
+            movesUsed: { type: integer }
+            stars: { type: [integer, "null"] }
+
+    AttemptResult:
+      type: object
+      required: [attemptId, status]
+      properties:
+        attemptId: { type: string }
+        status: { type: string, enum: [accepted, duplicate, corrected, rejected, late] }
+        result: { type: string }
+        stars: { type: [integer, "null"] }
+        rewards:
+          type: array
+          items:
+            type: object
+            properties:
+              currency: { type: string }
+              amount: { type: integer }
+              reason: { type: string }
+              xp: { type: integer }
+        daily:
+          type: object
+          properties:
+            rank: { type: integer }
+            percentile: { type: integer }
+            ranked: { type: boolean }
+        streak: { $ref: "#/components/schemas/Streak" }
+
+    Streak:
+      type: object
+      required: [current, best]
+      properties:
+        current: { type: integer }
+        best: { type: integer }
+
+    StreakState:
+      type: object
+      required: [current, best, lastDay, restorable]
+      properties:
+        current: { type: integer }
+        best: { type: integer }
+        lastDay: { type: string, format: date }
+        restorable: { type: boolean }
+        restoreUntil: { type: string, format: date-time }
+        restoreMethods:
+          type: array
+          items: { type: string, enum: [ad, emeralds] }
+        price: { type: integer }

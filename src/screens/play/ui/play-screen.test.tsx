@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { useGameSessionStore } from "@entities/level";
 import { useProgressStore } from "@entities/progress";
+import { RULE_DEMOS, isRuleCardId, useRulesStore } from "@entities/rules";
 import { unlockTapInput } from "@features/tap-cell";
 import { i18n } from "@shared/i18n";
 
@@ -22,9 +23,10 @@ jest.mock("@shared/ui/sheet", () => ({
   Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
     isOpen ? children : null,
 }));
-jest.mock("@entities/level/model/test-levels", () =>
-  jest.requireActual("../test-utils/test-levels"),
-);
+jest.mock("@reckon-path/content", () => ({
+  ...jest.requireActual("@reckon-path/content"),
+  ...jest.requireActual("../test-utils/test-levels"),
+}));
 jest.mock("@widgets/board", () => jest.requireActual("../test-utils/fake-board"));
 
 const BOMB = 3;
@@ -61,6 +63,9 @@ describe("PlayScreen", () => {
     unlockTapInput();
     useGameSessionStore.getState().reset();
     useProgressStore.getState().reset();
+    useRulesStore.getState().reset();
+    useRulesStore.getState().markSeen(Object.keys(RULE_DEMOS).filter(isRuleCardId));
+    useRulesStore.getState().skipTutorial();
   });
 
   afterEach(() => jest.useRealTimers());
@@ -69,6 +74,13 @@ describe("PlayScreen", () => {
     mockParams.id = "c-missing";
     await renderScreen();
     expect(screen.getByText("Уровень не найден")).toBeOnTheScreen();
+  });
+
+  test("does not open a locked level reached by a link", async () => {
+    mockParams.id = "c-b";
+    await renderScreen();
+    expect(screen.getByText("Сначала пройди уровень 1")).toBeOnTheScreen();
+    expect(useGameSessionStore.getState().game).toBeNull();
   });
 
   test("shows an error state for a mode other than the campaign", async () => {

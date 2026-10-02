@@ -5,16 +5,24 @@ import { AccessibilityInfo, AppState, BackHandler } from "react-native";
 
 import type { GameEvent, Idx } from "@reckon-path/engine";
 
+import { TUTORIAL } from "@reckon-path/content";
+
 import {
+  CAMPAIGN_LEVELS,
+  CAMPAIGN_WORLDS,
   findCampaignLevel,
   nextCampaignLevel,
   selectHasSavedSession,
   useGameSessionStore,
 } from "@entities/level";
+import { currentLevelId, levelStateOf, useProgressStore } from "@entities/progress";
+import { useRulesStore } from "@entities/rules";
 import { flagCell } from "@features/flag-cell";
 import { tapCell, unlockTapInput } from "@features/tap-cell";
 import { motion } from "@shared/theme";
 import { useBoardFx } from "@widgets/board";
+
+import { usePlayGuides } from "./use-play-guides";
 
 export type PlayOverlay =
   "none" | "resume" | "pause" | "restartConfirm" | "win" | "lose" | "declined";
@@ -26,6 +34,8 @@ interface PendingOverlay {
 
 const CAMPAIGN_MODE = "campaign";
 const LEVELS_ROUTE = "/levels";
+
+const NO_STATE_CHANGE: ReadonlySet<GameEvent["type"]> = new Set(["blocked", "alreadyRevealed"]);
 
 const hasEvent = (events: readonly GameEvent[], type: GameEvent["type"]) =>
   events.some((event) => event.type === type);
@@ -44,9 +54,24 @@ export const usePlayScreen = (mode: string, id: string) => {
   const next = campaign === null ? null : nextCampaignLevel(id);
   const fx = useBoardFx();
   const level = campaign?.level ?? null;
+  // A locked level can still be reached by a link; it is checked once, so winning it does not flip the screen (закрытый уровень можно открыть по ссылке; проверка один раз, чтобы победа не переключала экран).
+  const [lockedBy] = useState(() => {
+    if (level === null) return null;
+    const { best } = useProgressStore.getState();
+    const currentId = currentLevelId(CAMPAIGN_WORLDS, best);
+    if (levelStateOf(level.id, currentId, best) !== "locked") return null;
+    return (
+      CAMPAIGN_LEVELS.find((campaignLevel) => campaignLevel.level.id === currentId)?.number ?? null
+    );
+  });
+  // The tutorial always starts fresh, even over a saved game (обучение всегда начинается заново, даже поверх сохранённой партии).
   const [hasSavedSession] = useState(
-    () => level !== null && selectHasSavedSession(level.id)(useGameSessionStore.getState()),
+    () =>
+      level !== null &&
+      !(level.id === TUTORIAL.levelId && useRulesStore.getState().tutorial === "pending") &&
+      selectHasSavedSession(level.id)(useGameSessionStore.getState()),
   );
+  const guides = usePlayGuides(lockedBy === null ? level : null);
   const [overlay, setOverlay] = useState<PlayOverlay>(hasSavedSession ? "resume" : "none");
   const [pending, setPending] = useState<PendingOverlay | null>(null);
   const [isFlagMode, setIsFlagMode] = useState(false);
@@ -55,10 +80,10 @@ export const usePlayScreen = (mode: string, id: string) => {
 
   // Before the first paint, so the board never shows the previous level (до первой отрисовки, чтобы поле не показало прошлый уровень).
   useLayoutEffect(() => {
-    if (level === null) return;
+    if (level === null || lockedBy !== null) return;
     useGameSessionStore.getState().start(level, hasSavedSession ? "resume" : "new");
     unlockTapInput();
-  }, [level, hasSavedSession]);
+  }, [level, hasSavedSession, lockedBy]);
 
   useEffect(() => {
     if (pending === null) return;
@@ -103,6 +128,7 @@ export const usePlayScreen = (mode: string, id: string) => {
   const handleCellPress = (cell: Idx) => {
     const { game } = useGameSessionStore.getState();
     if (game === null || game.status !== "playing" || overlay !== "none") return;
+    if (!guides.allowsTap(cell)) return;
     if (isFlagMode && !game.revealed.has(cell)) {
       flagCell(cell);
       return;
@@ -110,10 +136,17 @@ export const usePlayScreen = (mode: string, id: string) => {
 
     const outcome = tapCell(cell);
     fx.play(cell, outcome.events);
+    if (
+      guides.tutorialStep !== null &&
+      outcome.events.some(({ type }) => !NO_STATE_CHANGE.has(type))
+    ) {
+      guides.handleTutorialTap();
+    }
     if (hasEvent(outcome.events, "targetFound")) {
       AccessibilityInfo.announceForAccessibility(t("play.found"));
     }
     if (hasEvent(outcome.events, "win")) {
+      guides.handleTutorialWin();
       setIsRecord(outcome.isRecord);
       setPending({ overlay: "win", delay: motion.animation.targetFound });
     }
@@ -125,7 +158,9 @@ export const usePlayScreen = (mode: string, id: string) => {
   };
 
   const handleCellLongPress = (cell: Idx) => {
-    if (overlay === "none" && isPlaying()) flagCell(cell);
+    if (overlay === "none" && isPlaying() && !guides.isBlocking && guides.tutorialStep === null) {
+      flagCell(cell);
+    }
   };
 
   const requestRestart = () => {
@@ -148,8 +183,16 @@ export const usePlayScreen = (mode: string, id: string) => {
     });
   };
 
+  const skipTutorial = () => {
+    guides.handleTutorialSkip();
+    useGameSessionStore.getState().finish();
+    router.replace(LEVELS_ROUTE);
+  };
+
   return {
     campaign,
+    guides,
+    lockedBy,
     hasNext: next !== null,
     fx,
     overlay,
@@ -167,5 +210,10 @@ export const usePlayScreen = (mode: string, id: string) => {
     handleDecline: () => setOverlay("declined"),
     handleNext: goNext,
     handleExit: exitToLevels,
+    handleTutorialSkip: skipTutorial,
+    handleRules: () => {
+      setOverlay("none");
+      guides.handleRulesOpen();
+    },
   };
 };

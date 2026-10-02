@@ -75,4 +75,11 @@ describe("buildCellVisuals", () => {
       hasBombNear: true,
     });
   });
+
+  test("dims every cell but the highlighted ones", () => {
+    const visuals = buildCellVisuals(makeGame(), { ...defaults, highlight: [5] });
+    expect(visuals[5]?.emphasis).toBe("highlight");
+    expect(visuals[0]?.emphasis).toBe("dim");
+    expect(buildCellVisuals(makeGame(), defaults)[0]?.emphasis).toBe("none");
+  });
 });

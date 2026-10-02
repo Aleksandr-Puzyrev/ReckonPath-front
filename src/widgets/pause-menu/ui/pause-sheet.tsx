@@ -1,8 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { useSettingsStore } from "@entities/settings";
 import { Button } from "@shared/ui/button";
 import { Sheet } from "@shared/ui/sheet";
+import { SwitchRow } from "@shared/ui/switch-row";
 import { Text } from "@shared/ui/text";
 
 import { styles } from "./pause-sheet-styles";
@@ -11,11 +13,15 @@ interface IPauseSheet {
   isOpen: boolean;
   onResume: () => void;
   onRestart: () => void;
+  onRules: () => void;
   onExit: () => void;
 }
 
-const PauseSheet = ({ isOpen, onResume, onRestart, onExit }: IPauseSheet) => {
+const PauseSheet = ({ isOpen, onResume, onRestart, onRules, onExit }: IPauseSheet) => {
   const { t } = useTranslation();
+  const isSoundOn = useSettingsStore((state) => state.isSoundOn);
+  const isMusicOn = useSettingsStore((state) => state.isMusicOn);
+  const { toggleSound, toggleMusic } = useSettingsStore.getState();
 
   return (
     <Sheet isOpen={isOpen} onDismiss={onResume}>
@@ -26,11 +32,24 @@ const PauseSheet = ({ isOpen, onResume, onRestart, onExit }: IPauseSheet) => {
           <Button label={t("play.pause.restart")} onPress={onRestart} />
         </View>
         <View style={styles.cell}>
-          {/* TODO: open the rule cards of elements seen so far (stage 1, task 4) */}
-          <Button label={t("play.pause.rules")} onPress={onResume} isDisabled />
+          <Button testID="pause-rules" label={t("play.pause.rules")} onPress={onRules} />
         </View>
       </View>
-      {/* TODO: sound and music toggles come with the audio and settings tasks */}
+      {/* TODO: play sound and music by these toggles once the assets exist */}
+      <View style={styles.switches}>
+        <SwitchRow
+          testID="sound"
+          label={t("play.pause.sound")}
+          isOn={isSoundOn}
+          onToggle={toggleSound}
+        />
+        <SwitchRow
+          testID="music"
+          label={t("play.pause.music")}
+          isOn={isMusicOn}
+          onToggle={toggleMusic}
+        />
+      </View>
       <Button label={t("play.pause.exit")} onPress={onExit} variant="ghost" />
     </Sheet>
   );

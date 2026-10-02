@@ -1,0 +1,16 @@
+{
+  "v": 2,
+  "id": "c-8",
+  "title": {
+    "ru": "Маяк в центре",
+    "en": "Beacon in the middle"
+  },
+  "world": 1,
+  "rows": 5,
+  "cols": 5,
+  "targets": [[3, 1]],
+  "beacons": [[2, 2]],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

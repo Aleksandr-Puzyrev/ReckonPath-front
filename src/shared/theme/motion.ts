@@ -26,6 +26,7 @@ export const motion = {
   shake: {
     bomb: { distance: 6, count: 3 },
     blocked: { distance: 2, count: 2 },
+    lockedRow: { distance: 6, count: 2 },
   },
   spring: {
     snappy: { damping: 18, stiffness: 260, mass: 1 },

@@ -18,8 +18,15 @@
     "pressedTint": "rgba(16,48,68,0.12)"
   },
   "elements": {
-    "heat": { "hot": "#FF6D5D", "warm": "#FFB65D", "cold": "#5FB8FF" },
-    "compare": { "warmer": "#FF6D5D", "colder": "#5FB8FF" },
+    "heat": {
+      "hot": "#FF6D5D",
+      "warm": "#FFB65D",
+      "cold": "#5FB8FF"
+    },
+    "compare": {
+      "warmer": "#FF6D5D",
+      "colder": "#5FB8FF"
+    },
     "stream": ["#8CEAF0", "#31BFD0", "#217DA2"],
     "streamSide": "#1D7FA0",
     "bridge": ["#E4C083", "#B98A55", "#9C6C3D"],
@@ -50,6 +57,8 @@
     "fog": "rgba(150,175,190,0.42)",
     "lastRing": "rgba(255,255,255,0.95)",
     "plaque": "rgba(6,19,30,0.55)",
-    "plaqueText": "#FFFFFF"
+    "plaqueText": "#FFFFFF",
+    "dimTint": "rgba(4,15,24,0.64)",
+    "coachRing": "#18D7DF"
   }
 }

@@ -30,17 +30,21 @@ interface IBoardCanvas {
   geometry: BoardGeometry;
   visuals: SharedValue<CellVisual[]>;
   fx: BoardFx;
-  onCellPress: (idx: Idx) => void;
-  onCellLongPress: (idx: Idx) => void;
+  onCellPress?: (idx: Idx) => void;
+  onCellLongPress?: (idx: Idx) => void;
+  isInteractive?: boolean;
 }
+
+const ignoreCell = () => undefined;
 
 const BoardCanvas = ({
   board,
   geometry,
   visuals,
   fx,
-  onCellPress,
-  onCellLongPress,
+  onCellPress = ignoreCell,
+  onCellLongPress = ignoreCell,
+  isInteractive = true,
 }: IBoardCanvas) => {
   const { rt } = useUnistyles();
   const numberFont = useFont(numberFontSource, geometry.fontSize);
@@ -89,16 +93,17 @@ const BoardCanvas = ({
       if (idx !== null) onCellLongPress(idx);
     });
 
-  return (
-    <GestureDetector gesture={Gesture.Exclusive(longPress, tap)}>
-      <Canvas style={styles.canvas}>
-        <Group transform={shakeTransform}>
-          <Picture picture={staticPicture} />
-          <Picture picture={cellPicture} />
-        </Group>
-      </Canvas>
-    </GestureDetector>
+  const canvas = (
+    <Canvas style={styles.canvas}>
+      <Group transform={shakeTransform}>
+        <Picture picture={staticPicture} />
+        <Picture picture={cellPicture} />
+      </Group>
+    </Canvas>
   );
+  if (!isInteractive) return canvas;
+
+  return <GestureDetector gesture={Gesture.Exclusive(longPress, tap)}>{canvas}</GestureDetector>;
 };
 
 export default BoardCanvas;

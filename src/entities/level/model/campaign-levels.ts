@@ -1,15 +1,35 @@
 import type { LevelInput } from "@reckon-path/engine";
 
-import { TEST_LEVELS } from "./test-levels";
+import { CAMPAIGN } from "@reckon-path/content";
+
+import { WORLDS } from "./worlds";
+import type { World, WorldNumber } from "./worlds";
 
 export interface CampaignLevel {
   level: LevelInput;
   number: number;
+  world: WorldNumber;
 }
 
-export const CAMPAIGN_LEVELS: readonly CampaignLevel[] = TEST_LEVELS.map((level, index) => ({
+export interface CampaignWorld extends World {
+  levels: readonly CampaignLevel[];
+}
+
+const worldOf = (level: LevelInput): WorldNumber => {
+  const world = WORLDS.find(({ number }) => number === level.world);
+  if (world === undefined) throw new Error(`Level ${level.id} has no campaign world`);
+  return world.number;
+};
+
+export const CAMPAIGN_LEVELS: readonly CampaignLevel[] = CAMPAIGN.map((level, index) => ({
   level,
   number: index + 1,
+  world: worldOf(level),
+}));
+
+export const CAMPAIGN_WORLDS: readonly CampaignWorld[] = WORLDS.map((world) => ({
+  ...world,
+  levels: CAMPAIGN_LEVELS.filter((campaignLevel) => campaignLevel.world === world.number),
 }));
 
 export const findCampaignLevel = (id: string) =>

@@ -12,7 +12,8 @@
       "@entities/*": ["./src/entities/*"],
       "@shared/*": ["./src/shared/*"],
       "@assets/*": ["./assets/*"],
-      "@reckon-path/engine": ["./packages/engine/src/index.ts"]
+      "@reckon-path/engine": ["./packages/engine/src/index.ts"],
+      "@reckon-path/content": ["./packages/content/src/index.ts"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]

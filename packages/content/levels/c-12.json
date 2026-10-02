@@ -1,0 +1,19 @@
+{
+  "v": 2,
+  "id": "c-12",
+  "title": {
+    "ru": "Экзамен бухты",
+    "en": "Bay exam"
+  },
+  "world": 1,
+  "rows": 5,
+  "cols": 5,
+  "targets": [[2, 3]],
+  "beacons": [
+    [0, 0],
+    [4, 4]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 4,
+  "stars": [2, 3]
+}

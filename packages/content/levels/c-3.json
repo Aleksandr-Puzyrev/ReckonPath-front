@@ -1,0 +1,15 @@
+{
+  "v": 2,
+  "id": "c-3",
+  "title": {
+    "ru": "Шире поле",
+    "en": "Wider field"
+  },
+  "world": 1,
+  "rows": 5,
+  "cols": 5,
+  "targets": [[3, 1]],
+  "probeMode": "distance",
+  "moveLimit": 6,
+  "stars": [3, 4]
+}

@@ -16,6 +16,10 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0008 | [`0008-engine-stage-c.md`](0008-engine-stage-c.md) | Level codes `RP2-` with fflate and CRC-8/SMBUS; no match state machine in the engine — match vectors for Go, replayed in TS by a test-only reference; turn limit re-checked after skipped turns |
 | 0009 | [`0009-engine-refactor.md`](0009-engine-refactor.md) | PvP map norm with bomb penalty 1; spec names and topic modules in the engine (exception to rule 07) |
 | 0010 | [`0010-play-screen.md`](0010-play-screen.md) | Stage 1 split into four tasks; board + play screen first; continue stubs; unexploded bomb counter; design colours for the light board; relative heat |
+| 0011 | [`0011-levels-list.md`](0011-levels-list.md) | Spec worlds with design look, test levels as world 1, design row and tile style, disabled editor/code buttons, FlashList, current level and world unlocking rules |
+| 0012 | [`0012-worlds-1-2-content.md`](0012-worlds-1-2-content.md) | Levels in `packages/content`, hand-made layouts with bot-computed limits, tutorial level 1 without a limit, `content:check` rules |
+| 0013 | [`0013-rule-cards-tutorial.md`](0013-rule-cards-tutorial.md) | Sound and Lottie postponed, design mini-board demos, all cards + flags + «Число», cards derived from level content, level 1 tutorial, settings store |
+| 0014 | [`0014-stage-2-plan.md`](0014-stage-2-plan.md) | Stage 2 order of tasks, mocks instead of a backend, agent-written `openapi.yaml` from Part 7, no API URLs yet, remote texts as a new task |
 
 ## Template
 

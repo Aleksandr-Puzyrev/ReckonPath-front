@@ -13,6 +13,7 @@ export const lightColors = {
     disabled: "#9AABB7",
     inverse: "#FFFFFF",
     onAccent: "#FFFFFF",
+    onGold: "#3D2408",
   },
   border: {
     default: "#D5E2E9",
@@ -75,6 +76,7 @@ export const darkColors: ThemeColors = {
     disabled: "#4E6676",
     inverse: "#06131E",
     onAccent: "#FFFFFF",
+    onGold: "#3D2408",
   },
   border: {
     default: "#213C4D",

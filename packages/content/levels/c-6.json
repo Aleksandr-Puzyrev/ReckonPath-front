@@ -1,0 +1,19 @@
+{
+  "v": 2,
+  "id": "c-6",
+  "title": {
+    "ru": "Два маяка",
+    "en": "Two beacons"
+  },
+  "world": 1,
+  "rows": 5,
+  "cols": 5,
+  "targets": [[3, 1]],
+  "beacons": [
+    [0, 4],
+    [4, 0]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 4,
+  "stars": [2, 3]
+}

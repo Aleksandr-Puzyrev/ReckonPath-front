@@ -1,0 +1,15 @@
+{
+  "v": 2,
+  "id": "c-7",
+  "title": {
+    "ru": "Флажки",
+    "en": "Flags"
+  },
+  "world": 1,
+  "rows": 5,
+  "cols": 5,
+  "targets": [[3, 2]],
+  "probeMode": "distance",
+  "moveLimit": 6,
+  "stars": [3, 4]
+}

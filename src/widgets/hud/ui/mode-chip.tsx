@@ -1,28 +1,42 @@
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Pressable } from "react-native";
+import { useUnistyles } from "react-native-unistyles";
 
 import type { ProbeMode } from "@reckon-path/engine";
 
 import { Text } from "@shared/ui/text";
+
+import InfoIcon from "@assets/icons/play/info.svg";
 
 import { styles } from "./mode-chip-styles";
 
 interface IModeChip {
   mode: ProbeMode;
   fog: number | null;
+  onInfo: () => void;
 }
 
-// TODO: the ⓘ button opens the rule card of the mode (stage 1, task 4)
-const ModeChip = ({ mode, fog }: IModeChip) => {
+const ModeChip = ({ mode, fog, onInfo }: IModeChip) => {
   const { t } = useTranslation();
-  const label = t(`play.mode.${mode}`);
+  const { theme } = useUnistyles();
+  const label =
+    fog === null ? t(`play.mode.${mode}`) : t("play.mode.fog", { mode: t(`play.mode.${mode}`) });
+  const iconSize = theme.sizes.icon.s;
 
   return (
-    <View style={styles.chip}>
+    <Pressable
+      testID="mode-info"
+      accessibilityRole="button"
+      accessibilityLabel={`${label}, ${t("rules.info")}`}
+      onPress={onInfo}
+      hitSlop={(theme.sizes.touchTarget - theme.space[8]) / 2}
+      style={styles.chip}
+    >
       <Text variant="caption" style={styles.text}>
-        {fog === null ? label : t("play.mode.fog", { mode: label })}
+        {label}
       </Text>
-    </View>
+      <InfoIcon width={iconSize} height={iconSize} color={theme.colors.accent.cyan} />
+    </Pressable>
   );
 };
 

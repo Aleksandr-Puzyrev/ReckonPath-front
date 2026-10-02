@@ -138,5 +138,162 @@
   },
   "ads": {
     "unavailable": "No ad available right now"
+  },
+  "levels": {
+    "eyebrow": "Signal path",
+    "title": "Levels",
+    "editor": "Editor",
+    "playCode": "Play a code",
+    "locked": "Beat level {{n}} first",
+    "worldLocked": "Finish world {{n}} to unlock",
+    "toCurrent": "To current",
+    "size": "{{rows}}×{{cols}}",
+    "row": "{{n}} · {{title}}",
+    "lockedRow": "Level {{n}} · {{description}}",
+    "world": {
+      "label": "World {{n}}",
+      "perfect": "3★ world",
+      "sheetEyebrow": "World {{n}} · {{name}}",
+      "name": {
+        "1": "Quiet Bay",
+        "2": "Reefs",
+        "3": "Currents",
+        "4": "The Flock",
+        "5": "Mine Harbour",
+        "6": "Rocky Shore",
+        "7": "Fog",
+        "8": "Open Sea"
+      },
+      "subtitle": {
+        "1": "new: bearing, beacon, flags",
+        "2": "new: fence",
+        "3": "new: stream and bridge",
+        "4": "new: several signals and ×2",
+        "5": "new: bomb and buoy",
+        "6": "new: rock and course",
+        "7": "new: hot-cold and fog",
+        "8": "new: signal order"
+      }
+    },
+    "element": {
+      "streams": "stream",
+      "heavy": "×2",
+      "bombs_one": "{{count}} bomb",
+      "bombs_other": "{{count}} bombs",
+      "bridges_one": "{{count}} bridge",
+      "bridges_other": "{{count}} bridges",
+      "rocks_one": "{{count}} rock",
+      "rocks_other": "{{count}} rocks",
+      "fences_one": "{{count}} fence",
+      "fences_other": "{{count}} fences",
+      "beacons_one": "{{count}} beacon",
+      "beacons_other": "{{count}} beacons",
+      "buoys_one": "{{count}} buoy",
+      "buoys_other": "{{count}} buoys"
+    },
+    "a11y": {
+      "done": "Level {{n}}, cleared, stars: {{stars}} of 3",
+      "current": "Level {{n}}, current",
+      "locked": "Level {{n}}, locked"
+    },
+    "sheet": {
+      "title": "Level {{n}}",
+      "limit_one": "Limit {{count}} move",
+      "limit_other": "Limit {{count}} moves",
+      "three_one": "3★ ≤ {{count}} move",
+      "three_other": "3★ ≤ {{count}} moves",
+      "two_one": "2★ ≤ {{count}} move",
+      "two_other": "2★ ≤ {{count}} moves",
+      "best_one": "Best {{count}} move",
+      "best_other": "Best {{count}} moves"
+    },
+    "targets_one": "{{count}} signal",
+    "targets_other": "{{count}} signals"
+  },
+  "rules": {
+    "stream": "Stream: stepping in costs 3. Going around may be shorter",
+    "fence": "A fence sits between tiles. The signal goes around it",
+    "bridge": "Bridge over a stream: a step costs 1",
+    "heavy": "Shallows (×2): a step costs 2",
+    "rock": "Rock: you can’t tap it or pass through it",
+    "bomb": "A bomb is hidden on the board. Tapping it costs 2 moves and gives no reading. The bomb count is shown at the top",
+    "bombNear": "A mine icon on an opened cell means a bomb is next to it: above, below, left or right",
+    "beacon": "The beacon is already lit: its reading is free",
+    "buoy": "A buoy is hidden on the board. Find it for +3 moves",
+    "fog": "Fog: only the last {{count}} readings stay visible. Use flags to remember",
+    "order": "Find the signals in order: the reading points to the next number",
+    "multi": "The number shows the path to the nearest unfound signal",
+    "direction": "The arrow points toward the signal",
+    "hotcold": "Warmer or colder — compared to your last tap",
+    "distance": "The number on a tile is how many steps to the signal. A smaller number means closer",
+    "flags": "Long-press to place a flag: mark the tiles you have already checked. A flag costs no move",
+    "title": {
+      "distance": "Number",
+      "flags": "Flags",
+      "fence": "Fence",
+      "stream": "Stream",
+      "bridge": "Bridge",
+      "heavy": "×2 tile",
+      "rock": "Rock",
+      "multi": "Several signals",
+      "bomb": "Bomb",
+      "bombNear": "Mine icon",
+      "beacon": "Beacon",
+      "buoy": "Buoy",
+      "fog": "Fog",
+      "order": "Signal order",
+      "direction": "Course",
+      "hotcold": "Hot-cold"
+    },
+    "newElement": "New element",
+    "gotIt": "Got it",
+    "listHint": "Elements you have already met. Tap to open the card",
+    "previous": "Previous card",
+    "next": "Next card",
+    "info": "Mode rule"
+  },
+  "onboarding": {
+    "tapCell": "Tap any tile",
+    "number": "The number is how many steps to the signal",
+    "closer": "Tap closer — the number will drop",
+    "find": "Now find the signal yourself",
+    "skip": "Skip",
+    "movesLimit": "Each level has a move limit. Fewer moves, more stars",
+    "next": "Next",
+    "resultNote": "The first level is always 3★. From now on moves are limited"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again",
+    "NETWORK": "Can’t reach the server",
+    "INSUFFICIENT_FUNDS": "Not enough currency",
+    "ALREADY_OWNED": "You already own this",
+    "OFFER_ENDED": "Offer ended",
+    "SOLD_OUT": "Sold out",
+    "PRICE_CHANGED": "The price changed — check and confirm again",
+    "LIMIT_REACHED": "That’s all for today. Come back tomorrow",
+    "MAP_INVALID": "Fix your map before the match",
+    "IN_MATCH": "You have a match running on another device",
+    "QUEUE_UNAVAILABLE": "Matchmaking is temporarily unavailable",
+    "CODE_INVALID": "Invalid code",
+    "CODE_NEWER": "This code needs a newer app version",
+    "FRIENDS_LIMIT": "Friend limit reached (200)",
+    "RATE_LIMITED": "Too many tries. Wait a moment"
+  },
+  "system": {
+    "update": {
+      "title": "A new version is available",
+      "body": "This version is no longer supported. Update to keep playing — your progress is safe.",
+      "cta": "Update",
+      "later": "Later",
+      "softTitle": "Version {{version}} is out"
+    },
+    "maintenance": {
+      "title": "Maintenance",
+      "body": "Back around {{time}}",
+      "cta": "Play offline",
+      "retry": "Check again",
+      "checking": "Checking…",
+      "still": "Still under maintenance"
+    }
   }
 }

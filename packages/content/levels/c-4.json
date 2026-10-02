@@ -1,0 +1,16 @@
+{
+  "v": 2,
+  "id": "c-4",
+  "title": {
+    "ru": "Маяк",
+    "en": "The beacon"
+  },
+  "world": 1,
+  "rows": 4,
+  "cols": 4,
+  "targets": [[2, 2]],
+  "beacons": [[0, 0]],
+  "probeMode": "distance",
+  "moveLimit": 4,
+  "stars": [2, 3]
+}

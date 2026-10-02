@@ -1,7 +1,6 @@
-import { stars } from "@reckon-path/engine";
 import type { GameEvent, Idx } from "@reckon-path/engine";
 
-import { useGameSessionStore } from "@entities/level";
+import { levelStarsOf, useGameSessionStore } from "@entities/level";
 import { useProgressStore } from "@entities/progress";
 import { haptic } from "@shared/haptics";
 import { motion } from "@shared/theme";
@@ -34,7 +33,7 @@ export const tapCell = (cell: Idx): TapOutcome => {
 
   const isRecord = useProgressStore
     .getState()
-    .recordWin(levelId, { stars: stars(game), moves: game.movesUsed });
+    .recordWin(levelId, { stars: levelStarsOf(game), moves: game.movesUsed });
   useGameSessionStore.getState().finish();
   return { events, isRecord };
 };

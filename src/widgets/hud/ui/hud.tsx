@@ -13,7 +13,11 @@ import { styles } from "./hud-styles";
 import ModeChip from "./mode-chip";
 import StarBar from "./star-bar";
 
-const Hud = () => {
+interface IHud {
+  onModeInfo: () => void;
+}
+
+const Hud = ({ onModeInfo }: IHud) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const game = useGameSessionStore((state) => state.game);
@@ -55,7 +59,7 @@ const Hud = () => {
         ) : (
           <StarBar share={values.movesShare} marks={values.starMarks} />
         )}
-        <ModeChip mode={game.rules.probeMode} fog={game.rules.fog} />
+        <ModeChip mode={game.rules.probeMode} fog={game.rules.fog} onInfo={onModeInfo} />
       </View>
     </View>
   );

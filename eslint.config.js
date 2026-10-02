@@ -17,7 +17,7 @@ const layerPolicies = FSD_LAYERS.map((layer, index) => ({
         types: {
           anyOf: [
             ...FSD_LAYERS.slice(index + 1),
-            ...(ENGINE_USERS.includes(layer) ? ["engine"] : []),
+            ...(ENGINE_USERS.includes(layer) ? ["engine", "content"] : []),
           ],
         },
       },
@@ -40,6 +40,7 @@ module.exports = defineConfig([
       "design/*",
       "ios/*",
       "android/*",
+      "src/shared/api/generated/*",
     ],
   },
 
@@ -60,6 +61,7 @@ module.exports = defineConfig([
           groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
           pathGroups: [
             { pattern: "@reckon-path/engine", group: "internal", position: "before" },
+            { pattern: "@reckon-path/content", group: "internal", position: "before" },
             ...FSD_LAYERS.slice(1).map((layer) => ({
               pattern: `@${layer}/**`,
               group: "internal",
@@ -91,6 +93,7 @@ module.exports = defineConfig([
         { type: "entities", pattern: "src/entities/*", capture: ["slice"] },
         { type: "shared", pattern: "src/shared" },
         { type: "engine", pattern: "packages/engine" },
+        { type: "content", pattern: "packages/content" },
       ],
     },
     rules: {
@@ -101,6 +104,10 @@ module.exports = defineConfig([
           policies: [
             { allow: { dependency: { relationship: { to: "internal" } } } },
             ...layerPolicies,
+            {
+              from: { element: { type: "content" } },
+              allow: { to: { element: { types: { anyOf: ["engine"] } } } },
+            },
           ],
         },
       ],

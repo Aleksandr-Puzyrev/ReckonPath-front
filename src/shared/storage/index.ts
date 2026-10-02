@@ -1,1 +1,1 @@
-export { zustandStorage } from "./mmkv-storage";
+export { keyValueStorage, zustandStorage } from "./mmkv-storage";

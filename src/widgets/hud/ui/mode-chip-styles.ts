@@ -8,6 +8,9 @@ export const styles = StyleSheet.create((theme) => ({
     borderWidth: 1,
     borderColor: theme.colors.border.default,
     backgroundColor: theme.colors.bg.surface,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.space[2],
     justifyContent: "center",
   },
   text: {

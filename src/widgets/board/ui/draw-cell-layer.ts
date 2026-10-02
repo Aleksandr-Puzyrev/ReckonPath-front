@@ -25,6 +25,7 @@ export interface CellFx {
 
 const HEAT_WIDTH = { hot: 3, warm: 2, cold: 1 } as const;
 const RING_WIDTH = 2;
+const COACH_RING_WIDTH = 3;
 const STALE_ALPHA = 0.45;
 const GHOST_ALPHA = 0.55;
 const FOG_DOT = 3.5;
@@ -348,6 +349,21 @@ const drawCell = (
       size,
       elements.mineBadge,
       1,
+    );
+  }
+  if (visual.emphasis === "dim") {
+    canvas.drawRRect(roundRect(x, y, cell, cell, radius), solidPaint(elements.dimTint));
+  }
+  if (visual.emphasis === "highlight") {
+    canvas.drawRRect(
+      roundRect(
+        x - RING_WIDTH,
+        y - RING_WIDTH,
+        cell + 2 * RING_WIDTH,
+        cell + 2 * RING_WIDTH,
+        radius,
+      ),
+      strokePaint(elements.coachRing, COACH_RING_WIDTH),
     );
   }
   if (visual.isLast && content.type !== "target") {

@@ -8,4 +8,8 @@ export const styles = StyleSheet.create((theme) => ({
   cell: {
     flex: 1,
   },
+  switches: {
+    borderRadius: theme.radius.l,
+    backgroundColor: theme.colors.bg.sunken,
+  },
 }));

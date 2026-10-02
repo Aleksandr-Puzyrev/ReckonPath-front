@@ -23,3 +23,5 @@ export const Board = ({ onCellPress, onCellLongPress, showHidden }: IFakeBoard) 
 );
 
 export const useBoardFx = () => ({ play: () => undefined });
+
+export const BoardDemo = () => null;

@@ -23,6 +23,7 @@ interface IBoard {
   size: number;
   fx: BoardFx;
   showHidden: boolean;
+  highlight?: readonly Idx[] | null;
   onCellPress: (idx: Idx) => void;
   onCellLongPress: (idx: Idx) => void;
 }
@@ -39,7 +40,14 @@ const lastTappedCell = () => {
   return taps.at(-1) ?? null;
 };
 
-const Board = ({ size, fx, showHidden, onCellPress, onCellLongPress }: IBoard) => {
+const Board = ({
+  size,
+  fx,
+  showHidden,
+  highlight = null,
+  onCellPress,
+  onCellLongPress,
+}: IBoard) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const board = useGameSessionStore((state) => state.game?.board);
@@ -51,11 +59,13 @@ const Board = ({ size, fx, showHidden, onCellPress, onCellLongPress }: IBoard) =
     const update = () => {
       const { game, flags } = useGameSessionStore.getState();
       if (game === null) return;
-      visuals.set(buildCellVisuals(game, { flags, lastCell: lastTappedCell(), showHidden }));
+      visuals.set(
+        buildCellVisuals(game, { flags, lastCell: lastTappedCell(), showHidden, highlight }),
+      );
     };
     update();
     return useGameSessionStore.subscribe(update);
-  }, [visuals, showHidden]);
+  }, [visuals, showHidden, highlight]);
 
   useEffect(() => {
     void AccessibilityInfo.isScreenReaderEnabled().then(setIsScreenReader);

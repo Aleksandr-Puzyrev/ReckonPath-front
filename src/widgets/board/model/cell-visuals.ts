@@ -9,8 +9,11 @@ export type CellContent =
   | { type: "target"; order: number | null }
   | { type: "bomb" };
 
+export type CellEmphasis = "none" | "dim" | "highlight";
+
 export interface CellVisual {
   content: CellContent;
+  emphasis: CellEmphasis;
   isStale: boolean;
   isFogged: boolean;
   isLast: boolean;
@@ -23,6 +26,7 @@ interface VisualOptions {
   flags: readonly Idx[];
   lastCell: Idx | null;
   showHidden: boolean;
+  highlight?: readonly Idx[] | null;
 }
 
 const isProbe = (reveal: Reveal) =>
@@ -59,14 +63,21 @@ const hiddenContent = (game: GameState, idx: Idx, options: VisualOptions): CellC
   ghost: options.showHidden ? ghostOf(game, idx) : null,
 });
 
+const emphasisOf = (idx: Idx, highlight: readonly Idx[] | null | undefined): CellEmphasis => {
+  if (highlight == null) return "none";
+  return highlight.includes(idx) ? "highlight" : "dim";
+};
+
 export const buildCellVisuals = (game: GameState, options: VisualOptions): CellVisual[] => {
   const visible = visibleUnderFog(game);
 
   return game.board.kinds.map((_, idx) => {
     const reveal = game.revealed.get(idx);
+    const emphasis = emphasisOf(idx, options.highlight);
     if (reveal === undefined) {
       return {
         content: hiddenContent(game, idx, options),
+        emphasis,
         isStale: false,
         isFogged: false,
         isLast: false,
@@ -79,6 +90,7 @@ export const buildCellVisuals = (game: GameState, options: VisualOptions): CellV
     const isBeacon = "beacon" in reveal && reveal.beacon === true;
     return {
       content: contentOf(reveal),
+      emphasis,
       isStale: isStale(game, reveal),
       isFogged: visible !== null && isProbe(reveal) && !isBeacon && !visible.has(idx),
       isLast: idx === options.lastCell,

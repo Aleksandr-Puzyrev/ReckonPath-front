@@ -1,0 +1,16 @@
+{
+  "v": 2,
+  "id": "c-11",
+  "title": {
+    "ru": "Вдоль берега",
+    "en": "Along the shore"
+  },
+  "world": 1,
+  "rows": 5,
+  "cols": 5,
+  "targets": [[1, 0]],
+  "beacons": [[0, 2]],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 3]
+}
