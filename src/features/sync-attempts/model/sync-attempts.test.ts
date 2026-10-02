@@ -1,6 +1,7 @@
 import { setItemAsync } from "expo-secure-store";
 import { http, HttpResponse } from "msw/http";
 
+import { useDailyRecordStore } from "@entities/daily";
 import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
 import { ApiError } from "@shared/api";
@@ -47,6 +48,7 @@ afterEach(() => {
   secureStore.__reset();
   useOutboxStore.getState().reset();
   useProgressStore.getState().reset();
+  useDailyRecordStore.getState().reset();
 });
 
 describe("syncAttempts", () => {
@@ -120,5 +122,25 @@ describe("syncAttempts", () => {
     await syncAttempts();
 
     expect(useProgressStore.getState().best).toEqual({ "c-2": { stars: 2, moves: 4 } });
+  });
+
+  test("keeps the server's place of the counted daily attempt", async () => {
+    await signIn();
+    const daily = attemptFixture({ mode: "daily", ref: "d-2026-09-28" });
+    useDailyRecordStore.getState().recordCounted("2026-09-28", {
+      attemptId: daily.attemptId,
+      result: "won",
+      movesUsed: 1,
+      stars: 3,
+      durationMs: 1,
+    });
+    useOutboxStore.getState().enqueue(daily);
+
+    await syncAttempts();
+
+    expect(useDailyRecordStore.getState().days["2026-09-28"]).toMatchObject({
+      rank: 134,
+      percentile: 88,
+    });
   });
 });

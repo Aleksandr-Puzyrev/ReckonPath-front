@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,23 +8,20 @@ import type { GameEvent, Idx } from "@reckon-path/engine";
 
 import { TUTORIAL } from "@reckon-path/content";
 
-import {
-  attemptOf,
-  CAMPAIGN_LEVELS,
-  CAMPAIGN_WORLDS,
-  findCampaignLevel,
-  nextCampaignLevel,
-  selectHasSavedSession,
-  useGameSessionStore,
-} from "@entities/level";
-import { currentLevelId, levelStateOf, useProgressStore } from "@entities/progress";
-import { useOutboxStore } from "@entities/outbox";
+import { useClockOffset } from "@entities/app-config";
+import { dailyDayQueryOptions } from "@entities/daily";
+import { selectHasSavedSession, useGameSessionStore } from "@entities/level";
+import type { Attempt } from "@entities/outbox";
+import { useProgressStore } from "@entities/progress";
 import { useRulesStore } from "@entities/rules";
+import { finishAttempt, isCountedDailyLevel } from "@features/finish-attempt";
 import { flagCell } from "@features/flag-cell";
 import { tapCell, unlockTapInput } from "@features/tap-cell";
 import { motion } from "@shared/theme";
 import { useBoardFx } from "@widgets/board";
 
+import { resolvePlayLevel } from "./resolve-play-level";
+import type { PlayLevel } from "./resolve-play-level";
 import { usePlayGuides } from "./use-play-guides";
 
 export type PlayOverlay =
@@ -34,48 +32,50 @@ interface PendingOverlay {
   delay: number;
 }
 
-const CAMPAIGN_MODE = "campaign";
 const LEVELS_ROUTE = "/levels";
+const DAILY_ROUTE = "/daily";
 
 const NO_STATE_CHANGE: ReadonlySet<GameEvent["type"]> = new Set(["blocked", "alreadyRevealed"]);
 
 const hasEvent = (events: readonly GameEvent[], type: GameEvent["type"]) =>
   events.some((event) => event.type === type);
 
-// Leaving a lost game, restarting it, or starting another level ends the attempt, which goes to the outbox and is not offered again (выход из проигранной партии, её перезапуск или запуск другого уровня завершает попытку: она уходит в очередь и больше не предлагается).
-const finishLostAttempt = () => {
-  const { game, levelId, actions, startedAt, finishedAt, finish } = useGameSessionStore.getState();
-  if (game?.status !== "lost" || levelId === null) return;
-  useOutboxStore
-    .getState()
-    .enqueue(
-      attemptOf({ levelId, actions, startedAt, finishedAt: finishedAt ?? Date.now(), game }),
-    );
-  finish();
+const playableLevelOf = (play: PlayLevel) =>
+  play.kind === "campaign" || play.kind === "daily" ? play.level : null;
+
+// Leaving a lost game, restarting it, or starting another level ends the attempt, so it goes to the outbox and is not offered again (выход из проигранной партии, её перезапуск или запуск другого уровня завершает попытку: она уходит в очередь и больше не предлагается).
+const finishLostGame = () => {
+  if (useGameSessionStore.getState().game?.status === "lost") finishAttempt();
 };
 
-const exitToLevels = () => {
-  finishLostAttempt();
-  if (router.canGoBack()) router.back();
-  else router.replace(LEVELS_ROUTE);
+// «Заново» during the counted daily attempt counts it as a loss (DLY-05) («Заново» во время зачётной попытки дейли засчитывает её как поражение).
+const isCountedDailyInPlay = (play: PlayLevel) => {
+  const { game, levelId } = useGameSessionStore.getState();
+  return (
+    play.kind === "daily" &&
+    game?.status === "playing" &&
+    game.movesUsed > 0 &&
+    levelId !== null &&
+    isCountedDailyLevel(levelId)
+  );
 };
 
 export const usePlayScreen = (mode: string, id: string) => {
   const { t } = useTranslation();
-  const campaign = mode === CAMPAIGN_MODE ? findCampaignLevel(id) : null;
-  const next = campaign === null ? null : nextCampaignLevel(id);
+  const queryClient = useQueryClient();
+  const clockOffset = useClockOffset();
   const fx = useBoardFx();
-  const level = campaign?.level ?? null;
-  // A locked level can still be reached by a link; it is checked once, so winning it does not flip the screen (закрытый уровень можно открыть по ссылке; проверка один раз, чтобы победа не переключала экран).
-  const [lockedBy] = useState(() => {
-    if (level === null) return null;
-    const { best } = useProgressStore.getState();
-    const currentId = currentLevelId(CAMPAIGN_WORLDS, best);
-    if (levelStateOf(level.id, currentId, best) !== "locked") return null;
-    return (
-      CAMPAIGN_LEVELS.find((campaignLevel) => campaignLevel.level.id === currentId)?.number ?? null
-    );
-  });
+  // Resolved once: winning a level must not flip a locked check or the day (определяется один раз: победа не должна менять проверку закрытия или день).
+  const [play] = useState(() =>
+    resolvePlayLevel(mode, id, {
+      best: useProgressStore.getState().best,
+      now: Date.now() + clockOffset,
+      savedLevelId: useGameSessionStore.getState().levelId,
+      dailyOverride: (dayKey) =>
+        queryClient.getQueryData(dailyDayQueryOptions(dayKey).queryKey)?.override ?? null,
+    }),
+  );
+  const level = playableLevelOf(play);
   // The tutorial always starts fresh, even over a saved game (обучение всегда начинается заново, даже поверх сохранённой партии).
   const [hasSavedSession] = useState(
     () =>
@@ -83,20 +83,21 @@ export const usePlayScreen = (mode: string, id: string) => {
       !(level.id === TUTORIAL.levelId && useRulesStore.getState().tutorial === "pending") &&
       selectHasSavedSession(level.id)(useGameSessionStore.getState()),
   );
-  const guides = usePlayGuides(lockedBy === null ? level : null);
+  const guides = usePlayGuides(level);
   const [overlay, setOverlay] = useState<PlayOverlay>(hasSavedSession ? "resume" : "none");
   const [pending, setPending] = useState<PendingOverlay | null>(null);
   const [isFlagMode, setIsFlagMode] = useState(false);
   const [isRecord, setIsRecord] = useState(false);
+  const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
   const [isBombLoss, setIsBombLoss] = useState(false);
 
   // Before the first paint, so the board never shows the previous level (до первой отрисовки, чтобы поле не показало прошлый уровень).
   useLayoutEffect(() => {
-    if (level === null || lockedBy !== null) return;
-    if (!hasSavedSession) finishLostAttempt();
+    if (level === null) return;
+    if (!hasSavedSession) finishLostGame();
     useGameSessionStore.getState().start(level, hasSavedSession ? "resume" : "new");
     unlockTapInput();
-  }, [level, hasSavedSession, lockedBy]);
+  }, [level, hasSavedSession]);
 
   useEffect(() => {
     if (pending === null) return;
@@ -129,9 +130,16 @@ export const usePlayScreen = (mode: string, id: string) => {
     return () => subscription.remove();
   }, []);
 
+  const exit = () => {
+    finishLostGame();
+    if (router.canGoBack()) router.back();
+    else router.replace(play.kind === "daily" ? DAILY_ROUTE : LEVELS_ROUTE);
+  };
+
   const restart = () => {
     if (level === null) return;
-    finishLostAttempt();
+    if (isCountedDailyInPlay(play)) finishAttempt();
+    else finishLostGame();
     useGameSessionStore.getState().start(level, "new");
     unlockTapInput();
     setPending(null);
@@ -148,24 +156,23 @@ export const usePlayScreen = (mode: string, id: string) => {
       return;
     }
 
-    const outcome = tapCell(cell);
-    fx.play(cell, outcome.events);
-    if (
-      guides.tutorialStep !== null &&
-      outcome.events.some(({ type }) => !NO_STATE_CHANGE.has(type))
-    ) {
+    const events = tapCell(cell);
+    fx.play(cell, events);
+    if (guides.tutorialStep !== null && events.some(({ type }) => !NO_STATE_CHANGE.has(type))) {
       guides.handleTutorialTap();
     }
-    if (hasEvent(outcome.events, "targetFound")) {
+    if (hasEvent(events, "targetFound")) {
       AccessibilityInfo.announceForAccessibility(t("play.found"));
     }
-    if (hasEvent(outcome.events, "win")) {
+    if (hasEvent(events, "win")) {
       guides.handleTutorialWin();
-      setIsRecord(outcome.isRecord);
+      const finished = finishAttempt();
+      setIsRecord(finished.isRecord);
+      setLastAttempt(finished.attempt);
       setPending({ overlay: "win", delay: motion.animation.targetFound });
     }
-    if (hasEvent(outcome.events, "lose")) {
-      const isBomb = hasEvent(outcome.events, "bomb");
+    if (hasEvent(events, "lose")) {
+      const isBomb = hasEvent(events, "bomb");
       setIsBombLoss(isBomb);
       setPending({ overlay: "lose", delay: isBomb ? motion.animation.bomb : 0 });
     }
@@ -190,10 +197,10 @@ export const usePlayScreen = (mode: string, id: string) => {
   };
 
   const goNext = () => {
-    if (next === null) return;
+    if (play.kind !== "campaign" || play.next === null) return;
     router.replace({
       pathname: "/play/[mode]/[id]",
-      params: { mode: CAMPAIGN_MODE, id: next.level.id },
+      params: { mode: "campaign", id: play.next.level.id },
     });
   };
 
@@ -204,14 +211,15 @@ export const usePlayScreen = (mode: string, id: string) => {
   };
 
   return {
-    campaign,
+    play,
     guides,
-    lockedBy,
-    hasNext: next !== null,
+    hasNext: play.kind === "campaign" && play.next !== null,
+    isCountedRestart: overlay === "restartConfirm" && isCountedDailyInPlay(play),
     fx,
     overlay,
     isFlagMode,
     isRecord,
+    lastAttempt,
     isBombLoss,
     handleCellPress,
     handleCellLongPress,
@@ -223,7 +231,8 @@ export const usePlayScreen = (mode: string, id: string) => {
     handleContinued: () => setOverlay("none"),
     handleDecline: () => setOverlay("declined"),
     handleNext: goNext,
-    handleExit: exitToLevels,
+    handleExit: exit,
+    handleHome: () => router.replace("/"),
     handleTutorialSkip: skipTutorial,
     handleRules: () => {
       setOverlay("none");

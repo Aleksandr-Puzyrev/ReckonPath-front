@@ -1,3 +1,4 @@
+import { useDailyRecordStore } from "@entities/daily";
 import { CAMPAIGN_LEVELS } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
@@ -15,7 +16,7 @@ const KNOWN_LEVEL_IDS: ReadonlySet<string> = new Set(CAMPAIGN_LEVELS.map(({ leve
 
 const sendBatch = async () => {
   const batch = useOutboxStore.getState().attempts.slice(0, BATCH_SIZE);
-  const { error, response } = await apiClient.POST("/attempts:batch", {
+  const { data, error, response } = await apiClient.POST("/attempts:batch", {
     body: { attempts: batch },
   });
   if (
@@ -25,6 +26,14 @@ const sendBatch = async () => {
     const { code, details } = readErrorEnvelope(error);
     throw new ApiError(response.status, code, details);
   }
+  data?.results.forEach(({ attemptId, daily }) => {
+    if (daily === undefined) return;
+    useDailyRecordStore.getState().recordPlace(attemptId, {
+      rank: daily.rank ?? null,
+      percentile: daily.percentile ?? null,
+      ranked: daily.ranked ?? null,
+    });
+  });
   // Every answered attempt leaves the queue, whatever its status; a rejected batch is dropped too (каждая отвеченная попытка уходит из очереди при любом статусе; отклонённая пачка тоже удаляется).
   // TODO: report rejected attempts and dropped batches to Sentry once it is set up
   useOutboxStore.getState().remove(batch.map(({ attemptId }) => attemptId));

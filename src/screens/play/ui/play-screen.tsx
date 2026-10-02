@@ -4,11 +4,14 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 
+import { DAILY_UNLOCK_LEVEL } from "@features/daily-today";
+import { formatDayMonth } from "@shared/lib";
 import { CoachMark } from "@shared/ui/coach-mark";
 import { Dialog } from "@shared/ui/dialog";
 import { Screen } from "@shared/ui/screen";
 import { AnswerPanel } from "@widgets/answer-panel";
 import { Board } from "@widgets/board";
+import { DailyResultSheet } from "@widgets/daily-result";
 import { Hud } from "@widgets/hud";
 import { LoseSheet, WinSheet } from "@widgets/level-result";
 import { PauseSheet } from "@widgets/pause-menu";
@@ -28,22 +31,32 @@ interface IPlayLevel {
 }
 
 const PlayLevel = ({ mode, id }: IPlayLevel) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const play = usePlayScreen(mode, id);
   const [boardSize, setBoardSize] = useState(0);
+  const target = play.play;
 
-  if (play.campaign === null) {
+  if (target.kind === "missing") {
     return <LevelUnavailable message={t("play.notFound")} onExit={play.handleExit} />;
   }
-  if (play.lockedBy !== null) {
+  if (target.kind === "locked") {
     return (
       <LevelUnavailable
-        message={t("levels.locked", { n: play.lockedBy })}
+        message={t("levels.locked", { n: target.lockedBy })}
         onExit={play.handleExit}
       />
     );
   }
-  const { level, number } = play.campaign;
+  if (target.kind === "dailyLocked") {
+    return (
+      <LevelUnavailable
+        message={t("daily.locked", { n: DAILY_UNLOCK_LEVEL })}
+        onExit={play.handleExit}
+      />
+    );
+  }
+  const { level } = target;
+  const isDaily = target.kind === "daily";
 
   const handleBoardLayout = ({ nativeEvent }: LayoutChangeEvent) =>
     setBoardSize(Math.min(nativeEvent.layout.width, nativeEvent.layout.height));
@@ -51,7 +64,8 @@ const PlayLevel = ({ mode, id }: IPlayLevel) => {
   return (
     <Screen style={styles.screen}>
       <PlayHeader
-        levelNumber={number}
+        title={isDaily ? t("daily.title") : t("home.level", { n: target.number })}
+        eyebrow={isDaily ? formatDayMonth(target.dayKey, i18n.language) : undefined}
         onPause={play.handlePause}
         onRestart={play.handleRestartRequest}
       />
@@ -91,22 +105,33 @@ const PlayLevel = ({ mode, id }: IPlayLevel) => {
 
       <PauseSheet
         isOpen={play.overlay === "pause"}
+        note={isDaily ? t("daily.pauseNote") : undefined}
         onResume={play.handleResume}
-        onRestart={play.handleRestart}
+        onRestart={isDaily ? play.handleRestartRequest : play.handleRestart}
         onRules={play.handleRules}
         onExit={play.handleExit}
       />
-      <WinSheet
-        isOpen={play.overlay === "win"}
-        levelId={level.id}
-        levelNumber={number}
-        isRecord={play.isRecord}
-        isTutorial={play.guides.isTutorialLevel}
-        hasNext={play.hasNext}
-        onNext={play.handleNext}
-        onAgain={play.handleRestart}
-        onExit={play.handleExit}
-      />
+      {target.kind === "daily" ? (
+        <DailyResultSheet
+          isOpen={play.overlay === "win"}
+          dayKey={target.dayKey}
+          attempt={play.lastAttempt}
+          onAgain={play.handleRestart}
+          onHome={play.handleHome}
+        />
+      ) : (
+        <WinSheet
+          isOpen={play.overlay === "win"}
+          levelId={level.id}
+          levelNumber={target.number}
+          isRecord={play.isRecord}
+          isTutorial={play.guides.isTutorialLevel}
+          hasNext={play.hasNext}
+          onNext={play.handleNext}
+          onAgain={play.handleRestart}
+          onExit={play.handleExit}
+        />
+      )}
       <LoseSheet
         isOpen={play.overlay === "lose"}
         isBombLoss={play.isBombLoss}
@@ -117,7 +142,8 @@ const PlayLevel = ({ mode, id }: IPlayLevel) => {
       />
       <Dialog
         isOpen={play.overlay === "restartConfirm"}
-        title={t("play.restartConfirm")}
+        title={play.isCountedRestart ? t("daily.restartTitle") : t("play.restartConfirm")}
+        message={play.isCountedRestart ? t("daily.restartCounted") : undefined}
         onCancel={play.handleResume}
         actions={[
           { label: t("common.cancel"), variant: "secondary", onPress: play.handleResume },

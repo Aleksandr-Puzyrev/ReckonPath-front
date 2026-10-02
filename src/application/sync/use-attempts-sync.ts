@@ -1,20 +1,28 @@
-import { onlineManager, useMutation } from "@tanstack/react-query";
+import { onlineManager, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useEffectEvent } from "react";
 import { AppState } from "react-native";
 
 import { syncAttemptsMutationOptions } from "@features/sync-attempts";
+import { dailyKeys } from "@entities/daily";
 import { useOutboxStore } from "@entities/outbox";
 import { useSessionStore } from "@entities/session";
+import { streakKeys } from "@entities/streak";
 
 import { retryDelay, shouldRetry } from "../query/retry-policy";
 
 export const OUTBOX_INTERVAL_MS = 60_000;
 
 export const useAttemptsSync = () => {
+  const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     ...syncAttemptsMutationOptions(),
     retry: shouldRetry,
     retryDelay,
+    // Sent daily attempts change the streak, the calendar and the day's standings (отправленные попытки дейли меняют серию, календарь и таблицу дня).
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: streakKeys.all });
+      queryClient.invalidateQueries({ queryKey: dailyKeys.all });
+    },
   });
 
   const sync = useEffectEvent(() => {

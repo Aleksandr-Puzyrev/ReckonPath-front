@@ -7,7 +7,8 @@
     "profile": "Profile"
   },
   "common": {
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "back": "Back"
   },
   "home": {
     "level": "Level {{n}}",
@@ -295,5 +296,69 @@
       "checking": "Checking…",
       "still": "Still under maintenance"
     }
+  },
+  "daily": {
+    "title": "Daily bearing",
+    "next": "New one in {{time}}",
+    "nextShort": "new in {{time}}",
+    "dateLine": "{{weekday}} · {{date}}",
+    "cardEyebrow": "Daily bearing · {{date}}",
+    "notPlayed": "Not played yet today",
+    "locked": "Unlocks after level {{n}}",
+    "today": "Today",
+    "limit_one": "{{count}}-move limit · 3★ up to {{moves}}",
+    "limit_other": "{{count}}-move limit · 3★ up to {{moves}}",
+    "moves_one": "{{count}} move",
+    "moves_other": "{{count}} moves",
+    "movesShort": "{{count}} mv",
+    "done": "Done: {{moves}} · #{{rank}}",
+    "doneNoRank": "Done: {{moves}}",
+    "replay": "Play again (no reward)",
+    "median_one": "Average: {{count}} move",
+    "median_other": "Average: {{count}} moves",
+    "calendar": "Last 30 days",
+    "won": "win",
+    "lost": "loss",
+    "restored": "restored",
+    "leaderboard": "Daily leaderboard",
+    "rankAfter": "Your rank — after your attempt",
+    "offline": "Your result will be sent once you are online",
+    "pauseNote": "timer runs — time affects rank",
+    "restartTitle": "Restart?",
+    "restartCounted": "Your ranked attempt will count as a loss. Replays give no reward or rank.",
+    "result": {
+      "eyebrow": "Daily bearing cleared",
+      "title": "Signal found",
+      "moves": "Moves",
+      "time": "Time",
+      "place": "Rank",
+      "counting": "Counting…",
+      "streak_one": "Streak {{count}} day",
+      "streak_other": "Streak {{count}} days",
+      "top": "Top {{percent}}%",
+      "again": "Again (no reward)",
+      "home": "Home",
+      "movesOf": "{{used}} / {{limit}}",
+      "rank": "#{{rank}}",
+      "streakToday_one": "Streak {{count}} day · +1",
+      "streakToday_other": "Streak {{count}} days · +1",
+      "noPlace": "—",
+      "replayNote": "Replays give no reward or rank",
+      "notRanked": "Continued — not ranked"
+    },
+    "you": "You",
+    "rowLabel": "{{rank}}. {{name}}, {{moves}}"
+  },
+  "streak": {
+    "days_one": "{{count}}-day streak",
+    "days_other": "{{count}}-day streak",
+    "daysShort_one": "day",
+    "daysShort_other": "days",
+    "best": "best streak {{count}}",
+    "was": "was {{count}} · best {{best}}",
+    "lost_one": "Your {{count}}-day streak ended",
+    "lost_other": "Your {{count}}-day streak ended",
+    "restore": "Restore streak",
+    "weekly": "Restore is available once a week"
   }
 }

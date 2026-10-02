@@ -27,6 +27,8 @@ export const sizes = {
   },
   // The soft update sheet's badge from design 28.2, decision 0014 (значок листа мягкого обновления из дизайна 28.2, решение 0014).
   softUpdateBadge: { size: 52, radius: 16, icon: 26 },
+  // The daily screen's preview, streak track and calendar from design 20.1, decision 0017 (превью, шкала серии и календарь экрана дейли из дизайна 20.1, решение 0017).
+  daily: { preview: 120, milestone: 28, track: 6, calendarGap: 5, rankBadge: 26 },
   timerRing: { size: 56, stroke: 4 },
   toast: { minHeight: 44, offset: 12 },
 } as const;

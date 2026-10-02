@@ -7,8 +7,14 @@ export const styles = StyleSheet.create((theme) => ({
     gap: theme.space[3],
     minHeight: theme.sizes.topBar.height,
   },
-  title: {
+  titles: {
     flex: 1,
+    alignItems: "center",
+  },
+  eyebrow: {
+    color: theme.colors.accent.cyan,
+  },
+  title: {
     textAlign: "center",
   },
 }));

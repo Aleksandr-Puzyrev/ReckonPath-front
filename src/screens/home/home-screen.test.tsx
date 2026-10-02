@@ -1,20 +1,27 @@
-import { render } from "@testing-library/react-native";
+import { fireEvent, render, screen } from "@testing-library/react-native";
 
 import { useRulesStore } from "@entities/rules";
 
 import HomeScreen from "./home-screen";
 
-const mockRouter = { replace: jest.fn() };
+const mockRouter = { replace: jest.fn(), push: jest.fn() };
 
 jest.mock("expo-router", () => ({
   get router() {
     return mockRouter;
   },
 }));
+jest.mock("@widgets/daily-card", () => ({
+  DailyCard: ({ onOpen }: { onOpen: () => void }) => {
+    const { Pressable } = jest.requireActual("react-native");
+    return <Pressable testID="daily-card" onPress={onOpen} />;
+  },
+}));
 
 describe("HomeScreen", () => {
   beforeEach(() => {
     mockRouter.replace.mockClear();
+    mockRouter.push.mockClear();
     useRulesStore.getState().reset();
   });
 
@@ -30,5 +37,14 @@ describe("HomeScreen", () => {
     useRulesStore.getState().skipTutorial();
     await render(<HomeScreen />);
     expect(mockRouter.replace).not.toHaveBeenCalled();
+  });
+
+  test("opens the daily from its card", async () => {
+    useRulesStore.getState().skipTutorial();
+    await render(<HomeScreen />);
+
+    await fireEvent.press(screen.getByTestId("daily-card"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/daily");
   });
 });

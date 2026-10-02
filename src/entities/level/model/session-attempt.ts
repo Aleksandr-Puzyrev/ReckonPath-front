@@ -8,8 +8,10 @@ import { levelStarsOf } from "./level-stars";
 import type { SessionAction } from "./replay-session";
 
 type Attempt = components["schemas"]["Attempt"];
+type AttemptMode = Attempt["mode"];
 
 interface FinishedSession {
+  mode: AttemptMode;
   levelId: string;
   actions: readonly SessionAction[];
   startedAt: number | null;
@@ -20,6 +22,7 @@ interface FinishedSession {
 const toIsoTime = (time: number) => new Date(time).toISOString();
 
 export const attemptOf = ({
+  mode,
   levelId,
   actions,
   startedAt,
@@ -31,10 +34,12 @@ export const attemptOf = ({
   const continueAction = actions.find((action) => action.type === "continue");
   return {
     attemptId: uuidv7(),
-    mode: "campaign",
+    mode,
     ref: levelId,
     // TODO: send contentVersion once content comes from the server (GET /content/manifest)
     ...(startedAt === null ? {} : { startedAt: toIsoTime(startedAt) }),
+    // Only the daily ranks by time, so only it reports the duration (по времени ранжируется только дейли, поэтому только она сообщает длительность).
+    ...(mode === "daily" && startedAt !== null ? { durationMs: finishedAt - startedAt } : {}),
     finishedAt: toIsoTime(finishedAt),
     taps: actions.flatMap((action) =>
       action.type === "tap" ? [[Math.floor(action.cell / cols), action.cell % cols]] : [],

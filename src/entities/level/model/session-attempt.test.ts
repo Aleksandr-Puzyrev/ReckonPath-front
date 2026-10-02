@@ -20,6 +20,7 @@ const FINISHED_AT = Date.UTC(2026, 8, 26, 8, 3, 2);
 
 const finishedWith = (actions: SessionAction[], startedAt: number | null = STARTED_AT) =>
   attemptOf({
+    mode: "campaign",
     levelId: LEVEL.id,
     actions,
     startedAt,
@@ -79,5 +80,21 @@ describe("attemptOf", () => {
     const actions: SessionAction[] = [{ type: "tap", cell: 8 }];
 
     expect(finishedWith(actions).attemptId).not.toBe(finishedWith(actions).attemptId);
+  });
+
+  test("reports the duration of a daily attempt only", () => {
+    const actions: SessionAction[] = [{ type: "tap", cell: 8 }];
+    const game = replaySession(LEVEL, actions);
+    const daily = attemptOf({
+      mode: "daily",
+      levelId: "d-2026-09-26",
+      actions,
+      startedAt: STARTED_AT,
+      finishedAt: FINISHED_AT,
+      game,
+    });
+
+    expect(daily).toMatchObject({ mode: "daily", ref: "d-2026-09-26", durationMs: 112_000 });
+    expect(finishedWith(actions)).not.toHaveProperty("durationMs");
   });
 });

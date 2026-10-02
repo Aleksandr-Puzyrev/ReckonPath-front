@@ -6,6 +6,7 @@ import { getResponse } from "msw/utils/get-response";
 
 import { resetMockAttempts } from "./attempts-handlers";
 import { resetMockAuth } from "./auth-handlers";
+import { resetMockDaily } from "./daily-handlers";
 import { handlers } from "./handlers";
 
 export { MOCK_API_ORIGIN } from "./mock-url";
@@ -32,6 +33,7 @@ export const mockServer = {
     overrides = [];
     resetMockAuth();
     resetMockAttempts();
+    resetMockDaily();
   },
   fetch: respond,
 };

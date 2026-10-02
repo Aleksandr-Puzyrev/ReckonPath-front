@@ -11,12 +11,13 @@ import RestartIcon from "@assets/icons/play/restart.svg";
 import { styles } from "./play-header-styles";
 
 interface IPlayHeader {
-  levelNumber: number;
+  title: string;
+  eyebrow?: string;
   onPause: () => void;
   onRestart: () => void;
 }
 
-const PlayHeader = ({ levelNumber, onPause, onRestart }: IPlayHeader) => {
+const PlayHeader = ({ title, eyebrow, onPause, onRestart }: IPlayHeader) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const iconSize = theme.sizes.iconButton.icon;
@@ -30,9 +31,16 @@ const PlayHeader = ({ levelNumber, onPause, onRestart }: IPlayHeader) => {
         onPress={onPause}
         icon={<PauseIcon width={iconSize} height={iconSize} color={iconColor} />}
       />
-      <Text variant="title.l" style={styles.title} accessibilityRole="header">
-        {t("home.level", { n: levelNumber })}
-      </Text>
+      <View style={styles.titles}>
+        {eyebrow === undefined ? null : (
+          <Text variant="eyebrow" style={styles.eyebrow}>
+            {eyebrow}
+          </Text>
+        )}
+        <Text variant="title.l" style={styles.title} accessibilityRole="header">
+          {title}
+        </Text>
+      </View>
       <IconButton
         testID="restart"
         accessibilityLabel={t("play.header.restart")}

@@ -7,6 +7,7 @@ import { useProgressStore } from "@entities/progress";
 import { RULE_DEMOS, isRuleCardId, useRulesStore } from "@entities/rules";
 import { unlockTapInput } from "@features/tap-cell";
 import { i18n } from "@shared/i18n";
+import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import PlayScreen from "./play-screen";
 
@@ -43,7 +44,7 @@ const tap = async (...cells: number[]) => {
 const BOARD_LAYOUT = { nativeEvent: { layout: { width: 358, height: 358 } } };
 
 const renderScreen = async () => {
-  const view = await render(<PlayScreen />);
+  const view = await render(<PlayScreen />, { wrapper: createQueryWrapper() });
   const area = screen.queryByTestId("board-area");
   if (area !== null) await fireEvent(area, "layout", BOARD_LAYOUT);
   return view;

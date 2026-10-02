@@ -7,11 +7,13 @@ import { isSoftUpdateSnoozed, useSystemNoticeStore, useSystemState } from "@enti
 import { useSystemSignalRefetch } from "../query/use-system-signal-refetch";
 import { useGuestSession } from "../session/use-guest-session";
 import { useAttemptsSync } from "../sync/use-attempts-sync";
+import { useDailyWeekPrefetch } from "../sync/use-daily-week-prefetch";
 
 const RootStack = () => {
   useSystemSignalRefetch();
   useGuestSession();
   useAttemptsSync();
+  useDailyWeekPrefetch();
   const { state } = useSystemState();
   const isMaintenanceDismissed = useSystemNoticeStore((notices) => notices.isMaintenanceDismissed);
   const softUpdateDismissedAt = useSystemNoticeStore((notices) => notices.softUpdateDismissedAt);
@@ -24,6 +26,7 @@ const RootStack = () => {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={!isUpdateRequired && !isMaintenance}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="daily" />
           <Stack.Screen
             name="play/[mode]/[id]"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}

@@ -20,6 +20,10 @@ export const styles = StyleSheet.create((theme) => ({
   title: {
     textAlign: "center",
   },
+  message: {
+    textAlign: "center",
+    color: theme.colors.text.secondary,
+  },
   actions: {
     flexDirection: "row",
     gap: theme.space[3],

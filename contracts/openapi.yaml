@@ -215,9 +215,9 @@ paths:
                     required: [top, median]
                     properties:
                       top:
-                        description: Not detailed in Part 7
+                        description: Rows as in GET /leaderboards (Part 7 §6); the preview shape is not detailed in Part 7
                         type: array
-                        items: { type: object }
+                        items: { $ref: "#/components/schemas/LeaderboardRow" }
                       median: { type: number }
                   me:
                     type: object
@@ -226,6 +226,38 @@ paths:
                       played: { type: boolean }
                       result: { type: [string, "null"] }
                       rank: { type: [integer, "null"] }
+        default: { $ref: "#/components/responses/Error" }
+
+  /daily/history:
+    get:
+      operationId: getDailyHistory
+      description: >
+        PROPOSAL by the client team (decision 0017 #2), not in Part 7: the player's own daily
+        results for the calendar of the last days.
+      parameters:
+        - name: days
+          in: query
+          required: true
+          schema: { type: integer, minimum: 1, maximum: 30 }
+      responses:
+        "200":
+          description: One entry per played or restored day, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [days]
+                properties:
+                  days:
+                    type: array
+                    items:
+                      type: object
+                      required: [date, result, stars, restored]
+                      properties:
+                        date: { type: string, format: date }
+                        result: { type: [string, "null"], enum: [won, lost, null] }
+                        stars: { type: [integer, "null"] }
+                        restored: { type: boolean }
         default: { $ref: "#/components/responses/Error" }
 
   /streak:
@@ -502,6 +534,22 @@ components:
             percentile: { type: integer }
             ranked: { type: boolean }
         streak: { $ref: "#/components/schemas/Streak" }
+
+    LeaderboardRow:
+      type: object
+      required: [rank, user, value]
+      properties:
+        rank: { type: integer }
+        user:
+          type: object
+          required: [id, nickname]
+          properties:
+            id: { type: string }
+            nickname: { type: string }
+            avatar: { type: string }
+            frame: { type: string }
+            league: { type: string }
+        value: { type: integer }
 
     Streak:
       type: object

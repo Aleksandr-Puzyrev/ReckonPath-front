@@ -10,4 +10,5 @@ export type { components } from "./generated/schema";
 export { readData } from "./read-data";
 export { readErrorEnvelope } from "./read-error-envelope";
 export { onSystemSignal } from "./system-signals";
+export { useIsOnline } from "./use-is-online";
 export type { SystemSignal } from "./system-signals";

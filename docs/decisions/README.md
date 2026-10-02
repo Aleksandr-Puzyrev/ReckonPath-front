@@ -22,6 +22,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0014 | [`0014-stage-2-plan.md`](0014-stage-2-plan.md) | Stage 2 order of tasks, mocks instead of a backend, agent-written `openapi.yaml` from Part 7, no API URLs yet; remote texts dropped in favour of OTA updates |
 | 0015 | [`0015-guest-sign-in.md`](0015-guest-sign-in.md) | Silent guest sign-in, new guest on a revoked session, ban screens and `GET /me` postponed, device ID in SecureStore, auth mocks |
 | 0016 | [`0016-attempts-sync.md`](0016-attempts-sync.md) | Outbox of finished attempts, `GET /progress` reconciliation by maximum with pending attempts, no `contentVersion` yet, continue method in the log |
+| 0017 | [`0017-daily-and-streak.md`](0017-daily-and-streak.md) | Daily split 5a / 5b, `GET /daily/history` proposal for the calendar, Home daily card only, daily unlocked after campaign level 6, overrides for 7 days |
 
 ## Template
 

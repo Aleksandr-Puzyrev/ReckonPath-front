@@ -7,6 +7,7 @@ import { useRulesStore } from "@entities/rules";
 import { useSettingsStore } from "@entities/settings";
 import { unlockTapInput } from "@features/tap-cell";
 import { i18n } from "@shared/i18n";
+import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import PlayScreen from "./play-screen";
 
@@ -37,7 +38,7 @@ const TARGET = 6;
 
 const renderScreen = async (id: string) => {
   mockParams.id = id;
-  await render(<PlayScreen />);
+  await render(<PlayScreen />, { wrapper: createQueryWrapper() });
   await fireEvent(screen.getByTestId("board-area"), "layout", BOARD_LAYOUT);
 };
 

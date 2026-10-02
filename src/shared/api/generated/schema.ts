@@ -148,6 +148,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/daily/history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description PROPOSAL by the client team (decision 0017 #2), not in Part 7: the player's own daily results for the calendar of the last days. */
+    get: operations["getDailyHistory"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/streak": {
     parameters: {
       query?: never;
@@ -336,6 +353,17 @@ export interface components {
         ranked?: boolean;
       };
       streak?: components["schemas"]["Streak"];
+    };
+    LeaderboardRow: {
+      rank: number;
+      user: {
+        id: string;
+        nickname: string;
+        avatar?: string;
+        frame?: string;
+        league?: string;
+      };
+      value: number;
     };
     Streak: {
       current: number;
@@ -616,8 +644,8 @@ export interface operations {
             /** @description Level v2 (contracts/schemas/level.schema.json) or null */
             override: null | Record<string, never>;
             leaderboardPreview: {
-              /** @description Not detailed in Part 7 */
-              top: Record<string, never>[];
+              /** @description Rows as in GET /leaderboards (Part 7 §6); the preview shape is not detailed in Part 7 */
+              top: components["schemas"]["LeaderboardRow"][];
               median: number;
             };
             me: {
@@ -625,6 +653,38 @@ export interface operations {
               result?: string | null;
               rank?: number | null;
             };
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getDailyHistory: {
+    parameters: {
+      query: {
+        days: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description One entry per played or restored day, newest first */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            days: {
+              /** Format: date */
+              date: string;
+              /** @enum {string|null} */
+              result: "won" | "lost" | null;
+              stars: number | null;
+              restored: boolean;
+            }[];
           };
         };
       };

@@ -15,17 +15,23 @@ export interface DialogAction {
 interface IDialog {
   isOpen: boolean;
   title: string;
+  message?: string;
   actions: readonly DialogAction[];
   onCancel: () => void;
 }
 
-const Dialog = ({ isOpen, title, actions, onCancel }: IDialog) => (
+const Dialog = ({ isOpen, title, message, actions, onCancel }: IDialog) => (
   <Modal visible={isOpen} transparent animationType="fade" onRequestClose={onCancel}>
     <View style={styles.backdrop}>
       <View style={styles.card} accessibilityRole="alert">
         <Text variant="title.m" style={styles.title}>
           {title}
         </Text>
+        {message === undefined ? null : (
+          <Text variant="body.m" style={styles.message}>
+            {message}
+          </Text>
+        )}
         <View style={styles.actions}>
           {actions.map((action) => (
             <View key={action.label} style={styles.action}>
