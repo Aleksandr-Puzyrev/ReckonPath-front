@@ -69,9 +69,9 @@ describe("useGameSessionStore", () => {
     [0, 1, 2, 4].forEach((cell) => store().tap(cell));
     expect(store().game?.status).toBe("lost");
 
-    store().continueGame();
+    store().continueGame("ad");
     expect(store().game).toMatchObject({ status: "playing", bonusMoves: 3, continued: true });
-    expect(store().actions.at(-1)).toEqual({ type: "continue" });
+    expect(store().actions.at(-1)).toEqual({ type: "continue", method: "ad" });
   });
 
   test("restores the exact game from the saved log", () => {
@@ -107,15 +107,46 @@ describe("useGameSessionStore persistence", () => {
   const { migrate } = useGameSessionStore.persist.getOptions();
 
   test("keeps a valid saved session on migration", () => {
-    const saved = { levelId: "c-1", actions: [{ type: "tap", cell: 2 }], flags: [1] };
-    expect(migrate?.(saved, 0)).toEqual(saved);
+    const saved = {
+      levelId: "c-1",
+      actions: [{ type: "tap", cell: 2 }],
+      flags: [1],
+      startedAt: 1_000,
+      finishedAt: null,
+    };
+    expect(migrate?.(saved, 2)).toEqual(saved);
+  });
+
+  test("migrates a version 1 session: the continue becomes an ad and the times are unknown", () => {
+    const saved = {
+      levelId: "c-1",
+      actions: [{ type: "tap", cell: 2 }, { type: "continue" }],
+      flags: [],
+    };
+    expect(migrate?.(saved, 1)).toEqual({
+      levelId: "c-1",
+      actions: [
+        { type: "tap", cell: 2 },
+        { type: "continue", method: "ad" },
+      ],
+      flags: [],
+      startedAt: null,
+      finishedAt: null,
+    });
   });
 
   test("drops a corrupt saved session on migration", () => {
-    expect(migrate?.({ levelId: 5 }, 0)).toEqual({ levelId: null, actions: [], flags: [] });
+    expect(migrate?.({ levelId: 5 }, 0)).toEqual({
+      levelId: null,
+      actions: [],
+      flags: [],
+      startedAt: null,
+      finishedAt: null,
+    });
   });
 
-  test("persists only the level, the action log, and the flags", () => {
+  test("persists the level, the action log, the flags, and the start time", () => {
+    jest.useFakeTimers({ now: 5_000 });
     store().start(LEVEL, "new");
     store().tap(0);
     const { partialize } = useGameSessionStore.persist.getOptions();
@@ -123,6 +154,34 @@ describe("useGameSessionStore persistence", () => {
       levelId: "c-store",
       actions: [{ type: "tap", cell: 0 }],
       flags: [],
+      startedAt: 5_000,
+      finishedAt: null,
     });
+    jest.useRealTimers();
+  });
+
+  test("remembers when the game was lost and forgets it after a continue", () => {
+    jest.useFakeTimers({ now: 5_000 });
+    store().start(LEVEL, "new");
+    [0, 1, 2].forEach((cell) => store().tap(cell));
+    jest.setSystemTime(7_000);
+    store().tap(4);
+    expect(store().game?.status).toBe("lost");
+    expect(store().finishedAt).toBe(7_000);
+
+    store().continueGame("ad");
+
+    expect(store().finishedAt).toBeNull();
+    jest.useRealTimers();
+  });
+
+  test("keeps the time of the first tap, not of later ones", () => {
+    jest.useFakeTimers({ now: 5_000 });
+    store().start(LEVEL, "new");
+    store().tap(0);
+    jest.setSystemTime(9_000);
+    store().tap(1);
+    expect(store().startedAt).toBe(5_000);
+    jest.useRealTimers();
   });
 });

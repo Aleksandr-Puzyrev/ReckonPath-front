@@ -1,7 +1,10 @@
 import { applyTap, continueGame, createBoard, initGame } from "@reckon-path/engine";
 import type { GameState, Idx, LevelInput } from "@reckon-path/engine";
 
-export type SessionAction = { type: "tap"; cell: Idx } | { type: "continue" };
+export type ContinueMethod = "ad" | "emeralds";
+
+export type SessionAction =
+  { type: "tap"; cell: Idx } | { type: "continue"; method: ContinueMethod };
 
 export const startGame = (level: LevelInput) => {
   const { board, rules } = createBoard(level);

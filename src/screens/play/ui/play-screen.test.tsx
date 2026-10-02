@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
 import { useGameSessionStore } from "@entities/level";
+import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
 import { RULE_DEMOS, isRuleCardId, useRulesStore } from "@entities/rules";
 import { unlockTapInput } from "@features/tap-cell";
@@ -63,6 +64,7 @@ describe("PlayScreen", () => {
     unlockTapInput();
     useGameSessionStore.getState().reset();
     useProgressStore.getState().reset();
+    useOutboxStore.getState().reset();
     useRulesStore.getState().reset();
     useRulesStore.getState().markSeen(Object.keys(RULE_DEMOS).filter(isRuleCardId));
     useRulesStore.getState().skipTutorial();
@@ -194,6 +196,14 @@ describe("PlayScreen", () => {
     expect(screen.getByText("4 / 4")).toBeOnTheScreen();
   });
 
+  test("sends nothing when a game in progress is restarted", async () => {
+    await renderScreen();
+    await tap(0);
+    await fireEvent.press(screen.getByTestId("restart"));
+    await fireEvent.press(screen.getByText("Заново"));
+    expect(useOutboxStore.getState().attempts).toEqual([]);
+  });
+
   test("restarts an untouched game without asking", async () => {
     await renderScreen();
     await fireEvent.press(screen.getByTestId("restart"));
@@ -220,11 +230,52 @@ describe("PlayScreen", () => {
     await settle();
     await fireEvent.press(screen.getByText("К уровням"));
     expect(useGameSessionStore.getState().levelId).toBeNull();
+    expect(useOutboxStore.getState().attempts).toMatchObject([
+      { ref: "c-a", claimed: { result: "lost", movesUsed: 4, stars: null } },
+    ]);
     await first.unmount();
 
     await renderScreen();
     expect(screen.queryByText("Продолжить или начать заново?")).toBeNull();
     expect(screen.getByText("4 / 4")).toBeOnTheScreen();
+  });
+
+  test("sends the lost attempt when the lost game is restarted", async () => {
+    await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await fireEvent.press(screen.getByText("Начать заново"));
+    expect(useOutboxStore.getState().attempts).toMatchObject([{ claimed: { result: "lost" } }]);
+    expect(screen.getByText("4 / 4")).toBeOnTheScreen();
+  });
+
+  test("sends a lost attempt left on the lose sheet when another level is opened", async () => {
+    const first = await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await first.unmount();
+    useProgressStore.getState().recordWin("c-a", { stars: 3, moves: 2 });
+    mockParams.id = "c-b";
+
+    await renderScreen();
+
+    expect(useOutboxStore.getState().attempts).toMatchObject([
+      { ref: "c-a", claimed: { result: "lost" } },
+    ]);
+  });
+
+  test("dates a lost attempt by the loss, not by leaving the sheet", async () => {
+    const first = await renderScreen();
+    await tap(0, 1, 2, 4);
+    const lostAt = useGameSessionStore.getState().finishedAt;
+    await settle();
+    await act(async () => jest.advanceTimersByTime(60_000));
+    await fireEvent.press(screen.getByText("К уровням"));
+    await first.unmount();
+
+    expect(useOutboxStore.getState().attempts[0]?.finishedAt).toBe(
+      new Date(lostAt ?? 0).toISOString(),
+    );
   });
 
   test("keeps a game in progress when leaving from the pause menu", async () => {

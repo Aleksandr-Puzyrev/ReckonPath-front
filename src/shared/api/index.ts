@@ -8,5 +8,6 @@ export { errorMessageKey } from "./error-message-key";
 export type { ErrorMessageKey } from "./error-message-key";
 export type { components } from "./generated/schema";
 export { readData } from "./read-data";
+export { readErrorEnvelope } from "./read-error-envelope";
 export { onSystemSignal } from "./system-signals";
 export type { SystemSignal } from "./system-signals";

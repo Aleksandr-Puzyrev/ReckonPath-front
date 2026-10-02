@@ -24,7 +24,7 @@ const ContinueOptions = ({ onContinued }: IContinueOptions) => {
 
   // TODO: watch a rewarded ad (stage 3) instead of the dev-only free continue
   const handleFreeContinue = () => {
-    useGameSessionStore.getState().continueGame();
+    useGameSessionStore.getState().continueGame("ad");
     haptic("success");
     onContinued();
   };

@@ -8,15 +8,17 @@ import { applyTap, canContinue, continueGame } from "@reckon-path/engine";
 import { zustandStorage } from "@shared/storage";
 
 import { replaySession, startGame } from "./replay-session";
-import type { SessionAction } from "./replay-session";
+import type { ContinueMethod, SessionAction } from "./replay-session";
 
-const STORE_VERSION = 1;
+const STORE_VERSION = 2;
 const NO_STATE_CHANGE: ReadonlySet<GameEvent["type"]> = new Set(["blocked", "alreadyRevealed"]);
 
 interface SavedSession {
   levelId: string | null;
   actions: SessionAction[];
   flags: Idx[];
+  startedAt: number | null;
+  finishedAt: number | null;
 }
 
 interface GameSessionState extends SavedSession {
@@ -24,22 +26,31 @@ interface GameSessionState extends SavedSession {
   start: (level: LevelInput, mode: "new" | "resume") => void;
   tap: (cell: Idx) => GameEvent[];
   toggleFlag: (cell: Idx) => void;
-  continueGame: () => void;
+  continueGame: (method: ContinueMethod) => void;
   finish: () => void;
   reset: () => void;
 }
 
-const EMPTY_SESSION: SavedSession = { levelId: null, actions: [], flags: [] };
+const EMPTY_SESSION: SavedSession = {
+  levelId: null,
+  actions: [],
+  flags: [],
+  startedAt: null,
+  finishedAt: null,
+};
 
 const savedSessionSchema = z.object({
   levelId: z.string().nullable(),
   actions: z.array(
     z.union([
       z.object({ type: z.literal("tap"), cell: z.number().int() }),
-      z.object({ type: z.literal("continue") }),
+      // Version 1 kept no method; its only continue was the free dev one, logged as an ad (в версии 1 способа не было; единственное продолжение — бесплатное dev, пишется как реклама).
+      z.object({ type: z.literal("continue"), method: z.enum(["ad", "emeralds"]).default("ad") }),
     ]),
   ),
   flags: z.array(z.number().int()),
+  startedAt: z.number().nullable().default(null),
+  finishedAt: z.number().nullable().default(null),
 });
 
 export const useGameSessionStore = create<GameSessionState>()(
@@ -54,11 +65,11 @@ export const useGameSessionStore = create<GameSessionState>()(
           set({ game: replaySession(level, actions), flags });
           return;
         }
-        set({ levelId: level.id, actions: [], flags: [], game: startGame(level) });
+        set({ ...EMPTY_SESSION, levelId: level.id, game: startGame(level) });
       },
 
       tap: (cell) => {
-        const { game, actions, flags } = get();
+        const { game, actions, flags, startedAt } = get();
         if (game === null) return [];
 
         const { state, events } = applyTap(game, cell);
@@ -68,6 +79,8 @@ export const useGameSessionStore = create<GameSessionState>()(
           game: state,
           actions: [...actions, { type: "tap", cell }],
           flags: flags.filter((flag) => flag !== cell),
+          startedAt: startedAt ?? Date.now(),
+          finishedAt: state.status === "playing" ? null : Date.now(),
         });
         return events;
       },
@@ -82,10 +95,14 @@ export const useGameSessionStore = create<GameSessionState>()(
         });
       },
 
-      continueGame: () => {
+      continueGame: (method) => {
         const { game, actions } = get();
         if (game === null || !canContinue(game)) return;
-        set({ game: continueGame(game), actions: [...actions, { type: "continue" }] });
+        set({
+          game: continueGame(game),
+          actions: [...actions, { type: "continue", method }],
+          finishedAt: null,
+        });
       },
 
       finish: () => set(EMPTY_SESSION),
@@ -96,7 +113,13 @@ export const useGameSessionStore = create<GameSessionState>()(
       name: "game-session",
       version: STORE_VERSION,
       storage: createJSONStorage(() => zustandStorage),
-      partialize: ({ levelId, actions, flags }): SavedSession => ({ levelId, actions, flags }),
+      partialize: ({ levelId, actions, flags, startedAt, finishedAt }): SavedSession => ({
+        levelId,
+        actions,
+        flags,
+        startedAt,
+        finishedAt,
+      }),
       migrate: (persisted) => savedSessionSchema.catch(EMPTY_SESSION).parse(persisted),
     },
   ),

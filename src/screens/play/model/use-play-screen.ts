@@ -8,6 +8,7 @@ import type { GameEvent, Idx } from "@reckon-path/engine";
 import { TUTORIAL } from "@reckon-path/content";
 
 import {
+  attemptOf,
   CAMPAIGN_LEVELS,
   CAMPAIGN_WORLDS,
   findCampaignLevel,
@@ -16,6 +17,7 @@ import {
   useGameSessionStore,
 } from "@entities/level";
 import { currentLevelId, levelStateOf, useProgressStore } from "@entities/progress";
+import { useOutboxStore } from "@entities/outbox";
 import { useRulesStore } from "@entities/rules";
 import { flagCell } from "@features/flag-cell";
 import { tapCell, unlockTapInput } from "@features/tap-cell";
@@ -40,10 +42,20 @@ const NO_STATE_CHANGE: ReadonlySet<GameEvent["type"]> = new Set(["blocked", "alr
 const hasEvent = (events: readonly GameEvent[], type: GameEvent["type"]) =>
   events.some((event) => event.type === type);
 
+// Leaving a lost game, restarting it, or starting another level ends the attempt, which goes to the outbox and is not offered again (выход из проигранной партии, её перезапуск или запуск другого уровня завершает попытку: она уходит в очередь и больше не предлагается).
+const finishLostAttempt = () => {
+  const { game, levelId, actions, startedAt, finishedAt, finish } = useGameSessionStore.getState();
+  if (game?.status !== "lost" || levelId === null) return;
+  useOutboxStore
+    .getState()
+    .enqueue(
+      attemptOf({ levelId, actions, startedAt, finishedAt: finishedAt ?? Date.now(), game }),
+    );
+  finish();
+};
+
 const exitToLevels = () => {
-  // Leaving a lost game ends the attempt, so it is not offered again (выход из проигранной партии завершает попытку, и её больше не предлагают продолжить).
-  const session = useGameSessionStore.getState();
-  if (session.game?.status === "lost") session.finish();
+  finishLostAttempt();
   if (router.canGoBack()) router.back();
   else router.replace(LEVELS_ROUTE);
 };
@@ -81,6 +93,7 @@ export const usePlayScreen = (mode: string, id: string) => {
   // Before the first paint, so the board never shows the previous level (до первой отрисовки, чтобы поле не показало прошлый уровень).
   useLayoutEffect(() => {
     if (level === null || lockedBy !== null) return;
+    if (!hasSavedSession) finishLostAttempt();
     useGameSessionStore.getState().start(level, hasSavedSession ? "resume" : "new");
     unlockTapInput();
   }, [level, hasSavedSession, lockedBy]);
@@ -118,6 +131,7 @@ export const usePlayScreen = (mode: string, id: string) => {
 
   const restart = () => {
     if (level === null) return;
+    finishLostAttempt();
     useGameSessionStore.getState().start(level, "new");
     unlockTapInput();
     setPending(null);

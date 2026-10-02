@@ -1,6 +1,7 @@
 import type { LevelInput } from "@reckon-path/engine";
 
 import { useGameSessionStore } from "@entities/level";
+import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
 
 import { tapCell, unlockTapInput } from "./tap-cell";
@@ -26,6 +27,7 @@ describe("tapCell", () => {
     jest.useFakeTimers();
     unlockTapInput();
     useProgressStore.getState().reset();
+    useOutboxStore.getState().reset();
     useGameSessionStore.getState().start(LEVEL, "new");
   });
 
@@ -47,5 +49,28 @@ describe("tapCell", () => {
     expect(useProgressStore.getState().best["c-tap"]).toEqual({ stars: 3, moves: 2 });
     expect(useGameSessionStore.getState().levelId).toBeNull();
     expect(useGameSessionStore.getState().game?.status).toBe("won");
+  });
+
+  test("queues the won attempt for the server", () => {
+    tapCell(0);
+    jest.advanceTimersByTime(300);
+    tapCell(15);
+
+    expect(useOutboxStore.getState().attempts).toMatchObject([
+      {
+        ref: "c-tap",
+        taps: [
+          [0, 0],
+          [3, 3],
+        ],
+        claimed: { result: "won", movesUsed: 2, stars: 3 },
+      },
+    ]);
+  });
+
+  test("queues nothing while the game goes on", () => {
+    tapCell(0);
+
+    expect(useOutboxStore.getState().attempts).toEqual([]);
   });
 });

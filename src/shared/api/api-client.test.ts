@@ -121,6 +121,21 @@ describe("apiClient", () => {
     expect(response.status).toBe(HTTP_UNAUTHORIZED);
   });
 
+  test("does not refresh on a 401 from the refresh itself", async () => {
+    const refresh = jest.fn(async () => "token-2");
+    setApiSession({ getAccessToken: () => null, refreshAccessToken: refresh });
+    mockServer.use(
+      http.post(mockUrl("/auth/refresh"), () =>
+        HttpResponse.json({ error: { code: "SESSION_REVOKED" } }, { status: HTTP_UNAUTHORIZED }),
+      ),
+    );
+
+    const { response } = await apiClient.POST("/auth/refresh", { body: { refreshToken: "r" } });
+
+    expect(response.status).toBe(HTTP_UNAUTHORIZED);
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
   test("signals an update on 426", async () => {
     const listener = jest.fn();
     const unsubscribe = onSystemSignal(listener);

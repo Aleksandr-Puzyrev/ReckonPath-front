@@ -16,10 +16,11 @@ export interface LevelBest {
 interface ProgressState {
   best: Record<string, LevelBest>;
   recordWin: (levelId: string, result: LevelBest) => boolean;
+  replaceBest: (best: Record<string, LevelBest>) => void;
   reset: () => void;
 }
 
-const isBetter = (result: LevelBest, previous: LevelBest) =>
+export const isBetter = (result: LevelBest, previous: LevelBest) =>
   (result.stars ?? 0) > (previous.stars ?? 0) ||
   ((result.stars ?? 0) === (previous.stars ?? 0) && result.moves < previous.moves);
 
@@ -31,7 +32,6 @@ const bestSchema = z.record(
   }),
 );
 
-// TODO: sync with the server by max stars once attempts:batch exists
 export const useProgressStore = create<ProgressState>()(
   persist(
     (set, get) => ({
@@ -44,6 +44,8 @@ export const useProgressStore = create<ProgressState>()(
         set({ best: { ...get().best, [levelId]: result } });
         return previous !== undefined;
       },
+
+      replaceBest: (best) => set({ best }),
 
       reset: () => set({ best: {} }),
     }),

@@ -4,6 +4,8 @@ import { HttpResponse } from "msw/http";
 import type { HttpHandler } from "msw/http";
 import { getResponse } from "msw/utils/get-response";
 
+import { resetMockAttempts } from "./attempts-handlers";
+import { resetMockAuth } from "./auth-handlers";
 import { handlers } from "./handlers";
 
 export { MOCK_API_ORIGIN } from "./mock-url";
@@ -28,6 +30,8 @@ export const mockServer = {
   },
   reset: () => {
     overrides = [];
+    resetMockAuth();
+    resetMockAttempts();
   },
   fetch: respond,
 };

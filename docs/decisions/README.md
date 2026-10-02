@@ -19,7 +19,9 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0011 | [`0011-levels-list.md`](0011-levels-list.md) | Spec worlds with design look, test levels as world 1, design row and tile style, disabled editor/code buttons, FlashList, current level and world unlocking rules |
 | 0012 | [`0012-worlds-1-2-content.md`](0012-worlds-1-2-content.md) | Levels in `packages/content`, hand-made layouts with bot-computed limits, tutorial level 1 without a limit, `content:check` rules |
 | 0013 | [`0013-rule-cards-tutorial.md`](0013-rule-cards-tutorial.md) | Sound and Lottie postponed, design mini-board demos, all cards + flags + «Число», cards derived from level content, level 1 tutorial, settings store |
-| 0014 | [`0014-stage-2-plan.md`](0014-stage-2-plan.md) | Stage 2 order of tasks, mocks instead of a backend, agent-written `openapi.yaml` from Part 7, no API URLs yet, remote texts as a new task |
+| 0014 | [`0014-stage-2-plan.md`](0014-stage-2-plan.md) | Stage 2 order of tasks, mocks instead of a backend, agent-written `openapi.yaml` from Part 7, no API URLs yet; remote texts dropped in favour of OTA updates |
+| 0015 | [`0015-guest-sign-in.md`](0015-guest-sign-in.md) | Silent guest sign-in, new guest on a revoked session, ban screens and `GET /me` postponed, device ID in SecureStore, auth mocks |
+| 0016 | [`0016-attempts-sync.md`](0016-attempts-sync.md) | Outbox of finished attempts, `GET /progress` reconciliation by maximum with pending attempts, no `contentVersion` yet, continue method in the log |
 
 ## Template
 

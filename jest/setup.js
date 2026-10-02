@@ -15,3 +15,16 @@ jest.mock("expo-constants", () => {
 jest.mock("@react-native-community/netinfo", () =>
   require("@react-native-community/netinfo/jest/netinfo-mock.js"),
 );
+jest.mock("expo-secure-store", () => {
+  const items = new Map();
+  return {
+    getItemAsync: async (key) => items.get(key) ?? null,
+    setItemAsync: async (key, value) => {
+      items.set(key, value);
+    },
+    deleteItemAsync: async (key) => {
+      items.delete(key);
+    },
+    __reset: () => items.clear(),
+  };
+});

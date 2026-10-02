@@ -5,6 +5,14 @@ const store = () => useProgressStore.getState();
 describe("useProgressStore", () => {
   beforeEach(() => store().reset());
 
+  test("replaces the best results with the reconciled ones", () => {
+    store().recordWin("c-1", { stars: 3, moves: 5 });
+
+    store().replaceBest({ "c-2": { stars: 1, moves: 9 } });
+
+    expect(store().best).toEqual({ "c-2": { stars: 1, moves: 9 } });
+  });
+
   test("keeps the first win without calling it a record", () => {
     expect(store().recordWin("c-1", { stars: 2, moves: 9 })).toBe(false);
     expect(store().best["c-1"]).toEqual({ stars: 2, moves: 9 });

@@ -5,9 +5,13 @@ import { SoftUpdateSheet } from "@screens/system";
 import { isSoftUpdateSnoozed, useSystemNoticeStore, useSystemState } from "@entities/app-config";
 
 import { useSystemSignalRefetch } from "../query/use-system-signal-refetch";
+import { useGuestSession } from "../session/use-guest-session";
+import { useAttemptsSync } from "../sync/use-attempts-sync";
 
 const RootStack = () => {
   useSystemSignalRefetch();
+  useGuestSession();
+  useAttemptsSync();
   const { state } = useSystemState();
   const isMaintenanceDismissed = useSystemNoticeStore((notices) => notices.isMaintenanceDismissed);
   const softUpdateDismissedAt = useSystemNoticeStore((notices) => notices.softUpdateDismissedAt);

@@ -4,6 +4,8 @@ import { APP_VERSION } from "@shared/config";
 
 import type { components } from "../generated/schema";
 
+import { attemptsHandlers } from "./attempts-handlers";
+import { authHandlers } from "./auth-handlers";
 import { mockUrl } from "./mock-url";
 
 type Bootstrap = components["schemas"]["Bootstrap"];
@@ -28,4 +30,8 @@ export const bootstrapMock = (now = new Date()): Bootstrap => ({
   nextDayAt: startOfNextUtcDay(now).toISOString(),
 });
 
-export const handlers = [http.get(mockUrl("/bootstrap"), () => HttpResponse.json(bootstrapMock()))];
+export const handlers = [
+  http.get(mockUrl("/bootstrap"), () => HttpResponse.json(bootstrapMock())),
+  ...authHandlers,
+  ...attemptsHandlers,
+];

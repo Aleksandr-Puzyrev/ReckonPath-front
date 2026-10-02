@@ -29,3 +29,13 @@ Date: 2026-10-02. Taken by the agent while implementing the confirmed task 1 und
 | 16 | Not yet used | `config`, `serverTime` (clock offset) and the 401 refresh are wired only where a consumer exists: refresh comes with task 3, config and clock offset with their first consumer (daily, continue price). | — |
 | 17 | msw in dev builds | msw is imported through `msw/http` and `msw/utils/get-response` (no WebSocket / SSE modules), with a dev-only polyfill for `MessageEvent` and `Headers.getSetCookie`, which Hermes and React Native's fetch lack. Release builds drop the mocks with the `__DEV__` branch. | rule 16 |
 | 18 | `errors.QUEUE_UNAVAILABLE`, `CODE_INVALID`, `CODE_NEWER` | Part 5 texts for client-side cases (matchmaking, level codes); Part 7 §2 has no such server codes, so the server error mapping does not use them. | Part 5, Part 7 §2 |
+
+## Round 2: remote texts (#8 revised)
+
+Date: 2026-10-02. Answered by: developer.
+
+| # | Question | Decision | Spec reference |
+| --- | --- | --- | --- |
+| 19 | Remote texts (#8) | **Dropped.** Every UI text is in the JS bundle and is fixed by an OTA update (`eas update`) without a store release, so no admin editing is built. The admin panel would only be needed for texts that need a store release, and those (app name, system permission prompts) are native and cannot be changed from a server either. | Part 8 §12.1 |
+| 20 | Precondition | OTA needs `expo-updates` in the build before the first store release (`runtimeVersion` policy `fingerprint`, channels per Part 8 §12.1); a store build without it can only be fixed by a new store release. | Part 8 §12.1 |
+| 21 | OTA setup | A separate task before the first store release: `expo-updates`, `runtimeVersion` policy `fingerprint`, `eas.json` profiles and channels, separate bundle IDs per profile (Part 8 §12.1); needs the developer's EAS login and `eas init`. Stage 2 continues with task 3 (guest sign-in). | Part 8 §12.1 |
