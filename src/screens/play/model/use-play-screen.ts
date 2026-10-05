@@ -17,7 +17,9 @@ import { useRulesStore } from "@entities/rules";
 import { finishAttempt, isCountedDailyLevel } from "@features/finish-attempt";
 import { flagCell } from "@features/flag-cell";
 import { tapCell, unlockTapInput } from "@features/tap-cell";
+import type { ErrorMessageKey } from "@shared/api";
 import { motion } from "@shared/theme";
+import type { ToastMessage } from "@shared/ui/toast";
 import { useBoardFx } from "@widgets/board";
 
 import { resolvePlayLevel } from "./resolve-play-level";
@@ -89,6 +91,8 @@ export const usePlayScreen = (mode: string, id: string) => {
   const [isFlagMode, setIsFlagMode] = useState(false);
   const [isRecord, setIsRecord] = useState(false);
   const [lastAttempt, setLastAttempt] = useState<Attempt | null>(null);
+  const [earnShortBy, setEarnShortBy] = useState<number | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
   const [isBombLoss, setIsBombLoss] = useState(false);
 
   // Before the first paint, so the board never shows the previous level (до первой отрисовки, чтобы поле не показало прошлый уровень).
@@ -233,6 +237,17 @@ export const usePlayScreen = (mode: string, id: string) => {
     handleNext: goNext,
     handleExit: exit,
     handleHome: () => router.replace("/"),
+    earnShortBy,
+    toast,
+    handleShortOfEmeralds: setEarnShortBy,
+    handleEarnClose: () => setEarnShortBy(null),
+    handleEarnDaily: () => {
+      setEarnShortBy(null);
+      router.push(DAILY_ROUTE);
+    },
+    handleContinueError: (messageKey: ErrorMessageKey) =>
+      setToast((current) => ({ id: (current?.id ?? 0) + 1, text: t(messageKey) })),
+    handleToastHide: () => setToast(null),
     handleTutorialSkip: skipTutorial,
     handleRules: () => {
       setOverlay("none");

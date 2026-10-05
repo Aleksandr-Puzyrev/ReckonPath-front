@@ -3,6 +3,7 @@ import { CAMPAIGN_LEVELS } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
 import { hasSavedSession } from "@entities/session";
+import type { Wallet } from "@entities/wallet";
 import { apiClient, ApiError, readData, readErrorEnvelope } from "@shared/api";
 
 import { mergeBest } from "./merge-best";
@@ -14,7 +15,7 @@ const KEEP_ON_STATUSES: ReadonlySet<number> = new Set([401, 408, 426, 429]);
 
 const KNOWN_LEVEL_IDS: ReadonlySet<string> = new Set(CAMPAIGN_LEVELS.map(({ level }) => level.id));
 
-const sendBatch = async () => {
+const sendBatch = async (): Promise<Wallet | null> => {
   const batch = useOutboxStore.getState().attempts.slice(0, BATCH_SIZE);
   const { data, error, response } = await apiClient.POST("/attempts:batch", {
     body: { attempts: batch },
@@ -37,6 +38,7 @@ const sendBatch = async () => {
   // Every answered attempt leaves the queue, whatever its status; a rejected batch is dropped too (каждая отвеченная попытка уходит из очереди при любом статусе; отклонённая пачка тоже удаляется).
   // TODO: report rejected attempts and dropped batches to Sentry once it is set up
   useOutboxStore.getState().remove(batch.map(({ attemptId }) => attemptId));
+  return data?.wallet ?? null;
 };
 
 const reconcileProgress = async () => {
@@ -46,8 +48,11 @@ const reconcileProgress = async () => {
   useProgressStore.getState().replaceBest(mergeBest(levels, pending, KNOWN_LEVEL_IDS));
 };
 
+// Returns the wallet of the last answered batch, which carries the rewards it granted (возвращает кошелёк последней отвеченной пачки с начисленными наградами).
 export const syncAttempts = async () => {
-  if (!(await hasSavedSession())) return;
-  while (useOutboxStore.getState().attempts.length > 0) await sendBatch();
+  if (!(await hasSavedSession())) return null;
+  let wallet: Wallet | null = null;
+  while (useOutboxStore.getState().attempts.length > 0) wallet = await sendBatch();
   await reconcileProgress();
+  return wallet;
 };

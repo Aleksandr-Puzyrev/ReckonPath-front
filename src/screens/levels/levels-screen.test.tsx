@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { useProgressStore } from "@entities/progress";
 import { i18n } from "@shared/i18n";
+import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import LevelsScreen from "./levels-screen";
 
@@ -42,14 +43,14 @@ describe("LevelsScreen", () => {
   afterEach(() => jest.useRealTimers());
 
   test("opens the current level at once", async () => {
-    await render(<LevelsScreen />);
+    await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
     await fireEvent.press(screen.getByTestId("level-c-a"));
     expect(mockRouter.push).toHaveBeenCalledWith(playRoute("c-a"));
   });
 
   test("tells which level to beat first when a locked level is tapped (LVL-23)", async () => {
     useProgressStore.getState().recordWin("c-a", { stars: 2, moves: 4 });
-    await render(<LevelsScreen />);
+    await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
     await fireEvent.press(screen.getByTestId("level-c-c"));
     expect(screen.getByText("Сначала пройди уровень 2")).toBeOnTheScreen();
     expect(mockRouter.push).not.toHaveBeenCalled();
@@ -60,7 +61,7 @@ describe("LevelsScreen", () => {
 
   test("shows a won level's thresholds and best result in its sheet", async () => {
     useProgressStore.getState().recordWin("c-a", { stars: 2, moves: 4 });
-    await render(<LevelsScreen />);
+    await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
     await fireEvent.press(screen.getByTestId("level-c-a"));
 
     expect(screen.getByText("Уровень 1")).toBeOnTheScreen();
@@ -75,7 +76,7 @@ describe("LevelsScreen", () => {
 
   test("describes rows and counts the stars", async () => {
     useProgressStore.getState().recordWin("c-a", { stars: 3, moves: 3 });
-    await render(<LevelsScreen />);
+    await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
     expect(screen.getByLabelText("3 / 9")).toBeOnTheScreen();
     expect(screen.getByLabelText("Уровень 1, пройден, звёзды: 3 из 3")).toBeOnTheScreen();
     expect(screen.getByLabelText("Уровень 2, текущий")).toBeOnTheScreen();
@@ -83,7 +84,7 @@ describe("LevelsScreen", () => {
   });
 
   test("collapses a world that is not open yet", async () => {
-    await render(<LevelsScreen />);
+    await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
     expect(screen.getByText("Пройди мир 1, чтобы открыть")).toBeOnTheScreen();
   });
 
@@ -91,7 +92,7 @@ describe("LevelsScreen", () => {
     ["c-a", "c-b", "c-c"].forEach((id) =>
       useProgressStore.getState().recordWin(id, { stars: 3, moves: 3 }),
     );
-    await render(<LevelsScreen />);
+    await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
     expect(screen.getByText("3★ мир")).toBeOnTheScreen();
   });
 });

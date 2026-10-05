@@ -110,6 +110,7 @@ describe("useGameSessionStore persistence", () => {
     const saved = {
       levelId: "c-1",
       actions: [{ type: "tap", cell: 2 }],
+      attemptId: "a-1",
       flags: [1],
       startedAt: 1_000,
       finishedAt: null,
@@ -129,6 +130,7 @@ describe("useGameSessionStore persistence", () => {
         { type: "tap", cell: 2 },
         { type: "continue", method: "ad" },
       ],
+      attemptId: null,
       flags: [],
       startedAt: null,
       finishedAt: null,
@@ -138,6 +140,7 @@ describe("useGameSessionStore persistence", () => {
   test("drops a corrupt saved session on migration", () => {
     expect(migrate?.({ levelId: 5 }, 0)).toEqual({
       levelId: null,
+      attemptId: null,
       actions: [],
       flags: [],
       startedAt: null,
@@ -152,6 +155,7 @@ describe("useGameSessionStore persistence", () => {
     const { partialize } = useGameSessionStore.persist.getOptions();
     expect(partialize?.(store())).toEqual({
       levelId: "c-store",
+      attemptId: expect.any(String),
       actions: [{ type: "tap", cell: 0 }],
       flags: [],
       startedAt: 5_000,
@@ -173,6 +177,17 @@ describe("useGameSessionStore persistence", () => {
 
     expect(store().finishedAt).toBeNull();
     jest.useRealTimers();
+  });
+
+  test("names the attempt when a new game starts and keeps the name on resume", () => {
+    store().start(LEVEL, "new");
+    const { attemptId } = store();
+    store().tap(0);
+
+    store().start(LEVEL, "resume");
+
+    expect(attemptId).toMatch(/^[0-9a-f-]{36}$/);
+    expect(store().attemptId).toBe(attemptId);
   });
 
   test("keeps the time of the first tap, not of later ones", () => {

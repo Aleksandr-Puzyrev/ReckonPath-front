@@ -15,11 +15,4 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     paddingHorizontal: theme.space[5],
     paddingBottom: runtime.insets.bottom + theme.space[9],
   },
-  lost: {
-    padding: theme.space[5],
-    borderRadius: theme.radius.xl,
-    borderWidth: 1,
-    borderColor: theme.colors.feedback.warm,
-    backgroundColor: theme.colors.bg.surface,
-  },
 }));

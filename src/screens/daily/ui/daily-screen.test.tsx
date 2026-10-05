@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
@@ -13,6 +13,10 @@ import DailyScreen from "./daily-screen";
 
 const mockRouter = { back: jest.fn(), replace: jest.fn(), push: jest.fn(), canGoBack: () => true };
 
+jest.mock("@shared/ui/sheet", () => ({
+  Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
+    isOpen ? children : null,
+}));
 jest.mock("expo-router", () => ({
   get router() {
     return mockRouter;
@@ -28,6 +32,13 @@ const unlockDaily = () =>
         CAMPAIGN_LEVELS.slice(0, 6).map(({ level }) => [level.id, { stars: 3, moves: 5 }]),
       ),
     );
+
+const serveStreak = (overrides: Record<string, unknown>) =>
+  mockServer.use(
+    http.get(mockUrl("/streak"), () =>
+      HttpResponse.json({ current: 12, best: 19, lastDay: "2026-09-26", ...overrides }),
+    ),
+  );
 
 const renderScreen = async (wrapper: ({ children }: { children: ReactNode }) => ReactNode) => {
   await render(<DailyScreen />, { wrapper });
@@ -72,5 +83,44 @@ describe("DailyScreen", () => {
 
     expect(await screen.findByText("Результат отправится, когда появится сеть")).toBeOnTheScreen();
     expect(screen.getByText("Играть")).toBeOnTheScreen();
+  });
+
+  test("restores a streak broken yesterday for emeralds (DLY-09)", async () => {
+    unlockDaily();
+    serveStreak({ restorable: true, price: 30, restoreUntil: "2026-09-29T00:00:00Z" });
+    await renderScreen(createQueryWrapper());
+
+    expect(await screen.findByText("Серия 12 дней прервалась")).toBeOnTheScreen();
+    expect(screen.getByText("Вчера пеленг не сыгран · вернуть можно ещё 12 ч")).toBeOnTheScreen();
+    await act(() => jest.advanceTimersByTimeAsync(0));
+    await fireEvent.press(screen.getByTestId("restore-emeralds"));
+    await act(() => jest.advanceTimersByTimeAsync(0));
+
+    expect(screen.getByText("Серия восстановлена")).toBeOnTheScreen();
+  });
+
+  test("opens the ways to earn when emeralds are short for the restore", async () => {
+    unlockDaily();
+    serveStreak({ restorable: true, price: 30 });
+    mockServer.use(
+      http.get(mockUrl("/me"), () => HttpResponse.json({ wallet: { emeralds: 10, coins: 0 } })),
+    );
+    await renderScreen(createQueryWrapper());
+    await screen.findByText("Серия 12 дней прервалась");
+    await act(() => jest.advanceTimersByTimeAsync(0));
+
+    await fireEvent.press(screen.getByTestId("restore-emeralds"));
+
+    expect(screen.getByText("Не хватает")).toBeOnTheScreen();
+    expect(screen.getByText("20")).toBeOnTheScreen();
+  });
+
+  test("explains the weekly limit instead of offering a restore (DLY-10)", async () => {
+    unlockDaily();
+    serveStreak({ restorable: false });
+    await renderScreen(createQueryWrapper());
+
+    expect(await screen.findByText("Восстановление — раз в неделю")).toBeOnTheScreen();
+    expect(screen.queryByTestId("restore-emeralds")).toBeNull();
   });
 });

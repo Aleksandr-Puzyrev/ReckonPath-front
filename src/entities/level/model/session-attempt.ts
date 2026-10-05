@@ -12,6 +12,7 @@ type AttemptMode = Attempt["mode"];
 
 interface FinishedSession {
   mode: AttemptMode;
+  attemptId: string | null;
   levelId: string;
   actions: readonly SessionAction[];
   startedAt: number | null;
@@ -23,6 +24,7 @@ const toIsoTime = (time: number) => new Date(time).toISOString();
 
 export const attemptOf = ({
   mode,
+  attemptId,
   levelId,
   actions,
   startedAt,
@@ -33,7 +35,7 @@ export const attemptOf = ({
   const isWon = game.status === "won";
   const continueAction = actions.find((action) => action.type === "continue");
   return {
-    attemptId: uuidv7(),
+    attemptId: attemptId ?? uuidv7(),
     mode,
     ref: levelId,
     // TODO: send contentVersion once content comes from the server (GET /content/manifest)

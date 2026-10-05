@@ -18,12 +18,14 @@ export const isCountedDailyLevel = (levelId: string) => {
 
 // Ends the game in progress as an attempt: a game still being played counts as lost (завершает текущую партию попыткой: ещё идущая партия засчитывается как поражение).
 export const finishAttempt = (): FinishedAttempt => {
-  const { game, levelId, actions, startedAt, finishedAt, finish } = useGameSessionStore.getState();
+  const { game, levelId, attemptId, actions, startedAt, finishedAt, finish } =
+    useGameSessionStore.getState();
   if (game === null || levelId === null) return NOTHING_FINISHED;
 
   const dayKey = dayKeyOfLevelId(levelId);
   const attempt = attemptOf({
     mode: dayKey === null ? "campaign" : "daily",
+    attemptId,
     levelId,
     actions,
     startedAt,

@@ -36,6 +36,7 @@ const renderApp = () => {
     "(tabs)/_layout": () => <Slot />,
     "(tabs)/index": () => <Text>home</Text>,
     "play/[mode]/[id]": () => <Text>play</Text>,
+    daily: () => <Text>daily</Text>,
     "system/update": () => <Text>update</Text>,
     "system/maintenance": () => <Text>maintenance</Text>,
   });

@@ -7,6 +7,7 @@ import { useProgressStore } from "@entities/progress";
 import { RULE_DEMOS, isRuleCardId, useRulesStore } from "@entities/rules";
 import { unlockTapInput } from "@features/tap-cell";
 import { i18n } from "@shared/i18n";
+import { mockServer } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import PlayScreen from "./play-screen";
@@ -52,6 +53,14 @@ const renderScreen = async () => {
 
 const settle = () => act(async () => jest.advanceTimersByTime(1000));
 
+const flushRequests = () => act(() => jest.advanceTimersByTimeAsync(0));
+
+const continueForEmeralds = async () => {
+  await flushRequests();
+  await fireEvent.press(screen.getByTestId("continue-emeralds"));
+  await flushRequests();
+};
+
 describe("PlayScreen", () => {
   beforeAll(async () => {
     await i18n.changeLanguage("ru");
@@ -71,7 +80,10 @@ describe("PlayScreen", () => {
     useRulesStore.getState().skipTutorial();
   });
 
-  afterEach(() => jest.useRealTimers());
+  afterEach(() => {
+    mockServer.reset();
+    jest.useRealTimers();
+  });
 
   test("shows an error state for an unknown level", async () => {
     mockParams.id = "c-missing";
@@ -134,13 +146,13 @@ describe("PlayScreen", () => {
     await renderScreen();
     await tap(0, 1, 2, 4);
     await settle();
-    await fireEvent.press(screen.getByTestId("continue-dev"));
+    await continueForEmeralds();
     expect(screen.getByText("3 / 7")).toBeOnTheScreen();
 
     await tap(5, 6, 7);
     await settle();
     expect(screen.getByText("Ходы закончились")).toBeOnTheScreen();
-    expect(screen.queryByTestId("continue-dev")).toBeNull();
+    expect(screen.queryByTestId("continue-emeralds")).toBeNull();
     expect(screen.getByText("Начать заново")).toBeOnTheScreen();
   });
 
@@ -172,7 +184,7 @@ describe("PlayScreen", () => {
     await renderScreen();
     await tap(0, 1, 2, 4);
     await settle();
-    await fireEvent.press(screen.getByTestId("continue-dev"));
+    await continueForEmeralds();
     await tap(TARGET);
     await settle();
     expect(screen.getByLabelText("Звёзды: 1 из 3")).toBeOnTheScreen();

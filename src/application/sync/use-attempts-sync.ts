@@ -7,6 +7,7 @@ import { dailyKeys } from "@entities/daily";
 import { useOutboxStore } from "@entities/outbox";
 import { useSessionStore } from "@entities/session";
 import { streakKeys } from "@entities/streak";
+import { applyWallet } from "@entities/wallet";
 
 import { retryDelay, shouldRetry } from "../query/retry-policy";
 
@@ -19,7 +20,8 @@ export const useAttemptsSync = () => {
     retry: shouldRetry,
     retryDelay,
     // Sent daily attempts change the streak, the calendar and the day's standings (отправленные попытки дейли меняют серию, календарь и таблицу дня).
-    onSuccess: () => {
+    onSuccess: (wallet) => {
+      if (wallet !== null) applyWallet(queryClient, wallet);
       queryClient.invalidateQueries({ queryKey: streakKeys.all });
       queryClient.invalidateQueries({ queryKey: dailyKeys.all });
     },

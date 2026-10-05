@@ -16,6 +16,7 @@ interface IButton {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isDisabled?: boolean;
+  isLabelDanger?: boolean;
   caption?: string;
   icon?: ReactNode;
   accessibilityLabel?: string;
@@ -30,13 +31,14 @@ const Button = ({
   variant = "secondary",
   size = "m",
   isDisabled = false,
+  isLabelDanger = false,
   caption,
   icon,
   accessibilityLabel,
   testID,
 }: IButton) => {
   const { theme } = useUnistyles();
-  styles.useVariants({ variant, size, isDisabled });
+  styles.useVariants({ variant, size, isDisabled, isLabelDanger });
   const hasGradient = variant === "primary" && !isDisabled;
 
   return (

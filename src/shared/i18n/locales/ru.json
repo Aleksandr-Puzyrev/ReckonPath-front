@@ -8,7 +8,8 @@
   },
   "common": {
     "cancel": "Отмена",
-    "back": "Назад"
+    "back": "Назад",
+    "close": "Закрыть"
   },
   "home": {
     "level": "Уровень {{n}}",
@@ -136,7 +137,6 @@
       "title": "+3 хода",
       "ad": "+3 хода за рекламу",
       "gems": "+3 хода",
-      "dev": "+3 хода · dev",
       "note": "После продолжения — не больше 1★"
     },
     "stars": "Звёзды: {{count}} из 3"
@@ -401,6 +401,30 @@
     "lost_many": "Серия {{count}} дней прервалась",
     "lost_other": "Серия {{count}} дня прервалась",
     "restore": "Восстановить серию",
-    "weekly": "Восстановление — раз в неделю"
+    "weekly": "Восстановление — раз в неделю",
+    "restoreAd": "За рекламу",
+    "restoreLeft": "Вчера пеленг не сыгран · вернуть можно ещё {{hours}} ч",
+    "restored": "Серия восстановлена",
+    "restoredNote": "Не пропусти сегодняшний пеленг",
+    "restoredToast_one": "Серия {{count}} день восстановлена",
+    "restoredToast_few": "Серия {{count}} дня восстановлена",
+    "restoredToast_many": "Серия {{count}} дней восстановлена",
+    "restoredToast_other": "Серия {{count}} дня восстановлена"
+  },
+  "earn": {
+    "title": "Как заработать",
+    "short": "Не хватает",
+    "where": "Где получить изумруды:",
+    "daily": "Пеленг дня"
+  },
+  "brand": {
+    "first": "RECKON",
+    "second": " PATH",
+    "tagline": "SIGNAL HUNT",
+    "emblem": "Знак Reckon Path"
+  },
+  "wallet": {
+    "emeralds": "Изумруды: {{count}}",
+    "coins": "Монеты: {{count}}"
   }
 }

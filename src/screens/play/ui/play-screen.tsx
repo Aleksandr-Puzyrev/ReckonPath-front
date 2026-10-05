@@ -9,9 +9,11 @@ import { formatDayMonth } from "@shared/lib";
 import { CoachMark } from "@shared/ui/coach-mark";
 import { Dialog } from "@shared/ui/dialog";
 import { Screen } from "@shared/ui/screen";
+import { Toast } from "@shared/ui/toast";
 import { AnswerPanel } from "@widgets/answer-panel";
 import { Board } from "@widgets/board";
 import { DailyResultSheet } from "@widgets/daily-result";
+import { EarnSheet } from "@widgets/earn-sheet";
 import { Hud } from "@widgets/hud";
 import { LoseSheet, WinSheet } from "@widgets/level-result";
 import { PauseSheet } from "@widgets/pause-menu";
@@ -136,6 +138,8 @@ const PlayLevel = ({ mode, id }: IPlayLevel) => {
         isOpen={play.overlay === "lose"}
         isBombLoss={play.isBombLoss}
         onContinued={play.handleContinued}
+        onShortOfEmeralds={play.handleShortOfEmeralds}
+        onError={play.handleContinueError}
         onRestart={play.handleRestart}
         onDecline={play.handleDecline}
         onExit={play.handleExit}
@@ -159,6 +163,13 @@ const PlayLevel = ({ mode, id }: IPlayLevel) => {
           { label: t("home.continue"), variant: "primary", onPress: play.handleResume },
         ]}
       />
+      <EarnSheet
+        isOpen={play.earnShortBy !== null}
+        shortBy={play.earnShortBy}
+        onDaily={play.handleEarnDaily}
+        onClose={play.handleEarnClose}
+      />
+      <Toast message={play.toast} onHide={play.handleToastHide} />
       <PlayGuides level={level} guides={play.guides} />
     </Screen>
   );

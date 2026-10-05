@@ -143,4 +143,11 @@ describe("syncAttempts", () => {
       percentile: 88,
     });
   });
+
+  test("returns the balance of the last answered batch (LVL-26)", async () => {
+    await signIn();
+    queue(2);
+
+    expect(await syncAttempts()).toEqual({ emeralds: 2640, coins: 18420 });
+  });
 });

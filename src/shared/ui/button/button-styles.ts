@@ -51,6 +51,10 @@ export const styles = StyleSheet.create((theme) => ({
         true: { color: theme.colors.text.disabled },
         false: {},
       },
+      isLabelDanger: {
+        true: { color: theme.colors.status.danger },
+        false: {},
+      },
     },
   },
   caption: {

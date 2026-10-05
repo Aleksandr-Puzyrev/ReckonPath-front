@@ -1,3 +1,4 @@
+import { uuidv7 } from "uuidv7";
 import { z } from "zod";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -10,11 +11,12 @@ import { zustandStorage } from "@shared/storage";
 import { replaySession, startGame } from "./replay-session";
 import type { ContinueMethod, SessionAction } from "./replay-session";
 
-const STORE_VERSION = 2;
+const STORE_VERSION = 3;
 const NO_STATE_CHANGE: ReadonlySet<GameEvent["type"]> = new Set(["blocked", "alreadyRevealed"]);
 
 interface SavedSession {
   levelId: string | null;
+  attemptId: string | null;
   actions: SessionAction[];
   flags: Idx[];
   startedAt: number | null;
@@ -33,6 +35,7 @@ interface GameSessionState extends SavedSession {
 
 const EMPTY_SESSION: SavedSession = {
   levelId: null,
+  attemptId: null,
   actions: [],
   flags: [],
   startedAt: null,
@@ -41,6 +44,8 @@ const EMPTY_SESSION: SavedSession = {
 
 const savedSessionSchema = z.object({
   levelId: z.string().nullable(),
+  // Versions 1–2 named the attempt only when it ended; a new id is made then (версии 1–2 давали id попытке только в конце; тогда он создаётся заново).
+  attemptId: z.string().nullable().default(null),
   actions: z.array(
     z.union([
       z.object({ type: z.literal("tap"), cell: z.number().int() }),
@@ -65,7 +70,7 @@ export const useGameSessionStore = create<GameSessionState>()(
           set({ game: replaySession(level, actions), flags });
           return;
         }
-        set({ ...EMPTY_SESSION, levelId: level.id, game: startGame(level) });
+        set({ ...EMPTY_SESSION, levelId: level.id, attemptId: uuidv7(), game: startGame(level) });
       },
 
       tap: (cell) => {
@@ -113,8 +118,16 @@ export const useGameSessionStore = create<GameSessionState>()(
       name: "game-session",
       version: STORE_VERSION,
       storage: createJSONStorage(() => zustandStorage),
-      partialize: ({ levelId, actions, flags, startedAt, finishedAt }): SavedSession => ({
+      partialize: ({
         levelId,
+        attemptId,
+        actions,
+        flags,
+        startedAt,
+        finishedAt,
+      }): SavedSession => ({
+        levelId,
+        attemptId,
         actions,
         flags,
         startedAt,

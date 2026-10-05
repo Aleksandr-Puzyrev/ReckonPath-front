@@ -5,12 +5,11 @@ import type { components } from "../generated/schema";
 import { countDailyAttempt } from "./daily-handlers";
 import { clearMockState, loadMockState, saveMockState } from "./mock-state";
 import { mockUrl } from "./mock-url";
+import { mockWallet } from "./mock-wallet";
 
 type Attempt = components["schemas"]["Attempt"];
 type AttemptsBatch = { attempts: Attempt[] };
 type LevelBest = { id: string; bestStars: number; bestMoves: number };
-
-const WALLET = { emeralds: 0, coins: 0 };
 
 const STATE_NAME = "attempts";
 
@@ -74,7 +73,7 @@ export const attemptsHandlers = [
     return HttpResponse.json({
       results,
       progress: { currentLevel: bestByLevel.size + 1, totalStars: totalStars() },
-      wallet: WALLET,
+      wallet: mockWallet(),
     });
   }),
   http.get(mockUrl("/progress"), () =>

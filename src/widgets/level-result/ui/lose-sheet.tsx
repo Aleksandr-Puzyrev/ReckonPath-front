@@ -4,16 +4,16 @@ import { canContinue } from "@reckon-path/engine";
 
 import { useGameSessionStore } from "@entities/level";
 import { ContinueOptions } from "@features/continue-game";
+import type { ContinueCallbacks } from "@features/continue-game";
 import { Button } from "@shared/ui/button";
 import { Sheet } from "@shared/ui/sheet";
 import { Text } from "@shared/ui/text";
 
 import { styles } from "./lose-sheet-styles";
 
-interface ILoseSheet {
+interface ILoseSheet extends ContinueCallbacks {
   isOpen: boolean;
   isBombLoss: boolean;
-  onContinued: () => void;
   onRestart: () => void;
   onDecline: () => void;
   onExit: () => void;
@@ -23,6 +23,8 @@ const LoseSheet = ({
   isOpen,
   isBombLoss,
   onContinued,
+  onShortOfEmeralds,
+  onError,
   onRestart,
   onDecline,
   onExit,
@@ -39,7 +41,13 @@ const LoseSheet = ({
       <Text variant="body.m" style={styles.found}>
         {t("result.lose.found", { found: game.found.size, total: game.board.targets.length })}
       </Text>
-      {canContinue(game) ? <ContinueOptions onContinued={onContinued} /> : null}
+      {canContinue(game) ? (
+        <ContinueOptions
+          onContinued={onContinued}
+          onShortOfEmeralds={onShortOfEmeralds}
+          onError={onError}
+        />
+      ) : null}
       <Button label={t("play.pause.restart")} onPress={onRestart} />
       <Button label={t("play.pause.exit")} onPress={onExit} variant="ghost" />
       {canContinue(game) ? (

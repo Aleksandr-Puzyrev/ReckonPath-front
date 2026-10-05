@@ -8,7 +8,8 @@
   },
   "common": {
     "cancel": "Cancel",
-    "back": "Back"
+    "back": "Back",
+    "close": "Close"
   },
   "home": {
     "level": "Level {{n}}",
@@ -132,7 +133,6 @@
       "title": "+3 moves",
       "ad": "+3 moves for an ad",
       "gems": "+3 moves",
-      "dev": "+3 moves · dev",
       "note": "After continuing — 1★ at most"
     },
     "stars": "Stars: {{count}} of 3"
@@ -359,6 +359,28 @@
     "lost_one": "Your {{count}}-day streak ended",
     "lost_other": "Your {{count}}-day streak ended",
     "restore": "Restore streak",
-    "weekly": "Restore is available once a week"
+    "weekly": "Restore is available once a week",
+    "restoreAd": "Watch ad",
+    "restoreLeft": "Yesterday was missed · {{hours}} h left to restore",
+    "restored": "Streak restored",
+    "restoredNote": "Don’t miss today’s bearing",
+    "restoredToast_one": "{{count}}-day streak restored",
+    "restoredToast_other": "{{count}}-day streak restored"
+  },
+  "earn": {
+    "title": "Ways to earn",
+    "short": "Not enough",
+    "where": "Where to get emeralds:",
+    "daily": "Daily bearing"
+  },
+  "brand": {
+    "first": "RECKON",
+    "second": " PATH",
+    "tagline": "SIGNAL HUNT",
+    "emblem": "Reckon Path emblem"
+  },
+  "wallet": {
+    "emeralds": "Emeralds: {{count}}",
+    "coins": "Coins: {{count}}"
   }
 }

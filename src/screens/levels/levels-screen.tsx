@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { CAMPAIGN_WORLDS } from "@entities/level";
@@ -10,9 +11,11 @@ import { Screen } from "@shared/ui/screen";
 import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
 import { BoardPreview } from "@widgets/board";
+import { EarnSheet } from "@widgets/earn-sheet";
 import { LevelList, buildListItems } from "@widgets/level-list";
 import type { LevelItem } from "@widgets/level-list";
 import { LevelSheet } from "@widgets/level-sheet";
+import { TopBar } from "@widgets/top-bar";
 
 import LevelsHeader from "./levels-header";
 import { styles } from "./levels-screen-styles";
@@ -25,6 +28,7 @@ const LevelsScreen = () => {
   const best = useProgressStore((state) => state.best);
   const [sheetLevel, setSheetLevel] = useState<CampaignLevel | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  const [isEarnOpen, setIsEarnOpen] = useState(false);
   const items = buildListItems(CAMPAIGN_WORLDS, best);
   const current = items.find((item) => item.type === "level" && item.state === "current");
 
@@ -51,6 +55,9 @@ const LevelsScreen = () => {
 
   return (
     <Screen style={styles.screen}>
+      <View style={styles.top}>
+        <TopBar onWalletPress={() => setIsEarnOpen(true)} />
+      </View>
       <LevelList
         items={items}
         header={
@@ -71,6 +78,15 @@ const LevelsScreen = () => {
         }
         onPlay={play}
         onDismiss={() => setSheetLevel(null)}
+      />
+      <EarnSheet
+        isOpen={isEarnOpen}
+        shortBy={null}
+        onDaily={() => {
+          setIsEarnOpen(false);
+          router.push("/daily");
+        }}
+        onClose={() => setIsEarnOpen(false)}
       />
     </Screen>
   );

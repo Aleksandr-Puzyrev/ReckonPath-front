@@ -5,7 +5,7 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     flex: 1,
   },
   content: {
-    paddingTop: runtime.insets.top + theme.space[6],
+    paddingTop: theme.space[4],
     paddingHorizontal: theme.space[5],
     paddingBottom:
       runtime.insets.bottom +

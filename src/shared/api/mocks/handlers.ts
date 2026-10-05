@@ -8,6 +8,7 @@ import { attemptsHandlers } from "./attempts-handlers";
 import { authHandlers } from "./auth-handlers";
 import { dailyHandlers } from "./daily-handlers";
 import { mockUrl } from "./mock-url";
+import { walletHandlers } from "./wallet-handlers";
 
 type Bootstrap = components["schemas"]["Bootstrap"];
 
@@ -36,4 +37,5 @@ export const handlers = [
   ...authHandlers,
   ...attemptsHandlers,
   ...dailyHandlers,
+  ...walletHandlers,
 ];

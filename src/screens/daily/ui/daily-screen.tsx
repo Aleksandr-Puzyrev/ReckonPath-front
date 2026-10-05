@@ -6,11 +6,12 @@ import { useUnistyles } from "react-native-unistyles";
 import { useIsDailyUnlocked } from "@features/daily-today";
 import { IconButton } from "@shared/ui/icon-button";
 import { Screen } from "@shared/ui/screen";
-import { Text } from "@shared/ui/text";
+import { Toast } from "@shared/ui/toast";
 import { BoardPreview } from "@widgets/board";
 import { DailyCalendar } from "@widgets/daily-calendar";
 import { DailyTodayCard } from "@widgets/daily-today-card";
 import { DayLeaderboard } from "@widgets/day-leaderboard";
+import { EarnSheet } from "@widgets/earn-sheet";
 import { StreakCard } from "@widgets/streak-card";
 
 import ChevronLeftIcon from "@assets/icons/levels/chevron-left.svg";
@@ -18,6 +19,7 @@ import ChevronLeftIcon from "@assets/icons/levels/chevron-left.svg";
 import { useDailyScreen } from "../model/use-daily-screen";
 
 import DailyLocked from "./daily-locked";
+import DailyStreakNotice from "./daily-streak-notice";
 import { styles } from "./daily-screen-styles";
 import DailyTitle from "./daily-title";
 
@@ -41,11 +43,13 @@ const DailyContent = () => {
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         <DailyTitle todayKey={daily.todayKey} />
-        {daily.streak.lost === null ? null : (
-          <View style={styles.lost}>
-            <Text variant="title.s">{t("streak.lost", { count: daily.streak.lost })}</Text>
-          </View>
-        )}
+        <DailyStreakNotice
+          offer={daily.restoreOffer}
+          restoredDays={daily.restoredDays}
+          onRestored={daily.handleRestored}
+          onShortOfEmeralds={daily.handleShortOfEmeralds}
+          onError={daily.handleError}
+        />
         <DailyTodayCard
           level={daily.level}
           preview={<BoardPreview level={daily.level} size={theme.sizes.daily.preview} />}
@@ -62,6 +66,13 @@ const DailyContent = () => {
           hasPlayed={daily.hasPlayed}
         />
       </ScrollView>
+      <EarnSheet
+        isOpen={daily.earnShortBy !== null}
+        shortBy={daily.earnShortBy}
+        onDaily={daily.handleEarnClose}
+        onClose={daily.handleEarnClose}
+      />
+      <Toast message={daily.toast} onHide={daily.handleToastHide} />
     </Screen>
   );
 };

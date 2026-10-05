@@ -1,8 +1,9 @@
-import { onlineManager, useMutation } from "@tanstack/react-query";
+import { onlineManager, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useEffectEvent } from "react";
 import { AppState } from "react-native";
 
 import { apiSession, ensureSessionMutationOptions } from "@entities/session";
+import { walletKeys } from "@entities/wallet";
 import { setApiSession } from "@shared/api";
 
 import { retryDelay, shouldRetry } from "../query/retry-policy";
@@ -11,10 +12,13 @@ import { retryDelay, shouldRetry } from "../query/retry-policy";
 setApiSession(apiSession);
 
 export const useGuestSession = () => {
+  const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     ...ensureSessionMutationOptions(),
     retry: shouldRetry,
     retryDelay,
+    // The player's data asked before the session existed is asked again (данные игрока, запрошенные до появления сессии, запрашиваются снова).
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: walletKeys.all }),
   });
 
   const ensure = useEffectEvent(() => {
