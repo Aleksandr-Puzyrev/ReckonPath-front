@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SoftUpdateSheet } from "@screens/system";
 import { isSoftUpdateSnoozed, useSystemNoticeStore, useSystemState } from "@entities/app-config";
 
+import LinkOfferHost from "../account/link-offer-host";
 import { useSystemSignalRefetch } from "../query/use-system-signal-refetch";
 import { useGuestSession } from "../session/use-guest-session";
 import { useAttemptsSync } from "../sync/use-attempts-sync";
@@ -20,6 +21,8 @@ const RootStack = () => {
   const [launchedAt] = useState(Date.now);
   const isUpdateRequired = state.kind === "forcedUpdate";
   const isMaintenance = state.kind === "maintenance" && !isMaintenanceDismissed;
+  const isSoftUpdateOpen =
+    state.kind === "softUpdate" && !isSoftUpdateSnoozed(softUpdateDismissedAt, launchedAt);
 
   return (
     <>
@@ -31,6 +34,8 @@ const RootStack = () => {
             name="play/[mode]/[id]"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}
           />
+          <Stack.Screen name="account/sign-in" options={{ presentation: "modal" }} />
+          <Stack.Screen name="account/sign-up" options={{ presentation: "modal" }} />
         </Stack.Protected>
         <Stack.Protected guard={isUpdateRequired}>
           <Stack.Screen name="system/update" options={{ gestureEnabled: false }} />
@@ -41,13 +46,14 @@ const RootStack = () => {
       </Stack>
       {state.kind === "softUpdate" ? (
         <SoftUpdateSheet
-          isOpen={!isSoftUpdateSnoozed(softUpdateDismissedAt, launchedAt)}
+          isOpen={isSoftUpdateOpen}
           version={state.version}
           storeUrl={state.storeUrl}
           message={state.message}
           onDismiss={useSystemNoticeStore.getState().dismissSoftUpdate}
         />
       ) : null}
+      <LinkOfferHost isSuspended={isSoftUpdateOpen} />
     </>
   );
 };

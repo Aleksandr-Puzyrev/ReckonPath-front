@@ -31,4 +31,10 @@ export const sizes = {
   daily: { preview: 120, milestone: 28, track: 6, calendarGap: 5, rankBadge: 26 },
   timerRing: { size: 56, stroke: 4 },
   toast: { minHeight: 44, offset: 12 },
+  // The fields, consent box and password strength bar of design 1.3 / 1.4, decision 0019 (поля, галочка согласия и шкала надёжности пароля из дизайна 1.3 / 1.4, решение 0019).
+  input: { height: 52, border: 1.5 },
+  checkbox: { size: 24, border: 1.5 },
+  strengthBar: { height: 4 },
+  // The link sheet's badge from design 26.1, decision 0019 (значок листа привязки из дизайна 26.1, решение 0019).
+  linkBadge: { size: 96, radius: 30, icon: 44 },
 } as const;

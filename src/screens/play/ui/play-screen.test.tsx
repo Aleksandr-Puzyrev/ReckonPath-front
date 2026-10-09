@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
+import { offerLinkAfterLevel } from "@features/link-account";
 import { useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
@@ -31,6 +32,7 @@ jest.mock("@reckon-path/content", () => ({
   ...jest.requireActual("../test-utils/test-levels"),
 }));
 jest.mock("@widgets/board", () => jest.requireActual("../test-utils/fake-board"));
+jest.mock("@features/link-account", () => ({ offerLinkAfterLevel: jest.fn() }));
 
 const BOMB = 3;
 const TARGET = 15;
@@ -178,6 +180,18 @@ describe("PlayScreen", () => {
       pathname: "/play/[mode]/[id]",
       params: { mode: "campaign", id: "c-b" },
     });
+  });
+
+  test("offers linking for the level once its win sheet closes", async () => {
+    jest.mocked(offerLinkAfterLevel).mockClear();
+    await renderScreen();
+    await tap(TARGET);
+    await settle();
+    expect(offerLinkAfterLevel).not.toHaveBeenCalled();
+
+    await fireEvent.press(screen.getByText("Дальше"));
+
+    expect(offerLinkAfterLevel).toHaveBeenCalledWith(1);
   });
 
   test("gives at most one star after a continue (LVL-13)", async () => {

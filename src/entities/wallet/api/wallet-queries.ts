@@ -19,6 +19,8 @@ export const meQueryOptions = () =>
     staleTime: ME_STALE_MS,
   });
 
+export const useMeQuery = () => useQuery(meQueryOptions());
+
 export const useWalletQuery = () =>
   useQuery({ ...meQueryOptions(), select: ({ wallet }) => wallet });
 

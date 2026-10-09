@@ -5,7 +5,9 @@ info:
   description: >
     Stage 2 subset of spec Part 7 (decision 0014 #2): bootstrap, guest auth, profile,
     attempts, progress, continue, daily, streak. Written from Part 7 by the client team,
-    reviewed by the backend. Fields not stated in Part 7 are not added.
+    reviewed by the backend. Fields not stated in Part 7 are not added. `/auth/register`
+    and `/auth/login` replace Part 7's Apple / Google sign-in and are a proposal to agree
+    with the backend (decision 0019 #14).
 servers:
   - url: "{baseUrl}/v1"
     variables:
@@ -48,6 +50,47 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Session" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/register:
+    post:
+      operationId: authRegister
+      description: Turns the current guest into a permanent account (decision 0019 #14).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "200":
+          description: The guest is now a permanent account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user: { $ref: "#/components/schemas/SessionUser" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/login:
+    post:
+      operationId: authLogin
+      description: >
+        Signs in to an existing account; the caller decides whether to keep the new session
+        (decision 0019 #14).
+      security: [{}, { bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Session of the account and a summary of its progress
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoginResult" }
         default: { $ref: "#/components/responses/Error" }
 
   /auth/refresh:
@@ -348,6 +391,8 @@ components:
         - IN_MATCH
         - ALREADY_QUEUED
         - NICK_TAKEN
+        - EMAIL_TAKEN
+        - INVALID_CREDENTIALS
         - ACCOUNT_CONFLICT
         - INSUFFICIENT_FUNDS
         - OFFER_ENDED
@@ -408,13 +453,47 @@ components:
         - type: object
           required: [user]
           properties:
-            user:
-              type: object
-              required: [id, nickname, isGuest]
-              properties:
-                id: { type: string }
-                nickname: { type: string }
-                isGuest: { type: boolean }
+            user: { $ref: "#/components/schemas/SessionUser" }
+
+    SessionUser:
+      type: object
+      required: [id, nickname, isGuest]
+      properties:
+        id: { type: string }
+        nickname: { type: string }
+        isGuest: { type: boolean }
+
+    LoginResult:
+      allOf:
+        - $ref: "#/components/schemas/Session"
+        - type: object
+          required: [summary]
+          properties:
+            summary: { $ref: "#/components/schemas/AccountSummary" }
+
+    AccountSummary:
+      description: Shown on the account conflict cards (Part 7 §3 `details.other`)
+      type: object
+      required: [level, league, stars]
+      properties:
+        level: { type: integer }
+        league: { type: [string, "null"], description: null without the arena }
+        stars: { type: integer }
+
+    RegisterRequest:
+      type: object
+      required: [nickname, email, password]
+      properties:
+        nickname: { type: string, minLength: 3, maxLength: 16 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+
+    LoginRequest:
+      type: object
+      required: [login, password]
+      properties:
+        login: { type: string, description: Nickname or e-mail }
+        password: { type: string }
 
     RefreshRequest:
       type: object

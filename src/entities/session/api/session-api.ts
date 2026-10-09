@@ -1,9 +1,10 @@
 import { mutationOptions } from "@tanstack/react-query";
 import { Platform } from "react-native";
 
-import { apiClient, readData, readErrorEnvelope } from "@shared/api";
+import { apiClient, ApiError, readData, readErrorEnvelope } from "@shared/api";
 import type { ApiSession, components } from "@shared/api";
 
+import { useAccountStore } from "../model/account-store";
 import { readDeviceId, readRefreshToken, saveRefreshToken } from "../model/secure-session";
 import { useSessionStore } from "../model/session-store";
 
@@ -52,7 +53,22 @@ const refreshAccessToken = async () => {
     return keepTokens(readData(result));
   // The revoked token stays until the new guest replaces it, so a failed sign-in is retried by the next 401 (отозванный токен остаётся до замены новым гостем, и неудачный вход повторит следующий 401).
   useSessionStore.getState().reset();
-  return signInGuest();
+  const accessToken = await signInGuest();
+  useAccountStore.getState().loseSignIn();
+  return accessToken;
+};
+
+// The token is dropped first, so the switch looks like a new sign-in and the attempts sync starts (токен сначала сбрасывается: смена выглядит как новый вход и запускает синхронизацию попыток).
+export const switchSession = async (tokens: TokenPair) => {
+  useSessionStore.getState().reset();
+  await keepTokens(tokens);
+};
+
+export const revokeSession = async (refreshToken: string) => {
+  const { error, response } = await apiClient.POST("/auth/logout", { body: { refreshToken } });
+  if (response.ok) return;
+  const { code, details } = readErrorEnvelope(error);
+  throw new ApiError(response.status, code, details);
 };
 
 export const apiSession: ApiSession = {

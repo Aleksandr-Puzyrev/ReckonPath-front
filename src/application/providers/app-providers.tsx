@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { UnistylesRuntime, useUnistyles } from "react-native-unistyles";
 
@@ -43,10 +44,12 @@ const AppProviders = ({ children }: IAppProviders) => {
     >
       <GestureHandlerRootView style={styles.root}>
         <SafeAreaProvider>
-          <BottomSheetModalProvider>
-            <StatusBar style="auto" />
-            {children}
-          </BottomSheetModalProvider>
+          <KeyboardProvider>
+            <BottomSheetModalProvider>
+              <StatusBar style="auto" />
+              {children}
+            </BottomSheetModalProvider>
+          </KeyboardProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </PersistQueryClientProvider>

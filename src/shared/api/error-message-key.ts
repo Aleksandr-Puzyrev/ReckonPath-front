@@ -2,6 +2,9 @@ import { isApiError } from "./api-error";
 import type { ApiErrorCode } from "./api-error";
 
 const CODES_WITH_TEXT = [
+  "NICK_TAKEN",
+  "EMAIL_TAKEN",
+  "INVALID_CREDENTIALS",
   "INSUFFICIENT_FUNDS",
   "ALREADY_OWNED",
   "OFFER_ENDED",

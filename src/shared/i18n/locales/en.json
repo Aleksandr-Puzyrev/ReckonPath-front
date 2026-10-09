@@ -278,7 +278,10 @@
     "CODE_INVALID": "Invalid code",
     "CODE_NEWER": "This code needs a newer app version",
     "FRIENDS_LIMIT": "Friend limit reached (200)",
-    "RATE_LIMITED": "Too many tries. Wait a moment"
+    "RATE_LIMITED": "Too many tries. Wait a moment",
+    "NICK_TAKEN": "This nickname is taken",
+    "EMAIL_TAKEN": "This e-mail is already taken",
+    "INVALID_CREDENTIALS": "Wrong login or password"
   },
   "system": {
     "update": {
@@ -382,5 +385,73 @@
   "wallet": {
     "emeralds": "Emeralds: {{count}}",
     "coins": "Coins: {{count}}"
+  },
+  "profile": {
+    "saveProgress": "Save your progress"
+  },
+  "account": {
+    "benefits": {
+      "phone": "Keep progress when you switch phones",
+      "friends": "Friends, challenges and the arena",
+      "devices": "Play on several devices"
+    },
+    "signUpAction": "Sign up",
+    "signInAction": "Sign in",
+    "later": "Later",
+    "linked": "Account linked",
+    "showPassword": "Show",
+    "hidePassword": "Hide",
+    "password": "Password",
+    "signIn": {
+      "eyebrow": "Welcome back",
+      "title": "Sign in",
+      "login": "Nickname or e-mail",
+      "loginPlaceholder": "nickname or e-mail",
+      "passwordPlaceholder": "at least 6 characters",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "No account?"
+    },
+    "signUp": {
+      "eyebrow": "New account",
+      "title": "Sign up",
+      "nickname": "Nickname",
+      "nicknamePlaceholder": "e.g. Seeker_7",
+      "email": "E-mail",
+      "passwordHint": "8+ characters, a digit and a capital letter",
+      "strength": {
+        "weak": "Weak",
+        "fair": "Fair",
+        "good": "Good",
+        "strong": "Strong"
+      },
+      "consent": "I accept the terms and privacy policy and I’m 12 or older",
+      "submit": "Create account",
+      "submitting": "Creating…",
+      "hasAccount": "Have an account?"
+    },
+    "errors": {
+      "loginRequired": "Enter your nickname or e-mail",
+      "passwordShort": "Password must be at least 6 characters",
+      "nicknameLength": "Nickname: 3–16 characters",
+      "nicknameChars": "Letters, digits and _ only",
+      "email": "Check your e-mail",
+      "passwordWeak": "Password is too simple",
+      "consent": "Please accept the terms"
+    },
+    "conflict": {
+      "header": "Link account",
+      "title": "Two progress saves found",
+      "description": "This account already has progress. If you load it, the progress on this device is deleted.",
+      "thisDevice": "This device",
+      "saved": "Saved",
+      "level": "Level",
+      "arena": "Arena",
+      "noLeague": "—",
+      "load": "Load saved",
+      "confirmTitle": "Keep “{{name}}”?",
+      "confirmMessage": "“{{name}}” progress will be deleted permanently.",
+      "keep": "Keep"
+    }
   }
 }

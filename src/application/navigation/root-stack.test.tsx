@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 import { Text } from "react-native";
 
 import { useSystemNoticeStore } from "@entities/app-config";
+import { useAccountStore } from "@entities/session";
+import { i18n } from "@shared/i18n";
 import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
@@ -25,27 +27,54 @@ const versions = (min: string, recommended: string) => ({
   version: { min, recommended, storeUrl: "https://apps.apple.com/app/id000" },
 });
 
-const renderApp = () => {
+const renderApp = (options: Parameters<typeof renderRouter>[1] = {}) => {
   const QueryWrapper = createQueryWrapper();
-  return renderRouter({
-    _layout: () => (
-      <QueryWrapper>
-        <RootStack />
-      </QueryWrapper>
-    ),
-    "(tabs)/_layout": () => <Slot />,
-    "(tabs)/index": () => <Text>home</Text>,
-    "play/[mode]/[id]": () => <Text>play</Text>,
-    daily: () => <Text>daily</Text>,
-    "system/update": () => <Text>update</Text>,
-    "system/maintenance": () => <Text>maintenance</Text>,
-  });
+  return renderRouter(
+    {
+      _layout: () => (
+        <QueryWrapper>
+          <RootStack />
+        </QueryWrapper>
+      ),
+      "(tabs)/_layout": () => <Slot />,
+      "(tabs)/index": () => <Text>home</Text>,
+      "play/[mode]/[id]": () => <Text>play</Text>,
+      "account/sign-in": () => <Text>sign-in</Text>,
+      "account/sign-up": () => <Text>sign-up</Text>,
+      daily: () => <Text>daily</Text>,
+      "system/update": () => <Text>update</Text>,
+      "system/maintenance": () => <Text>maintenance</Text>,
+    },
+    options,
+  );
 };
 
 describe("RootStack", () => {
-  beforeEach(() => useSystemNoticeStore.getState().reset());
+  beforeAll(() => i18n.changeLanguage("ru"));
+
+  beforeEach(() => {
+    useSystemNoticeStore.getState().reset();
+    useAccountStore.getState().reset();
+  });
 
   afterEach(() => mockServer.reset());
+
+  test("shows a queued link offer on the tabs", async () => {
+    useAccountStore.getState().requestLevelOffer();
+
+    await renderApp();
+
+    expect(await screen.findByText("Сохрани прогресс")).toBeOnTheScreen();
+  });
+
+  test("keeps a queued link offer away from a game", async () => {
+    useAccountStore.getState().requestLevelOffer();
+
+    await renderApp({ initialUrl: "/play/campaign/c-1" });
+
+    expect(await screen.findByText("play")).toBeOnTheScreen();
+    expect(screen.queryByText("Сохрани прогресс")).toBeNull();
+  });
 
   test("opens the app on the current version", async () => {
     await renderApp();

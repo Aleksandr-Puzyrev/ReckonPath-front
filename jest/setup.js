@@ -12,6 +12,9 @@ jest.mock("expo-constants", () => {
     default: { ...constants, expoConfig: { ...constants.expoConfig, version: expo.version } },
   };
 });
+jest.mock("react-native-keyboard-controller", () =>
+  require("react-native-keyboard-controller/jest"),
+);
 jest.mock("@react-native-community/netinfo", () =>
   require("@react-native-community/netinfo/jest/netinfo-mock.js"),
 );

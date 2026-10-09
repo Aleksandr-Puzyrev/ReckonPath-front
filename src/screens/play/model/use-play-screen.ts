@@ -16,6 +16,7 @@ import { useProgressStore } from "@entities/progress";
 import { useRulesStore } from "@entities/rules";
 import { finishAttempt, isCountedDailyLevel } from "@features/finish-attempt";
 import { flagCell } from "@features/flag-cell";
+import { offerLinkAfterLevel } from "@features/link-account";
 import { tapCell, unlockTapInput } from "@features/tap-cell";
 import type { ErrorMessageKey } from "@shared/api";
 import { motion } from "@shared/theme";
@@ -134,7 +135,13 @@ export const usePlayScreen = (mode: string, id: string) => {
     return () => subscription.remove();
   }, []);
 
+  // Closing the campaign win sheet by any of its buttons may queue the link offer (закрытие листа победы кампании любой кнопкой может поставить в очередь предложение привязки).
+  const closeWin = () => {
+    if (overlay === "win" && play.kind === "campaign") offerLinkAfterLevel(play.number);
+  };
+
   const exit = () => {
+    closeWin();
     finishLostGame();
     if (router.canGoBack()) router.back();
     else router.replace(play.kind === "daily" ? DAILY_ROUTE : LEVELS_ROUTE);
@@ -142,6 +149,7 @@ export const usePlayScreen = (mode: string, id: string) => {
 
   const restart = () => {
     if (level === null) return;
+    closeWin();
     if (isCountedDailyInPlay(play)) finishAttempt();
     else finishLostGame();
     useGameSessionStore.getState().start(level, "new");
@@ -202,6 +210,7 @@ export const usePlayScreen = (mode: string, id: string) => {
 
   const goNext = () => {
     if (play.kind !== "campaign" || play.next === null) return;
+    closeWin();
     router.replace({
       pathname: "/play/[mode]/[id]",
       params: { mode: "campaign", id: play.next.level.id },

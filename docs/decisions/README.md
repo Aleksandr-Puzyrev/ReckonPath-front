@@ -24,6 +24,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0016 | [`0016-attempts-sync.md`](0016-attempts-sync.md) | Outbox of finished attempts, `GET /progress` reconciliation by maximum with pending attempts, no `contentVersion` yet, continue method in the log |
 | 0017 | [`0017-daily-and-streak.md`](0017-daily-and-streak.md) | Daily split 5a / 5b, `GET /daily/history` proposal for the calendar, Home daily card only, daily unlocked after campaign level 6, overrides for 7 days |
 | 0018 | [`0018-wallet-and-continue.md`](0018-wallet-and-continue.md) | Online `POST /continue`, offline continue charged with the attempt, TopBar with the design emblem, minimal «Как заработать», free dev continue removed, streak restore for ◆ |
+| 0019 | [`0019-account-sign-in.md`](0019-account-sign-in.md) | Login and password instead of Apple / Google, VK ID later; link sheet after level 6 and after a revoked session; client-side account conflict; proposed `/auth/register` and `/auth/login` |
 
 ## Template
 

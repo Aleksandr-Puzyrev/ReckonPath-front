@@ -36,6 +36,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/register": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Turns the current guest into a permanent account (decision 0019 */
+    post: operations["authRegister"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/login": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Signs in to an existing account; the caller decides whether to keep the new session (decision 0019 #14). */
+    post: operations["authLogin"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/auth/refresh": {
     parameters: {
       query?: never;
@@ -225,6 +259,8 @@ export interface components {
       | "IN_MATCH"
       | "ALREADY_QUEUED"
       | "NICK_TAKEN"
+      | "EMAIL_TAKEN"
+      | "INVALID_CREDENTIALS"
       | "ACCOUNT_CONFLICT"
       | "INSUFFICIENT_FUNDS"
       | "OFFER_ENDED"
@@ -271,11 +307,33 @@ export interface components {
       expiresIn: number;
     };
     Session: components["schemas"]["TokenPair"] & {
-      user: {
-        id: string;
-        nickname: string;
-        isGuest: boolean;
-      };
+      user: components["schemas"]["SessionUser"];
+    };
+    SessionUser: {
+      id: string;
+      nickname: string;
+      isGuest: boolean;
+    };
+    LoginResult: components["schemas"]["Session"] & {
+      summary: components["schemas"]["AccountSummary"];
+    };
+    /** @description Shown on the account conflict cards (Part 7 §3 `details.other`) */
+    AccountSummary: {
+      level: number;
+      /** @description null without the arena */
+      league: string | null;
+      stars: number;
+    };
+    RegisterRequest: {
+      nickname: string;
+      /** Format: email */
+      email: string;
+      password: string;
+    };
+    LoginRequest: {
+      /** @description Nickname or e-mail */
+      login: string;
+      password: string;
     };
     RefreshRequest: {
       refreshToken: string;
@@ -444,6 +502,58 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Session"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  authRegister: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RegisterRequest"];
+      };
+    };
+    responses: {
+      /** @description The guest is now a permanent account */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            user: components["schemas"]["SessionUser"];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  authLogin: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginRequest"];
+      };
+    };
+    responses: {
+      /** @description Session of the account and a summary of its progress */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LoginResult"];
         };
       };
       default: components["responses"]["Error"];
@@ -775,6 +885,8 @@ export const errorCodeValues: ReadonlyArray<
   "IN_MATCH",
   "ALREADY_QUEUED",
   "NICK_TAKEN",
+  "EMAIL_TAKEN",
+  "INVALID_CREDENTIALS",
   "ACCOUNT_CONFLICT",
   "INSUFFICIENT_FUNDS",
   "OFFER_ENDED",

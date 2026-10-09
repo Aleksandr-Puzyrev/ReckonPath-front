@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw/http";
 import { apiClient, setApiSession } from "@shared/api";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
+import { useAccountStore } from "../model/account-store";
 import { useSessionStore } from "../model/session-store";
 
 import { apiSession, ensureSession } from "./session-api";
@@ -53,6 +54,7 @@ afterEach(() => {
   mockServer.reset();
   secureStore.__reset();
   useSessionStore.getState().reset();
+  useAccountStore.getState().reset();
   setApiSession(null);
 });
 
@@ -120,6 +122,17 @@ describe("session refresh", () => {
     expect(response.status).toBe(200);
     expect(deviceIds).toEqual([await getItemAsync("reckon-path.device-id")]);
     expect(await getItemAsync("reckon-path.refresh-token")).toBe("r_3");
+  });
+
+  test("offers signing in again when an account with a login is revoked (decision 0019 #17)", async () => {
+    await ensureSession();
+    useAccountStore.getState().markSignedIn();
+    await apiClient.POST("/auth/refresh", { body: { refreshToken: "r_1" } });
+    serveMeFor("a_3");
+
+    await apiClient.GET("/me");
+
+    expect(useAccountStore.getState()).toMatchObject({ hasLogin: false, offer: "signInLost" });
   });
 
   test("keeps the session on a 401 from the refresh that is not a revocation", async () => {

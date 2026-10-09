@@ -304,7 +304,10 @@
     "CODE_INVALID": "Неверный код",
     "CODE_NEWER": "Код из более новой версии — обнови игру",
     "FRIENDS_LIMIT": "Достигнут лимит друзей (200)",
-    "RATE_LIMITED": "Слишком часто. Подожди немного"
+    "RATE_LIMITED": "Слишком часто. Подожди немного",
+    "NICK_TAKEN": "Этот ник уже занят",
+    "EMAIL_TAKEN": "Этот e-mail уже занят",
+    "INVALID_CREDENTIALS": "Неверный логин или пароль"
   },
   "system": {
     "update": {
@@ -426,5 +429,73 @@
   "wallet": {
     "emeralds": "Изумруды: {{count}}",
     "coins": "Монеты: {{count}}"
+  },
+  "profile": {
+    "saveProgress": "Сохрани прогресс"
+  },
+  "account": {
+    "benefits": {
+      "phone": "Не потеряешь прогресс при смене телефона",
+      "friends": "Друзья, вызовы и арена",
+      "devices": "Игра на нескольких устройствах"
+    },
+    "signUpAction": "Зарегистрироваться",
+    "signInAction": "Войти",
+    "later": "Позже",
+    "linked": "Аккаунт привязан",
+    "showPassword": "Показать",
+    "hidePassword": "Скрыть",
+    "password": "Пароль",
+    "signIn": {
+      "eyebrow": "С возвращением",
+      "title": "Вход",
+      "login": "Ник или e-mail",
+      "loginPlaceholder": "ник или e-mail",
+      "passwordPlaceholder": "минимум 6 символов",
+      "submit": "Войти",
+      "submitting": "Входим…",
+      "noAccount": "Нет аккаунта?"
+    },
+    "signUp": {
+      "eyebrow": "Новый аккаунт",
+      "title": "Регистрация",
+      "nickname": "Ник",
+      "nicknamePlaceholder": "например, Seeker_7",
+      "email": "E-mail",
+      "passwordHint": "8+ символов, цифра и заглавная буква",
+      "strength": {
+        "weak": "Слабый",
+        "fair": "Средний",
+        "good": "Хороший",
+        "strong": "Надёжный"
+      },
+      "consent": "Принимаю условия и политику конфиденциальности, мне есть 12 лет",
+      "submit": "Создать аккаунт",
+      "submitting": "Создаём…",
+      "hasAccount": "Уже есть аккаунт?"
+    },
+    "errors": {
+      "loginRequired": "Введи ник или e-mail",
+      "passwordShort": "Пароль — минимум 6 символов",
+      "nicknameLength": "Ник — от 3 до 16 символов",
+      "nicknameChars": "Только буквы, цифры и _",
+      "email": "Проверь e-mail",
+      "passwordWeak": "Слишком простой пароль",
+      "consent": "Нужно согласие с условиями"
+    },
+    "conflict": {
+      "header": "Привязка аккаунта",
+      "title": "Найдено два прогресса",
+      "description": "У этого аккаунта уже есть прогресс. Если загрузить его, прогресс на этом устройстве удалится.",
+      "thisDevice": "Это устройство",
+      "saved": "Сохранённый",
+      "level": "Уровень",
+      "arena": "Арена",
+      "noLeague": "—",
+      "load": "Загрузить сохранённый",
+      "confirmTitle": "Оставить «{{name}}»?",
+      "confirmMessage": "Прогресс «{{name}}» будет удалён без возможности восстановить.",
+      "keep": "Оставить"
+    }
   }
 }
