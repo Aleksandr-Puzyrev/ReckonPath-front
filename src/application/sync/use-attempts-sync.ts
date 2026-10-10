@@ -8,8 +8,7 @@ import { useOutboxStore } from "@entities/outbox";
 import { useSessionStore } from "@entities/session";
 import { streakKeys } from "@entities/streak";
 import { applyWallet } from "@entities/wallet";
-
-import { retryDelay, shouldRetry } from "../query/retry-policy";
+import { retryDelay, shouldRetry } from "@shared/api";
 
 export const OUTBOX_INTERVAL_MS = 60_000;
 

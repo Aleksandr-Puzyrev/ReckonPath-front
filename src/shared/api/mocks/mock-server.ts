@@ -4,10 +4,13 @@ import { HttpResponse } from "msw/http";
 import type { HttpHandler } from "msw/http";
 import { getResponse } from "msw/utils/get-response";
 
+import { resetMockAds } from "./ads-handlers";
 import { resetMockAttempts } from "./attempts-handlers";
 import { resetMockAuth } from "./auth-handlers";
 import { resetMockDaily } from "./daily-handlers";
+import { resetMockShop } from "./mock-shop";
 import { resetMockWallet } from "./mock-wallet";
+import { resetMockPurchases } from "./shop-handlers";
 import { handlers } from "./handlers";
 
 export { MOCK_API_ORIGIN } from "./mock-url";
@@ -36,6 +39,9 @@ export const mockServer = {
     resetMockAttempts();
     resetMockDaily();
     resetMockWallet();
+    resetMockShop();
+    resetMockPurchases();
+    resetMockAds();
   },
   fetch: respond,
 };

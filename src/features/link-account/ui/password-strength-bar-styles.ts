@@ -10,8 +10,8 @@ export const styles = StyleSheet.create((theme) => ({
   },
   segment: {
     flex: 1,
-    height: theme.sizes.strengthBar.height,
-    borderRadius: theme.sizes.strengthBar.height / 2,
+    height: theme.sizes.progressBar.height,
+    borderRadius: theme.sizes.progressBar.height / 2,
     backgroundColor: theme.colors.bg.sunken,
   },
   segmentOn: {

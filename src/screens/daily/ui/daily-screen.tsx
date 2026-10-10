@@ -70,6 +70,7 @@ const DailyContent = () => {
         isOpen={daily.earnShortBy !== null}
         shortBy={daily.earnShortBy}
         onDaily={daily.handleEarnClose}
+        onMessage={daily.handleError}
         onClose={daily.handleEarnClose}
       />
       <Toast message={daily.toast} onHide={daily.handleToastHide} />

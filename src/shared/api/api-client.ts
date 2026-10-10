@@ -2,6 +2,7 @@ import createClient from "openapi-fetch";
 
 import { API_BASE_URL } from "@shared/config";
 
+import { ApiError } from "./api-error";
 import { createApiFetch } from "./api-fetch";
 import type { Transport } from "./api-fetch";
 import { apiMiddleware } from "./api-middleware";
@@ -31,3 +32,10 @@ export const apiClient = createClient<paths>({
 });
 
 apiClient.use(apiMiddleware);
+
+// Assets come from the CDN, outside the API, but through the same transport, so dev builds get them from the mocks (ассеты идут с CDN, мимо API, но тем же транспортом, поэтому dev-сборки получают их из моков).
+export const fetchAssetJson = async (url: string): Promise<unknown> => {
+  const response = await backend.transport(new Request(url));
+  if (!response.ok) throw new ApiError(response.status, null);
+  return response.json();
+};

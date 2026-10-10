@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw/http";
 
 import { restoreMockStreak, streakRestorePrice } from "./daily-handlers";
+import { mockShopState } from "./mock-shop";
 import { chargeEmeralds, mockWallet } from "./mock-wallet";
 import { mockUrl } from "./mock-url";
 
@@ -28,13 +29,14 @@ const ME = {
   xp: 0,
   xpToNext: 100,
   arena: { trophies: 0, league: "BRONZE", division: 3, peak: 0, rp: 0, seasonId: 1 },
-  loadout: {},
   flags: { nickChangeFreeAvailable: true, nickChangeAvailableAt: null, deletionScheduledAt: null },
   friendCode: "PL4821",
 };
 
 export const walletHandlers = [
-  http.get(mockUrl("/me"), () => HttpResponse.json({ ...ME, wallet: mockWallet() })),
+  http.get(mockUrl("/me"), () =>
+    HttpResponse.json({ ...ME, wallet: mockWallet(), loadout: mockShopState().loadout }),
+  ),
   http.post(mockUrl("/continue"), () => {
     if (!chargeEmeralds(CONTINUE_PRICE)) return insufficientFunds(CONTINUE_PRICE);
     return HttpResponse.json({ granted: true, bonusMoves: BONUS_MOVES, wallet: mockWallet() });

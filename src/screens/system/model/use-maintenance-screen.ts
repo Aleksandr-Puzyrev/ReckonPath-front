@@ -3,9 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import { useSystemNoticeStore, useSystemState } from "@entities/app-config";
 import { errorMessageKey, isApiError } from "@shared/api";
+import { formatClockTime } from "@shared/lib";
 import type { ToastMessage } from "@shared/ui/toast";
-
-import { formatClockTime } from "./format-clock-time";
 
 const isStillMaintenance = (error: unknown) =>
   error === null || (isApiError(error) && error.code === "MAINTENANCE");

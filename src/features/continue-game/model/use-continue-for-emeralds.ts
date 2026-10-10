@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uuidv7 } from "uuidv7";
 
+import type { AdMessageKey } from "@entities/ad";
 import { useGameSessionStore } from "@entities/level";
 import { applyWallet, useWalletQuery } from "@entities/wallet";
 import { errorMessageKey, isApiError, useIsOnline } from "@shared/api";
-import type { ErrorMessageKey } from "@shared/api";
 import { CONTINUE_GEM_PRICE } from "@shared/config";
 import { haptic } from "@shared/haptics";
 
@@ -13,7 +13,7 @@ import { continueForEmeraldsMutationOptions } from "../api/continue-mutation";
 export interface ContinueCallbacks {
   onContinued: () => void;
   onShortOfEmeralds: (need: number) => void;
-  onError: (messageKey: ErrorMessageKey) => void;
+  onError: (messageKey: AdMessageKey) => void;
 }
 
 const needOf = (details: Record<string, unknown>, fallback: number) =>

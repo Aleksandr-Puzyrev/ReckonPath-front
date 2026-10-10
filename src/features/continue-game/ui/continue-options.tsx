@@ -6,20 +6,20 @@ import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
 
 import EmeraldIcon from "@assets/icons/play/emerald.svg";
-import VideoIcon from "@assets/icons/play/video.svg";
 
+import { useContinueForAd } from "../model/use-continue-for-ad";
 import { useContinueForEmeralds } from "../model/use-continue-for-emeralds";
 import type { ContinueCallbacks } from "../model/use-continue-for-emeralds";
 
+import AdContinueButton from "./ad-continue-button";
 import { styles } from "./continue-options-styles";
-
-const ignorePress = () => undefined;
 
 const ContinueOptions = ({ onContinued, onShortOfEmeralds, onError }: ContinueCallbacks) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const iconSize = theme.sizes.icon.l;
   const emeralds = useContinueForEmeralds({ onContinued, onShortOfEmeralds, onError });
+  const ad = useContinueForAd({ onContinued, onMessage: onError });
 
   return (
     <View style={styles.container}>
@@ -27,18 +27,11 @@ const ContinueOptions = ({ onContinued, onShortOfEmeralds, onError }: ContinueCa
         {t("result.continue.title")}
       </Text>
       <View style={styles.row}>
-        <View style={styles.option}>
-          {/* TODO: watch a rewarded ad once the ads SDK exists (stage 3) */}
-          <Button
-            label={t("result.continue.ad")}
-            caption={t("ads.unavailable")}
-            icon={
-              <VideoIcon width={iconSize} height={iconSize} color={theme.colors.text.disabled} />
-            }
-            isDisabled
-            onPress={ignorePress}
-          />
-        </View>
+        {ad.state === "limit" ? null : (
+          <View style={styles.option}>
+            <AdContinueButton state={ad.state} left={ad.left} onPress={ad.handlePress} />
+          </View>
+        )}
         <View style={styles.option}>
           <Button
             testID="continue-emeralds"

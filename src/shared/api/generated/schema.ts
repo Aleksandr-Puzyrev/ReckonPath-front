@@ -231,6 +231,119 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/shop": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getShop"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/shop/purchase": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["postShopPurchase"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/inventory": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getInventory"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/loadout": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["putLoadout"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ads/limits": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Today's rewarded ad counters (decision 0025 */
+    get: operations["getAdLimits"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ads/intent": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["postAdIntent"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/ads/intent/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getAdIntent"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -259,6 +372,7 @@ export interface components {
       | "IN_MATCH"
       | "ALREADY_QUEUED"
       | "NICK_TAKEN"
+      | "NOT_OWNED"
       | "EMAIL_TAKEN"
       | "INVALID_CREDENTIALS"
       | "ACCOUNT_CONFLICT"
@@ -359,9 +473,7 @@ export interface components {
         rp: number;
         seasonId: number;
       };
-      loadout: {
-        [key: string]: unknown;
-      };
+      loadout: components["schemas"]["Loadout"];
       flags: {
         nickChangeFreeAvailable?: boolean;
         /** Format: date-time */
@@ -437,6 +549,159 @@ export interface components {
       restoreUntil?: string;
       restoreMethods?: ("ad" | "emeralds")[];
       price?: number;
+    };
+    /** @description Exactly one currency (decision 0021 */
+    Price:
+      | {
+          emeralds: number;
+        }
+      | {
+          coins: number;
+        };
+    /** @enum {string} */
+    Rarity: "common" | "rare" | "epic" | "legendary";
+    /**
+     * @description Loadout slot keys (decision 0021
+     * @enum {string}
+     */
+    Slot:
+      | "field"
+      | "fence"
+      | "stream"
+      | "rock"
+      | "x2"
+      | "bridge"
+      | "bomb"
+      | "target"
+      | "avatar"
+      | "frame"
+      | "badges"
+      | "title"
+      | "fxClick"
+      | "fxReveal"
+      | "fxVictory";
+    ItemPackage: {
+      url: string;
+      sha256: string;
+      version: number;
+    };
+    /** @description Name and description in the X-Locale language (decision 0021 */
+    ItemDescription: {
+      type: string;
+      rarity: components["schemas"]["Rarity"];
+      name: string;
+      description: string;
+      preview: string;
+      package: components["schemas"]["ItemPackage"];
+    };
+    ShopItem: components["schemas"]["ItemDescription"] & {
+      id: string;
+      slot: components["schemas"]["Slot"];
+      /** @description Decision 0022 #2 */
+      visibleInMatch: boolean;
+      price: components["schemas"]["Price"];
+      /** Format: date-time */
+      availableTo: string | null;
+      stockLeft: number | null;
+      owned: boolean;
+      equipped: boolean;
+    };
+    ShopTab: {
+      /** @enum {string} */
+      id: "exclusive" | "holiday" | "elements" | "fields" | "profile" | "effects";
+      items: components["schemas"]["ShopItem"][];
+    };
+    /** @description Name, description, rarity and preview are added for the bundle card, as for items (decision 0021 #11). */
+    Bundle: {
+      id: string;
+      name: string;
+      description: string;
+      rarity: components["schemas"]["Rarity"];
+      preview: string;
+      items: string[];
+      basePrice: components["schemas"]["Price"];
+      price: components["schemas"]["Price"];
+      ownedItems: string[];
+      /** Format: date-time */
+      availableTo: string | null;
+    };
+    Featured: {
+      id: string;
+      image: string;
+      title: string;
+      subtitle: string;
+      /** Format: date-time */
+      endsAt: string;
+      target:
+        | {
+            bundle: string;
+          }
+        | {
+            item: string;
+          };
+    };
+    Shop: {
+      featured: null | components["schemas"]["Featured"];
+      tabs: components["schemas"]["ShopTab"][];
+      bundles: components["schemas"]["Bundle"][];
+      cacheTtlSec: number;
+    };
+    InventoryEntry: {
+      itemId: string;
+      slot: components["schemas"]["Slot"];
+      /** Format: date-time */
+      acquiredAt: string;
+      source: string;
+      item: components["schemas"]["ItemDescription"];
+    };
+    /** @description Every slot is optional, so PUT sends only the changed ones; null is the default item */
+    Loadout: {
+      field?: string | null;
+      fence?: string | null;
+      stream?: string | null;
+      rock?: string | null;
+      x2?: string | null;
+      bridge?: string | null;
+      bomb?: string | null;
+      target?: string | null;
+      avatar?: string | null;
+      frame?: string | null;
+      badges?: string[];
+      title?: string | null;
+      fxClick?: string | null;
+      fxReveal?: string | null;
+      fxVictory?: string | null;
+    };
+    /** @enum {string} */
+    AdPlacement: "gems" | "continue" | "double" | "streak" | "event";
+    AdLimit: {
+      used: number;
+      max: number;
+      /** Format: date-time */
+      resetAt: string;
+    };
+    AdLimits: {
+      gems: components["schemas"]["AdLimit"];
+      continue: components["schemas"]["AdLimit"];
+      streak: components["schemas"]["AdLimit"];
+    };
+    AdIntent: {
+      adIntentId: string;
+      customData: string;
+      network: string;
+      unitId: string;
+      leftToday: number;
+    };
+    /** @description For continue and streak the reward is the right to call that endpoint with the intent (Part 7 §6) */
+    AdIntentStatus: {
+      /** @enum {string} */
+      status: "pending" | "rewarded" | "expired";
+      reward?: {
+        /** @enum {string} */
+        currency: "emerald" | "coin";
+        amount: number;
+      };
+      wallet?: components["schemas"]["Wallet"];
     };
   };
   responses: {
@@ -859,6 +1124,185 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  getShop: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Catalog for the player */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Shop"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  postShopPurchase: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json":
+          | {
+              itemId: string;
+              expectedPrice: components["schemas"]["Price"];
+            }
+          | {
+              bundleId: string;
+              expectedPrice: components["schemas"]["Price"];
+            };
+      };
+    };
+    responses: {
+      /** @description Purchase granted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            purchaseId: string;
+            granted: string[];
+            wallet: components["schemas"]["Wallet"];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getInventory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Owned items with their descriptions (decision 0021 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            items: components["schemas"]["InventoryEntry"][];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  putLoadout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["Loadout"];
+      };
+    };
+    responses: {
+      /** @description The whole loadout after the change */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Loadout"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getAdLimits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Counters per placement */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdLimits"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  postAdIntent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          placement: components["schemas"]["AdPlacement"];
+          /** @description attemptId or eventId */
+          ref?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Intent to show a rewarded ad */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdIntent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getAdIntent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Intent status after the SSV callback */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AdIntentStatus"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
 }
 type FlattenedDeepRequired<T> = {
   [K in keyof T]-?: FlattenedDeepRequired<
@@ -885,6 +1329,7 @@ export const errorCodeValues: ReadonlyArray<
   "IN_MATCH",
   "ALREADY_QUEUED",
   "NICK_TAKEN",
+  "NOT_OWNED",
   "EMAIL_TAKEN",
   "INVALID_CREDENTIALS",
   "ACCOUNT_CONFLICT",
@@ -915,3 +1360,38 @@ export const attemptResultStatusValues: ReadonlyArray<
 export const streakStateRestoreMethodsValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["StreakState"]["restoreMethods"]
 > = ["ad", "emeralds"];
+export const rarityValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["Rarity"]> = [
+  "common",
+  "rare",
+  "epic",
+  "legendary",
+];
+export const slotValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["Slot"]> = [
+  "field",
+  "fence",
+  "stream",
+  "rock",
+  "x2",
+  "bridge",
+  "bomb",
+  "target",
+  "avatar",
+  "frame",
+  "badges",
+  "title",
+  "fxClick",
+  "fxReveal",
+  "fxVictory",
+];
+export const shopTabIdValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ShopTab"]["id"]
+> = ["exclusive", "holiday", "elements", "fields", "profile", "effects"];
+export const adPlacementValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["AdPlacement"]
+> = ["gems", "continue", "double", "streak", "event"];
+export const adIntentStatusStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["AdIntentStatus"]["status"]
+> = ["pending", "rewarded", "expired"];
+export const adIntentStatusRewardCurrencyValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["AdIntentStatus"]["reward"]["currency"]
+> = ["emerald", "coin"];

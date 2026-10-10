@@ -4,19 +4,21 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import { zustandStorage } from "@shared/storage";
 
-const STORE_VERSION = 1;
+const STORE_VERSION = 2;
 
-export type LinkOffer = "level" | "signInLost";
+export type LinkOffer = "level" | "signInLost" | "purchase";
 
 interface AccountProgress {
   hasLogin: boolean;
   offer: LinkOffer | null;
   isLevelOfferUsed: boolean;
+  isPurchaseOfferUsed: boolean;
 }
 
 interface AccountState extends AccountProgress {
   linkedNotice: number;
   requestLevelOffer: () => void;
+  requestPurchaseOffer: () => boolean;
   loseSignIn: () => void;
   closeOffer: () => void;
   markRegistered: () => void;
@@ -24,12 +26,19 @@ interface AccountState extends AccountProgress {
   reset: () => void;
 }
 
-const INITIAL: AccountProgress = { hasLogin: false, offer: null, isLevelOfferUsed: false };
+const INITIAL: AccountProgress = {
+  hasLogin: false,
+  offer: null,
+  isLevelOfferUsed: false,
+  isPurchaseOfferUsed: false,
+};
 
+// Version 1 had no purchase offer; it is still unused for those players (в версии 1 не было предложения перед покупкой; у этих игроков оно ещё не использовано).
 const progressSchema = z.object({
   hasLogin: z.boolean(),
-  offer: z.enum(["level", "signInLost"]).nullable(),
+  offer: z.enum(["level", "signInLost", "purchase"]).nullable(),
   isLevelOfferUsed: z.boolean(),
+  isPurchaseOfferUsed: z.boolean().default(false),
 });
 
 export const useAccountStore = create<AccountState>()(
@@ -40,6 +49,11 @@ export const useAccountStore = create<AccountState>()(
       requestLevelOffer: () => {
         if (get().hasLogin || get().isLevelOfferUsed) return;
         set({ offer: "level", isLevelOfferUsed: true });
+      },
+      requestPurchaseOffer: () => {
+        if (get().hasLogin || get().isPurchaseOfferUsed) return false;
+        set({ offer: "purchase", isPurchaseOfferUsed: true });
+        return true;
       },
       loseSignIn: () => {
         if (get().hasLogin) set({ hasLogin: false, offer: "signInLost" });
@@ -54,11 +68,12 @@ export const useAccountStore = create<AccountState>()(
       name: "account",
       version: STORE_VERSION,
       storage: createJSONStorage(() => zustandStorage),
-      partialize: ({ hasLogin, offer, isLevelOfferUsed }): AccountProgress => ({
+      partialize: ({
         hasLogin,
         offer,
         isLevelOfferUsed,
-      }),
+        isPurchaseOfferUsed,
+      }): AccountProgress => ({ hasLogin, offer, isLevelOfferUsed, isPurchaseOfferUsed }),
       migrate: (persisted) => progressSchema.catch(INITIAL).parse(persisted),
     },
   ),

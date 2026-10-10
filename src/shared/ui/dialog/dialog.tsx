@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Modal, View } from "react-native";
 
 import { Button } from "../button";
@@ -14,8 +15,8 @@ export interface DialogAction {
 
 interface IDialog {
   isOpen: boolean;
-  title: string;
-  message?: string;
+  title: ReactNode;
+  message?: ReactNode;
   actions: readonly DialogAction[];
   onCancel: () => void;
 }

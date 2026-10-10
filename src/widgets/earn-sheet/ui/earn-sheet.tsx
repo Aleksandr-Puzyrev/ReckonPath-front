@@ -2,6 +2,8 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { AdEarnRow } from "@features/earn-for-ad";
+import type { AdMessageKey } from "@entities/ad";
 import { useWalletQuery } from "@entities/wallet";
 import { formatNumber } from "@shared/lib";
 import { Button } from "@shared/ui/button";
@@ -13,14 +15,25 @@ import EmeraldIcon from "@assets/icons/play/emerald.svg";
 
 import { styles } from "./earn-sheet-styles";
 
+export type EarnCurrency = "emeralds" | "coins";
+
 interface IEarnSheet {
   isOpen: boolean;
   shortBy: number | null;
+  currency?: EarnCurrency;
   onDaily: () => void;
+  onMessage: (messageKey: AdMessageKey) => void;
   onClose: () => void;
 }
 
-const EarnSheet = ({ isOpen, shortBy, onDaily, onClose }: IEarnSheet) => {
+const EarnSheet = ({
+  isOpen,
+  shortBy,
+  currency = "emeralds",
+  onDaily,
+  onMessage,
+  onClose,
+}: IEarnSheet) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
   const { data: wallet } = useWalletQuery();
@@ -33,7 +46,11 @@ const EarnSheet = ({ isOpen, shortBy, onDaily, onClose }: IEarnSheet) => {
       ) : (
         <View style={styles.title}>
           <Text variant="display.m">{t("earn.short")}</Text>
-          <EmeraldIcon width={iconSize} height={iconSize} />
+          {currency === "emeralds" ? (
+            <EmeraldIcon width={iconSize} height={iconSize} />
+          ) : (
+            <CoinIcon width={iconSize} height={iconSize} />
+          )}
           <Text variant="display.m">{shortBy}</Text>
         </View>
       )}
@@ -60,6 +77,7 @@ const EarnSheet = ({ isOpen, shortBy, onDaily, onClose }: IEarnSheet) => {
       <Text variant="body.s" style={styles.secondary}>
         {t("earn.where")}
       </Text>
+      <AdEarnRow onMessage={onMessage} />
       <Button testID="earn-daily" label={t("earn.daily")} onPress={onDaily} />
       <Button label={t("common.close")} onPress={onClose} variant="ghost" />
     </Sheet>

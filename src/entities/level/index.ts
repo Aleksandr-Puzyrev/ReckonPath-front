@@ -18,3 +18,4 @@ export { levelStarsOf } from "./model/level-stars";
 export { selectHasSavedSession, useGameSessionStore } from "./model/game-session-store";
 export type { ContinueMethod, SessionAction } from "./model/replay-session";
 export { attemptOf } from "./model/session-attempt";
+export { PREVIEW_LEVEL } from "./model/preview-level";

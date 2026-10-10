@@ -9,7 +9,11 @@
   "common": {
     "cancel": "Cancel",
     "back": "Back",
-    "close": "Close"
+    "close": "Close",
+    "retry": "Try again",
+    "offline": "You’re offline. Campaign and daily work without internet",
+    "updatedAt": "Updated {{time}}",
+    "later": "Later"
   },
   "home": {
     "level": "Level {{n}}",
@@ -133,12 +137,26 @@
       "title": "+3 moves",
       "ad": "+3 moves for an ad",
       "gems": "+3 moves",
-      "note": "After continuing — 1★ at most"
+      "note": "After continuing — 1★ at most",
+      "left": "{{count}} left today"
     },
     "stars": "Stars: {{count}} of 3"
   },
   "ads": {
-    "unavailable": "No ad available right now"
+    "unavailable": "No ad available right now",
+    "att": {
+      "title": "Ads that fit you",
+      "body": "Help us show relevant ads — that keeps the game free. You can change this in Settings.",
+      "continue": "Continue"
+    },
+    "watch": "Watch ad",
+    "unavailableShort": "No ad available",
+    "loading": "Loading…",
+    "loadingHint": "a few seconds",
+    "retryLater": "try again later",
+    "offline": "Offline",
+    "offlineHint": "ads unavailable",
+    "rewardLater": "Your reward is on its way"
   },
   "levels": {
     "eyebrow": "Signal path",
@@ -374,7 +392,11 @@
     "title": "Ways to earn",
     "short": "Not enough",
     "where": "Where to get emeralds:",
-    "daily": "Daily bearing"
+    "daily": "Daily bearing",
+    "adTitle": "Watch an ad",
+    "adToday": "today {{used}} / {{max}}",
+    "adTomorrow": "Back tomorrow",
+    "adReward": "+<icon/> {{amount}}"
   },
   "brand": {
     "first": "RECKON",
@@ -387,7 +409,30 @@
     "coins": "Coins: {{count}}"
   },
   "profile": {
-    "saveProgress": "Save your progress"
+    "saveProgress": "Save your progress",
+    "collection": "Collection",
+    "moreInShop": "More in the showroom",
+    "default": "Default",
+    "level": "Level {{level}}",
+    "levelGuest": "Level {{level}} · guest",
+    "xp": "XP {{xp}} / {{max}}",
+    "guestNote": "Guest progress is lost on a new phone",
+    "have": "Owned",
+    "equipped": "Equipped",
+    "slotLabel": "{{slot}}: {{item}}",
+    "slots": {
+      "field": "Board",
+      "fence": "Fence",
+      "stream": "Stream",
+      "rock": "Rock",
+      "x2": "×2",
+      "bridge": "Bridge",
+      "bomb": "Bomb",
+      "target": "Target",
+      "avatar": "Avatar",
+      "frame": "Frame",
+      "title": "Title"
+    }
   },
   "account": {
     "benefits": {
@@ -452,6 +497,89 @@
       "confirmTitle": "Keep “{{name}}”?",
       "confirmMessage": "“{{name}}” progress will be deleted permanently.",
       "keep": "Keep"
+    }
+  },
+  "shop": {
+    "eyebrow": "Showroom",
+    "title": "Collect your signal.",
+    "subtitle": "Cosmetics change the board, profile and effects. Results stay fair.",
+    "tabs": {
+      "exclusive": "Exclusive",
+      "holiday": "Holiday",
+      "elements": "Elements",
+      "fields": "Boards",
+      "bundles": "Bundles",
+      "profile": "Profile",
+      "effects": "Effects"
+    },
+    "hideOwned": "Hide owned",
+    "drop": {
+      "label": "LIMITED DROP",
+      "open": "Open bundle",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days"
+    },
+    "timer": {
+      "days": "{{days}}d",
+      "daysHours": "{{days}}d {{hours}}h"
+    },
+    "owned": "Owned",
+    "equipped": "Equipped",
+    "complete": "Complete",
+    "inMatch": "in match",
+    "types": {
+      "field": "Board",
+      "fence": "Fence",
+      "stream": "Stream",
+      "rock": "Rock",
+      "x2": "×2",
+      "bridge": "Bridge",
+      "bomb": "Bomb",
+      "target": "Target marker",
+      "avatar": "Avatar",
+      "frame": "Frame",
+      "badges": "Badge",
+      "title": "Title",
+      "fxClick": "Tap FX",
+      "fxReveal": "Target FX",
+      "fxVictory": "Win FX",
+      "bundle": "Bundle"
+    },
+    "rarity": {
+      "common": "Common",
+      "rare": "Rare",
+      "epic": "Epic",
+      "legendary": "Legendary"
+    },
+    "preview": {
+      "left": "Ends in {{time}}",
+      "have": "Owned"
+    },
+    "confirm": {
+      "title": "Buy “{{item}}” for <icon/> {{amount}}?",
+      "left": "You’ll have <icon/> {{amount}} left",
+      "buy": "Buy"
+    },
+    "success": {
+      "title": "Purchased",
+      "balance": "Balance: <icon/> {{amount}}"
+    },
+    "equip": "Equip",
+    "equippedAction": "Equipped",
+    "buying": "Buying…",
+    "needInternet": "Internet required",
+    "ended": {
+      "title": "Offer has ended",
+      "body": "The sale window closed. The item is removed and nothing was charged."
+    },
+    "soldOut": "Sold out",
+    "gotIt": "OK",
+    "equippedToast": "Equipped: {{item}}"
+  },
+  "settings": {
+    "theme": {
+      "light": "Light",
+      "dark": "Dark"
     }
   }
 }

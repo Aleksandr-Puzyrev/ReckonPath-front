@@ -86,6 +86,7 @@ const LevelsScreen = () => {
           setIsEarnOpen(false);
           router.push("/daily");
         }}
+        onMessage={(messageKey) => setToast({ id: Date.now(), text: t(messageKey) })}
         onClose={() => setIsEarnOpen(false)}
       />
     </Screen>

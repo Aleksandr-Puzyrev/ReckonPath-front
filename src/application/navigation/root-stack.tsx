@@ -5,6 +5,7 @@ import { SoftUpdateSheet } from "@screens/system";
 import { isSoftUpdateSnoozed, useSystemNoticeStore, useSystemState } from "@entities/app-config";
 
 import LinkOfferHost from "../account/link-offer-host";
+import AdsConsentHost from "../ads/ads-consent-host";
 import { useSystemSignalRefetch } from "../query/use-system-signal-refetch";
 import { useGuestSession } from "../session/use-guest-session";
 import { useAttemptsSync } from "../sync/use-attempts-sync";
@@ -54,6 +55,7 @@ const RootStack = () => {
         />
       ) : null}
       <LinkOfferHost isSuspended={isSoftUpdateOpen} />
+      <AdsConsentHost />
     </>
   );
 };

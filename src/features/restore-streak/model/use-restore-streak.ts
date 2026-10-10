@@ -1,18 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uuidv7 } from "uuidv7";
 
+import type { AdMessageKey } from "@entities/ad";
 import { dailyKeys } from "@entities/daily";
 import { streakKeys } from "@entities/streak";
 import { applyWallet, useWalletQuery } from "@entities/wallet";
 import { errorMessageKey, isApiError } from "@shared/api";
-import type { ErrorMessageKey } from "@shared/api";
 
 import { restoreStreakMutationOptions } from "../api/restore-streak-mutation";
 
 export interface RestoreCallbacks {
   onRestored: (days: number) => void;
   onShortOfEmeralds: (need: number) => void;
-  onError: (messageKey: ErrorMessageKey) => void;
+  onError: (messageKey: AdMessageKey) => void;
 }
 
 const needOf = (details: Record<string, unknown>, fallback: number) =>

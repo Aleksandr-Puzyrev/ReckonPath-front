@@ -71,5 +71,6 @@ describe("HomeScreen", () => {
     await fireEvent.press(screen.getByTestId("wallet-coins"));
 
     expect(screen.getByText("Где получить изумруды:")).toBeOnTheScreen();
+    expect(await screen.findByText("сегодня 0 / 5")).toBeOnTheScreen();
   });
 });

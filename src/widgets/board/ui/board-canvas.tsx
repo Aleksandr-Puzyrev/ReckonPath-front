@@ -2,7 +2,6 @@ import { Canvas, Group, Picture, createPicture, useFont } from "@shopify/react-n
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useDerivedValue } from "react-native-reanimated";
 import type { SharedValue } from "react-native-reanimated";
-import { useUnistyles } from "react-native-unistyles";
 
 import type { Board, Idx } from "@reckon-path/engine";
 
@@ -10,7 +9,8 @@ import type { BoardGeometry } from "../model/board-geometry";
 import { hitTest } from "../model/board-geometry";
 import { createBoardPaths } from "../model/board-paths";
 import { createBoardScene } from "../model/board-scene";
-import { boardSkinFor } from "../model/board-skin";
+import { useBoardSkin } from "../model/use-board-skin";
+import type { BoardLook } from "../model/use-board-skin";
 import type { CellVisual } from "../model/cell-visuals";
 import type { BoardFx } from "../model/use-board-fx";
 
@@ -33,6 +33,7 @@ interface IBoardCanvas {
   onCellPress?: (idx: Idx) => void;
   onCellLongPress?: (idx: Idx) => void;
   isInteractive?: boolean;
+  look?: BoardLook;
 }
 
 const ignoreCell = () => undefined;
@@ -45,12 +46,13 @@ const BoardCanvas = ({
   onCellPress = ignoreCell,
   onCellLongPress = ignoreCell,
   isInteractive = true,
+  look,
 }: IBoardCanvas) => {
-  const { rt } = useUnistyles();
+  const skin = useBoardSkin(look);
   const numberFont = useFont(numberFontSource, geometry.fontSize);
   const labelFont = useFont(labelFontSource, geometry.fontSize * LABEL_FONT_SHARE);
   const scene = createBoardScene(board, geometry, {
-    skin: boardSkinFor(rt.themeName === "light" ? "light" : "dark"),
+    skin,
     paths,
     font: numberFont,
     labelFont,

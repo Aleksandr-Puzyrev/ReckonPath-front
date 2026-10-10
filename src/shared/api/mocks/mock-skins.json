@@ -1,0 +1,190 @@
+{
+  "night": {
+    "light": {
+      "frame": {
+        "gradient": ["#1B2456", "#080C26"]
+      },
+      "cell": {
+        "stops": ["#4658A8", "#34438A", "#222E66"]
+      },
+      "number": "#EAF0FF"
+    },
+    "dark": {
+      "frame": {
+        "gradient": ["#1B2456", "#080C26"]
+      },
+      "cell": {
+        "stops": ["#4658A8", "#34438A", "#222E66"]
+      },
+      "number": "#EAF0FF"
+    }
+  },
+  "pumpkin": {
+    "light": {
+      "frame": {
+        "gradient": ["#3B2A52", "#170F24"]
+      },
+      "cell": {
+        "stops": ["#3E2E52", "#291D38", "#1E1529"]
+      },
+      "number": "#FFE2C2"
+    },
+    "dark": {
+      "frame": {
+        "gradient": ["#3B2A52", "#170F24"]
+      },
+      "cell": {
+        "stops": ["#3E2E52", "#291D38", "#1E1529"]
+      },
+      "number": "#FFE2C2"
+    }
+  },
+  "reef": {
+    "light": {
+      "frame": {
+        "gradient": ["#7A5238", "#3A2418"]
+      },
+      "cell": {
+        "stops": ["#FFE7BD", "#F6CD92", "#E3A96A"]
+      },
+      "number": "#3D2408"
+    },
+    "dark": {
+      "frame": {
+        "gradient": ["#7A5238", "#3A2418"]
+      },
+      "cell": {
+        "stops": ["#FFE7BD", "#F6CD92", "#E3A96A"]
+      },
+      "number": "#3D2408"
+    }
+  },
+  "creek": {
+    "light": {
+      "frame": {
+        "gradient": ["#1F4A36", "#0B2419"]
+      },
+      "cell": {
+        "stops": ["#9EE59A", "#6BC77A", "#46A45E"]
+      },
+      "number": "#0E2E1C"
+    },
+    "dark": {
+      "frame": {
+        "gradient": ["#1F4A36", "#0B2419"]
+      },
+      "cell": {
+        "stops": ["#9EE59A", "#6BC77A", "#46A45E"]
+      },
+      "number": "#0E2E1C"
+    }
+  },
+  "aurora": {
+    "light": {
+      "frame": {
+        "gradient": ["#E6FAFF", "#9FD8E8"]
+      },
+      "cell": {
+        "stops": ["#F4FDFF", "#CDEFF6", "#A9DDEA"]
+      },
+      "number": "#103044"
+    },
+    "dark": {
+      "frame": {
+        "gradient": ["#E6FAFF", "#9FD8E8"]
+      },
+      "cell": {
+        "stops": ["#F4FDFF", "#CDEFF6", "#A9DDEA"]
+      },
+      "number": "#103044"
+    }
+  },
+  "garden": {
+    "light": {
+      "frame": {
+        "gradient": ["#44561F", "#1C280C"]
+      },
+      "cell": {
+        "stops": ["#E8F59E", "#C2E074", "#92C24E"]
+      },
+      "number": "#26330C"
+    },
+    "dark": {
+      "frame": {
+        "gradient": ["#44561F", "#1C280C"]
+      },
+      "cell": {
+        "stops": ["#E8F59E", "#C2E074", "#92C24E"]
+      },
+      "number": "#26330C"
+    }
+  },
+  "fog": {
+    "light": {
+      "frame": {
+        "gradient": ["#CFD9E1", "#8396A6"]
+      },
+      "cell": {
+        "stops": ["#E2E9EF", "#AFBDC8", "#8C9DAB"]
+      },
+      "number": "#1F2E3A"
+    },
+    "dark": {
+      "frame": {
+        "gradient": ["#CFD9E1", "#8396A6"]
+      },
+      "cell": {
+        "stops": ["#E2E9EF", "#AFBDC8", "#8C9DAB"]
+      },
+      "number": "#1F2E3A"
+    }
+  },
+  "fence_neon": {
+    "light": {
+      "elements": {
+        "fence": "#18D7DF"
+      }
+    },
+    "dark": {
+      "elements": {
+        "fence": "#18D7DF"
+      }
+    }
+  },
+  "stream_ice": {
+    "light": {
+      "elements": {
+        "stream": ["#E6FBFF", "#9FD8E8", "#6FB6CC"]
+      }
+    },
+    "dark": {
+      "elements": {
+        "stream": ["#E6FBFF", "#9FD8E8", "#6FB6CC"]
+      }
+    }
+  },
+  "bomb_star": {
+    "light": {
+      "elements": {
+        "mine": "#FF9F3D"
+      }
+    },
+    "dark": {
+      "elements": {
+        "mine": "#FF9F3D"
+      }
+    }
+  },
+  "marker_gold": {
+    "light": {
+      "elements": {
+        "target": ["#FFE59A", "#FFC84E", "#E0A21E"]
+      }
+    },
+    "dark": {
+      "elements": {
+        "target": ["#FFE59A", "#FFC84E", "#E0A21E"]
+      }
+    }
+  }
+}

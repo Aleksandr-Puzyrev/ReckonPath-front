@@ -38,7 +38,7 @@ Supersedes the Apple / Google sign-in of Part 1 §7.6, Part 4 §12.1 and §12.3,
 | 18 | Form validation | Sign-in: login not empty, password at least 6 characters. Sign-up: nickname 3–16 letters, digits and `_`; e-mail format; password at least 8 characters with strength at least «Средний» (four signs of design 1.4); consent required. The nickname stop list is checked by the server. | design 1.3, 1.4, Part 4 §10.2 |
 | 19 | Navigation and results | The forms are full-screen modal routes opened from the link sheet. After sign-up — toast «Аккаунт привязан» and back to where the sheet was opened; after sign-in — Home with the loaded progress. The design's success screens («Аккаунт создан! К обучению →», «Готово, ты в игре») belong to the first launch and are not built. | design 1.3, 1.4 |
 | 20 | Password on the device | Never stored; only the tokens, as now. | Part 8 §10.3 |
-| 21 | VK ID | A separate task once the backend gives the endpoints; its SDK is not in the Part 8 stack and needs the developer's approval. | — |
+| 21 | VK ID | A separate task once the backend gives the endpoints; its SDK is not in the Part 8 stack and needs the developer's approval. **Not planned for now (0025): login and password only.** | — |
 
 ## Round 3
 

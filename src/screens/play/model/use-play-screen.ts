@@ -18,7 +18,7 @@ import { finishAttempt, isCountedDailyLevel } from "@features/finish-attempt";
 import { flagCell } from "@features/flag-cell";
 import { offerLinkAfterLevel } from "@features/link-account";
 import { tapCell, unlockTapInput } from "@features/tap-cell";
-import type { ErrorMessageKey } from "@shared/api";
+import type { AdMessageKey } from "@entities/ad";
 import { motion } from "@shared/theme";
 import type { ToastMessage } from "@shared/ui/toast";
 import { useBoardFx } from "@widgets/board";
@@ -254,7 +254,7 @@ export const usePlayScreen = (mode: string, id: string) => {
       setEarnShortBy(null);
       router.push(DAILY_ROUTE);
     },
-    handleContinueError: (messageKey: ErrorMessageKey) =>
+    handleContinueError: (messageKey: AdMessageKey) =>
       setToast((current) => ({ id: (current?.id ?? 0) + 1, text: t(messageKey) })),
     handleToastHide: () => setToast(null),
     handleTutorialSkip: skipTutorial,

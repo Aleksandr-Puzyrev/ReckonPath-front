@@ -14,7 +14,7 @@ import { selectHasSavedSession, useGameSessionStore } from "@entities/level";
 import { streakForecastOf, useStreakQuery } from "@entities/streak";
 import { useDailyToday } from "@features/daily-today";
 import { restoreOfferOf } from "@features/restore-streak";
-import type { ErrorMessageKey } from "@shared/api";
+import type { AdMessageKey } from "@entities/ad";
 import type { ToastMessage } from "@shared/ui/toast";
 import type { CalendarDayResult } from "@widgets/daily-calendar";
 
@@ -67,7 +67,7 @@ export const useDailyScreen = () => {
       showToast(t("streak.restoredToast", { count: days }));
     },
     handleShortOfEmeralds: setEarnShortBy,
-    handleError: (messageKey: ErrorMessageKey) => showToast(t(messageKey)),
+    handleError: (messageKey: AdMessageKey) => showToast(t(messageKey)),
     handleEarnClose: () => setEarnShortBy(null),
     handleToastHide: () => setToast(null),
     handlePlay: () =>

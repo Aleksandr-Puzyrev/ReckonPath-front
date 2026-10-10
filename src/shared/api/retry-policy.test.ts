@@ -1,5 +1,5 @@
-import { ApiError, RequestTimeoutError } from "@shared/api";
-
+import { ApiError } from "./api-error";
+import { RequestTimeoutError } from "./api-fetch";
 import { retryDelay, shouldRetry } from "./retry-policy";
 
 describe("shouldRetry", () => {

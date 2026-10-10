@@ -1,4 +1,4 @@
-import { isApiError } from "@shared/api";
+import { isApiError } from "./api-error";
 
 const MAX_RETRIES = 3;
 const FIRST_RETRY_DELAY_MS = 1000;

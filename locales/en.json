@@ -1,0 +1,5 @@
+{
+  "ios": {
+    "NSUserTrackingUsageDescription": "Your data will be used to deliver personalized ads."
+  }
+}

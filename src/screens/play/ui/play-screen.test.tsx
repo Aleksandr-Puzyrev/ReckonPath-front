@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
 import { offerLinkAfterLevel } from "@features/link-account";
@@ -8,7 +9,8 @@ import { useProgressStore } from "@entities/progress";
 import { RULE_DEMOS, isRuleCardId, useRulesStore } from "@entities/rules";
 import { unlockTapInput } from "@features/tap-cell";
 import { i18n } from "@shared/i18n";
-import { mockServer } from "@shared/test-utils/api-mock";
+import { adsProvider } from "@shared/ads";
+import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import PlayScreen from "./play-screen";
@@ -84,6 +86,7 @@ describe("PlayScreen", () => {
 
   afterEach(() => {
     mockServer.reset();
+    jest.restoreAllMocks();
     jest.useRealTimers();
   });
 
@@ -156,6 +159,51 @@ describe("PlayScreen", () => {
     expect(screen.getByText("Ходы закончились")).toBeOnTheScreen();
     expect(screen.queryByTestId("continue-emeralds")).toBeNull();
     expect(screen.getByText("Начать заново")).toBeOnTheScreen();
+  });
+
+  test("continues for an ad with three moves (LVL-13)", async () => {
+    await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await flushRequests();
+
+    await fireEvent.press(screen.getByTestId("continue-ad"));
+    await act(() => jest.advanceTimersByTimeAsync(2000));
+
+    expect(screen.getByText("3 / 7")).toBeOnTheScreen();
+  });
+
+  test("keeps the lose sheet when the ad is closed early (LVL-14)", async () => {
+    jest.spyOn(adsProvider, "showRewarded").mockResolvedValue({ rewarded: false });
+    await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await flushRequests();
+
+    await fireEvent.press(screen.getByTestId("continue-ad"));
+    await act(() => jest.advanceTimersByTimeAsync(200));
+
+    expect(screen.getByText("Ходы закончились")).toBeOnTheScreen();
+    expect(screen.getByText("Реклама сейчас недоступна")).toBeOnTheScreen();
+  });
+
+  test("hides the ad continue after today's limit, keeping the ◆ one (LVL-16)", async () => {
+    mockServer.use(
+      http.get(mockUrl("/ads/limits"), () =>
+        HttpResponse.json({
+          gems: { used: 0, max: 5, resetAt: "2026-10-11T00:00:00Z" },
+          continue: { used: 2, max: 2, resetAt: "2026-10-11T00:00:00Z" },
+          streak: { used: 0, max: 1, resetAt: "2026-10-11T00:00:00Z" },
+        }),
+      ),
+    );
+    await renderScreen();
+    await tap(0, 1, 2, 4);
+    await settle();
+    await flushRequests();
+
+    expect(screen.queryByTestId("continue-ad")).toBeNull();
+    expect(screen.getByTestId("continue-emeralds")).toBeOnTheScreen();
   });
 
   test("shows the targets and bombs after declining to continue", async () => {

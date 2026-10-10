@@ -25,6 +25,13 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0017 | [`0017-daily-and-streak.md`](0017-daily-and-streak.md) | Daily split 5a / 5b, `GET /daily/history` proposal for the calendar, Home daily card only, daily unlocked after campaign level 6, overrides for 7 days |
 | 0018 | [`0018-wallet-and-continue.md`](0018-wallet-and-continue.md) | Online `POST /continue`, offline continue charged with the attempt, TopBar with the design emblem, minimal «Как заработать», free dev continue removed, streak restore for ◆ |
 | 0019 | [`0019-account-sign-in.md`](0019-account-sign-in.md) | Login and password instead of Apple / Google, VK ID later; link sheet after level 6 and after a revoked session; client-side account conflict; proposed `/auth/register` and `/auth/login` |
+| 0020 | [`0020-stage-3-plan.md`](0020-stage-3-plan.md) | Stage 3 order of tasks, mocks and a contract from Part 7 §6, mock ads provider until IDs exist, colour-only test skins, no effects tab, minimal profile, double-for-ad and app-integrity out |
+| 0021 | [`0021-shop-contract.md`](0021-shop-contract.md) | Proposed shop tab ids, item data in the inventory, full loadout slots, one-currency prices, `NOT_OWNED`, mock catalog from design 22.x |
+| 0022 | [`0022-shop-screen.md`](0022-shop-screen.md) | Shop screen: placeholder previews, `visibleInMatch`, sorting, design texts over Part 5, timers, effects hidden, taps wired in task 3, states |
+| 0023 | [`0023-shop-preview-purchase.md`](0023-shop-preview-purchase.md) | Preview as a bottom sheet, static preview until skins, coins shortage sheet, link offer on the first ◆ buy tap, equip from the shop, server-side bundle price, purchase errors and texts |
+| 0024 | [`0024-skins-and-collection.md`](0024-skins-and-collection.md) | `skin.json` subset without zip, recolourable hidden cells, skin on every board, minimal profile header and guest card, collection tiles and slot sheet, interactive shop preview |
+| 0025 | [`0025-ads-layer.md`](0025-ads-layer.md) | Real ATT request with a pre-screen, `GET /ads/limits` proposal, mock ads provider without UI, design texts for the pre-screen; VK ID not planned for now |
+| 0026 | [`0026-rewarded-placements.md`](0026-rewarded-placements.md) | Ad row look and counter, late reward handling, rewarded flow, lose-sheet ad button states, no pause, ad streak restore |
 
 ## Template
 

@@ -21,7 +21,9 @@ const ME: components["schemas"]["Me"] = {
 
 describe("applyWallet", () => {
   test("replaces the cached balance with the one from an answer (LVL-26)", () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { gcTime: Infinity }, mutations: { gcTime: Infinity } },
+    });
     queryClient.setQueryData(meQueryOptions().queryKey, ME);
 
     applyWallet(queryClient, { emeralds: 2625, coins: 18470 });
@@ -33,7 +35,9 @@ describe("applyWallet", () => {
   });
 
   test("does nothing before the player's data has arrived", () => {
-    const queryClient = new QueryClient();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { gcTime: Infinity }, mutations: { gcTime: Infinity } },
+    });
 
     applyWallet(queryClient, { emeralds: 1, coins: 1 });
 

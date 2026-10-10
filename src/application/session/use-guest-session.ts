@@ -4,9 +4,7 @@ import { AppState } from "react-native";
 
 import { apiSession, ensureSessionMutationOptions } from "@entities/session";
 import { walletKeys } from "@entities/wallet";
-import { setApiSession } from "@shared/api";
-
-import { retryDelay, shouldRetry } from "../query/retry-policy";
+import { retryDelay, setApiSession, shouldRetry } from "@shared/api";
 
 // Set on import, before any screen sends a request; an effect would run after the screens' own effects (задаётся при импорте, до запросов экранов; эффект сработал бы после эффектов самих экранов).
 setApiSession(apiSession);

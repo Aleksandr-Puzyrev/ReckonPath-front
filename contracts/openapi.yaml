@@ -7,7 +7,8 @@ info:
     attempts, progress, continue, daily, streak. Written from Part 7 by the client team,
     reviewed by the backend. Fields not stated in Part 7 are not added. `/auth/register`
     and `/auth/login` replace Part 7's Apple / Google sign-in and are a proposal to agree
-    with the backend (decision 0019 #14).
+    with the backend (decision 0019 #14). Shop, inventory and loadout follow Part 7 §6 with
+    the additions of decision 0021, also to agree with the backend.
 servers:
   - url: "{baseUrl}/v1"
     variables:
@@ -345,6 +346,131 @@ paths:
                   wallet: { $ref: "#/components/schemas/Wallet" }
         default: { $ref: "#/components/responses/Error" }
 
+  /shop:
+    get:
+      operationId: getShop
+      responses:
+        "200":
+          description: Catalog for the player
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Shop" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /shop/purchase:
+    post:
+      operationId: postShopPurchase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [itemId, expectedPrice]
+                  properties:
+                    itemId: { type: string }
+                    expectedPrice: { $ref: "#/components/schemas/Price" }
+                - type: object
+                  required: [bundleId, expectedPrice]
+                  properties:
+                    bundleId: { type: string }
+                    expectedPrice: { $ref: "#/components/schemas/Price" }
+      responses:
+        "200":
+          description: Purchase granted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [purchaseId, granted, wallet]
+                properties:
+                  purchaseId: { type: string }
+                  granted:
+                    type: array
+                    items: { type: string }
+                  wallet: { $ref: "#/components/schemas/Wallet" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /inventory:
+    get:
+      operationId: getInventory
+      responses:
+        "200":
+          description: Owned items with their descriptions (decision 0021 #2)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/InventoryEntry" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /loadout:
+    put:
+      operationId: putLoadout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Loadout" }
+      responses:
+        "200":
+          description: The whole loadout after the change
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Loadout" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /ads/limits:
+    get:
+      operationId: getAdLimits
+      description: Today's rewarded ad counters (decision 0025 #2, to agree with the backend).
+      responses:
+        "200":
+          description: Counters per placement
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdLimits" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /ads/intent:
+    post:
+      operationId: postAdIntent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [placement]
+              properties:
+                placement: { $ref: "#/components/schemas/AdPlacement" }
+                ref: { type: string, description: attemptId or eventId }
+      responses:
+        "200":
+          description: Intent to show a rewarded ad
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdIntent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /ads/intent/{id}:
+    get:
+      operationId: getAdIntent
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Intent status after the SSV callback
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdIntentStatus" }
+        default: { $ref: "#/components/responses/Error" }
+
 components:
   securitySchemes:
     bearer:
@@ -391,6 +517,7 @@ components:
         - IN_MATCH
         - ALREADY_QUEUED
         - NICK_TAKEN
+        - NOT_OWNED
         - EMAIL_TAKEN
         - INVALID_CREDENTIALS
         - ACCOUNT_CONFLICT
@@ -546,9 +673,7 @@ components:
             peak: { type: integer }
             rp: { type: integer }
             seasonId: { type: integer }
-        loadout:
-          type: object
-          additionalProperties: true
+        loadout: { $ref: "#/components/schemas/Loadout" }
         flags:
           type: object
           properties:
@@ -650,3 +775,225 @@ components:
           type: array
           items: { type: string, enum: [ad, emeralds] }
         price: { type: integer }
+
+    Price:
+      description: Exactly one currency (decision 0021 #4)
+      oneOf:
+        - type: object
+          required: [emeralds]
+          properties:
+            emeralds: { type: integer }
+        - type: object
+          required: [coins]
+          properties:
+            coins: { type: integer }
+
+    Rarity:
+      type: string
+      enum: [common, rare, epic, legendary]
+
+    Slot:
+      description: Loadout slot keys (decision 0021 #3)
+      type: string
+      enum:
+        [
+          field,
+          fence,
+          stream,
+          rock,
+          x2,
+          bridge,
+          bomb,
+          target,
+          avatar,
+          frame,
+          badges,
+          title,
+          fxClick,
+          fxReveal,
+          fxVictory,
+        ]
+
+    ItemPackage:
+      type: object
+      required: [url, sha256, version]
+      properties:
+        url: { type: string }
+        sha256: { type: string }
+        version: { type: integer }
+
+    ItemDescription:
+      description: Name and description in the X-Locale language (decision 0021 #5)
+      type: object
+      required: [type, rarity, name, description, preview, package]
+      properties:
+        type: { type: string }
+        rarity: { $ref: "#/components/schemas/Rarity" }
+        name: { type: string }
+        description: { type: string }
+        preview: { type: string }
+        package: { $ref: "#/components/schemas/ItemPackage" }
+
+    ShopItem:
+      allOf:
+        - $ref: "#/components/schemas/ItemDescription"
+        - type: object
+          required: [id, slot, price, availableTo, stockLeft, owned, equipped, visibleInMatch]
+          properties:
+            id: { type: string }
+            slot: { $ref: "#/components/schemas/Slot" }
+            visibleInMatch: { type: boolean, description: "Decision 0022 #2" }
+            price: { $ref: "#/components/schemas/Price" }
+            availableTo: { type: [string, "null"], format: date-time }
+            stockLeft: { type: [integer, "null"] }
+            owned: { type: boolean }
+            equipped: { type: boolean }
+
+    ShopTab:
+      type: object
+      required: [id, items]
+      properties:
+        id:
+          type: string
+          enum: [exclusive, holiday, elements, fields, profile, effects]
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ShopItem" }
+
+    Bundle:
+      description: >
+        Name, description, rarity and preview are added for the bundle card, as for items
+        (decision 0021 #11).
+      type: object
+      required:
+        [id, name, description, rarity, preview, items, basePrice, price, ownedItems, availableTo]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        rarity: { $ref: "#/components/schemas/Rarity" }
+        preview: { type: string }
+        items:
+          type: array
+          items: { type: string }
+        basePrice: { $ref: "#/components/schemas/Price" }
+        price: { $ref: "#/components/schemas/Price" }
+        ownedItems:
+          type: array
+          items: { type: string }
+        availableTo: { type: [string, "null"], format: date-time }
+
+    Featured:
+      type: object
+      required: [id, image, title, subtitle, endsAt, target]
+      properties:
+        id: { type: string }
+        image: { type: string }
+        title: { type: string }
+        subtitle: { type: string }
+        endsAt: { type: string, format: date-time }
+        target:
+          oneOf:
+            - type: object
+              required: [bundle]
+              properties:
+                bundle: { type: string }
+            - type: object
+              required: [item]
+              properties:
+                item: { type: string }
+
+    Shop:
+      type: object
+      required: [featured, tabs, bundles, cacheTtlSec]
+      properties:
+        featured:
+          oneOf:
+            - type: "null"
+            - $ref: "#/components/schemas/Featured"
+        tabs:
+          type: array
+          items: { $ref: "#/components/schemas/ShopTab" }
+        bundles:
+          type: array
+          items: { $ref: "#/components/schemas/Bundle" }
+        cacheTtlSec: { type: integer }
+
+    InventoryEntry:
+      type: object
+      required: [itemId, slot, acquiredAt, source, item]
+      properties:
+        itemId: { type: string }
+        slot: { $ref: "#/components/schemas/Slot" }
+        acquiredAt: { type: string, format: date-time }
+        source: { type: string }
+        item: { $ref: "#/components/schemas/ItemDescription" }
+
+    Loadout:
+      description: Every slot is optional, so PUT sends only the changed ones; null is the default item
+      type: object
+      properties:
+        field: { type: [string, "null"] }
+        fence: { type: [string, "null"] }
+        stream: { type: [string, "null"] }
+        rock: { type: [string, "null"] }
+        x2: { type: [string, "null"] }
+        bridge: { type: [string, "null"] }
+        bomb: { type: [string, "null"] }
+        target: { type: [string, "null"] }
+        avatar: { type: [string, "null"] }
+        frame: { type: [string, "null"] }
+        badges:
+          type: array
+          maxItems: 3
+          items: { type: string }
+        title: { type: [string, "null"] }
+        fxClick: { type: [string, "null"] }
+        fxReveal: { type: [string, "null"] }
+        fxVictory: { type: [string, "null"] }
+
+    AdPlacement:
+      type: string
+      enum: [gems, continue, double, streak, event]
+
+    AdLimit:
+      type: object
+      required: [used, max, resetAt]
+      properties:
+        used: { type: integer }
+        max: { type: integer }
+        resetAt: { type: string, format: date-time }
+
+    AdLimits:
+      type: object
+      required: [gems, continue, streak]
+      properties:
+        gems: { $ref: "#/components/schemas/AdLimit" }
+        continue: { $ref: "#/components/schemas/AdLimit" }
+        streak: { $ref: "#/components/schemas/AdLimit" }
+
+    AdIntent:
+      type: object
+      required: [adIntentId, customData, network, unitId, leftToday]
+      properties:
+        adIntentId: { type: string }
+        customData: { type: string }
+        network: { type: string }
+        unitId: { type: string }
+        leftToday: { type: integer }
+
+    AdIntentStatus:
+      description: For continue and streak the reward is the right to call that endpoint with the intent (Part 7 §6)
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [pending, rewarded, expired]
+        reward:
+          type: object
+          required: [currency, amount]
+          properties:
+            currency: { type: string, enum: [emerald, coin] }
+            amount: { type: integer }
+        wallet: { $ref: "#/components/schemas/Wallet" }

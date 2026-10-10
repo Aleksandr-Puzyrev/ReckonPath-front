@@ -7,12 +7,13 @@ import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
 
 import EmeraldIcon from "@assets/icons/play/emerald.svg";
-import VideoIcon from "@assets/icons/play/video.svg";
 
 import type { RestoreOffer } from "../model/restore-offer";
 import { useRestoreStreak } from "../model/use-restore-streak";
+import { useRestoreStreakForAd } from "../model/use-restore-streak-for-ad";
 import type { RestoreCallbacks } from "../model/use-restore-streak";
 
+import RestoreAdButton from "./restore-ad-button";
 import { styles } from "./streak-restore-card-styles";
 
 interface IStreakRestoreCard extends RestoreCallbacks {
@@ -21,7 +22,6 @@ interface IStreakRestoreCard extends RestoreCallbacks {
 
 const HOUR_MS = 3_600_000;
 const NO_PRICE = 0;
-const ignorePress = () => undefined;
 
 const StreakRestoreCard = ({
   offer,
@@ -37,6 +37,7 @@ const StreakRestoreCard = ({
     onShortOfEmeralds,
     onError,
   });
+  const ad = useRestoreStreakForAd({ onRestored, onError });
   const iconSize = theme.sizes.icon.l;
 
   if (offer.kind === "weekly") {
@@ -65,16 +66,7 @@ const StreakRestoreCard = ({
       )}
       <View style={styles.actions}>
         <View style={styles.action}>
-          {/* TODO: restore for a rewarded ad once the ads SDK exists (stage 3) */}
-          <Button
-            label={t("streak.restoreAd")}
-            caption={t("ads.unavailable")}
-            icon={
-              <VideoIcon width={iconSize} height={iconSize} color={theme.colors.text.disabled} />
-            }
-            isDisabled
-            onPress={ignorePress}
-          />
+          <RestoreAdButton state={ad.state} onPress={ad.handlePress} />
         </View>
         <View style={styles.action}>
           <Button

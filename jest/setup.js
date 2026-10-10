@@ -12,6 +12,15 @@ jest.mock("expo-constants", () => {
     default: { ...constants, expoConfig: { ...constants.expoConfig, version: expo.version } },
   };
 });
+// Tracking is granted in tests; the consent test mocks it on its own (в тестах отслеживание разрешено; тест согласия мокает его сам).
+jest.mock("expo-tracking-transparency", () => {
+  const granted = { status: "granted", granted: true, canAskAgain: false, expires: "never" };
+  return {
+    PermissionStatus: { GRANTED: "granted", DENIED: "denied", UNDETERMINED: "undetermined" },
+    getTrackingPermissionsAsync: async () => granted,
+    requestTrackingPermissionsAsync: async () => granted,
+  };
+});
 jest.mock("react-native-keyboard-controller", () =>
   require("react-native-keyboard-controller/jest"),
 );

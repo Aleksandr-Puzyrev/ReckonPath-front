@@ -1,4 +1,4 @@
-export { apiClient } from "./api-client";
+export { apiClient, fetchAssetJson } from "./api-client";
 export { ApiError, isApiError } from "./api-error";
 export type { ApiErrorCode, ApiErrorDetails } from "./api-error";
 export { RequestTimeoutError } from "./api-fetch";
@@ -12,3 +12,4 @@ export { readErrorEnvelope } from "./read-error-envelope";
 export { onSystemSignal } from "./system-signals";
 export { useIsOnline } from "./use-is-online";
 export type { SystemSignal } from "./system-signals";
+export { retryDelay, shouldRetry } from "./retry-policy";

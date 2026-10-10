@@ -1,1 +1,1 @@
-export { default as ShopScreen } from "./shop-screen";
+export { default as ShopScreen } from "./ui/shop-screen";

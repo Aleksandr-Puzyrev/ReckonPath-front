@@ -99,6 +99,18 @@ describe("DailyScreen", () => {
     expect(screen.getByText("Серия восстановлена")).toBeOnTheScreen();
   });
 
+  test("restores a streak broken yesterday for an ad (DLY-09)", async () => {
+    unlockDaily();
+    serveStreak({ restorable: true, price: 30, restoreUntil: "2026-09-29T00:00:00Z" });
+    await renderScreen(createQueryWrapper());
+    await screen.findByText("Серия 12 дней прервалась");
+
+    await fireEvent.press(screen.getByTestId("restore-ad"));
+    await act(() => jest.advanceTimersByTimeAsync(2000));
+
+    expect(screen.getByText("Серия восстановлена")).toBeOnTheScreen();
+  });
+
   test("opens the ways to earn when emeralds are short for the restore", async () => {
     unlockDaily();
     serveStreak({ restorable: true, price: 30 });

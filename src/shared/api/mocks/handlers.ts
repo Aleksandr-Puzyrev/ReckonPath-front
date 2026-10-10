@@ -4,10 +4,12 @@ import { APP_VERSION } from "@shared/config";
 
 import type { components } from "../generated/schema";
 
+import { adsHandlers } from "./ads-handlers";
 import { attemptsHandlers } from "./attempts-handlers";
 import { authHandlers } from "./auth-handlers";
 import { dailyHandlers } from "./daily-handlers";
 import { mockUrl } from "./mock-url";
+import { shopHandlers } from "./shop-handlers";
 import { walletHandlers } from "./wallet-handlers";
 
 type Bootstrap = components["schemas"]["Bootstrap"];
@@ -38,4 +40,6 @@ export const handlers = [
   ...attemptsHandlers,
   ...dailyHandlers,
   ...walletHandlers,
+  ...shopHandlers,
+  ...adsHandlers,
 ];

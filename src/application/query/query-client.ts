@@ -5,8 +5,7 @@ import { AppState } from "react-native";
 
 import { APP_VERSION } from "@shared/config";
 import { keyValueStorage } from "@shared/storage";
-
-import { retryDelay, shouldRetry } from "./retry-policy";
+import { retryDelay, shouldRetry } from "@shared/api";
 
 const CACHE_MAX_AGE_MS = 24 * 60 * 60_000;
 

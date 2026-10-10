@@ -167,6 +167,7 @@ const PlayLevel = ({ mode, id }: IPlayLevel) => {
         isOpen={play.earnShortBy !== null}
         shortBy={play.earnShortBy}
         onDaily={play.handleEarnDaily}
+        onMessage={play.handleContinueError}
         onClose={play.handleEarnClose}
       />
       <Toast message={play.toast} onHide={play.handleToastHide} />
