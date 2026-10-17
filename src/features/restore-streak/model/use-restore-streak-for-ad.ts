@@ -2,15 +2,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { uuidv7 } from "uuidv7";
 
-import { adKeys, watchRewardedAd } from "@entities/ad";
+import { adKeys, useAdLimitsQuery, watchRewardedAd } from "@entities/ad";
 import { dailyKeys } from "@entities/daily";
 import { streakKeys } from "@entities/streak";
 import { applyWallet } from "@entities/wallet";
-import { apiClient, errorMessageKey, readData, useIsOnline } from "@shared/api";
+import { apiClient, errorMessageKey, isApiError, readData, useIsOnline } from "@shared/api";
 
 import type { RestoreCallbacks } from "./use-restore-streak";
 
-export type RestoreAdState = "ready" | "loading" | "unavailable" | "offline";
+export type RestoreAdState = "ready" | "loading" | "unavailable" | "offline" | "limit";
 
 // The ad pays for the right to restore; the streak comes back only with the server's answer (реклама оплачивает право восстановить; серия возвращается только с ответом сервера).
 const restoreForAd = async () => {
@@ -30,6 +30,7 @@ export const useRestoreStreakForAd = ({
 }: Pick<RestoreCallbacks, "onRestored" | "onError">) => {
   const queryClient = useQueryClient();
   const isOnline = useIsOnline();
+  const { data: limits } = useAdLimitsQuery();
   const [isUnavailable, setIsUnavailable] = useState(false);
 
   const { mutate, isPending } = useMutation({
@@ -48,10 +49,15 @@ export const useRestoreStreakForAd = ({
       void queryClient.invalidateQueries({ queryKey: dailyKeys.all });
       onRestored(restored.streak.current);
     },
-    onError: (error) => onError(errorMessageKey(error)),
+    onError: (error) => {
+      void queryClient.invalidateQueries({ queryKey: adKeys.limits() });
+      if (isApiError(error) && error.code === "LIMIT_REACHED") return;
+      onError(errorMessageKey(error));
+    },
   });
 
   const state = (): RestoreAdState => {
+    if (limits !== undefined && limits.streak.used >= limits.streak.max) return "limit";
     if (!isOnline) return "offline";
     if (isPending) return "loading";
     return isUnavailable ? "unavailable" : "ready";

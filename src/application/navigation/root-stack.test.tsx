@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Text } from "react-native";
 
 import { useSystemNoticeStore } from "@entities/app-config";
+import { useInterstitialStore } from "@entities/ad";
 import { useAccountStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
 import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
@@ -74,6 +75,15 @@ describe("RootStack", () => {
 
     expect(await screen.findByText("play")).toBeOnTheScreen();
     expect(screen.queryByText("Сохрани прогресс")).toBeNull();
+  });
+
+  test("remembers the first launch for the quiet first session", async () => {
+    useInterstitialStore.getState().reset();
+
+    await renderApp();
+
+    expect(await screen.findByText("home")).toBeOnTheScreen();
+    expect(useInterstitialStore.getState().firstLaunchAt).not.toBeNull();
   });
 
   test("opens the app on the current version", async () => {

@@ -1,7 +1,8 @@
 import { Stack } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SoftUpdateSheet } from "@screens/system";
+import { useInterstitialStore } from "@entities/ad";
 import { isSoftUpdateSnoozed, useSystemNoticeStore, useSystemState } from "@entities/app-config";
 
 import LinkOfferHost from "../account/link-offer-host";
@@ -20,6 +21,11 @@ const RootStack = () => {
   const isMaintenanceDismissed = useSystemNoticeStore((notices) => notices.isMaintenanceDismissed);
   const softUpdateDismissedAt = useSystemNoticeStore((notices) => notices.softUpdateDismissedAt);
   const [launchedAt] = useState(Date.now);
+
+  // The first launch starts the quiet first session of interstitials (первый запуск начинает тихую первую сессию без межстраничной рекламы).
+  useEffect(() => {
+    useInterstitialStore.getState().markLaunched(launchedAt);
+  }, [launchedAt]);
   const isUpdateRequired = state.kind === "forcedUpdate";
   const isMaintenance = state.kind === "maintenance" && !isMaintenanceDismissed;
   const isSoftUpdateOpen =

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import type { LevelInput } from "@reckon-path/engine";
 
+import { useInterstitialStore } from "@entities/ad";
 import { dailyDayQueryOptions, useDailyRecordStore } from "@entities/daily";
 import { CAMPAIGN_LEVELS, useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
@@ -132,6 +133,17 @@ describe("PlayScreen in the daily", () => {
     expect(screen.getByText("Пеленг дня пройден")).toBeOnTheScreen();
     expect(useOutboxStore.getState().attempts[0]).toMatchObject({ mode: "daily", durationMs: 0 });
     expect(Object.keys(useProgressStore.getState().best)).toHaveLength(6);
+  });
+
+  test("does not count the daily for interstitials (decision 0027 #1)", async () => {
+    useInterstitialStore.getState().reset();
+    await renderDaily();
+    await tap(TARGET);
+    await settle();
+
+    await act(async () => fireEvent.press(screen.getByText("Ещё раз (без награды)")));
+
+    expect(useInterstitialStore.getState().finishedLevels).toBe(0);
   });
 
   test("restarts a replay without the warning", async () => {

@@ -3,6 +3,7 @@ import { AdUnavailableError, adsProvider } from "@shared/ads";
 import { fetchAdIntentStatus, requestAdIntent } from "../api/ad-queries";
 
 import type { AdIntentStatus, AdPlacement } from "./ad-type";
+import { useInterstitialStore } from "./interstitial-store";
 import { prepareAdsConsent } from "./prepare-ads-consent";
 
 export type RewardedOutcome =
@@ -54,5 +55,7 @@ export const watchRewardedAd = async (
   const intent = await requestAdIntent(placement, ref);
   const isWatched = await showAd(intent.unitId, intent.customData, isPersonalized);
   if (!isWatched) return { kind: "unavailable" };
+  // A watched rewarded ad counts for the interstitial interval (ADS-07) (досмотренная rewarded-реклама учитывается в интервале межстраничной).
+  useInterstitialStore.getState().noteAdShown(Date.now());
   return pollReward(intent.adIntentId);
 };

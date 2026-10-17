@@ -3,6 +3,7 @@ import { http, HttpResponse } from "msw/http";
 import { AdUnavailableError, adsProvider } from "@shared/ads";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
+import { useInterstitialStore } from "./interstitial-store";
 import { watchRewardedAd } from "./watch-rewarded-ad";
 
 const watch = async (placement: Parameters<typeof watchRewardedAd>[0] = "gems") => {
@@ -12,7 +13,10 @@ const watch = async (placement: Parameters<typeof watchRewardedAd>[0] = "gems") 
 };
 
 describe("watchRewardedAd", () => {
-  beforeEach(() => jest.useFakeTimers());
+  beforeEach(() => {
+    jest.useFakeTimers();
+    useInterstitialStore.getState().reset();
+  });
 
   afterEach(() => {
     mockServer.reset();
@@ -24,6 +28,7 @@ describe("watchRewardedAd", () => {
     const outcome = await watch();
 
     expect(outcome).toMatchObject({ kind: "rewarded", status: { reward: { amount: 5 } } });
+    expect(useInterstitialStore.getState().lastAdAt).not.toBeNull();
   });
 
   test("grants nothing for an ad closed early (LVL-14)", async () => {

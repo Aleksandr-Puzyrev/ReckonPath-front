@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AccessibilityInfo, AppState, BackHandler } from "react-native";
 
@@ -17,6 +17,7 @@ import { useRulesStore } from "@entities/rules";
 import { finishAttempt, isCountedDailyLevel } from "@features/finish-attempt";
 import { flagCell } from "@features/flag-cell";
 import { offerLinkAfterLevel } from "@features/link-account";
+import { useInterstitial } from "@features/show-interstitial";
 import { tapCell, unlockTapInput } from "@features/tap-cell";
 import type { AdMessageKey } from "@entities/ad";
 import { motion } from "@shared/theme";
@@ -87,6 +88,7 @@ export const usePlayScreen = (mode: string, id: string) => {
       selectHasSavedSession(level.id)(useGameSessionStore.getState()),
   );
   const guides = usePlayGuides(level);
+  const interstitial = useInterstitial();
   const [overlay, setOverlay] = useState<PlayOverlay>(hasSavedSession ? "resume" : "none");
   const [pending, setPending] = useState<PendingOverlay | null>(null);
   const [isFlagMode, setIsFlagMode] = useState(false);
@@ -135,21 +137,39 @@ export const usePlayScreen = (mode: string, id: string) => {
     return () => subscription.remove();
   }, []);
 
-  // Closing the campaign win sheet by any of its buttons may queue the link offer (закрытие листа победы кампании любой кнопкой может поставить в очередь предложение привязки).
-  const closeWin = () => {
-    if (overlay === "win" && play.kind === "campaign") offerLinkAfterLevel(play.number);
+  // Leaving a campaign result by any button may queue the link offer and show an interstitial first (уход с итога кампании любой кнопкой может поставить в очередь предложение привязки и сначала показать межстраничную рекламу).
+  const isLeavingRef = useRef(false);
+
+  const leaveResult = async () => {
+    if (play.kind !== "campaign") return;
+    if (overlay === "win") offerLinkAfterLevel(play.number);
+    const status = useGameSessionStore.getState().game?.status;
+    if (guides.isTutorialLevel || (status !== "won" && status !== "lost")) return;
+    interstitial.finishLevel();
+    await interstitial.showIfDue();
   };
 
-  const exit = () => {
-    closeWin();
+  // A second tap while an interstitial is coming must not count the level again or navigate twice (повторный тап, пока идёт межстраничная реклама, не должен второй раз засчитать уровень и перейти).
+  const once = (action: () => Promise<void>) => async () => {
+    if (isLeavingRef.current) return;
+    isLeavingRef.current = true;
+    try {
+      await action();
+    } finally {
+      isLeavingRef.current = false;
+    }
+  };
+
+  const exit = once(async () => {
+    await leaveResult();
     finishLostGame();
     if (router.canGoBack()) router.back();
     else router.replace(play.kind === "daily" ? DAILY_ROUTE : LEVELS_ROUTE);
-  };
+  });
 
-  const restart = () => {
+  const restart = once(async () => {
     if (level === null) return;
-    closeWin();
+    await leaveResult();
     if (isCountedDailyInPlay(play)) finishAttempt();
     else finishLostGame();
     useGameSessionStore.getState().start(level, "new");
@@ -157,7 +177,7 @@ export const usePlayScreen = (mode: string, id: string) => {
     setPending(null);
     setIsFlagMode(false);
     setOverlay("none");
-  };
+  });
 
   const handleCellPress = (cell: Idx) => {
     const { game } = useGameSessionStore.getState();
@@ -200,7 +220,7 @@ export const usePlayScreen = (mode: string, id: string) => {
     const { game } = useGameSessionStore.getState();
     if (game !== null && game.movesUsed > 0 && game.status === "playing")
       setOverlay("restartConfirm");
-    else restart();
+    else void restart();
   };
 
   const resume = () => {
@@ -208,14 +228,14 @@ export const usePlayScreen = (mode: string, id: string) => {
     setOverlay(game?.status === "lost" ? "lose" : "none");
   };
 
-  const goNext = () => {
+  const goNext = once(async () => {
     if (play.kind !== "campaign" || play.next === null) return;
-    closeWin();
+    await leaveResult();
     router.replace({
       pathname: "/play/[mode]/[id]",
       params: { mode: "campaign", id: play.next.level.id },
     });
-  };
+  });
 
   const skipTutorial = () => {
     guides.handleTutorialSkip();

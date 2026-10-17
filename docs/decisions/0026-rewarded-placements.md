@@ -13,6 +13,14 @@ Date: 2026-10-10. Asked by: stage 3 task 6 (clarify-task). Answered by: develope
 | 7 | ◆ 5 for an ad | After the reward the balance and the counter refresh; no separate toast (ADS-01). | Part 11 ADS-01 |
 | 8 | Out of scope | «Удвоить ● за рекламу» (0020 #7), interstitials (task 7), the wallet badge for a late reward (ADS-02, no badge in the design). | — |
 
+## Round 2
+
+Date: 2026-10-11. Answered by: developer (after the code review).
+
+| # | Question | Decision | Spec reference |
+| --- | --- | --- | --- |
+| 16 | Ad streak restore at the limit | «За рекламу» is hidden when the `streak` limit of `/ads/limits` is used, like the ad continue (LVL-16). Notes #9–15 accepted. | Part 11 LVL-16, 0026 #6 |
+
 ## Implementation notes
 
 Date: 2026-10-10. Taken by the agent while implementing; to be confirmed by the developer.

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
@@ -109,6 +109,24 @@ describe("DailyScreen", () => {
     await act(() => jest.advanceTimersByTimeAsync(2000));
 
     expect(screen.getByText("Серия восстановлена")).toBeOnTheScreen();
+  });
+
+  test("hides the ad restore after today's limit (decision 0026 #16)", async () => {
+    unlockDaily();
+    serveStreak({ restorable: true, price: 30 });
+    mockServer.use(
+      http.get(mockUrl("/ads/limits"), () =>
+        HttpResponse.json({
+          gems: { used: 0, max: 5, resetAt: "2026-09-29T00:00:00Z" },
+          continue: { used: 0, max: 2, resetAt: "2026-09-29T00:00:00Z" },
+          streak: { used: 1, max: 1, resetAt: "2026-09-29T00:00:00Z" },
+        }),
+      ),
+    );
+    await renderScreen(createQueryWrapper());
+    await screen.findByText("Серия 12 дней прервалась");
+    await waitFor(() => expect(screen.queryByTestId("restore-ad")).toBeNull());
+    expect(screen.getByTestId("restore-emeralds")).toBeOnTheScreen();
   });
 
   test("opens the ways to earn when emeralds are short for the restore", async () => {

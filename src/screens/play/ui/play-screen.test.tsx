@@ -3,6 +3,7 @@ import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
 import { offerLinkAfterLevel } from "@features/link-account";
+import { useInterstitialStore } from "@entities/ad";
 import { useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
@@ -10,7 +11,7 @@ import { RULE_DEMOS, isRuleCardId, useRulesStore } from "@entities/rules";
 import { unlockTapInput } from "@features/tap-cell";
 import { i18n } from "@shared/i18n";
 import { adsProvider } from "@shared/ads";
-import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import PlayScreen from "./play-screen";
@@ -228,6 +229,39 @@ describe("PlayScreen", () => {
       pathname: "/play/[mode]/[id]",
       params: { mode: "campaign", id: "c-b" },
     });
+  });
+
+  test("counts a finished campaign level when its result sheet closes", async () => {
+    useInterstitialStore.getState().reset();
+    await renderScreen();
+    await tap(TARGET);
+    await settle();
+
+    await act(async () => fireEvent.press(screen.getByText("Дальше")));
+
+    expect(useInterstitialStore.getState().finishedLevels).toBe(1);
+  });
+
+  test("shows an interstitial before restarting when its turn has come (ADS-06)", async () => {
+    mockServer.use(
+      http.get(mockUrl("/bootstrap"), () =>
+        HttpResponse.json({ ...bootstrapMock(), config: { "ads.interstitial.minLevel": 1 } }),
+      ),
+    );
+    useInterstitialStore.getState().reset();
+    useInterstitialStore.getState().markLaunched(Date.now() - 3_600_000);
+    useInterstitialStore.getState().countFinishedLevel();
+    useInterstitialStore.getState().countFinishedLevel();
+    const show = jest.spyOn(adsProvider, "showInterstitial");
+    await renderScreen();
+    await flushRequests();
+    await tap(TARGET);
+    await settle();
+
+    await act(async () => fireEvent.press(screen.getByText("Ещё раз")));
+
+    expect(show).toHaveBeenCalled();
+    expect(useInterstitialStore.getState().finishedLevels).toBe(0);
   });
 
   test("offers linking for the level once its win sheet closes", async () => {

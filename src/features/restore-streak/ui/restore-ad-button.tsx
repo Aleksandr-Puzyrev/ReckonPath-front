@@ -8,7 +8,7 @@ import VideoIcon from "@assets/icons/play/video.svg";
 import type { RestoreAdState } from "../model/use-restore-streak-for-ad";
 
 interface IRestoreAdButton {
-  state: RestoreAdState;
+  state: Exclude<RestoreAdState, "limit">;
   onPress: () => void;
 }
 

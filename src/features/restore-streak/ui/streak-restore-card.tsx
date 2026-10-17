@@ -65,9 +65,11 @@ const StreakRestoreCard = ({
         </Text>
       )}
       <View style={styles.actions}>
-        <View style={styles.action}>
-          <RestoreAdButton state={ad.state} onPress={ad.handlePress} />
-        </View>
+        {ad.state === "limit" ? null : (
+          <View style={styles.action}>
+            <RestoreAdButton state={ad.state} onPress={ad.handlePress} />
+          </View>
+        )}
         <View style={styles.action}>
           <Button
             testID="restore-emeralds"

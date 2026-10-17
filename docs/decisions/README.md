@@ -32,6 +32,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0024 | [`0024-skins-and-collection.md`](0024-skins-and-collection.md) | `skin.json` subset without zip, recolourable hidden cells, skin on every board, minimal profile header and guest card, collection tiles and slot sheet, interactive shop preview |
 | 0025 | [`0025-ads-layer.md`](0025-ads-layer.md) | Real ATT request with a pre-screen, `GET /ads/limits` proposal, mock ads provider without UI, design texts for the pre-screen; VK ID not planned for now |
 | 0026 | [`0026-rewarded-placements.md`](0026-rewarded-placements.md) | Ad row look and counter, late reward handling, rewarded flow, lose-sheet ad button states, no pause, ad streak restore |
+| 0027 | [`0027-interstitials.md`](0027-interstitials.md) | Interstitials after campaign levels on any way out of the result sheet, rewarded ads count for the interval, MMKV counters, rule values from bootstrap config |
 
 ## Template
 
