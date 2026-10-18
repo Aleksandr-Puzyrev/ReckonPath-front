@@ -18,7 +18,7 @@ export type {
   Stars,
   TapResult,
 } from "./model/types";
-export { DEFAULT_ENGINE_CONFIG } from "./config/engine-config";
+export { DEFAULT_ENGINE_CONFIG, PVP_SOLVER_BOMB_PENALTY } from "./config/engine-config";
 export type { EngineConfig, RatingConfig } from "./config/engine-config";
 export { edgeKey, toCell, toIdx } from "./grid/grid";
 export { levelSchema } from "./level/level-schema";
@@ -45,7 +45,7 @@ export type {
 } from "./validator/validate-level";
 export { rngFromKey } from "./random/random";
 export type { Rng } from "./random/random";
-export { divisionOf, leagueOf } from "./formulas/league";
+export { divisionOf, LEAGUES, leagueOf } from "./formulas/league";
 export type { Division, League } from "./formulas/league";
 export type { MatchKind, MatchOutcome } from "./formulas/match-result";
 export { rankPoints, trackStep, xpFor, xpToNext } from "./formulas/rewards";

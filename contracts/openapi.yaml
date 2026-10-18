@@ -8,7 +8,8 @@ info:
     reviewed by the backend. Fields not stated in Part 7 are not added. `/auth/register`
     and `/auth/login` replace Part 7's Apple / Google sign-in and are a proposal to agree
     with the backend (decision 0019 #14). Shop, inventory and loadout follow Part 7 §6 with
-    the additions of decision 0021, also to agree with the backend.
+    the additions of decision 0021, also to agree with the backend. Arena follows Part 7 §5 with
+    the additions of decision 0029, to agree with the backend.
 servers:
   - url: "{baseUrl}/v1"
     variables:
@@ -471,6 +472,233 @@ paths:
               schema: { $ref: "#/components/schemas/AdIntentStatus" }
         default: { $ref: "#/components/responses/Error" }
 
+  /arena:
+    get:
+      operationId: getArena
+      responses:
+        "200":
+          description: Arena profile, season and format
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Arena" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/maps:
+    get:
+      operationId: getArenaMaps
+      responses:
+        "200":
+          description: The player's maps
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ArenaMap" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      operationId: postArenaMap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArenaMapInput" }
+      responses:
+        "200":
+          description: The saved map; the server computes valid, errors and botNorm
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ArenaMap" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/maps/{id}:
+    put:
+      operationId: putArenaMap
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArenaMapInput" }
+      responses:
+        "200":
+          description: The saved map
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ArenaMap" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: deleteArenaMap
+      description: The active map cannot be deleted (409 MAP_ACTIVE, decision 0029).
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Deleted }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/maps/{id}/activate:
+    post:
+      operationId: activateArenaMap
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: The new active map
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [activeMapId]
+                properties:
+                  activeMapId: { type: string }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/maps/validate:
+    post:
+      operationId: validateArenaMap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format, map]
+              properties:
+                format: { type: integer }
+                map: { $ref: "#/components/schemas/PvpMap" }
+      responses:
+        "200":
+          description: Validation without saving
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MapValidation" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/maps/random:
+    post:
+      operationId: randomArenaMap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format]
+              properties:
+                format: { type: integer }
+      responses:
+        "200":
+          description: A random valid map
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [map, botNorm]
+                properties:
+                  map: { $ref: "#/components/schemas/PvpMap" }
+                  botNorm: { type: integer }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/async:
+    post:
+      operationId: startAsyncMatch
+      responses:
+        "201":
+          description: A match against another player's map
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AsyncMatch" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/async/{id}/tap:
+    post:
+      operationId: tapAsyncMatch
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [turn, cell]
+              properties:
+                turn: { type: integer }
+                cell: { $ref: "#/components/schemas/Cell" }
+      responses:
+        "200":
+          description: The tap result, or the final result once the match is over
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/AsyncTapResult"
+                  - $ref: "#/components/schemas/AsyncFinish"
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/matches:
+    get:
+      operationId: getArenaMatches
+      parameters:
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: Match history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, nextCursor]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/MatchSummary" }
+                  nextCursor: { type: [string, "null"] }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/matches/{id}:
+    get:
+      operationId: getArenaMatch
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Both maps and every tap (decision 0029 #3)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchDetails" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/season/claim:
+    post:
+      operationId: claimSeasonStep
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [step]
+              properties:
+                step: { type: integer }
+      responses:
+        "200":
+          description: The reward; a repeat answers duplicate without an error
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [duplicate]
+                properties:
+                  duplicate:
+                    { type: boolean, description: "Decision 0029, to agree with the backend" }
+                  reward: { type: object }
+                  wallet: { $ref: "#/components/schemas/Wallet" }
+                  inventoryAdded:
+                    type: array
+                    items: { type: string }
+        default: { $ref: "#/components/responses/Error" }
+
 components:
   securitySchemes:
     bearer:
@@ -518,6 +746,7 @@ components:
         - ALREADY_QUEUED
         - NICK_TAKEN
         - NOT_OWNED
+        - MAP_ACTIVE
         - EMAIL_TAKEN
         - INVALID_CREDENTIALS
         - ACCOUNT_CONFLICT
@@ -997,3 +1226,267 @@ components:
             currency: { type: string, enum: [emerald, coin] }
             amount: { type: integer }
         wallet: { $ref: "#/components/schemas/Wallet" }
+
+    Fence:
+      type: array
+      prefixItems:
+        - $ref: "#/components/schemas/Cell"
+        - $ref: "#/components/schemas/Cell"
+      minItems: 2
+      maxItems: 2
+
+    Cells:
+      type: array
+      items: { $ref: "#/components/schemas/Cell" }
+
+    PvpMap:
+      description: Level v2 without moveLimit (Part 7 §5, decision 0029 #5)
+      type: object
+      required: [rows, cols, targets]
+      properties:
+        rows: { type: integer }
+        cols: { type: integer }
+        targets: { $ref: "#/components/schemas/Cells" }
+        bombs: { $ref: "#/components/schemas/Cells" }
+        streams: { $ref: "#/components/schemas/Cells" }
+        bridges: { $ref: "#/components/schemas/Cells" }
+        heavy: { $ref: "#/components/schemas/Cells" }
+        rocks: { $ref: "#/components/schemas/Cells" }
+        fences:
+          type: array
+          items: { $ref: "#/components/schemas/Fence" }
+
+    MapLayout:
+      description: An opponent's map without targets and bombs
+      type: object
+      required: [rows, cols]
+      properties:
+        rows: { type: integer }
+        cols: { type: integer }
+        streams: { $ref: "#/components/schemas/Cells" }
+        bridges: { $ref: "#/components/schemas/Cells" }
+        heavy: { $ref: "#/components/schemas/Cells" }
+        rocks: { $ref: "#/components/schemas/Cells" }
+        fences:
+          type: array
+          items: { $ref: "#/components/schemas/Fence" }
+
+    MapError:
+      type: object
+      required: [code, cells]
+      properties:
+        code: { type: string, description: Validator codes of Part 6 §6.1 }
+        cells: { $ref: "#/components/schemas/Cells" }
+
+    MapValidation:
+      type: object
+      required: [valid, errors, botNorm]
+      properties:
+        valid: { type: boolean }
+        errors:
+          type: array
+          items: { $ref: "#/components/schemas/MapError" }
+        botNorm: { type: [integer, "null"] }
+
+    ArenaMapInput:
+      type: object
+      required: [name, format, map]
+      properties:
+        name: { type: string }
+        format: { type: integer }
+        map: { $ref: "#/components/schemas/PvpMap" }
+
+    ArenaMap:
+      allOf:
+        - $ref: "#/components/schemas/ArenaMapInput"
+        - type: object
+          required: [id, valid, errors, active, botNorm, plays, defended]
+          properties:
+            id: { type: string }
+            valid: { type: boolean }
+            errors:
+              type: array
+              items: { $ref: "#/components/schemas/MapError" }
+            active: { type: boolean }
+            botNorm: { type: [integer, "null"] }
+            plays: { type: integer }
+            defended: { type: integer }
+
+    FormatLimits:
+      type: object
+      required: [fence, stream, heavy, rock, bridge, bomb]
+      properties:
+        fence: { type: integer }
+        stream: { type: integer }
+        heavy: { type: integer }
+        rock: { type: integer }
+        bridge: { type: integer }
+        bomb: { type: integer }
+
+    ArenaFormat:
+      type: object
+      required: [size, targets, turnSec, bombHint, limits]
+      properties:
+        size: { type: integer }
+        targets: { type: integer }
+        turnSec: { type: integer }
+        bombHint: { type: boolean }
+        limits: { $ref: "#/components/schemas/FormatLimits" }
+
+    SeasonStep:
+      type: object
+      required: [step, rp, reward, state]
+      properties:
+        step: { type: integer }
+        rp: { type: integer }
+        reward: { type: object }
+        state:
+          type: string
+          enum: [claimed, available, locked]
+
+    Arena:
+      type: object
+      required: [profile, season, format, activeMapId, unlocked, onboardingDone]
+      properties:
+        profile:
+          type: object
+          required:
+            [trophies, league, division, divisionMin, divisionMax, peak, rp, wins, losses, draws]
+          properties:
+            trophies: { type: integer }
+            league: { type: string }
+            division: { type: integer }
+            divisionMin: { type: integer }
+            divisionMax: { type: integer }
+            peak: { type: integer }
+            rp: { type: integer }
+            wins: { type: integer }
+            losses: { type: integer }
+            draws: { type: integer }
+        season:
+          type: object
+          required: [id, endsAt, track]
+          properties:
+            id: { type: integer }
+            endsAt: { type: string, format: date-time }
+            track:
+              type: array
+              items: { $ref: "#/components/schemas/SeasonStep" }
+        format: { $ref: "#/components/schemas/ArenaFormat" }
+        activeMapId: { type: [string, "null"] }
+        unlocked: { type: boolean }
+        onboardingDone: { type: boolean }
+
+    AsyncMatch:
+      type: object
+      required: [asyncId, author, map, bombCount, targetsCount, norm, turnSec, bombHint]
+      properties:
+        asyncId: { type: string }
+        author:
+          type: object
+          required: [id, nickname, league]
+          properties:
+            id: { type: string }
+            nickname: { type: string }
+            league: { type: string }
+            avatar: { type: string }
+        map: { $ref: "#/components/schemas/MapLayout" }
+        bombCount: { type: integer }
+        targetsCount: { type: integer }
+        norm: { type: integer }
+        turnSec: { type: integer }
+        bombHint: { type: boolean }
+        skin: { type: object }
+
+    TapOutcome:
+      type: string
+      enum: [pelang, target, bomb]
+
+    AsyncTapResult:
+      type: object
+      required: [turn, outcome, turnsUsed, deadline]
+      properties:
+        turn: { type: integer }
+        outcome: { $ref: "#/components/schemas/TapOutcome" }
+        value: { type: [integer, "null"] }
+        bombNear: { type: boolean }
+        turnsUsed: { type: integer }
+        deadline: { type: string, format: date-time }
+
+    MatchResult:
+      type: string
+      enum: [win, loss, draw, annulled]
+
+    AsyncFinish:
+      type: object
+      required: [finished, result, turnsUsed, norm, trophiesDelta, rp, rewards, map]
+      properties:
+        finished: { type: boolean, const: true }
+        result: { $ref: "#/components/schemas/MatchResult" }
+        turnsUsed: { type: integer }
+        norm: { type: integer }
+        trophiesDelta: { type: integer }
+        rp: { type: integer }
+        rewards:
+          type: array
+          items: { type: object }
+        map:
+          type: object
+          required: [targets, bombs]
+          properties:
+            targets: { $ref: "#/components/schemas/Cells" }
+            bombs: { $ref: "#/components/schemas/Cells" }
+
+    MatchSummary:
+      type: object
+      required: [matchId, mode, opponent, result, reason, turns, trophiesDelta, endedAt]
+      properties:
+        matchId: { type: string }
+        mode:
+          type: string
+          enum: [ranked, bot, async, training, friendly]
+        opponent:
+          type: object
+          required: [id, nickname, league, isBot]
+          properties:
+            id: { type: string }
+            nickname: { type: string }
+            league: { type: string }
+            isBot: { type: boolean }
+            label: { type: [string, "null"] }
+        result: { $ref: "#/components/schemas/MatchResult" }
+        reason:
+          type: string
+          enum: [targets, surrender, afk, turnLimit, annulled]
+        turns:
+          type: object
+          required: [me, opponent]
+          properties:
+            me: { type: integer }
+            opponent: { type: integer }
+        trophiesDelta: { type: integer }
+        endedAt: { type: string, format: date-time }
+
+    MatchDetails:
+      allOf:
+        - $ref: "#/components/schemas/MatchSummary"
+        - type: object
+          required: [maps, taps]
+          properties:
+            maps:
+              type: object
+              required: [mine, opponent]
+              properties:
+                mine: { $ref: "#/components/schemas/PvpMap" }
+                opponent: { $ref: "#/components/schemas/PvpMap" }
+            taps:
+              type: array
+              items:
+                type: object
+                required: [turn, player, cell, outcome]
+                properties:
+                  turn: { type: integer }
+                  player: { type: string, enum: [me, opponent] }
+                  cell: { $ref: "#/components/schemas/Cell" }
+                  outcome: { $ref: "#/components/schemas/TapOutcome" }
+                  value: { type: [integer, "null"] }

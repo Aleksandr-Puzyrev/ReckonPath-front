@@ -1,0 +1,9 @@
+export const WS_CLOSE = {
+  ABNORMAL: 1006,
+  TOKEN: 4001,
+  BANNED: 4003,
+  OTHER_DEVICE: 4009,
+  MOVED: 4010,
+  UPGRADE: 4026,
+  MAINTENANCE: 4503,
+} as const;

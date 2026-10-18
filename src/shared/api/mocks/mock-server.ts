@@ -5,9 +5,13 @@ import type { HttpHandler } from "msw/http";
 import { getResponse } from "msw/utils/get-response";
 
 import { resetMockAds } from "./ads-handlers";
+import { resetMockArenaMaps } from "./arena-map-handlers";
 import { resetMockAttempts } from "./attempts-handlers";
 import { resetMockAuth } from "./auth-handlers";
 import { resetMockDaily } from "./daily-handlers";
+import { fakeGameServer } from "./fake-game/fake-game-server";
+import { resetMockArenaProfile } from "./mock-arena-profile";
+import { resetMockMapCheck } from "./mock-map-check";
 import { resetMockShop } from "./mock-shop";
 import { resetMockWallet } from "./mock-wallet";
 import { resetMockPurchases } from "./shop-handlers";
@@ -42,6 +46,10 @@ export const mockServer = {
     resetMockShop();
     resetMockPurchases();
     resetMockAds();
+    resetMockArenaMaps();
+    resetMockMapCheck();
+    resetMockArenaProfile();
+    fakeGameServer.reset();
   },
   fetch: respond,
 };

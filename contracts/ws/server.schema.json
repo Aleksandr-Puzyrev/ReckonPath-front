@@ -1,0 +1,496 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ws/server",
+  "description": "Messages the server sends (Part 7 §8.2; match.snapshot per decision 0029 #2, to agree with the backend)",
+  "$defs": {
+    "ack": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "ack"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": ["t"]
+    },
+    "queueStatus": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "queue.status"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "waitedSec": {
+              "type": "integer"
+            },
+            "range": {
+              "type": "integer"
+            },
+            "asyncAvailable": {
+              "type": "boolean"
+            }
+          },
+          "required": ["waitedSec", "range", "asyncAvailable"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchFound": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.found"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "matchId": {
+              "type": "string"
+            },
+            "endpoint": {
+              "type": "string"
+            },
+            "ticket": {
+              "type": "string"
+            },
+            "opponent": {
+              "$ref": "common.schema.json#/$defs/opponent"
+            },
+            "format": {
+              "$ref": "common.schema.json#/$defs/format"
+            }
+          },
+          "required": ["matchId", "endpoint", "ticket", "opponent", "format"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchState": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.state"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "state": {
+              "enum": ["intro"]
+            },
+            "opponentMap": {
+              "$ref": "common.schema.json#/$defs/mapLayout"
+            },
+            "opponentBombs": {
+              "type": "integer"
+            },
+            "opponentSkin": {
+              "type": "object"
+            },
+            "introEndsAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": ["state", "opponentMap", "opponentBombs", "introEndsAt"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchTurn": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.turn"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "turn": {
+              "type": "integer"
+            },
+            "player": {
+              "$ref": "common.schema.json#/$defs/player"
+            },
+            "deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "skipped": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/skip"
+              }
+            },
+            "final": {
+              "type": "boolean"
+            }
+          },
+          "required": ["turn", "player", "deadline"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchTapResult": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.tapResult"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "turn": {
+              "type": "integer"
+            },
+            "player": {
+              "$ref": "common.schema.json#/$defs/player"
+            },
+            "cell": {
+              "$ref": "common.schema.json#/$defs/cell"
+            },
+            "outcome": {
+              "$ref": "common.schema.json#/$defs/outcome"
+            },
+            "value": {
+              "type": ["integer", "null"]
+            },
+            "bombNear": {
+              "type": "boolean"
+            },
+            "found": {
+              "$ref": "common.schema.json#/$defs/found"
+            }
+          },
+          "required": ["turn", "player", "cell", "outcome"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchOpponent": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.opponent"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "connection": {
+              "enum": ["online", "reconnecting", "offline"]
+            }
+          },
+          "required": ["connection"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchEmote": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.emote"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "player": {
+              "$ref": "common.schema.json#/$defs/player"
+            },
+            "emote": {
+              "$ref": "common.schema.json#/$defs/emote"
+            }
+          },
+          "required": ["player", "emote"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchSnapshot": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.snapshot"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "state": {
+              "enum": ["intro", "playing", "finalTurn"]
+            },
+            "turn": {
+              "type": "integer"
+            },
+            "current": {
+              "$ref": "common.schema.json#/$defs/player"
+            },
+            "deadline": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "final": {
+              "type": "boolean"
+            },
+            "opponent": {
+              "$ref": "common.schema.json#/$defs/opponent"
+            },
+            "format": {
+              "$ref": "common.schema.json#/$defs/format"
+            },
+            "opponentMap": {
+              "$ref": "common.schema.json#/$defs/mapLayout"
+            },
+            "opponentBombs": {
+              "type": "integer"
+            },
+            "opponentSkin": {
+              "type": "object"
+            },
+            "myTaps": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/tap"
+              }
+            },
+            "opponentTaps": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/tap"
+              }
+            },
+            "found": {
+              "$ref": "common.schema.json#/$defs/found"
+            },
+            "timeoutsRow": {
+              "type": "object",
+              "properties": {
+                "me": {
+                  "type": "integer"
+                },
+                "opponent": {
+                  "type": "integer"
+                }
+              }
+            },
+            "skip": {
+              "type": "object",
+              "properties": {
+                "me": {
+                  "type": "integer"
+                },
+                "opponent": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "required": [
+            "state",
+            "turn",
+            "current",
+            "deadline",
+            "opponent",
+            "format",
+            "opponentMap",
+            "opponentBombs",
+            "myTaps",
+            "opponentTaps",
+            "found"
+          ]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchEnd": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.end"
+        },
+        "seq": {
+          "type": "integer"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "result": {
+              "enum": ["win", "loss", "draw", "annulled"]
+            },
+            "reason": {
+              "enum": ["targets", "surrender", "afk", "turnLimit", "annulled"]
+            },
+            "turns": {
+              "$ref": "common.schema.json#/$defs/found"
+            },
+            "maps": {
+              "type": "object",
+              "properties": {
+                "mine": {
+                  "$ref": "common.schema.json#/$defs/revealedMap"
+                },
+                "opponent": {
+                  "$ref": "common.schema.json#/$defs/revealedMap"
+                }
+              },
+              "required": ["mine", "opponent"]
+            },
+            "trophies": {
+              "type": "object",
+              "properties": {
+                "before": {
+                  "type": "integer"
+                },
+                "after": {
+                  "type": "integer"
+                },
+                "delta": {
+                  "type": "integer"
+                }
+              },
+              "required": ["before", "after", "delta"]
+            },
+            "league": {
+              "type": "object",
+              "properties": {
+                "changed": {
+                  "type": "boolean"
+                }
+              },
+              "required": ["changed"]
+            },
+            "rp": {
+              "type": "integer"
+            },
+            "rewards": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/reward"
+              }
+            }
+          },
+          "required": ["result", "reason", "turns", "maps", "trophies", "league", "rp", "rewards"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "error"
+        },
+        "id": {
+          "type": "string"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "enum": [
+                "NOT_YOUR_TURN",
+                "CELL_REVEALED",
+                "CELL_ROCK",
+                "STALE_TURN",
+                "MATCH_OVER",
+                "IN_MATCH",
+                "ALREADY_QUEUED",
+                "MAP_INVALID",
+                "BANNED"
+              ]
+            }
+          },
+          "required": ["code"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "challengeIncoming": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "challenge.incoming"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "challengeId": {
+              "type": "string"
+            },
+            "from": {
+              "type": "object"
+            },
+            "format": {
+              "type": "integer"
+            },
+            "expiresAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": ["challengeId", "from", "format", "expiresAt"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "presence": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "presence"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "userId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            }
+          },
+          "required": ["userId", "status"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "pong": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "pong"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "c": {
+              "type": "integer"
+            },
+            "s": {
+              "type": "integer"
+            }
+          },
+          "required": ["c", "s"]
+        }
+      },
+      "required": ["t", "d"]
+    }
+  }
+}

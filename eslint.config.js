@@ -17,6 +17,7 @@ const layerPolicies = FSD_LAYERS.map((layer, index) => ({
         types: {
           anyOf: [
             ...FSD_LAYERS.slice(index + 1),
+            ...(layer === "shared" ? [] : ["mocks"]),
             ...(ENGINE_USERS.includes(layer) ? ["engine", "content"] : []),
           ],
         },
@@ -41,6 +42,7 @@ module.exports = defineConfig([
       "ios/*",
       "android/*",
       "src/shared/api/generated/*",
+      "src/shared/ws/generated/*",
     ],
   },
 
@@ -91,6 +93,7 @@ module.exports = defineConfig([
         { type: "widgets", pattern: "src/widgets/*", capture: ["slice"] },
         { type: "features", pattern: "src/features/*", capture: ["slice"] },
         { type: "entities", pattern: "src/entities/*", capture: ["slice"] },
+        { type: "mocks", pattern: "src/shared/api/mocks" },
         { type: "shared", pattern: "src/shared" },
         { type: "engine", pattern: "packages/engine" },
         { type: "content", pattern: "packages/content" },
@@ -104,6 +107,15 @@ module.exports = defineConfig([
           policies: [
             { allow: { dependency: { relationship: { to: "internal" } } } },
             ...layerPolicies,
+            // The mocks play the server, which runs the same engine (моки играют роль сервера, который считает тем же движком).
+            {
+              from: { element: { type: "shared" } },
+              allow: { to: { element: { type: "mocks" } } },
+            },
+            {
+              from: { element: { type: "mocks" } },
+              allow: { to: { element: { types: { anyOf: ["shared", "engine"] } } } },
+            },
             {
               from: { element: { type: "content" } },
               allow: { to: { element: { types: { anyOf: ["engine"] } } } },

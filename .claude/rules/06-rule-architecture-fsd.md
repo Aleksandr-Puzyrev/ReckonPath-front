@@ -33,7 +33,7 @@ Routes live in `src/app/` (Expo Router gives it precedence); the spec's FSD `app
 
 ```text
 app → application → screens → widgets → features → entities → shared
-@reckon-path/engine is importable from entities and above; it imports nothing from src/.
+@reckon-path/engine is importable from entities and above, and from the dev mocks in src/shared/api/mocks (they play the server; decision 0029); it imports nothing from src/.
 ```
 
 * Imports go only downward. Slices of the same layer must not import each other (`features/tap-cell` must not import `features/equip-item`). Shared needs move down a layer.

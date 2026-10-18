@@ -58,6 +58,8 @@ const accept = (attempt: Attempt) => {
 const totalStars = () =>
   [...bestByLevel.values()].reduce((total, { bestStars }) => total + bestStars, 0);
 
+export const mockPassedLevels = () => bestByLevel.size;
+
 export const resetMockAttempts = () => {
   acceptedIds = new Set();
   bestByLevel = new Map();

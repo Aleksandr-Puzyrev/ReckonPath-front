@@ -344,6 +344,183 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/arena": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getArena"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/maps": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getArenaMaps"];
+    put?: never;
+    post: operations["postArenaMap"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/maps/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["putArenaMap"];
+    post?: never;
+    /** @description The active map cannot be deleted (409 MAP_ACTIVE, decision 0029). */
+    delete: operations["deleteArenaMap"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/maps/{id}/activate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["activateArenaMap"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/maps/validate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["validateArenaMap"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/maps/random": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["randomArenaMap"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/async": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["startAsyncMatch"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/async/{id}/tap": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tapAsyncMatch"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/matches": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getArenaMatches"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/matches/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getArenaMatch"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/season/claim": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["claimSeasonStep"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -373,6 +550,7 @@ export interface components {
       | "ALREADY_QUEUED"
       | "NICK_TAKEN"
       | "NOT_OWNED"
+      | "MAP_ACTIVE"
       | "EMAIL_TAKEN"
       | "INVALID_CREDENTIALS"
       | "ACCOUNT_CONFLICT"
@@ -702,6 +880,179 @@ export interface components {
         amount: number;
       };
       wallet?: components["schemas"]["Wallet"];
+    };
+    Fence: [components["schemas"]["Cell"], components["schemas"]["Cell"]];
+    Cells: components["schemas"]["Cell"][];
+    /** @description Level v2 without moveLimit (Part 7 §5, decision 0029 */
+    PvpMap: {
+      rows: number;
+      cols: number;
+      targets: components["schemas"]["Cells"];
+      bombs?: components["schemas"]["Cells"];
+      streams?: components["schemas"]["Cells"];
+      bridges?: components["schemas"]["Cells"];
+      heavy?: components["schemas"]["Cells"];
+      rocks?: components["schemas"]["Cells"];
+      fences?: components["schemas"]["Fence"][];
+    };
+    /** @description An opponent's map without targets and bombs */
+    MapLayout: {
+      rows: number;
+      cols: number;
+      streams?: components["schemas"]["Cells"];
+      bridges?: components["schemas"]["Cells"];
+      heavy?: components["schemas"]["Cells"];
+      rocks?: components["schemas"]["Cells"];
+      fences?: components["schemas"]["Fence"][];
+    };
+    MapError: {
+      /** @description Validator codes of Part 6 §6.1 */
+      code: string;
+      cells: components["schemas"]["Cells"];
+    };
+    MapValidation: {
+      valid: boolean;
+      errors: components["schemas"]["MapError"][];
+      botNorm: number | null;
+    };
+    ArenaMapInput: {
+      name: string;
+      format: number;
+      map: components["schemas"]["PvpMap"];
+    };
+    ArenaMap: components["schemas"]["ArenaMapInput"] & {
+      id: string;
+      valid: boolean;
+      errors: components["schemas"]["MapError"][];
+      active: boolean;
+      botNorm: number | null;
+      plays: number;
+      defended: number;
+    };
+    FormatLimits: {
+      fence: number;
+      stream: number;
+      heavy: number;
+      rock: number;
+      bridge: number;
+      bomb: number;
+    };
+    ArenaFormat: {
+      size: number;
+      targets: number;
+      turnSec: number;
+      bombHint: boolean;
+      limits: components["schemas"]["FormatLimits"];
+    };
+    SeasonStep: {
+      step: number;
+      rp: number;
+      reward: Record<string, never>;
+      /** @enum {string} */
+      state: "claimed" | "available" | "locked";
+    };
+    Arena: {
+      profile: {
+        trophies: number;
+        league: string;
+        division: number;
+        divisionMin: number;
+        divisionMax: number;
+        peak: number;
+        rp: number;
+        wins: number;
+        losses: number;
+        draws: number;
+      };
+      season: {
+        id: number;
+        /** Format: date-time */
+        endsAt: string;
+        track: components["schemas"]["SeasonStep"][];
+      };
+      format: components["schemas"]["ArenaFormat"];
+      activeMapId: string | null;
+      unlocked: boolean;
+      onboardingDone: boolean;
+    };
+    AsyncMatch: {
+      asyncId: string;
+      author: {
+        id: string;
+        nickname: string;
+        league: string;
+        avatar?: string;
+      };
+      map: components["schemas"]["MapLayout"];
+      bombCount: number;
+      targetsCount: number;
+      norm: number;
+      turnSec: number;
+      bombHint: boolean;
+      skin?: Record<string, never>;
+    };
+    /** @enum {string} */
+    TapOutcome: "pelang" | "target" | "bomb";
+    AsyncTapResult: {
+      turn: number;
+      outcome: components["schemas"]["TapOutcome"];
+      value?: number | null;
+      bombNear?: boolean;
+      turnsUsed: number;
+      /** Format: date-time */
+      deadline: string;
+    };
+    /** @enum {string} */
+    MatchResult: "win" | "loss" | "draw" | "annulled";
+    AsyncFinish: {
+      /** @constant */
+      finished: true;
+      result: components["schemas"]["MatchResult"];
+      turnsUsed: number;
+      norm: number;
+      trophiesDelta: number;
+      rp: number;
+      rewards: Record<string, never>[];
+      map: {
+        targets: components["schemas"]["Cells"];
+        bombs: components["schemas"]["Cells"];
+      };
+    };
+    MatchSummary: {
+      matchId: string;
+      /** @enum {string} */
+      mode: "ranked" | "bot" | "async" | "training" | "friendly";
+      opponent: {
+        id: string;
+        nickname: string;
+        league: string;
+        isBot: boolean;
+        label?: string | null;
+      };
+      result: components["schemas"]["MatchResult"];
+      /** @enum {string} */
+      reason: "targets" | "surrender" | "afk" | "turnLimit" | "annulled";
+      turns: {
+        me: number;
+        opponent: number;
+      };
+      trophiesDelta: number;
+      /** Format: date-time */
+      endedAt: string;
+    };
+    MatchDetails: components["schemas"]["MatchSummary"] & {
+      maps: {
+        mine: components["schemas"]["PvpMap"];
+        opponent: components["schemas"]["PvpMap"];
+      };
+      taps: {
+        turn: number;
+        /** @enum {string} */
+        player: "me" | "opponent";
+        cell: components["schemas"]["Cell"];
+        outcome: components["schemas"]["TapOutcome"];
+        value?: number | null;
+      }[];
     };
   };
   responses: {
@@ -1303,6 +1654,338 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  getArena: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Arena profile, season and format */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Arena"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getArenaMaps: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The player's maps */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ArenaMap"][];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  postArenaMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ArenaMapInput"];
+      };
+    };
+    responses: {
+      /** @description The saved map; the server computes valid, errors and botNorm */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ArenaMap"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  putArenaMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ArenaMapInput"];
+      };
+    };
+    responses: {
+      /** @description The saved map */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ArenaMap"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  deleteArenaMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  activateArenaMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The new active map */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            activeMapId: string;
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  validateArenaMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          format: number;
+          map: components["schemas"]["PvpMap"];
+        };
+      };
+    };
+    responses: {
+      /** @description Validation without saving */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MapValidation"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  randomArenaMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          format: number;
+        };
+      };
+    };
+    responses: {
+      /** @description A random valid map */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            map: components["schemas"]["PvpMap"];
+            botNorm: number;
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  startAsyncMatch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A match against another player's map */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AsyncMatch"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  tapAsyncMatch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          turn: number;
+          cell: components["schemas"]["Cell"];
+        };
+      };
+    };
+    responses: {
+      /** @description The tap result, or the final result once the match is over */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json":
+            components["schemas"]["AsyncTapResult"] | components["schemas"]["AsyncFinish"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getArenaMatches: {
+    parameters: {
+      query?: {
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Match history */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            items: components["schemas"]["MatchSummary"][];
+            nextCursor: string | null;
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getArenaMatch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Both maps and every tap (decision 0029 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchDetails"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  claimSeasonStep: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          step: number;
+        };
+      };
+    };
+    responses: {
+      /** @description The reward; a repeat answers duplicate without an error */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** @description Decision 0029, to agree with the backend */
+            duplicate: boolean;
+            reward?: Record<string, never>;
+            wallet?: components["schemas"]["Wallet"];
+            inventoryAdded?: string[];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
 }
 type FlattenedDeepRequired<T> = {
   [K in keyof T]-?: FlattenedDeepRequired<
@@ -1330,6 +2013,7 @@ export const errorCodeValues: ReadonlyArray<
   "ALREADY_QUEUED",
   "NICK_TAKEN",
   "NOT_OWNED",
+  "MAP_ACTIVE",
   "EMAIL_TAKEN",
   "INVALID_CREDENTIALS",
   "ACCOUNT_CONFLICT",
@@ -1395,3 +2079,21 @@ export const adIntentStatusStatusValues: ReadonlyArray<
 export const adIntentStatusRewardCurrencyValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["AdIntentStatus"]["reward"]["currency"]
 > = ["emerald", "coin"];
+export const seasonStepStateValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["SeasonStep"]["state"]
+> = ["claimed", "available", "locked"];
+export const tapOutcomeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["TapOutcome"]
+> = ["pelang", "target", "bomb"];
+export const matchResultValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchResult"]
+> = ["win", "loss", "draw", "annulled"];
+export const matchSummaryModeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchSummary"]["mode"]
+> = ["ranked", "bot", "async", "training", "friendly"];
+export const matchSummaryReasonValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchSummary"]["reason"]
+> = ["targets", "surrender", "afk", "turnLimit", "annulled"];
+export const matchDetailsTapsPlayerValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchDetails"]["taps"]["player"]
+> = ["me", "opponent"];

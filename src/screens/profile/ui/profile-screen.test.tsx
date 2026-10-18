@@ -133,11 +133,22 @@ describe("ProfileScreen", () => {
   });
 
   test("shows a skeleton while the player's data loads", async () => {
+    let release = () => {};
+    const isReleased = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    mockServer.use(
+      http.get(mockUrl("/me"), async () => {
+        await isReleased;
+        return undefined;
+      }),
+    );
     await render(<ProfileScreen />, { wrapper: createQueryWrapper() });
 
     expect(
       screen.getByTestId("profile-skeleton", { includeHiddenElements: true }),
     ).toBeOnTheScreen();
+    release();
     await screen.findByText("Player4821");
   });
 });

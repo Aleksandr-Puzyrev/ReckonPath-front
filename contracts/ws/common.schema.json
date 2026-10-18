@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ws/common",
+  "description": "Shared parts of the WebSocket messages (Part 7 §8, decision 0029)",
+  "$defs": {
+    "cell": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 8
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "cells": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/cell"
+      }
+    },
+    "fences": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/cell"
+        },
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "player": {
+      "enum": ["me", "opponent"]
+    },
+    "outcome": {
+      "enum": ["pelang", "target", "bomb"]
+    },
+    "emote": {
+      "enum": ["nice", "wow", "oops", "luck", "thanks", "echo"]
+    },
+    "mapLayout": {
+      "type": "object",
+      "properties": {
+        "fences": {
+          "$ref": "#/$defs/fences"
+        },
+        "streams": {
+          "$ref": "#/$defs/cells"
+        },
+        "bridges": {
+          "$ref": "#/$defs/cells"
+        },
+        "heavy": {
+          "$ref": "#/$defs/cells"
+        },
+        "rocks": {
+          "$ref": "#/$defs/cells"
+        }
+      }
+    },
+    "revealedMap": {
+      "type": "object",
+      "properties": {
+        "targets": {
+          "$ref": "#/$defs/cells"
+        },
+        "bombs": {
+          "$ref": "#/$defs/cells"
+        }
+      },
+      "required": ["targets", "bombs"]
+    },
+    "opponent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "league": {
+          "type": "string"
+        },
+        "division": {
+          "type": "integer"
+        },
+        "trophies": {
+          "type": "integer"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "frame": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "isBot": {
+          "type": "boolean"
+        },
+        "label": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["id", "nickname", "league", "trophies", "isBot"]
+    },
+    "format": {
+      "type": "object",
+      "properties": {
+        "size": {
+          "type": "integer"
+        },
+        "targets": {
+          "type": "integer"
+        },
+        "turnSec": {
+          "type": "integer"
+        },
+        "bombHint": {
+          "type": "boolean"
+        },
+        "maxTurns": {
+          "type": "integer"
+        }
+      },
+      "required": ["size", "targets", "turnSec", "bombHint", "maxTurns"]
+    },
+    "found": {
+      "type": "object",
+      "properties": {
+        "me": {
+          "type": "integer"
+        },
+        "opponent": {
+          "type": "integer"
+        }
+      },
+      "required": ["me", "opponent"]
+    },
+    "skip": {
+      "type": "object",
+      "properties": {
+        "player": {
+          "$ref": "#/$defs/player"
+        },
+        "reason": {
+          "enum": ["bomb", "timeout"]
+        }
+      },
+      "required": ["player", "reason"]
+    },
+    "tap": {
+      "type": "object",
+      "properties": {
+        "turn": {
+          "type": "integer"
+        },
+        "player": {
+          "$ref": "#/$defs/player"
+        },
+        "cell": {
+          "$ref": "#/$defs/cell"
+        },
+        "outcome": {
+          "$ref": "#/$defs/outcome"
+        },
+        "value": {
+          "type": ["integer", "null"]
+        },
+        "bombNear": {
+          "type": "boolean"
+        }
+      },
+      "required": ["turn", "player", "cell", "outcome"]
+    },
+    "reward": {
+      "type": "object",
+      "description": "A server-defined reward; the client shows it as received"
+    }
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ws/client",
+  "description": "Messages the client sends (Part 7 §8.2)",
+  "$defs": {
+    "queueJoin": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "queue.join"
+        },
+        "id": {
+          "type": "string"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "type": "integer"
+            },
+            "mapId": {
+              "type": "string"
+            }
+          },
+          "required": ["format", "mapId"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "queueLeave": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "queue.leave"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": ["t"]
+    },
+    "challengeSend": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "challenge.send"
+        },
+        "id": {
+          "type": "string"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "friendId": {
+              "type": "string"
+            },
+            "format": {
+              "type": "integer"
+            },
+            "mapId": {
+              "type": "string"
+            }
+          },
+          "required": ["friendId", "format", "mapId"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "challengeAnswer": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "challenge.answer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "challengeId": {
+              "type": "string"
+            },
+            "accept": {
+              "type": "boolean"
+            },
+            "mapId": {
+              "type": "string"
+            }
+          },
+          "required": ["challengeId", "accept"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchTap": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.tap"
+        },
+        "id": {
+          "type": "string"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "turn": {
+              "type": "integer"
+            },
+            "cell": {
+              "$ref": "common.schema.json#/$defs/cell"
+            }
+          },
+          "required": ["turn", "cell"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchEmote": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.emote"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "emote": {
+              "$ref": "common.schema.json#/$defs/emote"
+            }
+          },
+          "required": ["emote"]
+        }
+      },
+      "required": ["t", "d"]
+    },
+    "matchSurrender": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.surrender"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": ["t"]
+    },
+    "matchResync": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "match.resync"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": ["t"]
+    },
+    "ping": {
+      "type": "object",
+      "properties": {
+        "t": {
+          "const": "ping"
+        },
+        "d": {
+          "type": "object",
+          "properties": {
+            "c": {
+              "type": "integer"
+            }
+          },
+          "required": ["c"]
+        }
+      },
+      "required": ["t", "d"]
+    }
+  }
+}

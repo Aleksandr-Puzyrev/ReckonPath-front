@@ -5,6 +5,8 @@ import { APP_VERSION } from "@shared/config";
 import type { components } from "../generated/schema";
 
 import { adsHandlers } from "./ads-handlers";
+import { arenaHandlers } from "./arena-handlers";
+import { arenaMapHandlers } from "./arena-map-handlers";
 import { attemptsHandlers } from "./attempts-handlers";
 import { authHandlers } from "./auth-handlers";
 import { dailyHandlers } from "./daily-handlers";
@@ -42,4 +44,6 @@ export const handlers = [
   ...walletHandlers,
   ...shopHandlers,
   ...adsHandlers,
+  ...arenaHandlers,
+  ...arenaMapHandlers,
 ];

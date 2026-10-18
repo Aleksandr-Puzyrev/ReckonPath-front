@@ -25,6 +25,11 @@ export const creditEmeralds = (amount: number) => {
   saveMockState(STATE_NAME, wallet);
 };
 
+export const creditCoins = (amount: number) => {
+  wallet = { ...wallet, coins: wallet.coins + amount };
+  saveMockState(STATE_NAME, wallet);
+};
+
 export type MockPrice = { emeralds: number } | { coins: number };
 
 export const shortOf = (price: MockPrice) =>

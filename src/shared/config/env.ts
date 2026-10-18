@@ -7,4 +7,5 @@ const readAppVersion = () => {
 };
 
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "";
+export const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL ?? "";
 export const APP_VERSION = readAppVersion();
