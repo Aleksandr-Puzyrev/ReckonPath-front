@@ -36,6 +36,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0028 | [`0028-stage-4-plan.md`](0028-stage-4-plan.md) | Stage 4 order of tasks, Part 7 contracts with WS schemas, fake game server for WS mocks, training via WS, simple animations, leaderboards and replay out |
 | 0029 | [`0029-arena-contract.md`](0029-arena-contract.md) | `json-schema-to-zod` for WS types, full `match.snapshot` and history details proposals, arena enums and emote ids, map schemas, format-limit mapping, arena and maps mocks |
 | 0030 | [`0030-ws-client-and-fake-server.md`](0030-ws-client-and-fake-server.md) | WS client scope (heartbeat, reconnect, clock offset, `seq`, close codes), fake game server opponent and bot, match results recorded in mocks, training and `matchStore` out of task 2 |
+| 0031 | [`0031-arena-home.md`](0031-arena-home.md) | Arena home: design texts, mock season track and claim, inactive buttons of later tasks, no-map and no-history states, map switch sheet, match details route, local lock, league emblem and division progress, offline |
 
 ## Template
 

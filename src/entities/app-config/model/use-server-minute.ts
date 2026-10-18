@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { useClockOffset } from "@entities/app-config";
+import { useClockOffset } from "../api/bootstrap-queries";
 
 const MINUTE_MS = 60_000;
 

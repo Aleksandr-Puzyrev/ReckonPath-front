@@ -48,7 +48,14 @@ export type { Rng } from "./random/random";
 export { divisionOf, LEAGUES, leagueOf } from "./formulas/league";
 export type { Division, League } from "./formulas/league";
 export type { MatchKind, MatchOutcome } from "./formulas/match-result";
-export { rankPoints, trackStep, xpFor, xpToNext } from "./formulas/rewards";
+export {
+  rankPoints,
+  RP_PER_TRACK_STEP,
+  TRACK_STEPS,
+  trackStep,
+  xpFor,
+  xpToNext,
+} from "./formulas/rewards";
 export type { XpSource } from "./formulas/rewards";
 export { applyTrophies, seasonReset, trophyDelta } from "./formulas/trophies";
 export { createSolver, observeTap, chooseMove, scoreCells } from "./solver/solver";

@@ -1,4 +1,4 @@
-// TODO: add hero.arena, hero.shop, hero.event once their gradient angle is clarified
+// TODO: add hero.shop, hero.event once their gradient angle is clarified
 
 interface Gradient {
   colors: readonly [string, string, ...string[]];
@@ -12,6 +12,8 @@ export const gradients = {
   done: { colors: ["#36D4B0", "#5E86FF"], angle: 135 },
   // TODO: the spec adds a highlight («+ блик») to hero.home without parameters — clarify with the home screen
   heroHome: { colors: ["#102E43", "#187E9D", "#6653B8"], locations: [0, 0.48, 1], angle: 145 },
+  // Part 3 gives hero.arena no angle; it takes hero.home's 145° (у hero.arena в Части 3 нет угла; берётся 145° от hero.home).
+  heroArena: { colors: ["#112F45", "#205C79", "#6953B6"], locations: [0, 0.5, 1], angle: 145 },
   levelDone: { colors: ["#3ED49B", "#1F9C74"], angle: 145 },
   levelCurrent: { colors: ["#FFB65D", "#FF5D6A"], angle: 145 },
   perfectBadge: { colors: ["#FFE59A", "#FFC84E"], angle: 135 },

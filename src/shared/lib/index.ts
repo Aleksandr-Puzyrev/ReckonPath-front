@@ -3,3 +3,4 @@ export { formatCountdown, formatDuration } from "./format-duration";
 export { formatNumber } from "./format-number";
 export { splitTimeLeft } from "./split-time-left";
 export { formatClockTime } from "./format-clock-time";
+export { formatDateTime } from "./format-date-time";

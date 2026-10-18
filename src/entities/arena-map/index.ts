@@ -4,6 +4,7 @@ export { deleteArenaMapMutationOptions } from "./api/delete-arena-map-mutation";
 export { randomArenaMapMutationOptions } from "./api/random-arena-map-mutation";
 export { saveArenaMapMutationOptions } from "./api/save-arena-map-mutation";
 export { validateArenaMapMutationOptions } from "./api/validate-arena-map-mutation";
+export { levelOfMap } from "./model/level-of-map";
 export type {
   ArenaMap,
   ArenaMapInput,

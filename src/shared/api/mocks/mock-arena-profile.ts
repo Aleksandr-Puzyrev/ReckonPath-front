@@ -4,6 +4,9 @@ import {
   LEAGUES,
   leagueOf,
   rankPoints,
+  RP_PER_TRACK_STEP,
+  TRACK_STEPS,
+  trackStep,
   trophyDelta,
 } from "@reckon-path/engine";
 import type { MatchKind, MatchOutcome } from "@reckon-path/engine";
@@ -15,6 +18,8 @@ import { creditCoins, creditEmeralds } from "./mock-wallet";
 
 type ArenaProfile = components["schemas"]["Arena"]["profile"];
 type MatchDetails = components["schemas"]["MatchDetails"];
+type SeasonStep = components["schemas"]["SeasonStep"];
+type SeasonReward = components["schemas"]["SeasonReward"];
 
 const STATE_NAME = "arena-profile";
 const DAY_MS = 86_400_000;
@@ -23,6 +28,13 @@ const DIVISION_NUMBERS = { III: 3, II: 2, I: 1 } as const;
 const WIN_COINS = 40;
 const FIRST_WINS_EMERALDS = 3;
 const FIRST_WINS_PER_DAY = 3;
+// The design's currency rewards in a cycle; the mock catalog has no season items (валютные награды дизайна по кругу; сезонных предметов в каталоге мока нет).
+const TRACK_REWARDS: readonly SeasonReward[] = [
+  { currency: "coin", amount: 200 },
+  { currency: "emerald", amount: 10 },
+  { currency: "coin", amount: 400 },
+  { currency: "emerald", amount: 20 },
+];
 
 interface ArenaProfileState {
   trophies: number;
@@ -35,6 +47,7 @@ interface ArenaProfileState {
   winDay: number;
   winsToday: number;
   history: MatchDetails[];
+  claimedSteps: number[];
 }
 
 const START_STATE: ArenaProfileState = {
@@ -48,9 +61,11 @@ const START_STATE: ArenaProfileState = {
   winDay: 0,
   winsToday: 0,
   history: [],
+  claimedSteps: [],
 };
 
-let state = loadMockState<ArenaProfileState>(STATE_NAME, START_STATE);
+// Fields added later get their start values in a state saved before them (поля, добавленные позже, получают начальные значения в состоянии, сохранённом до них).
+let state: ArenaProfileState = { ...START_STATE, ...loadMockState(STATE_NAME, START_STATE) };
 
 export const resetMockArenaProfile = () => {
   state = START_STATE;
@@ -91,6 +106,31 @@ export const mockArenaProfile = (): ArenaProfile => ({
 
 export const mockMatchHistory = () => state.history;
 
+const rewardOf = (step: number) => TRACK_REWARDS[(step - 1) % TRACK_REWARDS.length] ?? {};
+
+const stepStateOf = (step: number): SeasonStep["state"] => {
+  if (state.claimedSteps.includes(step)) return "claimed";
+  return trackStep(state.rp) >= step ? "available" : "locked";
+};
+
+export const mockSeasonTrack = (): SeasonStep[] =>
+  Array.from({ length: TRACK_STEPS }, (_, index) => {
+    const step = index + 1;
+    return { step, rp: step * RP_PER_TRACK_STEP, reward: rewardOf(step), state: stepStateOf(step) };
+  });
+
+export const claimMockStep = (step: number) => {
+  const stepState = stepStateOf(step);
+  if (stepState === "locked") return null;
+  const reward = rewardOf(step);
+  if (stepState === "claimed") return { duplicate: true, reward };
+  if (reward.currency === "coin") creditCoins(reward.amount ?? 0);
+  if (reward.currency === "emerald") creditEmeralds(reward.amount ?? 0);
+  state = { ...state, claimedSteps: [...state.claimedSteps, step] };
+  saveMockState(STATE_NAME, state);
+  return { duplicate: false, reward, inventoryAdded: [] };
+};
+
 interface MatchRecord {
   outcome: MatchOutcome;
   kind: MatchKind;
@@ -128,6 +168,7 @@ export const recordMockMatch = ({ outcome, kind, opponentTrophies, details }: Ma
     winDay,
     winsToday,
     history: [{ ...details, trophiesDelta: after - before }, ...state.history],
+    claimedSteps: state.claimedSteps,
   };
   saveMockState(STATE_NAME, state);
   return {

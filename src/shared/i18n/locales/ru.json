@@ -144,7 +144,12 @@
       "note": "После продолжения — не больше 1★",
       "left": "осталось {{count}} сегодня"
     },
-    "stars": "Звёзды: {{count}} из 3"
+    "stars": "Звёзды: {{count}} из 3",
+    "pvp": {
+      "win": "Победа",
+      "lose": "Поражение",
+      "draw": "Ничья"
+    }
   },
   "ads": {
     "unavailable": "Реклама сейчас недоступна",
@@ -627,5 +632,96 @@
       "light": "Светлая",
       "dark": "Тёмная"
     }
+  },
+  "arena": {
+    "eyebrow": "ARENA",
+    "title": "Сигнал против сигнала.",
+    "stats": {
+      "trophies": "Кубки",
+      "league": "Лига",
+      "season": "Сезон"
+    },
+    "seasonValue": "{{n}} · {{days}}д",
+    "progress": "{{trophies}} / {{max}} → {{next}}",
+    "fight": "В бой",
+    "async": "Против карты",
+    "needInternet": "Нужен интернет",
+    "format": "{{size}} · {{count}} цели · {{sec}} с на ход",
+    "myMap": "Моя карта",
+    "mapActive": "{{name}} · активная",
+    "mapDraft": "черновик — карта невалидна",
+    "botEstimate_one": "Бот решает за ~{{count}} ход",
+    "botEstimate_few": "Бот решает за ~{{count}} хода",
+    "botEstimate_many": "Бот решает за ~{{count}} ходов",
+    "botEstimate_other": "Бот решает за ~{{count}} хода",
+    "defended": "Защита: {{count}}",
+    "edit": "Изменить",
+    "switch": "Сменить",
+    "noMap": "Карты пока нет",
+    "createMap": "Собрать карту",
+    "maps": {
+      "title": "Мои карты",
+      "format": "{{size}} · {{league}}",
+      "editInEditor": "Изменить в редакторе"
+    },
+    "track": {
+      "title": "Сезонный трек",
+      "rp": "RP {{rp}}",
+      "stepRp": "{{rp}} RP",
+      "locked": "Закрыто",
+      "claimed": "Получено"
+    },
+    "history": {
+      "title": "История матчей",
+      "bot": "БОТ",
+      "win_one": "Победа · {{count}} ход",
+      "win_few": "Победа · {{count}} хода",
+      "win_many": "Победа · {{count}} ходов",
+      "win_other": "Победа · {{count}} хода",
+      "loss_one": "Поражение · {{count}} ход",
+      "loss_few": "Поражение · {{count}} хода",
+      "loss_many": "Поражение · {{count}} ходов",
+      "loss_other": "Поражение · {{count}} хода",
+      "draw_one": "Ничья · {{count}} ход",
+      "draw_few": "Ничья · {{count}} хода",
+      "draw_many": "Ничья · {{count}} ходов",
+      "draw_other": "Ничья · {{count}} хода",
+      "annulled": "Матч отменён",
+      "training": "{{text}} · тренировочный",
+      "async": "{{result}} · против карты",
+      "resultWin": "Победа",
+      "resultLoss": "Поражение",
+      "resultDraw": "Ничья"
+    },
+    "lockedTitle": "Арена закрыта",
+    "locked": "Пройди уровень 12, чтобы открыть арену",
+    "lockedProgress": "Прогресс",
+    "lockedCount": "{{n}} / {{total}}",
+    "toLevels": "К уровням",
+    "lockedCards": {
+      "turns": {
+        "title": "Ходите по очереди",
+        "text": "Каждый ищет цели на карте соперника"
+      },
+      "ownMap": {
+        "title": "Своя карта",
+        "text": "Ты сам прячешь цели и бомбы"
+      },
+      "leagues": {
+        "title": "Кубки и лиги",
+        "text": "От Bronze до Master, сезон — 28 дней"
+      }
+    },
+    "offline": "Нет сети · данные от {{time}}",
+    "details": {
+      "title": "Матч с {{name}}",
+      "meta": "{{date}} · {{size}}",
+      "score": "{{me}} : {{opponent}}",
+      "myMap": "Моя карта · тапы {{name}}",
+      "theirMap": "Карта {{name}} · мои тапы"
+    }
+  },
+  "season": {
+    "claim": "Забрать"
   }
 }

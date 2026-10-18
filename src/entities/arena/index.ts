@@ -1,3 +1,4 @@
 export { arenaKeys, arenaQueryOptions, useArenaQuery } from "./api/arena-queries";
-export type { Arena, ArenaFormat, SeasonStep } from "./model/arena-type";
+export { claimSeasonStepMutationOptions } from "./api/claim-season-step-mutation";
+export type { Arena, ArenaFormat, SeasonReward, SeasonStep } from "./model/arena-type";
 export { pvpFormatOf } from "./model/pvp-format-of";

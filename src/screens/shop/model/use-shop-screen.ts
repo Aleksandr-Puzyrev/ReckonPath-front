@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useServerMinute } from "@entities/app-config";
 import { offerKeyOf, useShopQuery } from "@entities/item";
 import type { Currency, ShopOffer } from "@entities/item";
 import { useIsOnline } from "@shared/api";
@@ -7,7 +8,6 @@ import { shopCardsOf, visibleTabsOf } from "@widgets/shop-grid";
 import type { ShopTabId } from "@widgets/shop-grid";
 
 import { allItemsOf, featuredKeyOf, findOffer } from "./find-offer";
-import { useServerMinute } from "./use-server-minute";
 
 interface Shortage {
   amount: number;

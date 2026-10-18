@@ -37,6 +37,7 @@ const RootStack = () => {
         <Stack.Protected guard={!isUpdateRequired && !isMaintenance}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
+          <Stack.Screen name="arena/history/[id]" />
           <Stack.Screen
             name="play/[mode]/[id]"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}

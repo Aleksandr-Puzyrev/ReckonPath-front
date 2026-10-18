@@ -140,7 +140,12 @@
       "note": "After continuing — 1★ at most",
       "left": "{{count}} left today"
     },
-    "stars": "Stars: {{count}} of 3"
+    "stars": "Stars: {{count}} of 3",
+    "pvp": {
+      "win": "Victory",
+      "lose": "Defeat",
+      "draw": "Draw"
+    }
   },
   "ads": {
     "unavailable": "No ad available right now",
@@ -581,5 +586,88 @@
       "light": "Light",
       "dark": "Dark"
     }
+  },
+  "arena": {
+    "eyebrow": "ARENA",
+    "title": "Signal vs signal.",
+    "stats": {
+      "trophies": "Trophies",
+      "league": "League",
+      "season": "Season"
+    },
+    "seasonValue": "{{n}} · {{days}}d",
+    "progress": "{{trophies}} / {{max}} → {{next}}",
+    "fight": "Fight",
+    "async": "Vs a map",
+    "needInternet": "Internet required",
+    "format": "{{size}} · {{count}} signals · {{sec}}s per turn",
+    "myMap": "My map",
+    "mapActive": "{{name}} · active",
+    "mapDraft": "draft — map is invalid",
+    "botEstimate_one": "Bot solves in ~{{count}} move",
+    "botEstimate_other": "Bot solves in ~{{count}} moves",
+    "defended": "Defended: {{count}}",
+    "edit": "Edit",
+    "switch": "Switch",
+    "noMap": "No map yet",
+    "createMap": "Build a map",
+    "maps": {
+      "title": "My maps",
+      "format": "{{size}} · {{league}}",
+      "editInEditor": "Edit in editor"
+    },
+    "track": {
+      "title": "Season track",
+      "rp": "RP {{rp}}",
+      "stepRp": "{{rp}} RP",
+      "locked": "Locked",
+      "claimed": "Claimed"
+    },
+    "history": {
+      "title": "Match history",
+      "bot": "BOT",
+      "win_one": "Win · {{count}} move",
+      "win_other": "Win · {{count}} moves",
+      "loss_one": "Loss · {{count}} move",
+      "loss_other": "Loss · {{count}} moves",
+      "draw_one": "Draw · {{count}} move",
+      "draw_other": "Draw · {{count}} moves",
+      "annulled": "Match cancelled",
+      "training": "{{text}} · training",
+      "async": "{{result}} · vs map",
+      "resultWin": "Win",
+      "resultLoss": "Loss",
+      "resultDraw": "Draw"
+    },
+    "lockedTitle": "Arena is locked",
+    "locked": "Beat level 12 to unlock the Arena",
+    "lockedProgress": "Progress",
+    "lockedCount": "{{n}} / {{total}}",
+    "toLevels": "To levels",
+    "lockedCards": {
+      "turns": {
+        "title": "Take turns",
+        "text": "Each hunts targets on the rival’s map"
+      },
+      "ownMap": {
+        "title": "Your own map",
+        "text": "You hide your own targets and bombs"
+      },
+      "leagues": {
+        "title": "Trophies & leagues",
+        "text": "Bronze to Master, 28-day seasons"
+      }
+    },
+    "offline": "Offline · data from {{time}}",
+    "details": {
+      "title": "Match vs {{name}}",
+      "meta": "{{date}} · {{size}}",
+      "score": "{{me}} : {{opponent}}",
+      "myMap": "My map · {{name}}’s taps",
+      "theirMap": "{{name}}’s map · my taps"
+    }
+  },
+  "season": {
+    "claim": "Claim"
   }
 }

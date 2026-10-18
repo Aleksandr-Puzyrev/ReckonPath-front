@@ -39,4 +39,15 @@ export const sizes = {
   shop: { heroBoard: 112, skeletonCardRatio: 0.7, previewVisual: 200 },
   // The link sheet's badge from design 26.1, decision 0019 (значок листа привязки из дизайна 26.1, решение 0019).
   linkBadge: { size: 96, radius: 30, icon: 44 },
+  // The league emblem (Part 4 §8.1), map previews, season step and history avatar of design 13.1 / 13.6 / 32.4, decision 0031 (эмблема лиги (Часть 4 §8.1), превью карт, ступень трека и аватар истории из дизайна 13.1 / 13.6 / 32.4, решение 0031).
+  arena: {
+    emblem: 64,
+    myMap: 86,
+    switchMap: 64,
+    detailsMap: 150,
+    trackStep: 88,
+    trackIcon: 40,
+    historyAvatar: 40,
+    progress: 8,
+  },
 } as const;

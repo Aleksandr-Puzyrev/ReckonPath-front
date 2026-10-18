@@ -944,10 +944,17 @@ export interface components {
       bombHint: boolean;
       limits: components["schemas"]["FormatLimits"];
     };
+    /** @description A currency amount or an item, as in the Part 7 §5 examples */
+    SeasonReward: {
+      /** @enum {string} */
+      currency?: "coin" | "emerald";
+      amount?: number;
+      item?: string;
+    };
     SeasonStep: {
       step: number;
       rp: number;
-      reward: Record<string, never>;
+      reward: components["schemas"]["SeasonReward"];
       /** @enum {string} */
       state: "claimed" | "available" | "locked";
     };
@@ -1977,7 +1984,7 @@ export interface operations {
           "application/json": {
             /** @description Decision 0029, to agree with the backend */
             duplicate: boolean;
-            reward?: Record<string, never>;
+            reward?: components["schemas"]["SeasonReward"];
             wallet?: components["schemas"]["Wallet"];
             inventoryAdded?: string[];
           };
@@ -2079,6 +2086,9 @@ export const adIntentStatusStatusValues: ReadonlyArray<
 export const adIntentStatusRewardCurrencyValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["AdIntentStatus"]["reward"]["currency"]
 > = ["emerald", "coin"];
+export const seasonRewardCurrencyValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["SeasonReward"]["currency"]
+> = ["coin", "emerald"];
 export const seasonStepStateValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["SeasonStep"]["state"]
 > = ["claimed", "available", "locked"];
