@@ -4,6 +4,8 @@ export { default as BoardEditor } from "./ui/board-editor";
 export type { EditorGesture } from "./ui/board-editor";
 export { default as BoardMapPreview } from "./ui/board-map-preview";
 export { default as BoardPreview } from "./ui/board-preview";
+export { default as BoardRemote } from "./ui/board-remote";
+export type { RemoteTap } from "./model/remote-visuals";
 export { default as BoardTryout } from "./ui/board-tryout";
 export type { BoardTheme } from "./model/board-skin";
 export type { BoardLook } from "./model/use-board-skin";

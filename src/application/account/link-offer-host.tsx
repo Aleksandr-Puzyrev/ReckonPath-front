@@ -42,7 +42,7 @@ const LinkOfferHost = ({ isSuspended }: ILinkOfferHost) => {
         isOpen={offer !== null && segment === TABS_SEGMENT && !isSuspended}
         onSignUp={() => openForm(SIGN_UP_ROUTE)}
         onSignIn={() => openForm(SIGN_IN_ROUTE)}
-        onLater={useAccountStore.getState().closeOffer}
+        onLater={useAccountStore.getState().declineOffer}
       />
       <Toast message={toast} onHide={() => setToast(null)} />
     </>

@@ -38,6 +38,8 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0030 | [`0030-ws-client-and-fake-server.md`](0030-ws-client-and-fake-server.md) | WS client scope (heartbeat, reconnect, clock offset, `seq`, close codes), fake game server opponent and bot, match results recorded in mocks, training and `matchStore` out of task 2 |
 | 0031 | [`0031-arena-home.md`](0031-arena-home.md) | Arena home: design texts, mock season track and claim, inactive buttons of later tasks, no-map and no-history states, map switch sheet, match details route, local lock, league emblem and division progress, offline |
 | 0032 | [`0032-map-editor.md`](0032-map-editor.md) | Map editor: drafts allowed, valid save activates, new maps from the switch sheet, tile conflicts and limits, status texts, bot check, gestures, 30-step history in MMKV, offline, renaming, save errors |
+| 0033 | [`0033-search-and-vs.md`](0033-search-and-vs.md) | Search and VS: tasks 5 and 6 merged, bot after 20 s, no-map dialog, IN_MATCH details proposal, search and stopped states, link sheet before the first match, VS layout, matchStore, search errors |
+| 0034 | [`0034-live-match.md`](0034-live-match.md) | Live match: end overlay until task 7, emote mapping, layout, texts, opponent board from server results, timer and haptics, menu and surrender, connection states, keep-awake, route |
 
 ## Template
 

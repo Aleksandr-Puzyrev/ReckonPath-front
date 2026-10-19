@@ -15,6 +15,7 @@ import {
   isSessionDirty,
   limitsOf,
   NEW_MAP_ID,
+  nextMapNumber,
   paintCell,
   toggleCell,
   toggleFence,
@@ -27,7 +28,6 @@ import { useSaveArenaMap } from "@features/save-arena-map";
 import { useIsOnline } from "@shared/api";
 import { useBoardFx } from "@widgets/board";
 
-import { nextMapNumber } from "./next-map-name";
 import { statusTextOf } from "./status-text";
 import { useBotCheck } from "./use-bot-check";
 
@@ -47,7 +47,6 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
   const [tool, setTool] = useState<EditorTool>("target");
   const [dialog, setDialog] = useState<EditorDialog>(null);
   const [flash, setFlash] = useState({ tool: null as EditorTool | null, key: 0 });
-  const [isLeavingAfterSave, setIsLeavingAfterSave] = useState(false);
   // A new map keeps editing under the id the server gave it (новая карта продолжает редактироваться под id, выданным сервером).
   const [savedNewId, setSavedNewId] = useState<string | null>(null);
   const mapId = savedNewId ?? id;
@@ -86,22 +85,10 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
       useEditorStore.getState().markSaved(savedId);
       setSavedNewId(savedId);
     },
-    onActivated: () => {
-      onToast(t("map.saved"));
-      if (isLeavingAfterSave) leave();
-    },
-    onDraft: () => {
-      onToast(t("map.draft"));
-      if (isLeavingAfterSave) leave();
-    },
-    onMapsLimit: () => {
-      setIsLeavingAfterSave(false);
-      onToast(t("map.mapsLimit"));
-    },
-    onError: (messageKey) => {
-      setIsLeavingAfterSave(false);
-      onToast(t(messageKey));
-    },
+    onActivated: () => onToast(t("map.saved")),
+    onDraft: () => onToast(t("map.draft")),
+    onMapsLimit: () => onToast(t("map.mapsLimit")),
+    onError: (messageKey) => onToast(t(messageKey)),
   });
   const random = useRandomArenaMap({
     onMap: (map) => useEditorStore.getState().apply(map),
@@ -146,12 +133,12 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
     else useEditorStore.getState().strokeTo(result.map);
   };
 
-  const save = () =>
-    saving.save(mapId === NEW_MAP_ID ? null : mapId, {
-      name: session.name,
-      format: format.size,
-      map,
-    });
+  const save = (onFinish?: () => void) =>
+    saving.save(
+      mapId === NEW_MAP_ID ? null : mapId,
+      { name: session.name, format: format.size, map },
+      onFinish,
+    );
 
   return {
     isReady: true as const,
@@ -222,7 +209,7 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
       random.requestRandom(format.size);
     },
     handleCheck: () => check.start(map),
-    handleSave: save,
+    handleSave: () => save(),
     handleBack: () => {
       if (dialog !== null) setDialog(null);
       else if (isDirty) setDialog("exit");
@@ -234,8 +221,7 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
         needInternet();
         return;
       }
-      setIsLeavingAfterSave(true);
-      save();
+      save(leave);
     },
     handleExitDiscard: () => {
       setDialog(null);

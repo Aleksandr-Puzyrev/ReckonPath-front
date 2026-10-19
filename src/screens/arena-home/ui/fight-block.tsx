@@ -10,10 +10,12 @@ import { styles } from "./arena-home-styles";
 interface IFightBlock {
   format: ArenaFormat;
   isOnline: boolean;
+  canFight: boolean;
+  onFight: () => void;
 }
 
-// TODO: start the search (stage 4 task 5) and the async match (task 8)
-const FightBlock = ({ format, isOnline }: IFightBlock) => {
+// TODO: start the async match (stage 4 task 8)
+const FightBlock = ({ format, isOnline, canFight, onFight }: IFightBlock) => {
   const { t } = useTranslation();
 
   return (
@@ -24,9 +26,9 @@ const FightBlock = ({ format, isOnline }: IFightBlock) => {
             testID="arena-fight"
             label={t("arena.fight")}
             size="l"
-            isDisabled
+            isDisabled={!canFight}
             caption={isOnline ? undefined : t("arena.needInternet")}
-            onPress={() => undefined}
+            onPress={onFight}
           />
         </View>
         <Button

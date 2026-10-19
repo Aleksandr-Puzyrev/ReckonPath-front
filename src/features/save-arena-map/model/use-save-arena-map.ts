@@ -12,7 +12,7 @@ import type { ErrorMessageKey } from "@shared/api";
 
 interface SaveCallbacks {
   onSaved: (mapId: string) => void;
-  onActivated: () => void;
+  onActivated: (mapId: string) => void;
   onDraft: () => void;
   onMapsLimit: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
@@ -37,7 +37,7 @@ export const useSaveArenaMap = ({
 
   const activate = useMutation({
     ...activateArenaMapMutationOptions(),
-    onSuccess: onActivated,
+    onSuccess: ({ activeMapId }) => onActivated(activeMapId),
     onError: (error) => {
       if (hasCode(error, "MAP_INVALID")) onDraft();
       else onError(errorMessageKey(error));
@@ -49,10 +49,7 @@ export const useSaveArenaMap = ({
     ...saveArenaMapMutationOptions(),
     onSuccess: (map) => {
       onSaved(map.id);
-      if (map.valid) {
-        activate.mutate(map.id);
-        return;
-      }
+      if (map.valid) return;
       onDraft();
       void refresh();
     },
@@ -62,8 +59,28 @@ export const useSaveArenaMap = ({
     },
   });
 
+  // A follow-up is passed with the call: mutation callbacks keep the closure of the render that started them (продолжение передаётся с вызовом: колбэки мутации хранят замыкание рендера, который их запустил).
+  const run = (id: string | null, input: ArenaMapInput, onFinish?: () => void) =>
+    save.mutate(
+      { id, input },
+      {
+        onSuccess: (map) => {
+          if (!map.valid) {
+            onFinish?.();
+            return;
+          }
+          activate.mutate(map.id, {
+            onSuccess: () => onFinish?.(),
+            onError: (error) => {
+              if (hasCode(error, "MAP_INVALID")) onFinish?.();
+            },
+          });
+        },
+      },
+    );
+
   return {
-    save: (id: string | null, input: ArenaMapInput) => save.mutate({ id, input }),
+    save: run,
     isPending: save.isPending || activate.isPending,
   };
 };

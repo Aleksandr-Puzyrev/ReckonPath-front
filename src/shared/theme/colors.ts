@@ -51,6 +51,10 @@ export const lightColors = {
     diamond: "#4F7EF0",
     master: "#A34CE0",
   },
+  player: {
+    me: "#18D7DF",
+    opponent: "#FF5D9A",
+  },
   rarity: {
     common: "#7F95A4",
     rare: "#2F86F0",
@@ -113,6 +117,10 @@ export const darkColors: ThemeColors = {
     platinum: "#6FE3D4",
     diamond: "#86AEFF",
     master: "#D27BFF",
+  },
+  player: {
+    me: "#18D7DF",
+    opponent: "#FF5D9A",
   },
   rarity: {
     common: "#9FB3C1",

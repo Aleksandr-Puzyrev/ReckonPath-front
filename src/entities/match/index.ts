@@ -12,4 +12,22 @@ export type {
   MatchSummary,
   TapOutcome,
 } from "./model/match-type";
-export type { ClientMessage, ServerMessage } from "@shared/ws";
+export { layoutLevelOf } from "./model/layout-level-of";
+export { matchSession } from "./model/match-session";
+export { useTurnCountdown } from "./model/use-turn-countdown";
+export { useMatchStore } from "./model/match-store";
+export type {
+  Cell,
+  MapLayout,
+  MatchEmote,
+  MatchEnd,
+  MatchEvent,
+  MatchEventKind,
+  MatchFormat,
+  MatchOpponent,
+  MatchPhase,
+  MatchTap,
+  SearchError,
+  Side,
+  TurnSkip,
+} from "./model/match-reducer";

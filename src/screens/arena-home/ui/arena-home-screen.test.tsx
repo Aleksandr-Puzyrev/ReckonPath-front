@@ -4,7 +4,9 @@ import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
 import { CAMPAIGN_LEVELS } from "@entities/level";
+import { matchSession } from "@entities/match";
 import { useProgressStore } from "@entities/progress";
+import { useAccountStore } from "@entities/session";
 import { apiClient } from "@shared/api";
 import { recordMockMatch } from "@shared/api/mocks/mock-arena-profile";
 import { i18n } from "@shared/i18n";
@@ -98,6 +100,8 @@ describe("ArenaHomeScreen", () => {
     await cleanup();
     mockServer.reset();
     useProgressStore.getState().reset();
+    useAccountStore.getState().reset();
+    jest.restoreAllMocks();
     await act(async () => onlineManager.setOnline(true));
   });
 
@@ -118,7 +122,7 @@ describe("ArenaHomeScreen", () => {
     expect(screen.getByText("5×5 · 1 цели · 5 с на ход")).toBeOnTheScreen();
     expect(screen.getByText("0 / 267 → BRONZE II")).toBeOnTheScreen();
     expect(screen.getByText(/^01 · \d+д$/)).toBeOnTheScreen();
-    expect(screen.getByTestId("arena-fight")).toBeDisabled();
+    expect(screen.getByTestId("arena-fight")).toBeEnabled();
   });
 
   test("offers to build a map when there is none and hides the empty history", async () => {
@@ -181,6 +185,35 @@ describe("ArenaHomeScreen", () => {
       pathname: "/arena/map/[id]",
       params: { id },
     });
+  });
+
+  test("offers linking to a guest before the first fight, then searches on «Позже» (ARN-02)", async () => {
+    const search = jest.spyOn(matchSession, "search").mockImplementation(() => undefined);
+    await activate(await saveMap("Fort"));
+    await renderOpenArena();
+    await screen.findByText("Fort · активная");
+
+    await fireEvent.press(screen.getByTestId("arena-fight"));
+    expect(useAccountStore.getState().offer).toBe("arena");
+    expect(search).not.toHaveBeenCalled();
+    await act(async () => useAccountStore.getState().declineOffer());
+
+    expect(search).toHaveBeenCalledWith(5, expect.any(String));
+    expect(mockRouter.push).toHaveBeenLastCalledWith("/arena/search");
+  });
+
+  test("asks to build or draw a map when there is no active one (ARN-03)", async () => {
+    useAccountStore.getState().markSignedIn();
+    const search = jest.spyOn(matchSession, "search").mockImplementation(() => undefined);
+    await renderOpenArena();
+
+    await fireEvent.press(screen.getByTestId("arena-fight"));
+    expect(screen.getByText("Нет карты для боя")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByText("Случайная"));
+
+    await waitFor(() => expect(search).toHaveBeenCalledWith(5, expect.any(String)));
+    const { data } = await apiClient.GET("/arena");
+    expect(data?.activeMapId).toEqual(expect.any(String));
   });
 
   test("claims an available season step and marks it claimed", async () => {

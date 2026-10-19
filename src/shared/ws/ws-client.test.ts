@@ -105,6 +105,17 @@ describe("createWsClient", () => {
     expect(match.sent.at(-1)).toEqual({ t: "match.tap", id: tapId, d: { turn: 1, cell: [4, 2] } });
   });
 
+  test("sends a message queued while connecting once the socket opens", () => {
+    const context = setup();
+    context.client.connect();
+
+    const id = context.client.send("queue.join", { format: 5, mapId: "map_1" });
+    context.last().handlers.onOpen();
+
+    expect(id).not.toBeNull();
+    expect(context.last().sent.map(({ t }) => t)).toEqual(["ping", "queue.join"]);
+  });
+
   test("returns no id when the connection is not open", () => {
     const { client } = setup();
 
@@ -124,6 +135,23 @@ describe("createWsClient", () => {
     expect(first.isClosed).toBe(true);
     await jest.advanceTimersByTimeAsync(600);
     expect(context.sockets).toHaveLength(2);
+  });
+
+  test("reports a match connection going down and back up", async () => {
+    const context = setup();
+    const statuses: boolean[] = [];
+    context.client.onStatus(({ scope, isOpen }) => {
+      if (scope === "match") statuses.push(isOpen);
+    });
+    jest.spyOn(Math, "random").mockReturnValue(0);
+    openMatch(context);
+
+    context.last().handlers.onClose(1006, "");
+    await jest.advanceTimersByTimeAsync(500);
+    context.last().handlers.onOpen();
+
+    expect(statuses).toEqual([true, false, true]);
+    jest.restoreAllMocks();
   });
 
   test("keeps the median clock offset of the last pings", () => {
@@ -169,6 +197,14 @@ describe("createWsClient", () => {
     ]);
     expect(context.last().sent.map(({ t }) => t)).toEqual(["ping", "match.resync"]);
     jest.restoreAllMocks();
+  });
+
+  test("returns to a running match without a ticket", () => {
+    const context = setup();
+
+    context.client.connectMatch(ENDPOINT, null);
+
+    expect(context.last().url).toBe(`${ENDPOINT}?token=access&resume=1`);
   });
 
   test("gives up on a match after 30 s without a connection", async () => {

@@ -213,6 +213,20 @@ describe("ArenaMapScreen", () => {
     expect(useEditorStore.getState().session).toBeNull();
   });
 
+  test("saves on the way out and then leaves", async () => {
+    const id = await saveMap("Fort");
+    await renderEditor(id);
+    await choose("heavy");
+    await tap(20);
+
+    await fireEvent.press(screen.getByTestId("editor-back"));
+    await fireEvent.press(
+      screen.getAllByText("Сохранить").at(-1) ?? screen.getByTestId("editor-back"),
+    );
+
+    await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
+  });
+
   test("leaves at once without changes", async () => {
     await renderEditor();
 

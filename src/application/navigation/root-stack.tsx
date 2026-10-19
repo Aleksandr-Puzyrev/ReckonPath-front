@@ -40,6 +40,14 @@ const RootStack = () => {
           <Stack.Screen name="arena/history/[id]" />
           <Stack.Screen name="arena/map/[id]" options={{ gestureEnabled: false }} />
           <Stack.Screen
+            name="arena/search"
+            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
+          />
+          <Stack.Screen
+            name="arena/match/[id]"
+            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
+          />
+          <Stack.Screen
             name="play/[mode]/[id]"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}
           />

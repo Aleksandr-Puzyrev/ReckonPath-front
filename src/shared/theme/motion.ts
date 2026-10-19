@@ -20,6 +20,9 @@ export const motion = {
     win: 1600,
     starStep: 250,
     lose: 480,
+    // One radar sweep and the pause on «Первым ходит» before the match, design 15.1 / 15.4 (оборот радара и пауза на «Первым ходит» перед матчем, дизайн 15.1 / 15.4).
+    radarTurn: 2600,
+    versusHold: 1200,
   },
   press: { scale: 0.96, offset: 3 },
   toast: { duration: 1500, errorDuration: 3000 },

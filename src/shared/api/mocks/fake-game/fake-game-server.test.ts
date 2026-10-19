@@ -95,7 +95,10 @@ describe("fakeGameServer queue", () => {
 
     joinQueue(entry, mapId, "again");
 
-    expect(entry.last("error")?.d.code).toBe("IN_MATCH");
+    expect(entry.last("error")?.d).toEqual({
+      code: "IN_MATCH",
+      details: { matchId: "match_1", endpoint: expect.stringContaining("/v1/match/match_1") },
+    });
   });
 
   test("answers a ping with the server time", async () => {

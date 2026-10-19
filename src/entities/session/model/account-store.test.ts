@@ -84,12 +84,13 @@ describe("useAccountStore", () => {
       isPurchaseOfferUsed: true,
     };
 
-    expect(migrate?.(saved, 1)).toEqual(saved);
+    expect(migrate?.(saved, 1)).toEqual({ ...saved, isArenaOfferUsed: false });
     expect(migrate?.({ offer: "banner" }, 1)).toEqual({
       hasLogin: false,
       offer: null,
       isLevelOfferUsed: false,
       isPurchaseOfferUsed: false,
+      isArenaOfferUsed: false,
     });
   });
 
@@ -101,6 +102,39 @@ describe("useAccountStore", () => {
       offer: null,
       isLevelOfferUsed: true,
       isPurchaseOfferUsed: false,
+      isArenaOfferUsed: false,
     });
+  });
+});
+
+describe("arena link offer", () => {
+  afterEach(() => useAccountStore.getState().reset());
+
+  test("offers linking once before the first arena match (ARN-02)", () => {
+    expect(useAccountStore.getState().requestArenaOffer()).toBe(true);
+    useAccountStore.getState().declineOffer();
+
+    expect(useAccountStore.getState().requestArenaOffer()).toBe(false);
+  });
+
+  test("reports «Позже» so the search can go on", () => {
+    useAccountStore.getState().requestArenaOffer();
+
+    useAccountStore.getState().declineOffer();
+
+    expect(useAccountStore.getState()).toEqual(
+      expect.objectContaining({ offer: null, declined: { offer: "arena", id: 1 } }),
+    );
+  });
+
+  test("migrates a version 2 state with the arena offer unused", async () => {
+    const { migrate } = useAccountStore.persist.getOptions();
+
+    expect(
+      await migrate?.(
+        { hasLogin: false, offer: null, isLevelOfferUsed: true, isPurchaseOfferUsed: true },
+        2,
+      ),
+    ).toEqual(expect.objectContaining({ isArenaOfferUsed: false }));
   });
 });

@@ -30,6 +30,7 @@ export type {
   ElementCounts,
   LimitedElement,
 } from "./model/map-edit";
+export { nextMapNumber } from "./model/next-map-name";
 export { pvpFormatOf } from "./model/pvp-format-of";
 export type {
   ArenaMap,

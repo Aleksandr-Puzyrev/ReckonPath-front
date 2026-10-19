@@ -21,6 +21,11 @@ type Handler = (message: ServerMessage) => void;
 
 export type WsScope = "entry" | "match";
 
+export interface WsStatus {
+  scope: WsScope;
+  isOpen: boolean;
+}
+
 export interface WsClosed {
   scope: WsScope;
   code: number;
@@ -39,6 +44,7 @@ export type WsClient = ReturnType<typeof createWsClient>;
 export const createWsClient = ({ transport, origin, accessToken, refreshToken }: ClientOptions) => {
   const handlers = new Map<ServerType, Set<Handler>>();
   const closedListeners = new Set<(closed: WsClosed) => void>();
+  const statusListeners = new Set<(status: WsStatus) => void>();
   let offsets: number[] = [];
   let match: WsConnection | null = null;
   let backgroundTimer: ReturnType<typeof setTimeout> | null = null;
@@ -71,6 +77,7 @@ export const createWsClient = ({ transport, origin, accessToken, refreshToken }:
       },
       onClosed: (code, reason) =>
         closedListeners.forEach((listener) => listener({ scope, code, reason })),
+      onStatus: (isOpen) => statusListeners.forEach((listener) => listener({ scope, isOpen })),
     });
 
   const entry = connectionOf("entry", () => {
@@ -87,11 +94,14 @@ export const createWsClient = ({ transport, origin, accessToken, refreshToken }:
 
   return {
     connect: () => entry.open(),
-    connectMatch: (endpoint: string, ticket: string) => {
+    // Without a ticket the player returns to a running match, as after a reconnect (без билета игрок возвращается в идущий матч, как после переподключения).
+    connectMatch: (endpoint: string, ticket: string | null) => {
       match?.close();
       matchEndpoint = endpoint;
       match = connectionOf("match", (isResume) => {
-        if (!isResume) return `${matchEndpoint}?ticket=${encodeURIComponent(ticket)}`;
+        if (!isResume && ticket !== null) {
+          return `${matchEndpoint}?ticket=${encodeURIComponent(ticket)}`;
+        }
         const query = tokenQuery();
         return query === null ? null : `${matchEndpoint}?${query}&resume=1`;
       });
@@ -120,6 +130,12 @@ export const createWsClient = ({ transport, origin, accessToken, refreshToken }:
       closedListeners.add(listener);
       return () => {
         closedListeners.delete(listener);
+      };
+    },
+    onStatus: (listener: (status: WsStatus) => void) => {
+      statusListeners.add(listener);
+      return () => {
+        statusListeners.delete(listener);
       };
     },
     send: <T extends ClientType>(type: T, ...[payload]: PayloadArgs<T>) => {

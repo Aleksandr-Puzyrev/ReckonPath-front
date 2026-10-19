@@ -144,7 +144,15 @@
     "pvp": {
       "win": "Victory",
       "lose": "Defeat",
-      "draw": "Draw"
+      "draw": "Draw",
+      "reason": {
+        "targets_one": "All signals found in {{count}} move",
+        "targets_other": "All signals found in {{count}} moves",
+        "surrender": "Opponent gave up",
+        "afk": "Opponent left",
+        "turnLimit": "Turn limit",
+        "annulled": "Match cancelled, trophies unchanged"
+      }
     }
   },
   "ads": {
@@ -321,6 +329,9 @@
       "retry": "Check again",
       "checking": "Checking…",
       "still": "Still under maintenance"
+    },
+    "banned": {
+      "title": "Access restricted"
     }
   },
   "daily": {
@@ -734,5 +745,83 @@
     "rename": "Map name",
     "newMap": "New map",
     "defaultName": "Map {{n}}"
+  },
+  "search": {
+    "title": "Finding an opponent…",
+    "stopped": "Search stopped",
+    "header": "Finding a rival",
+    "format": "{{size}} · {{league}} · {{count}} targets",
+    "myMap": "Your map",
+    "vsMap": "Play vs a map",
+    "captured": "Signal locked",
+    "capturedText": "No rival in 20 s — playing a training bot",
+    "toMatch": "To match",
+    "stoppedText": "The app was minimised — queue reset",
+    "again": "Search again",
+    "toArena": "To arena",
+    "noMap": {
+      "title": "No map for the fight",
+      "random": "Random map"
+    },
+    "inMatch": {
+      "title": "You’re already in a match",
+      "text": "You can’t search while that match is on. Rejoin it here — progress will sync.",
+      "rejoin": "Rejoin match"
+    }
+  },
+  "vs": {
+    "bot": "Practice opponent",
+    "first": "{{name}} goes first",
+    "firstMe": "You go first",
+    "coin": "Tossing…",
+    "title": "VS"
+  },
+  "match": {
+    "yourTurn": "Your turn",
+    "theirTurn": "Opponent’s turn",
+    "youSkip": "You skip a turn — bomb",
+    "botLabel": "Training opponent",
+    "botTrophies": "Training matches give half trophies",
+    "turnTime": "Turn time: {{sec}} s",
+    "theySkip": "Trap sprung! Go again",
+    "finalTurn": "Final turn!",
+    "theirFinal": "Rival’s final move",
+    "turn": "Turn {{n}} / {{max}}",
+    "found": "signals {{found}}/{{total}}",
+    "myFound": "found {{found}}/{{total}}",
+    "bombs": "× {{count}}",
+    "timeout": "Time’s up — turn skipped ({{n}}/3)",
+    "timeoutWarn": "One more skip and you lose",
+    "reconnecting": "Reconnecting…",
+    "seconds": "{{sec}} s",
+    "oppReconnecting": "Opponent is reconnecting",
+    "surrender": {
+      "action": "Give up",
+      "confirm": "Give up? You’ll lose {{count}} trophies",
+      "cancel": "Keep playing"
+    },
+    "toast": {
+      "myBomb": "Bomb! You skip your next move",
+      "opponentBomb": "Rival hit your bomb — they skip a move",
+      "opponentFound": "A target on your map is found",
+      "finalForMe": "All the rival’s targets are found — your final move",
+      "finalForOpponent": "All found! The rival gets a final move"
+    },
+    "emotes": "Emotes",
+    "flag": "Flag",
+    "menu": "Menu",
+    "mute": "Mute rival emotes",
+    "on": "On",
+    "off": "Off",
+    "emote": {
+      "nice": "Nice!",
+      "wow": "Wow!",
+      "oops": "Oops",
+      "luck": "Good luck",
+      "echo": "GG",
+      "thanks": "Thanks"
+    },
+    "over": "Match over",
+    "trophies": "Trophies: {{delta}}"
   }
 }

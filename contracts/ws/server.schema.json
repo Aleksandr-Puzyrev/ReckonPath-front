@@ -415,6 +415,18 @@
                 "MAP_INVALID",
                 "BANNED"
               ]
+            },
+            "details": {
+              "description": "IN_MATCH: the running match to return to (decision 0033 #4, to agree with the backend)",
+              "type": "object",
+              "properties": {
+                "matchId": {
+                  "type": "string"
+                },
+                "endpoint": {
+                  "type": "string"
+                }
+              }
             }
           },
           "required": ["code"]

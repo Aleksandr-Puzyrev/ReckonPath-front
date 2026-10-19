@@ -50,7 +50,12 @@ const ArenaHomeBody = ({ home, renderMap }: IArenaHomeBody) => {
         </Text>
       )}
       <ArenaHero profile={arena.profile} season={arena.season} now={home.now} />
-      <FightBlock format={arena.format} isOnline={home.isOnline} />
+      <FightBlock
+        format={arena.format}
+        isOnline={home.isOnline}
+        canFight={home.canFight}
+        onFight={home.find.handleFight}
+      />
       <MyMapCard
         map={home.activeMap}
         canSwitch={home.isOnline && home.formatMaps.length > 0}

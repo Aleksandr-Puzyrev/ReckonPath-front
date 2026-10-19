@@ -130,7 +130,11 @@ const refusalOf = (mapId: string) => {
 const joinQueue = (peer: FakePeer, id: string | undefined, mapId: string) => {
   const refusal = refusalOf(mapId);
   if (refusal !== null) {
-    peer.deliver({ t: "error", id, d: { code: refusal } });
+    const details =
+      refusal === "IN_MATCH" && room !== null
+        ? { details: { matchId: room.matchId, endpoint: `${MATCH_ENDPOINT}${room.matchId}` } }
+        : {};
+    peer.deliver({ t: "error", id, d: { code: refusal, ...details } });
     return;
   }
   peer.deliver({ t: "ack", id });

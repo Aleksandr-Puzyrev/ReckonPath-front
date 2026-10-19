@@ -25,6 +25,7 @@ interface ConnectionOptions {
   onPong: (clientSentAt: number, serverTime: number) => void;
   onMoved: (endpoint: string) => void;
   onClosed: (code: number, reason: string) => void;
+  onStatus: (isOpen: boolean) => void;
 }
 
 export type WsConnection = ReturnType<typeof createWsConnection>;
@@ -43,10 +44,23 @@ export const createWsConnection = (options: ConnectionOptions) => {
   let isResyncing = false;
   let isTokenRefreshed = false;
 
+  let outbox: ClientMessage[] = [];
+
+  // Messages sent while (re)connecting wait for the socket instead of getting lost (сообщения, отправленные во время подключения, ждут сокет, а не теряются).
   const send = (message: ClientMessage) => {
-    if (socket === null || !isOpen) return false;
-    socket.send(JSON.stringify(message));
+    if (socket !== null && isOpen) {
+      socket.send(JSON.stringify(message));
+      return true;
+    }
+    if (!isWanted) return false;
+    outbox = [...outbox, message];
     return true;
+  };
+
+  const flush = () => {
+    const waiting = outbox;
+    outbox = [];
+    waiting.forEach(send);
   };
 
   const stopTimers = () => {
@@ -73,6 +87,7 @@ export const createWsConnection = (options: ConnectionOptions) => {
   const beat = () => {
     if (Date.now() - lastPongAt >= PONG_TIMEOUT_MS) {
       dropSocket();
+      options.onStatus(false);
       scheduleReconnect(WS_CLOSE.ABNORMAL, "");
       return;
     }
@@ -121,6 +136,7 @@ export const createWsConnection = (options: ConnectionOptions) => {
   const handleOpen = () => {
     const isResume = hasConnected;
     isOpen = true;
+    options.onStatus(true);
     hasConnected = true;
     attempt = 0;
     droppedAt = null;
@@ -128,6 +144,7 @@ export const createWsConnection = (options: ConnectionOptions) => {
     heartbeat = setInterval(beat, PING_INTERVAL_MS);
     send({ t: "ping", d: { c: Date.now() } });
     isResyncing = isResume && options.isMatch && send({ t: "match.resync" });
+    flush();
   };
 
   const connect = () => {
@@ -184,6 +201,7 @@ export const createWsConnection = (options: ConnectionOptions) => {
     socket = null;
     isOpen = false;
     if (!isWanted) return;
+    options.onStatus(false);
     if (TERMINAL_CODES.has(code)) {
       giveUp(code, reason);
       return;
@@ -208,6 +226,7 @@ export const createWsConnection = (options: ConnectionOptions) => {
     },
     close: () => {
       isWanted = false;
+      outbox = [];
       dropSocket();
     },
     suspend: () => {

@@ -314,6 +314,12 @@ export const errorServerMessageSchema = z.object({
       "MAP_INVALID",
       "BANNED",
     ]),
+    details: z
+      .object({ matchId: z.string().optional(), endpoint: z.string().optional() })
+      .describe(
+        "IN_MATCH: the running match to return to (decision 0033 #4, to agree with the backend)",
+      )
+      .optional(),
   }),
 });
 export type ErrorServerMessage = z.infer<typeof errorServerMessageSchema>;

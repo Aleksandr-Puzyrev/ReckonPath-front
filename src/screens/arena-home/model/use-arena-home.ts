@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { useArenaQuery } from "@entities/arena";
 import { useArenaMapsQuery } from "@entities/arena-map";
-import { useServerMinute } from "@entities/app-config";
+import { useServerMinute, useSystemState } from "@entities/app-config";
 import { useMatchHistoryQuery } from "@entities/match";
 import { useProgressStore } from "@entities/progress";
 import { useActivateArenaMap } from "@features/activate-arena-map";
@@ -12,6 +12,7 @@ import { useIsOnline } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 
 import { isArenaUnlocked, passedTowardsArena } from "./arena-unlock";
+import { useFindMatch } from "./use-find-match";
 
 const HISTORY_ROWS = 5;
 
@@ -29,6 +30,8 @@ export const useArenaHome = (onError: (messageKey: ErrorMessageKey) => void) => 
     onActivated: () => setIsSwitchOpen(false),
     onError,
   });
+  const { state: systemState } = useSystemState();
+  const find = useFindMatch({ arena: arena.data, maps: maps.data ?? [], onError });
   const format = arena.data?.format;
   const formatMaps = (maps.data ?? []).filter(({ format: size }) => size === format?.size);
 
@@ -48,6 +51,8 @@ export const useArenaHome = (onError: (messageKey: ErrorMessageKey) => void) => 
     isSwitchOpen,
     isActivating,
     isEarnOpen,
+    canFight: isOnline && systemState.kind !== "maintenance",
+    find,
     handleRetry: () => void arena.refetch(),
     handleClaim: claim,
     handleSwitchOpen: () => setIsSwitchOpen(true),

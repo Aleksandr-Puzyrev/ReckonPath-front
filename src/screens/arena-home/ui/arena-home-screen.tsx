@@ -17,6 +17,7 @@ import { useArenaHome } from "../model/use-arena-home";
 
 import ArenaHomeBody from "./arena-home-body";
 import ArenaMapPreview from "./arena-map-preview";
+import NoMapDialog from "./no-map-dialog";
 import { styles } from "./arena-home-styles";
 
 const renderMap = (map: ArenaMap, size: number) => (
@@ -54,6 +55,13 @@ const ArenaHomeScreen = () => {
           onDismiss={home.handleSwitchClose}
         />
       )}
+      <NoMapDialog
+        isOpen={home.find.isNoMapOpen}
+        isPending={home.find.isRandomPending}
+        onBuild={home.find.handleBuildMap}
+        onRandom={home.find.handleRandomMap}
+        onClose={home.find.handleNoMapClose}
+      />
       <EarnSheet
         isOpen={home.isEarnOpen}
         shortBy={null}
