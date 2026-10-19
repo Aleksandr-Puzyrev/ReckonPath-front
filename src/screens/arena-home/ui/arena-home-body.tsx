@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { NEW_MAP_ID } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
 import { formatClockTime } from "@shared/lib";
 import { Text } from "@shared/ui/text";
@@ -55,6 +56,8 @@ const ArenaHomeBody = ({ home, renderMap }: IArenaHomeBody) => {
         canSwitch={home.isOnline && home.formatMaps.length > 0}
         renderMap={renderMap}
         onSwitch={home.handleSwitchOpen}
+        onEdit={() => home.handleEditMap(home.activeMap?.id ?? NEW_MAP_ID)}
+        onCreate={() => home.handleEditMap(NEW_MAP_ID)}
       />
       <SeasonTrack
         rp={arena.profile.rp}

@@ -37,6 +37,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0029 | [`0029-arena-contract.md`](0029-arena-contract.md) | `json-schema-to-zod` for WS types, full `match.snapshot` and history details proposals, arena enums and emote ids, map schemas, format-limit mapping, arena and maps mocks |
 | 0030 | [`0030-ws-client-and-fake-server.md`](0030-ws-client-and-fake-server.md) | WS client scope (heartbeat, reconnect, clock offset, `seq`, close codes), fake game server opponent and bot, match results recorded in mocks, training and `matchStore` out of task 2 |
 | 0031 | [`0031-arena-home.md`](0031-arena-home.md) | Arena home: design texts, mock season track and claim, inactive buttons of later tasks, no-map and no-history states, map switch sheet, match details route, local lock, league emblem and division progress, offline |
+| 0032 | [`0032-map-editor.md`](0032-map-editor.md) | Map editor: drafts allowed, valid save activates, new maps from the switch sheet, tile conflicts and limits, status texts, bot check, gestures, 30-step history in MMKV, offline, renaming, save errors |
 
 ## Template
 

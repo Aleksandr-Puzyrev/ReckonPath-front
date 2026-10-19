@@ -1,5 +1,7 @@
 export { default as Board } from "./ui/board";
 export { default as BoardDemo } from "./ui/board-demo";
+export { default as BoardEditor } from "./ui/board-editor";
+export type { EditorGesture } from "./ui/board-editor";
 export { default as BoardMapPreview } from "./ui/board-map-preview";
 export { default as BoardPreview } from "./ui/board-preview";
 export { default as BoardTryout } from "./ui/board-tryout";

@@ -49,5 +49,6 @@ export const sizes = {
     trackIcon: 40,
     historyAvatar: 40,
     progress: 8,
+    coordinates: 16,
   },
 } as const;

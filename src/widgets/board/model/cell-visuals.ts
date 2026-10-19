@@ -9,7 +9,7 @@ export type CellContent =
   | { type: "target"; order: number | null }
   | { type: "bomb" };
 
-export type CellEmphasis = "none" | "dim" | "highlight";
+export type CellEmphasis = "none" | "dim" | "highlight" | "error";
 
 export interface CellVisual {
   content: CellContent;
@@ -27,6 +27,7 @@ interface VisualOptions {
   lastCell: Idx | null;
   showHidden: boolean;
   highlight?: readonly Idx[] | null;
+  errors?: readonly Idx[];
 }
 
 const isProbe = (reveal: Reveal) =>
@@ -63,7 +64,8 @@ const hiddenContent = (game: GameState, idx: Idx, options: VisualOptions): CellC
   ghost: options.showHidden ? ghostOf(game, idx) : null,
 });
 
-const emphasisOf = (idx: Idx, highlight: readonly Idx[] | null | undefined): CellEmphasis => {
+const emphasisOf = (idx: Idx, { highlight, errors }: VisualOptions): CellEmphasis => {
+  if (errors?.includes(idx) === true) return "error";
   if (highlight == null) return "none";
   return highlight.includes(idx) ? "highlight" : "dim";
 };
@@ -73,7 +75,7 @@ export const buildCellVisuals = (game: GameState, options: VisualOptions): CellV
 
   return game.board.kinds.map((_, idx) => {
     const reveal = game.revealed.get(idx);
-    const emphasis = emphasisOf(idx, options.highlight);
+    const emphasis = emphasisOf(idx, options);
     if (reveal === undefined) {
       return {
         content: hiddenContent(game, idx, options),

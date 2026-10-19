@@ -1,4 +1,4 @@
-import { cellOrigin, computeBoardGeometry, hitTest } from "./board-geometry";
+import { cellOrigin, computeBoardGeometry, edgeHitTest, hitTest } from "./board-geometry";
 
 describe("computeBoardGeometry", () => {
   test("follows the design proportions for a 5×5 board", () => {
@@ -45,5 +45,29 @@ describe("hitTest", () => {
   test("ignores points outside the board", () => {
     expect(hitTest(geometry, -1, 10)).toBeNull();
     expect(hitTest(geometry, 10, geometry.height + 1)).toBeNull();
+  });
+});
+
+describe("edgeHitTest", () => {
+  const geometry = computeBoardGeometry(5, 5, 300);
+  const step = geometry.cell + geometry.gap;
+  const boundary = geometry.padding + step - geometry.gap / 2;
+  const middle = geometry.padding + geometry.cell / 2;
+
+  test("finds the vertical edge within 12 pt (Part 1 §5.2)", () => {
+    expect(edgeHitTest(geometry, boundary + 11, middle)).toEqual([0, 1]);
+    expect(edgeHitTest(geometry, boundary - 11, middle + 2 * step)).toEqual([10, 11]);
+  });
+
+  test("finds the horizontal edge within 12 pt", () => {
+    expect(edgeHitTest(geometry, middle + step, boundary + 5)).toEqual([1, 6]);
+  });
+
+  test("ignores a touch farther than 12 pt from any edge", () => {
+    expect(edgeHitTest(geometry, middle, middle)).toBeNull();
+  });
+
+  test("ignores the board's outer border", () => {
+    expect(edgeHitTest(geometry, 2, middle)).toBeNull();
   });
 });

@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 
 import { useArenaQuery } from "@entities/arena";
@@ -52,6 +53,10 @@ export const useArenaHome = (onError: (messageKey: ErrorMessageKey) => void) => 
     handleSwitchOpen: () => setIsSwitchOpen(true),
     handleSwitchClose: () => setIsSwitchOpen(false),
     handleActivate: activate,
+    handleEditMap: (mapId: string) => {
+      setIsSwitchOpen(false);
+      router.push({ pathname: "/arena/map/[id]", params: { id: mapId } });
+    },
     handleWalletPress: () => setIsEarnOpen(true),
     handleEarnClose: () => setIsEarnOpen(false),
   };

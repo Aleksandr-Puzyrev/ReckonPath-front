@@ -669,5 +669,70 @@
   },
   "season": {
     "claim": "Claim"
+  },
+  "map": {
+    "valid": "Map is valid",
+    "validBot_one": "Map is valid · Bot solves in ~{{count}} move",
+    "validBot_other": "Map is valid · Bot solves in ~{{count}} moves",
+    "err": {
+      "isolated": "Tiles {{cells}} are cut off by fences or rocks",
+      "targets": "You need {{count}} signals",
+      "limit": "Limit: {{max}}",
+      "bridge": "Bridges go on streams",
+      "trivial_one": "Too easy: the bot solves it in {{count}} move",
+      "trivial_other": "Too easy: the bot solves it in {{count}} moves"
+    },
+    "refuse": {
+      "targetOnRock": "Targets can’t go on rocks",
+      "bombOnRock": "Bombs can’t go on rocks",
+      "rockOnElement": "Rocks can’t cover a target or a bomb",
+      "bombAndTarget": "A bomb and a target can’t share a tile"
+    },
+    "random": {
+      "confirm": "Replace with a random map?",
+      "message": "The current layout will be replaced. You can undo with ↶.",
+      "replace": "Replace"
+    },
+    "unsaved": "Save changes?",
+    "unsavedMessage": "This map has unsaved changes.",
+    "dontSave": "Don’t save",
+    "tools": {
+      "target": "Target",
+      "fence": "Fence",
+      "stream": "Stream",
+      "heavy": "×2 tile",
+      "rock": "Rock",
+      "bridge": "Bridge",
+      "bomb": "Bomb",
+      "erase": "Erase",
+      "random": "Random"
+    },
+    "hints": {
+      "target": "tap a tile — target",
+      "fence": "tap the edge between tiles",
+      "stream": "tap — stream",
+      "heavy": "tap — ×2 tile",
+      "rock": "tap — rock",
+      "bridge": "streams only",
+      "bomb": "tap — bomb",
+      "erase": "tap — clear tile"
+    },
+    "counter": "{{count}}/{{max}}",
+    "save": "Save",
+    "saveMap": "Save map",
+    "saveDraft": "Save draft",
+    "check": "Check",
+    "clear": "Clear",
+    "undo": "Undo",
+    "redo": "Redo",
+    "saved": "Map saved and active",
+    "draft": "Saved as draft — fix it to make it active",
+    "mapsLimit": "Up to 3 maps per format",
+    "checking": "Bot is solving… move {{n}}",
+    "checked_one": "Bot found {{found}} targets in {{count}} move",
+    "checked_other": "Bot found {{found}} targets in {{count}} moves",
+    "rename": "Map name",
+    "newMap": "New map",
+    "defaultName": "Map {{n}}"
   }
 }

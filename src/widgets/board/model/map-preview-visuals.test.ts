@@ -27,3 +27,23 @@ describe("mapPreviewVisualsOf", () => {
     expect(visuals[12]?.content.type).toBe("target");
   });
 });
+
+describe("mapPreviewVisualsOf errors", () => {
+  test("marks the cells of a map error", () => {
+    const visuals = mapPreviewVisualsOf(
+      {
+        v: 2,
+        id: "u-arena-map",
+        rows: 5,
+        cols: 5,
+        targets: [[2, 2]],
+        probeMode: "distance",
+      },
+      [],
+      [3],
+    );
+
+    expect(visuals[3]?.emphasis).toBe("error");
+    expect(visuals[4]?.emphasis).toBe("none");
+  });
+});

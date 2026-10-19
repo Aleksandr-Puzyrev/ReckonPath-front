@@ -80,3 +80,32 @@ export const hitTest = (geometry: BoardGeometry, x: number, y: number): Idx | nu
     lineIndex(y, geometry.rows, geometry) * geometry.cols + lineIndex(x, geometry.cols, geometry)
   );
 };
+
+// The editor's fence zone reaches this far on either side of an edge (зона забора в редакторе — столько по обе стороны ребра).
+export const EDGE_ZONE = 12;
+
+const nearestBoundary = (offset: number, count: number, geometry: BoardGeometry) => {
+  const step = geometry.cell + geometry.gap;
+  const index = Math.round((offset - geometry.padding + geometry.gap / 2) / step);
+  if (index < 1 || index > count - 1) return null;
+  const position = geometry.padding + index * step - geometry.gap / 2;
+  return { index, distance: Math.abs(offset - position) };
+};
+
+export const edgeHitTest = (geometry: BoardGeometry, x: number, y: number): [Idx, Idx] | null => {
+  if (x < 0 || y < 0 || x > geometry.width || y > geometry.height) return null;
+  const { cols } = geometry;
+  const vertical = nearestBoundary(x, cols, geometry);
+  const horizontal = nearestBoundary(y, geometry.rows, geometry);
+  const isVertical =
+    vertical !== null &&
+    vertical.distance <= EDGE_ZONE &&
+    (horizontal === null || vertical.distance <= horizontal.distance);
+  if (isVertical) {
+    const row = lineIndex(y, geometry.rows, geometry);
+    return [row * cols + vertical.index - 1, row * cols + vertical.index];
+  }
+  if (horizontal === null || horizontal.distance > EDGE_ZONE) return null;
+  const col = lineIndex(x, cols, geometry);
+  return [(horizontal.index - 1) * cols + col, horizontal.index * cols + col];
+};

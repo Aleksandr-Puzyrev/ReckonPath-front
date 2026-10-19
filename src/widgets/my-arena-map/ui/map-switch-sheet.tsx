@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { MAPS_PER_FORMAT } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
 import { Button } from "@shared/ui/button";
 import { Sheet } from "@shared/ui/sheet";
@@ -17,6 +18,8 @@ interface IMapSwitchSheet {
   isDisabled: boolean;
   renderMap: (map: ArenaMap, size: number) => ReactNode;
   onSelect: (id: string) => void;
+  onEdit: () => void;
+  onNewMap: () => void;
   onDismiss: () => void;
 }
 
@@ -27,6 +30,8 @@ const MapSwitchSheet = ({
   isDisabled,
   renderMap,
   onSelect,
+  onEdit,
+  onNewMap,
   onDismiss,
 }: IMapSwitchSheet) => {
   const { t } = useTranslation();
@@ -49,12 +54,19 @@ const MapSwitchSheet = ({
             onSelect={onSelect}
           />
         ))}
-        {/* TODO: open the map editor once it exists (stage 4 task 4) */}
+        {maps.length < MAPS_PER_FORMAT ? (
+          <Button
+            testID="map-new"
+            label={`+ ${t("map.newMap")}`}
+            variant="ghost"
+            onPress={onNewMap}
+          />
+        ) : null}
         <Button
+          testID="map-edit-in-editor"
           label={t("arena.maps.editInEditor")}
           variant="secondary"
-          isDisabled
-          onPress={() => undefined}
+          onPress={onEdit}
         />
       </View>
     </Sheet>

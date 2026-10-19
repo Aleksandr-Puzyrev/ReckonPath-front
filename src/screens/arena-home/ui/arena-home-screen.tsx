@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 
+import { NEW_MAP_ID } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
 import { Screen } from "@shared/ui/screen";
 import { Toast } from "@shared/ui/toast";
@@ -48,6 +49,8 @@ const ArenaHomeScreen = () => {
           isDisabled={!home.isOnline || home.isActivating}
           renderMap={renderMap}
           onSelect={home.handleActivate}
+          onEdit={() => home.handleEditMap(home.activeMap?.id ?? NEW_MAP_ID)}
+          onNewMap={() => home.handleEditMap(NEW_MAP_ID)}
           onDismiss={home.handleSwitchClose}
         />
       )}

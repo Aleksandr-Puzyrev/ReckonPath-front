@@ -26,7 +26,17 @@ jest.mock("@shared/ui/sheet", () => ({
 }));
 jest.mock("@widgets/board", () => ({ BoardMapPreview: () => null }));
 
-const MAP = { rows: 5, cols: 5, targets: [[4, 4]] as [number, number][], bombs: [] };
+const MAP = {
+  rows: 5,
+  cols: 5,
+  targets: [[2, 2]] as [number, number][],
+  bombs: [[0, 0]] as [number, number][],
+  streams: [
+    [1, 2],
+    [2, 1],
+    [3, 2],
+  ] as [number, number][],
+};
 const DRAFT = { ...MAP, targets: [] };
 
 const passLevels = (count: number) =>
@@ -141,6 +151,36 @@ describe("ArenaHomeScreen", () => {
 
     expect(await screen.findByText("Reef · активная")).toBeOnTheScreen();
     await waitFor(() => expect(screen.queryByText("Мои карты")).toBeNull());
+  });
+
+  test("opens the editor for a new map and for the active one (decision 0032 #13)", async () => {
+    await renderOpenArena();
+
+    await fireEvent.press(screen.getByTestId("map-create"));
+    expect(mockRouter.push).toHaveBeenLastCalledWith({
+      pathname: "/arena/map/[id]",
+      params: { id: "new" },
+    });
+  });
+
+  test("offers a new map in the switch sheet while there are fewer than three", async () => {
+    const id = await saveMap("Fort");
+    await activate(id);
+    await renderOpenArena();
+    await screen.findByText("Fort · активная");
+
+    await fireEvent.press(screen.getByTestId("map-switch"));
+    await fireEvent.press(screen.getByTestId("map-new"));
+    expect(mockRouter.push).toHaveBeenLastCalledWith({
+      pathname: "/arena/map/[id]",
+      params: { id: "new" },
+    });
+    await fireEvent.press(screen.getByTestId("map-edit"));
+
+    expect(mockRouter.push).toHaveBeenLastCalledWith({
+      pathname: "/arena/map/[id]",
+      params: { id },
+    });
   });
 
   test("claims an available season step and marks it claimed", async () => {

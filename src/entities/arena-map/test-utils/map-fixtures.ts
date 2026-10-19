@@ -7,21 +7,22 @@ export const BRONZE_FORMAT = 5;
 export const VALID_MAP: PvpMap = {
   rows: 5,
   cols: 5,
-  targets: [[1, 3]],
-  bombs: [[3, 1]],
-  streams: [[2, 2]],
-  fences: [
-    [
-      [0, 0],
-      [0, 1],
-    ],
+  targets: [[2, 2]],
+  bombs: [
+    [0, 0],
+    [4, 4],
+  ],
+  streams: [
+    [1, 2],
+    [2, 1],
+    [3, 2],
   ],
 };
 
 export const TOO_MANY_BOMBS_MAP: PvpMap = {
   ...VALID_MAP,
   bombs: [
-    [3, 1],
+    [0, 0],
     [4, 4],
     [0, 4],
   ],

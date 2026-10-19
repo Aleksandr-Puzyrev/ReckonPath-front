@@ -8,7 +8,20 @@ import { INTRO_MS } from "../match-room";
 type PvpMap = components["schemas"]["PvpMap"];
 type MessageOf<T extends ServerMessage["t"]> = Extract<ServerMessage, { t: T }>;
 
-export const MY_MAP: PvpMap = { rows: 5, cols: 5, targets: [[4, 4]], bombs: [[4, 0]] };
+export const MY_MAP: PvpMap = {
+  rows: 5,
+  cols: 5,
+  targets: [[2, 2]],
+  bombs: [
+    [0, 0],
+    [4, 4],
+  ],
+  streams: [
+    [1, 2],
+    [2, 1],
+    [3, 2],
+  ],
+};
 export const OPPONENT_MAP: PvpMap = { rows: 5, cols: 5, targets: [[2, 2]], bombs: [[0, 0]] };
 export const SEARCH_MS = 20_000;
 

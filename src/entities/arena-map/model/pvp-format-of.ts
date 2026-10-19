@@ -1,6 +1,8 @@
 import type { PvpFormat } from "@reckon-path/engine";
 
-import type { ArenaFormat } from "./arena-type";
+import type { components } from "@shared/api";
+
+type ArenaFormat = components["schemas"]["ArenaFormat"];
 
 export const pvpFormatOf = ({ size, targets, limits }: ArenaFormat): PvpFormat => ({
   size,

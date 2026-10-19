@@ -19,9 +19,10 @@ interface IDialog {
   message?: ReactNode;
   actions: readonly DialogAction[];
   onCancel: () => void;
+  children?: ReactNode;
 }
 
-const Dialog = ({ isOpen, title, message, actions, onCancel }: IDialog) => (
+const Dialog = ({ isOpen, title, message, actions, onCancel, children }: IDialog) => (
   <Modal visible={isOpen} transparent animationType="fade" onRequestClose={onCancel}>
     <View style={styles.backdrop}>
       <View style={styles.card} accessibilityRole="alert">
@@ -33,6 +34,7 @@ const Dialog = ({ isOpen, title, message, actions, onCancel }: IDialog) => (
             {message}
           </Text>
         )}
+        {children}
         <View style={styles.actions}>
           {actions.map((action) => (
             <View key={action.label} style={styles.action}>

@@ -5,6 +5,7 @@ import {
   PVP_SOLVER_BOMB_PENALTY,
   rngFromKey,
   validateLevel,
+  validateLevelNorm,
 } from "@reckon-path/engine";
 import type { Cell, LevelInput, PvpFormat, ValidationError } from "@reckon-path/engine";
 
@@ -74,16 +75,26 @@ const mapErrorOf = (error: ValidationError): MapError => {
   return { code: error.code, cells: [] };
 };
 
-const botNormOf = (level: LevelInput) => {
+const normOf = (level: LevelInput) => {
   const { board, rules } = createBoard(level);
-  return Math.round(computeNorm(board, rules, level.id, PVP_SOLVER_BOMB_PENALTY).norm);
+  return computeNorm(board, rules, level.id, PVP_SOLVER_BOMB_PENALTY);
 };
 
 export const checkMockMap = (format: ArenaFormat, map: PvpMap) => {
   const level = levelOf(map);
-  const errors = validateLevel(level, { kind: "pvp", format: pvpFormatOf(format) }).map(mapErrorOf);
-  const valid = errors.length === 0;
-  return { valid, errors, botNorm: valid ? botNormOf(level) : null };
+  const context = { kind: "pvp" as const, format: pvpFormatOf(format) };
+  const errors = validateLevel(level, context).map(mapErrorOf);
+  if (errors.length > 0) return { valid: false, errors, botNorm: null };
+  const norm = normOf(level);
+  const normErrors = validateLevelNorm(level, context, norm).map(({ code }) => ({
+    code,
+    cells: [],
+  }));
+  return {
+    valid: normErrors.length === 0,
+    errors: normErrors,
+    botNorm: normErrors.length === 0 ? Math.round(norm.norm) : null,
+  };
 };
 
 export const randomMockMap = (format: ArenaFormat) => {

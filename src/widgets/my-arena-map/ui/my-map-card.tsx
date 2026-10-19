@@ -16,9 +16,11 @@ interface IMyMapCard {
   canSwitch: boolean;
   renderMap: (map: ArenaMap, size: number) => ReactNode;
   onSwitch: () => void;
+  onEdit: () => void;
+  onCreate: () => void;
 }
 
-const MyMapCard = ({ map, canSwitch, renderMap, onSwitch }: IMyMapCard) => {
+const MyMapCard = ({ map, canSwitch, renderMap, onSwitch, onEdit, onCreate }: IMyMapCard) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
 
@@ -30,13 +32,12 @@ const MyMapCard = ({ map, canSwitch, renderMap, onSwitch }: IMyMapCard) => {
             {t("arena.myMap")}
           </Text>
           <Text variant="title.s">{t("arena.noMap")}</Text>
-          {/* TODO: open the map editor once it exists (stage 4 task 4) */}
           <Button
+            testID="map-create"
             label={t("arena.createMap")}
             size="s"
             variant="secondary"
-            isDisabled
-            onPress={() => undefined}
+            onPress={onCreate}
           />
         </View>
       </View>
@@ -60,14 +61,13 @@ const MyMapCard = ({ map, canSwitch, renderMap, onSwitch }: IMyMapCard) => {
           {t("arena.defended", { count: map.defended })}
         </Text>
         <View style={styles.actions}>
-          {/* TODO: open the map editor once it exists (stage 4 task 4) */}
           <View style={styles.action}>
             <Button
+              testID="map-edit"
               label={t("arena.edit")}
               size="s"
               variant="secondary"
-              isDisabled
-              onPress={() => undefined}
+              onPress={onEdit}
             />
           </View>
           <View style={styles.action}>

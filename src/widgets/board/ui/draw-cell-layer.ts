@@ -354,6 +354,18 @@ const drawCell = (
   if (visual.emphasis === "dim") {
     canvas.drawRRect(roundRect(x, y, cell, cell, radius), solidPaint(elements.dimTint));
   }
+  if (visual.emphasis === "error") {
+    canvas.drawRRect(
+      roundRect(
+        x - RING_WIDTH,
+        y - RING_WIDTH,
+        cell + 2 * RING_WIDTH,
+        cell + 2 * RING_WIDTH,
+        radius,
+      ),
+      strokePaint(elements.mineBadge, COACH_RING_WIDTH),
+    );
+  }
   if (visual.emphasis === "highlight") {
     canvas.drawRRect(
       roundRect(
