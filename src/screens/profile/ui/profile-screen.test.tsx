@@ -49,7 +49,7 @@ describe("ProfileScreen", () => {
     await renderProfile();
 
     expect(screen.getByText("Уровень 1 · гость")).toBeOnTheScreen();
-    expect(screen.getByText("XP 0 / 100")).toBeOnTheScreen();
+    expect(screen.getByText("XP 0 / 50")).toBeOnTheScreen();
   });
 
   test("leads a guest to the sign-up and sign-in forms (decision 0024 #4)", async () => {

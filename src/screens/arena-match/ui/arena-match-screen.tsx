@@ -13,12 +13,10 @@ import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
 import { BoardMapPreview, BoardRemote } from "@widgets/board";
 
-import { revealedLevelOf } from "../model/revealed-level-of";
 import { useArenaMatch } from "../model/use-arena-match";
 import { useMatchEffects } from "../model/use-match-effects";
 
 import { styles } from "./arena-match-styles";
-import EndOverlay from "./end-overlay";
 import MatchControls from "./match-controls";
 import MatchSheets from "./match-sheets";
 import ReconnectOverlay from "./reconnect-overlay";
@@ -41,6 +39,7 @@ const ArenaMatchScreen = () => {
     emoteId: match.emoteId,
     isMuted: game.isMuted,
     phase: match.phase,
+    matchId: match.matchId,
     onToast: showToast,
   });
   const { handleSurrenderOpen } = game;
@@ -134,28 +133,6 @@ const ArenaMatchScreen = () => {
         ]}
       />
       {match.isReconnecting && !isOver ? <ReconnectOverlay /> : null}
-      {match.end === null || game.layout === null ? null : (
-        <EndOverlay
-          end={match.end}
-          onLeave={game.handleLeave}
-          maps={
-            <>
-              {myMapLevel === null ? null : (
-                <BoardMapPreview
-                  level={myMapLevel}
-                  taps={game.opponentTaps}
-                  size={theme.sizes.arena.detailsMap}
-                />
-              )}
-              <BoardMapPreview
-                level={revealedLevelOf(game.layout, match.end)}
-                taps={game.myTaps.map(({ cell }) => cell)}
-                size={theme.sizes.arena.detailsMap}
-              />
-            </>
-          }
-        />
-      )}
       <Toast message={toast} onHide={() => setToast(null)} />
     </Screen>
   );

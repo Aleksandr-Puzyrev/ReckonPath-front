@@ -11,7 +11,7 @@ const ME: components["schemas"]["Me"] = {
   providers: [],
   level: 1,
   xp: 0,
-  xpToNext: 100,
+  xpToNext: 50,
   wallet: { emeralds: 2640, coins: 18420 },
   arena: { trophies: 0, league: "BRONZE", division: 3, peak: 0, rp: 0, seasonId: 1 },
   loadout: {},

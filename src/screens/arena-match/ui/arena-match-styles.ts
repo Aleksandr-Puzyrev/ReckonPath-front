@@ -122,10 +122,4 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     padding: theme.space[5],
     backgroundColor: theme.colors.bg.base,
   },
-  endMaps: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: theme.space[3],
-  },
 }));

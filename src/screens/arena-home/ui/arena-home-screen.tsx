@@ -10,6 +10,7 @@ import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
 import { leagueLabelOf } from "@widgets/arena-hero";
 import { EarnSheet } from "@widgets/earn-sheet";
+import { NoMapDialog } from "@widgets/find-match";
 import { MapSwitchSheet } from "@widgets/my-arena-map";
 import { TopBar } from "@widgets/top-bar";
 
@@ -17,7 +18,6 @@ import { useArenaHome } from "../model/use-arena-home";
 
 import ArenaHomeBody from "./arena-home-body";
 import ArenaMapPreview from "./arena-map-preview";
-import NoMapDialog from "./no-map-dialog";
 import { styles } from "./arena-home-styles";
 
 const renderMap = (map: ArenaMap, size: number) => (

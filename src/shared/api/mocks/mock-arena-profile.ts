@@ -8,12 +8,14 @@ import {
   TRACK_STEPS,
   trackStep,
   trophyDelta,
+  xpFor,
 } from "@reckon-path/engine";
 import type { MatchKind, MatchOutcome } from "@reckon-path/engine";
 
 import type { components } from "../generated/schema";
 
 import { clearMockState, loadMockState, saveMockState } from "./mock-state";
+import { creditXp } from "./mock-player";
 import { creditCoins, creditEmeralds } from "./mock-wallet";
 
 type ArenaProfile = components["schemas"]["Arena"]["profile"];
@@ -157,6 +159,8 @@ export const recordMockMatch = ({ outcome, kind, opponentTrophies, details }: Ma
   const after = applyTrophies(before, raw, state.seasonFloor);
   const rp = rankPoints(outcome, kind);
   const { rewards, winDay, winsToday } = rewardsOf(outcome, Date.now());
+  const xp = xpFor("match") + (outcome === "win" ? xpFor("matchWin") : 0);
+  creditXp(xp);
   state = {
     trophies: after,
     peak: Math.max(state.peak, after),
@@ -175,6 +179,6 @@ export const recordMockMatch = ({ outcome, kind, opponentTrophies, details }: Ma
     trophies: { before, after, delta: after - before },
     league: { changed: leagueOf(before) !== leagueOf(after) },
     rp,
-    rewards,
+    rewards: [...rewards, { xp }],
   };
 };

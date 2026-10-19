@@ -40,6 +40,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0032 | [`0032-map-editor.md`](0032-map-editor.md) | Map editor: drafts allowed, valid save activates, new maps from the switch sheet, tile conflicts and limits, status texts, bot check, gestures, 30-step history in MMKV, offline, renaming, save errors |
 | 0033 | [`0033-search-and-vs.md`](0033-search-and-vs.md) | Search and VS: tasks 5 and 6 merged, bot after 20 s, no-map dialog, IN_MATCH details proposal, search and stopped states, link sheet before the first match, VS layout, matchStore, search errors |
 | 0034 | [`0034-live-match.md`](0034-live-match.md) | Live match: end overlay until task 7, emote mapping, layout, texts, opponent board from server results, timer and haptics, menu and surrender, connection states, keep-awake, route |
+| 0035 | [`0035-match-result.md`](0035-match-result.md) | Match result: spec rewards with XP, league-change moment only, result screen layout, reason texts, map zoom, buttons, interstitial counting matches, effects, data refresh |
 
 ## Template
 

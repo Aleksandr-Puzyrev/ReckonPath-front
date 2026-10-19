@@ -151,8 +151,17 @@
         "surrender": "Opponent gave up",
         "afk": "Opponent left",
         "turnLimit": "Turn limit",
-        "annulled": "Match cancelled, trophies unchanged"
-      }
+        "annulled": "Match cancelled, trophies unchanged",
+        "draw": "both found all targets — equal-turns rule"
+      },
+      "again": "Fight again",
+      "trophies_one": "{{delta}} trophy",
+      "trophies_other": "{{delta}} trophies",
+      "rp": "+{{n}} RP",
+      "xp": "+{{n}} XP",
+      "amount": "+{{n}}",
+      "myMap": "My map",
+      "theirMap": "{{name}}’s map"
     }
   },
   "ads": {
@@ -823,5 +832,11 @@
     },
     "over": "Match over",
     "trophies": "Trophies: {{delta}}"
+  },
+  "league": {
+    "up": "New league: {{league}}",
+    "down": "You’re in {{league}}",
+    "floor": "You can’t drop below {{league}} this season",
+    "next": "Continue"
   }
 }

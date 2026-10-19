@@ -9,16 +9,11 @@ import { LeagueEmblem } from "@shared/ui/league-emblem";
 import { Text } from "@shared/ui/text";
 
 import { leagueToneOf } from "../model/league-tone";
-import {
-  divisionNumeral,
-  divisionShare,
-  leagueLabelOf,
-  nextDivisionOf,
-  seasonDaysLeft,
-} from "../model/league-progress";
+import { divisionNumeral, leagueLabelOf, seasonDaysLeft } from "../model/league-progress";
 
 import { styles } from "./arena-hero-styles";
 import HeroStat from "./hero-stat";
+import LeagueProgress from "./league-progress";
 
 interface IArenaHero {
   profile: Arena["profile"];
@@ -33,8 +28,6 @@ const ArenaHero = ({ profile, season, now }: IArenaHero) => {
   const { theme } = useUnistyles();
   const { trophies, league, division, divisionMin, divisionMax } = profile;
   const label = leagueLabelOf(league, division);
-  const next = nextDivisionOf(league, division);
-  const share = divisionShare(trophies, divisionMin, divisionMax);
   const tone = leagueToneOf(league);
 
   return (
@@ -62,34 +55,15 @@ const ArenaHero = ({ profile, season, now }: IArenaHero) => {
           })}
         />
       </View>
-      {next === null ? null : (
-        <View style={styles.progress}>
-          <View style={styles.progressTexts}>
-            <Text variant="caption" style={styles.dim}>
-              {label}
-            </Text>
-            <Text variant="caption" style={styles.dim}>
-              {t("arena.progress", {
-                trophies: formatNumber(trophies, i18n.language),
-                max: formatNumber(divisionMax, i18n.language),
-                next,
-              })}
-            </Text>
-          </View>
-          <View
-            style={styles.track}
-            accessibilityRole="progressbar"
-            accessibilityValue={{ min: divisionMin, max: divisionMax, now: trophies }}
-          >
-            <View
-              style={[
-                styles.fill,
-                { width: `${share * 100}%`, backgroundColor: theme.colors.league[tone] },
-              ]}
-            />
-          </View>
-        </View>
-      )}
+      <LeagueProgress
+        trophies={trophies}
+        fromTrophies={trophies}
+        league={league}
+        division={division}
+        min={divisionMin}
+        max={divisionMax}
+        isOnHero
+      />
     </View>
   );
 };

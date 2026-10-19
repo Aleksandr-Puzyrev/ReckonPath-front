@@ -40,6 +40,7 @@ interface EffectsInput {
   emoteId: number;
   isMuted: boolean;
   phase: MatchPhase;
+  matchId: string | null;
   onToast: (text: string) => void;
 }
 
@@ -49,6 +50,7 @@ export const useMatchEffects = ({
   emoteId,
   isMuted,
   phase,
+  matchId,
   onToast,
 }: EffectsInput) => {
   const { t } = useTranslation();
@@ -86,6 +88,12 @@ export const useMatchEffects = ({
   useEffect(() => {
     if (phase === "lost") leaveLost();
   }, [phase]);
+
+  useEffect(() => {
+    if (phase === "ended" && matchId !== null) {
+      router.replace({ pathname: "/arena/result/[id]", params: { id: matchId } });
+    }
+  }, [phase, matchId]);
 
   const isShown = emote !== null && emoteId !== hiddenEmoteId;
   return { bubble: isShown && !(emote.player === "opponent" && isMuted) ? emote : null };

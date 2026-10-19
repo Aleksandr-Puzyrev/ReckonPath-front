@@ -152,6 +152,7 @@ describe("fake match room", () => {
     expect(end?.rewards).toEqual([
       { currency: "coin", amount: 40 },
       { currency: "emerald", amount: 3 },
+      { xp: 10 },
     ]);
     expect(end?.maps.opponent).toEqual({ targets: [[2, 2]], bombs: [[0, 0]] });
     expect((await apiClient.GET("/me")).data?.wallet).toEqual({

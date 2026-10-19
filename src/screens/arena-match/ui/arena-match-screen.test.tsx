@@ -8,7 +8,7 @@ import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import ArenaMatchScreen from "./arena-match-screen";
 
-const mockRouter = { back: jest.fn() };
+const mockRouter = { back: jest.fn(), replace: jest.fn() };
 
 jest.mock("expo-router", () => ({
   get router() {
@@ -85,7 +85,10 @@ const emit = (event: { kind: string; count?: number }) =>
 describe("ArenaMatchScreen", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
 
-  beforeEach(() => mockRouter.back.mockClear());
+  beforeEach(() => {
+    mockRouter.back.mockClear();
+    mockRouter.replace.mockClear();
+  });
 
   afterEach(async () => {
     await cleanup();
@@ -181,29 +184,15 @@ describe("ArenaMatchScreen", () => {
     expect(screen.getByText("Восстанавливаем связь…")).toBeOnTheScreen();
   });
 
-  test("shows the result and leaves for the arena (decision 0034 #1)", async () => {
-    const leave = jest.spyOn(matchSession, "leave").mockImplementation(() => undefined);
-    playing({
-      phase: "ended",
-      end: {
-        result: "win",
-        reason: "surrender",
-        turns: { me: 4, opponent: 4 },
-        maps: { mine: { targets: [], bombs: [] }, opponent: { targets: [[2, 2]], bombs: [] } },
-        trophies: { before: 0, after: 30, delta: 30 },
-        league: { changed: false },
-        rp: 10,
-        rewards: [],
-      },
-    });
+  test("moves on to the result screen when the match ends (decision 0035 #3)", async () => {
+    playing();
     await renderMatch();
 
-    expect(screen.getByText("Победа")).toBeOnTheScreen();
-    expect(screen.getByText("Сдача соперника")).toBeOnTheScreen();
-    expect(screen.getByText("Кубки: +30")).toBeOnTheScreen();
-    await fireEvent.press(screen.getByTestId("match-to-arena"));
+    await act(() => useMatchStore.setState({ phase: "ended" }));
 
-    expect(leave).toHaveBeenCalled();
-    expect(mockRouter.back).toHaveBeenCalled();
+    expect(mockRouter.replace).toHaveBeenCalledWith({
+      pathname: "/arena/result/[id]",
+      params: { id: "m1" },
+    });
   });
 });

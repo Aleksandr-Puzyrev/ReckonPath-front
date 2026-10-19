@@ -33,3 +33,9 @@ Date: 2026-10-18. Asked by: stage 4 task 4 (clarify-task). Answered by: develope
 * `Dialog` takes `children` (the rename field). Undo / redo icons added.
 * Leaving the editor (no changes, «Не сохранять», or after saving from the exit dialog) clears the draft; it survives an app restart. The editor route has no swipe-back; Android back runs the exit flow.
 * `pvpFormatOf` moved to `entities/arena-map`, next to the editor model; `NEW_MAP_ID` lives there too.
+
+## Round 2 (2026-10-19)
+
+| # | Question | Decision | Spec reference |
+| --- | --- | --- | --- |
+| 15 | Screen reader on the editor board | Postponed: finish the arena screens first; the editor board gets the Pressable overlay later. | rule 15 |

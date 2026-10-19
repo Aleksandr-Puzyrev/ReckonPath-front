@@ -34,21 +34,4 @@ export const styles = StyleSheet.create((theme) => ({
   dim: {
     color: theme.colors.text.onAccent,
   },
-  progress: {
-    gap: theme.space[2],
-  },
-  progressTexts: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  track: {
-    height: theme.sizes.arena.progress,
-    borderRadius: theme.radius.full,
-    backgroundColor: theme.colors.bg.overlay,
-    overflow: "hidden",
-  },
-  fill: {
-    height: "100%",
-    borderRadius: theme.radius.full,
-  },
 }));

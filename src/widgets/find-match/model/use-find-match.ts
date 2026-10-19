@@ -15,9 +15,10 @@ interface FindMatchOptions {
   arena: Arena | undefined;
   maps: readonly ArenaMap[];
   onError: (messageKey: ErrorMessageKey) => void;
+  isReplacing: boolean;
 }
 
-export const useFindMatch = ({ arena, maps, onError }: FindMatchOptions) => {
+export const useFindMatch = ({ arena, maps, onError, isReplacing }: FindMatchOptions) => {
   const { t } = useTranslation();
   const [isNoMapOpen, setIsNoMapOpen] = useState(false);
   const format = arena?.format.size ?? 0;
@@ -25,7 +26,8 @@ export const useFindMatch = ({ arena, maps, onError }: FindMatchOptions) => {
 
   const search = (mapId: string) => {
     matchSession.search(format, mapId);
-    router.push("/arena/search");
+    if (isReplacing) router.replace("/arena/search");
+    else router.push("/arena/search");
   };
 
   const begin = () => {

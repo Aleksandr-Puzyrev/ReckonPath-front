@@ -9,10 +9,10 @@ import { useProgressStore } from "@entities/progress";
 import { useActivateArenaMap } from "@features/activate-arena-map";
 import { useClaimSeasonStep } from "@features/claim-season-step";
 import { useIsOnline } from "@shared/api";
+import { useFindMatch } from "@widgets/find-match";
 import type { ErrorMessageKey } from "@shared/api";
 
 import { isArenaUnlocked, passedTowardsArena } from "./arena-unlock";
-import { useFindMatch } from "./use-find-match";
 
 const HISTORY_ROWS = 5;
 
@@ -31,7 +31,12 @@ export const useArenaHome = (onError: (messageKey: ErrorMessageKey) => void) => 
     onError,
   });
   const { state: systemState } = useSystemState();
-  const find = useFindMatch({ arena: arena.data, maps: maps.data ?? [], onError });
+  const find = useFindMatch({
+    arena: arena.data,
+    maps: maps.data ?? [],
+    onError,
+    isReplacing: false,
+  });
   const format = arena.data?.format;
   const formatMaps = (maps.data ?? []).filter(({ format: size }) => size === format?.size);
 

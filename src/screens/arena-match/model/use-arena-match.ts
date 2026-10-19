@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
@@ -99,9 +98,5 @@ export const useArenaMatch = () => {
       matchSession.surrender();
     },
     handleSurrenderClose: () => setIsSurrenderOpen(false),
-    handleLeave: () => {
-      matchSession.leave();
-      router.back();
-    },
   };
 };
