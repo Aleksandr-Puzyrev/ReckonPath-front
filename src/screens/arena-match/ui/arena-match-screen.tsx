@@ -21,6 +21,7 @@ import MatchControls from "./match-controls";
 import MatchSheets from "./match-sheets";
 import ReconnectOverlay from "./reconnect-overlay";
 import TimedPlayerBar from "./timed-player-bar";
+import TrainingHintCard from "./training-hint-card";
 import TurnBanner from "./turn-banner";
 
 const ArenaMatchScreen = () => {
@@ -40,19 +41,22 @@ const ArenaMatchScreen = () => {
     isMuted: game.isMuted,
     phase: match.phase,
     matchId: match.matchId,
+    isTraining: match.isTraining,
     onToast: showToast,
   });
-  const { handleSurrenderOpen } = game;
+  const { handleSurrenderOpen, trainingHint } = game;
   const isOver = match.phase === "ended";
+  const isTraining = match.isTraining;
 
+  // Training cannot be given up, so back does nothing there (тренировку нельзя сдать, поэтому «назад» в ней ничего не делает).
   useEffect(() => {
-    if (isOver) return undefined;
+    if (isOver && !isTraining) return undefined;
     const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-      handleSurrenderOpen();
+      if (!isTraining) handleSurrenderOpen();
       return true;
     });
     return () => subscription.remove();
-  }, [isOver, handleSurrenderOpen]);
+  }, [isOver, isTraining, handleSurrenderOpen]);
 
   const handleLayout = ({ nativeEvent }: LayoutChangeEvent) =>
     setBoardWidth(nativeEvent.layout.width);
@@ -65,8 +69,16 @@ const ArenaMatchScreen = () => {
         <View style={styles.flex}>
           <TimedPlayerBar
             side="opponent"
-            nickname={match.opponent?.nickname ?? ""}
-            status={t("match.found", { found: match.found.opponent, total })}
+            nickname={
+              isTraining
+                ? `${t("training.mentor")} · ${t("training.header").toLocaleUpperCase()}`
+                : (match.opponent?.nickname ?? "")
+            }
+            status={
+              isTraining
+                ? t("training.subtitle")
+                : t("match.found", { found: match.found.opponent, total })
+            }
             isOffline={match.opponentConnection !== "online"}
             bubble={bubble?.player === "opponent" ? t(`match.emote.${bubble.emote}`) : null}
           />
@@ -95,13 +107,20 @@ const ArenaMatchScreen = () => {
           />
         )}
       </View>
-      <Text variant="caption" style={styles.turnLine}>
-        {t("match.turn", { n: match.turn, max: match.format?.maxTurns ?? 0 })}
-      </Text>
+      {trainingHint === null ? (
+        <Text variant="caption" style={styles.turnLine}>
+          {t("match.turn", { n: match.turn, max: match.format?.maxTurns ?? 0 })}
+        </Text>
+      ) : (
+        <TrainingHintCard hint={trainingHint} onNext={game.handleTrainingNext} />
+      )}
       <TimedPlayerBar
         side="me"
         nickname={game.me?.nickname ?? ""}
-        status={`${t("match.myFound", { found: match.found.me, total })} · ${t("match.bombs", { count: match.opponentBombs })}`}
+        status={[
+          t("match.myFound", { found: match.found.me, total }),
+          isTraining ? t("training.noSurrender") : t("match.bombs", { count: match.opponentBombs }),
+        ].join(" · ")}
         isOffline={false}
         bubble={bubble?.player === "me" ? t(`match.emote.${bubble.emote}`) : null}
       />
@@ -116,6 +135,7 @@ const ArenaMatchScreen = () => {
         isMuted={game.isMuted}
         onEmote={game.handleEmote}
         onMuteToggle={game.handleMuteToggle}
+        canSurrender={!isTraining}
         onSurrender={game.handleSurrenderOpen}
         onClose={() => game.handleSheet(null)}
       />

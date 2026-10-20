@@ -22,6 +22,7 @@ export {
   paintCell,
   toggleCell,
   toggleFence,
+  TUTORIAL_MAP_ID,
 } from "./model/map-edit";
 export type {
   CellTool,

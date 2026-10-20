@@ -8,8 +8,10 @@ import type { Cell, MatchState, SearchError } from "./match-reducer";
 interface MatchStore extends MatchState {
   flags: Cell[];
   isReconnecting: boolean;
+  isTraining: boolean;
   receive: (message: ServerMessage) => void;
   startSearch: () => void;
+  startTraining: () => void;
   stopSearch: () => void;
   failSearch: (error: SearchError) => void;
   markLost: () => void;
@@ -22,7 +24,7 @@ interface MatchStore extends MatchState {
 
 const sameCell = ([a, b]: Cell, [c, d]: Cell) => a === c && b === d;
 
-const INITIAL = { ...INITIAL_MATCH, flags: [], isReconnecting: false };
+const INITIAL = { ...INITIAL_MATCH, flags: [], isReconnecting: false, isTraining: false };
 
 export const useMatchStore = create<MatchStore>()((set, get) => ({
   ...INITIAL,
@@ -30,6 +32,8 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
   receive: (message) => set(receiveMatchMessage(get(), message)),
 
   startSearch: () => set({ ...INITIAL, phase: "searching" }),
+
+  startTraining: () => set({ ...INITIAL, phase: "searching", isTraining: true }),
 
   stopSearch: () => set({ phase: "stopped" }),
 

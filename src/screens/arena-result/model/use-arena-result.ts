@@ -1,26 +1,33 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { BackHandler } from "react-native";
 
 import { arenaKeys, useArenaQuery } from "@entities/arena";
 import { useArenaMapsQuery } from "@entities/arena-map";
-import { matchKeys, matchSession, useMatchStore } from "@entities/match";
+import { matchKeys, matchSession, useAsyncMatchStore, useMatchStore } from "@entities/match";
 import { walletKeys } from "@entities/wallet";
 import { useInterstitial } from "@features/show-interstitial";
 import type { ErrorMessageKey } from "@shared/api";
 import { haptic } from "@shared/haptics";
 import { useFindMatch } from "@widgets/find-match";
 
+import { asyncSnapshot } from "./async-snapshot";
+
 export type ZoomedMap = "mine" | "theirs" | null;
 
+const ASYNC_MODE = "async";
+
+const liveSnapshot = () => {
+  const { end, opponent, layout, myTaps, opponentTaps, format } = useMatchStore.getState();
+  return { end, opponent, layout, myTaps, opponentTaps, format, norm: null };
+};
+
 export const useArenaResult = (onError: (messageKey: ErrorMessageKey) => void) => {
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
   const queryClient = useQueryClient();
   // The screen keeps the finished match: «Ещё бой» resets the session before its checks may still need the screen (экран хранит завершённый матч: «Ещё бой» сбрасывает сессию до того, как его проверкам может ещё понадобиться экран).
-  const [match] = useState(() => {
-    const { end, opponent, layout, myTaps, opponentTaps, format } = useMatchStore.getState();
-    return { end, opponent, layout, myTaps, opponentTaps, format };
-  });
+  const [match] = useState(() => (mode === ASYNC_MODE ? asyncSnapshot() : null) ?? liveSnapshot());
   const arena = useArenaQuery();
   const maps = useArenaMapsQuery();
   const interstitial = useInterstitial();
@@ -60,6 +67,7 @@ export const useArenaResult = (onError: (messageKey: ErrorMessageKey) => void) =
       await interstitial.showIfDue();
     }
     matchSession.leave();
+    useAsyncMatchStore.getState().reset();
     next();
     setIsLeaving(false);
   };
@@ -74,7 +82,10 @@ export const useArenaResult = (onError: (messageKey: ErrorMessageKey) => void) =
 
   return {
     ...match,
-    myMap: maps.data?.find(({ id }) => id === arena.data?.activeMapId) ?? null,
+    myMap:
+      match.norm === null
+        ? (maps.data?.find(({ id }) => id === arena.data?.activeMapId) ?? null)
+        : null,
     find,
     zoomed,
     isLeagueMomentOpen,

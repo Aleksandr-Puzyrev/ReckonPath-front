@@ -340,7 +340,18 @@
       "still": "Still under maintenance"
     },
     "banned": {
-      "title": "Access restricted"
+      "title": "Access restricted",
+      "arenaTitle": "Arena access suspended",
+      "body": "Reason: {{reason}}. Until {{date}}",
+      "permanent": "Reason: {{reason}}. Permanently",
+      "id": "ID: {{id}}",
+      "appeal": "Appeal",
+      "toCampaign": "To campaign"
+    },
+    "appeal": {
+      "field": "Describe what happened",
+      "send": "Send",
+      "sent": "Appeal sent"
     }
   },
   "daily": {
@@ -688,7 +699,16 @@
     }
   },
   "season": {
-    "claim": "Claim"
+    "ended": "Season {{n}} ended",
+    "started": "Season {{n}} started",
+    "claim": "Claim",
+    "peak": "Peak: {{league}}",
+    "place": "#{{rank}} worldwide",
+    "wins_one": "{{count}} win",
+    "wins_other": "{{count}} wins",
+    "rewards": "Season rewards",
+    "reset": "Soft trophy reset",
+    "resetRule": "above {{threshold}} → {{threshold}} + half the rest · RP reset"
   },
   "map": {
     "valid": "Map is valid",
@@ -753,7 +773,20 @@
     "checked_other": "Bot found {{found}} targets in {{count}} moves",
     "rename": "Map name",
     "newMap": "New map",
-    "defaultName": "Map {{n}}"
+    "defaultName": "Map {{n}}",
+    "tutorial": {
+      "title": "Your first map",
+      "target": "Pick “Target” and tap a tile — place 1 target",
+      "bomb": "Now pick “Bomb” and hide one",
+      "rock": "Rocks are impassable — no targets or bombs on them.",
+      "shared": "A target and a bomb can’t share a tile.",
+      "targetLimit": "Bronze allows 1 target. Remove it to move it.",
+      "bombLimit": "1 bomb in the tutorial. The Bronze limit is {{max}}.",
+      "subtitle": "Editor tutorial",
+      "stepTarget": "Place 1 target",
+      "stepBomb": "Hide 1 bomb",
+      "streamTarget": "Target on a stream: the last step costs 3 — sneaky!"
+    }
   },
   "search": {
     "title": "Finding an opponent…",
@@ -838,5 +871,65 @@
     "down": "You’re in {{league}}",
     "floor": "You can’t drop below {{league}} this season",
     "next": "Continue"
+  },
+  "async": {
+    "author": "Map author",
+    "norm_one": "Par: {{count}} move",
+    "norm_other": "Par: {{count}} moves",
+    "bomb": "Bomb: +1 move to your total",
+    "reason_one": "You: {{count}} move · Par: {{norm}}",
+    "reason_other": "You: {{count}} moves · Par: {{norm}}",
+    "mapTaps": "{{name}}’s map · your taps",
+    "half": "vs map ×0.5"
+  },
+  "arenaIntro": {
+    "title": "Arena · rules",
+    "count": "{{n}} / {{total}}",
+    "cards": {
+      "turns": {
+        "title": "Take turns",
+        "text": "Each hunts targets on the rival’s map. {{sec}} seconds per move on {{size}} — the timer rings your avatar."
+      },
+      "bomb": {
+        "title": "Bomb = skipped move",
+        "text": "Hit a bomb and you skip your next move — the rival moves twice."
+      },
+      "first": {
+        "title": "First one wins",
+        "text": "Find all targets first to win. If the first mover finishes, the second gets a final move for a draw."
+      }
+    },
+    "next": "Next",
+    "toTraining": "To training",
+    "skip": "I know the rules"
+  },
+  "training": {
+    "mentor": "Mentor",
+    "header": "Training",
+    "subtitle": "easy bot · trophies unchanged",
+    "noSurrender": "no giving up — it’s training",
+    "hint": {
+      "first": {
+        "title": "Tap any tile",
+        "text": "The number shows steps to the mentor’s signal"
+      },
+      "turns": {
+        "title": "Take turns",
+        "text": "The mentor hunts on your map. Tap where the number is smaller."
+      },
+      "bomb": {
+        "title": "Bomb! In a match that skips your move",
+        "text": "Your rival would move twice. The mine icon warns about a bomb next door."
+      },
+      "won": {
+        "title": "Great! That’s how duels are won",
+        "text": "Next — build your own map"
+      },
+      "lost": {
+        "title": "The mentor was quicker",
+        "text": "Next — build your own map"
+      }
+    },
+    "next": "Next"
   }
 }

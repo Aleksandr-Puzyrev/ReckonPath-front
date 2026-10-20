@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useShallow } from "zustand/react/shallow";
@@ -6,7 +7,7 @@ import { toCell, toIdx } from "@reckon-path/engine";
 import type { Idx } from "@reckon-path/engine";
 
 import { useArenaQuery } from "@entities/arena";
-import { useArenaMapsQuery } from "@entities/arena-map";
+import { TUTORIAL_MAP_ID, useArenaMapsQuery } from "@entities/arena-map";
 import { layoutLevelOf, matchSession, useMatchStore } from "@entities/match";
 import type { MatchTap } from "@entities/match";
 import { useMeQuery } from "@entities/wallet";
@@ -15,6 +16,7 @@ import type { RemoteTap } from "@widgets/board";
 
 import { bannerTextOf } from "./banner-text";
 import { surrenderLoss } from "./surrender-loss";
+import { trainingHintOf } from "./training-hint";
 
 export type MatchSheet = "emotes" | "menu" | null;
 
@@ -68,6 +70,7 @@ export const useArenaMatch = () => {
     flags: match.flags.map((cell) => toIdx(size, cell)),
     pendingCell: match.pendingCell === null ? null : toIdx(size, match.pendingCell),
     isDimmed: match.current !== "me",
+    trainingHint: match.isTraining ? trainingHintOf(match.myTaps, match.end) : null,
     banner: bannerTextOf(match.phase, match.current, match.skipped, t),
     surrenderLoss: match.opponent === null ? 0 : surrenderLoss(myTrophies, match.opponent),
     handleCellPress: (idx: Idx) => {
@@ -98,5 +101,9 @@ export const useArenaMatch = () => {
       matchSession.surrender();
     },
     handleSurrenderClose: () => setIsSurrenderOpen(false),
+    handleTrainingNext: () => {
+      matchSession.leave();
+      router.replace({ pathname: "/arena/map/[id]", params: { id: TUTORIAL_MAP_ID } });
+    },
   };
 };

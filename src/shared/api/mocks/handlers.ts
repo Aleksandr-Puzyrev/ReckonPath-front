@@ -6,12 +6,14 @@ import type { components } from "../generated/schema";
 
 import { adsHandlers } from "./ads-handlers";
 import { arenaHandlers } from "./arena-handlers";
+import { asyncHandlers } from "./async-handlers";
 import { arenaMapHandlers } from "./arena-map-handlers";
 import { attemptsHandlers } from "./attempts-handlers";
 import { authHandlers } from "./auth-handlers";
 import { dailyHandlers } from "./daily-handlers";
 import { mockUrl } from "./mock-url";
 import { shopHandlers } from "./shop-handlers";
+import { supportHandlers } from "./support-handlers";
 import { walletHandlers } from "./wallet-handlers";
 
 type Bootstrap = components["schemas"]["Bootstrap"];
@@ -46,4 +48,6 @@ export const handlers = [
   ...adsHandlers,
   ...arenaHandlers,
   ...arenaMapHandlers,
+  ...asyncHandlers,
+  ...supportHandlers,
 ];

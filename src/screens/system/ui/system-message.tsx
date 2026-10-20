@@ -3,10 +3,10 @@ import { View } from "react-native";
 import type { SvgProps } from "react-native-svg";
 
 import { Screen } from "@shared/ui/screen";
+import { SystemIllustration } from "@shared/ui/system-illustration";
+import type { IllustrationTone } from "@shared/ui/system-illustration";
 import { Text } from "@shared/ui/text";
 
-import SystemIllustration from "./system-illustration";
-import type { IllustrationTone } from "./system-illustration";
 import { styles } from "./system-message-styles";
 
 interface ISystemMessage {

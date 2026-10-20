@@ -49,17 +49,19 @@ const MatchDetailsBody = ({ match }: IMatchDetailsBody) => {
         {t("arena.details.score", { me: match.turns.me, opponent: match.turns.opponent })}
       </Text>
       <View style={styles.maps}>
-        <View style={styles.map}>
-          <BoardMapPreview
-            testID="details-my-map"
-            level={levelOfMap(maps.mine)}
-            taps={tapsOnMap(taps, "opponent", maps.mine.cols)}
-            size={size}
-          />
-          <Text variant="caption" style={styles.secondary}>
-            {t("arena.details.myMap", { name })}
-          </Text>
-        </View>
+        {match.mode === "async" ? null : (
+          <View style={styles.map}>
+            <BoardMapPreview
+              testID="details-my-map"
+              level={levelOfMap(maps.mine)}
+              taps={tapsOnMap(taps, "opponent", maps.mine.cols)}
+              size={size}
+            />
+            <Text variant="caption" style={styles.secondary}>
+              {t("arena.details.myMap", { name })}
+            </Text>
+          </View>
+        )}
         <View style={styles.map}>
           <BoardMapPreview
             testID="details-their-map"

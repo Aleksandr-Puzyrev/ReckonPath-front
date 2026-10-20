@@ -148,7 +148,7 @@ describe("apiClient", () => {
     await apiClient.GET("/bootstrap");
     unsubscribe();
 
-    expect(listener).toHaveBeenCalledWith("upgradeRequired");
+    expect(listener).toHaveBeenCalledWith("upgradeRequired", undefined);
   });
 
   test("signals maintenance only on a 503 with the maintenance code", async () => {
@@ -166,7 +166,23 @@ describe("apiClient", () => {
     unsubscribe();
 
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(listener).toHaveBeenCalledWith("maintenance");
+    expect(listener).toHaveBeenCalledWith("maintenance", undefined);
+  });
+
+  test("signals a ban with its details on a 403 with the ban code (decision 0038 #7)", async () => {
+    const listener = jest.fn();
+    const unsubscribe = onSystemSignal(listener);
+    const details = { scope: "all", until: null, reason: "Cheating" };
+    mockServer.use(
+      http.get(mockUrl("/me"), () =>
+        HttpResponse.json({ error: { code: "BANNED", details } }, { status: 403 }),
+      ),
+    );
+
+    await apiClient.GET("/me");
+    unsubscribe();
+
+    expect(listener).toHaveBeenCalledWith("banned", details);
   });
 
   test("fails a request that takes longer than the timeout", async () => {

@@ -60,4 +60,27 @@ describe("MatchDetailsScreen", () => {
     await fireEvent.press(screen.getByTestId("details-back"));
     expect(mockRouter.back).toHaveBeenCalled();
   });
+
+  test("shows only the author's map for an async match (decision 0036 #8)", async () => {
+    recordMockMatch({
+      outcome: "win",
+      kind: "async",
+      opponentTrophies: 0,
+      details: {
+        matchId: "m1",
+        mode: "async",
+        opponent: { id: "a1", nickname: "Milo", league: "BRONZE", isBot: false, label: null },
+        result: "win",
+        reason: "targets",
+        turns: { me: 3, opponent: 4 },
+        endedAt: "2026-10-18T12:00:00Z",
+        maps: { mine: MAP, opponent: MAP },
+        taps: [],
+      },
+    });
+    await render(<MatchDetailsScreen />, { wrapper: createQueryWrapper() });
+
+    expect(await screen.findByTestId("details-their-map")).toBeOnTheScreen();
+    expect(screen.queryByTestId("details-my-map")).toBeNull();
+  });
 });

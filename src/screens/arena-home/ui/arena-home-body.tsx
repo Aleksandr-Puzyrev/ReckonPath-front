@@ -7,6 +7,7 @@ import type { ArenaMap } from "@entities/arena-map";
 import { formatClockTime } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 import { ArenaHero } from "@widgets/arena-hero";
+import { BanNotice } from "@widgets/ban-notice";
 import { MatchHistory } from "@widgets/match-history";
 import { MyMapCard } from "@widgets/my-arena-map";
 import { SeasonTrack } from "@widgets/season-track";
@@ -21,14 +22,24 @@ import FightBlock from "./fight-block";
 interface IArenaHomeBody {
   home: ReturnType<typeof useArenaHome>;
   renderMap: (map: ArenaMap, size: number) => ReactNode;
+  onMessage: (text: string) => void;
 }
 
-const ArenaHomeBody = ({ home, renderMap }: IArenaHomeBody) => {
+const ArenaHomeBody = ({ home, renderMap, onMessage }: IArenaHomeBody) => {
   const { t, i18n } = useTranslation();
   const { arena } = home;
 
   if (!home.isUnlocked) {
     return <ArenaLocked passed={home.passed} onToLevels={() => router.navigate("/levels")} />;
+  }
+  if (home.ban !== null) {
+    return (
+      <BanNotice
+        ban={home.ban}
+        onCampaign={() => router.navigate("/levels")}
+        onMessage={onMessage}
+      />
+    );
   }
   if (arena === undefined) {
     return (
@@ -55,6 +66,7 @@ const ArenaHomeBody = ({ home, renderMap }: IArenaHomeBody) => {
         isOnline={home.isOnline}
         canFight={home.canFight}
         onFight={home.find.handleFight}
+        onAsync={() => home.find.handleAsync()}
       />
       <MyMapCard
         map={home.activeMap}

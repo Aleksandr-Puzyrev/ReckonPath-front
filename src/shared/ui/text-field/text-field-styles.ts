@@ -1,5 +1,7 @@
 import { StyleSheet } from "react-native-unistyles";
 
+const MULTILINE_ROWS = 3;
+
 export const styles = StyleSheet.create((theme) => ({
   field: {
     gap: theme.space[3],
@@ -35,6 +37,14 @@ export const styles = StyleSheet.create((theme) => ({
       },
       hasToggle: {
         true: { paddingRight: theme.sizes.touchTarget * 2 },
+        false: {},
+      },
+      isMultiline: {
+        true: {
+          height: theme.sizes.input.height * MULTILINE_ROWS,
+          paddingVertical: theme.space[4],
+          textAlignVertical: "top",
+        },
         false: {},
       },
     },

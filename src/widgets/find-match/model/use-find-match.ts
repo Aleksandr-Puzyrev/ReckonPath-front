@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -5,10 +6,11 @@ import { useTranslation } from "react-i18next";
 import type { Arena } from "@entities/arena";
 import { nextMapNumber } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
-import { matchSession } from "@entities/match";
+import { matchSession, startAsyncMatchMutationOptions, useAsyncMatchStore } from "@entities/match";
 import { useAccountStore } from "@entities/session";
 import { useRandomArenaMap } from "@features/random-arena-map";
 import { useSaveArenaMap } from "@features/save-arena-map";
+import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 
 interface FindMatchOptions {
@@ -49,6 +51,17 @@ export const useFindMatch = ({ arena, maps, onError, isReplacing }: FindMatchOpt
     onMapsLimit: () => onError("errors.LIMIT_REACHED"),
     onError,
   });
+  const asyncStart = useMutation({
+    ...startAsyncMatchMutationOptions(),
+    onSuccess: (match) => {
+      useAsyncMatchStore.getState().start(match, arena?.profile.trophies ?? 0);
+      const route = { pathname: "/arena/async/[id]", params: { id: match.asyncId } } as const;
+      if (isReplacing) router.replace(route);
+      else router.push(route);
+    },
+    onError: (error) => onError(errorMessageKey(error)),
+  });
+
   const random = useRandomArenaMap({
     onMap: (map) => {
       const nameOf = (n: number) => t("map.defaultName", { n });
@@ -89,5 +102,9 @@ export const useFindMatch = ({ arena, maps, onError, isReplacing }: FindMatchOpt
     },
     handleRandomMap: () => random.requestRandom(format),
     handleNoMapClose: () => setIsNoMapOpen(false),
+    // A follow-up runs only once the async match has started (продолжение выполняется, только когда асинхронный матч стартовал).
+    handleAsync: (onStarted?: () => void) => {
+      if (!asyncStart.isPending) asyncStart.mutate(undefined, { onSuccess: onStarted });
+    },
   };
 };

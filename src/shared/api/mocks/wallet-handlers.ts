@@ -26,7 +26,7 @@ const ME = {
   nickname: "Player4821",
   isGuest: true,
   providers: [],
-  arena: { trophies: 0, league: "BRONZE", division: 3, peak: 0, rp: 0, seasonId: 1 },
+  arena: { trophies: 0, league: "BRONZE", division: 3, peak: 0, rp: 0, seasonId: 2 },
   flags: { nickChangeFreeAvailable: true, nickChangeAvailableAt: null, deletionScheduledAt: null },
   friendCode: "PL4821",
 };

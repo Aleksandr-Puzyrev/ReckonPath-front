@@ -3,7 +3,7 @@ import type {
   MatchEndServerMessage,
 } from "../../../ws/generated/messages";
 import type { components } from "../../generated/schema";
-import { recordMockMatch } from "../mock-arena-profile";
+import { mockTrophies, recordMockMatch } from "../mock-arena-profile";
 
 import type { TapOutcome } from "./match-board";
 import type { createMatchRules, Ending, Side } from "./match-rules";
@@ -16,6 +16,8 @@ export interface MatchSetup {
   opponent: MatchFoundServerMessage["d"]["opponent"];
   myMap: PvpMap;
   opponentMap: PvpMap;
+  isTraining: boolean;
+  isEasy: boolean;
 }
 
 export interface RoomTap {
@@ -37,13 +39,29 @@ const outcomeOf = ({ winner }: MatchEnding) => {
 const hiddenOf = ({ targets, bombs }: PvpMap) => ({ targets, bombs: bombs ?? [] });
 
 export const recordMatchEnd = (
-  { matchId, opponent, myMap, opponentMap }: MatchSetup,
+  setup: MatchSetup,
   rules: ReturnType<typeof createMatchRules>,
   taps: readonly RoomTap[],
   ending: MatchEnding,
 ): MatchEndServerMessage["d"] => {
+  const { matchId, opponent, myMap, opponentMap } = setup;
   const result = outcomeOf(ending);
   const turns = rules.turnsUsed();
+  const maps = { mine: hiddenOf(myMap), opponent: hiddenOf(opponentMap) };
+  // A training match changes neither trophies nor the history (тренировка не меняет ни кубки, ни историю).
+  if (setup.isTraining) {
+    const trophies = mockTrophies();
+    return {
+      result,
+      reason: ending.reason,
+      turns,
+      maps,
+      trophies: { before: trophies, after: trophies, delta: 0 },
+      league: { changed: false },
+      rp: 0,
+      rewards: [],
+    };
+  }
   const extras = recordMockMatch({
     outcome: result,
     kind: opponent.isBot ? "bot" : "ranked",
@@ -76,7 +94,7 @@ export const recordMatchEnd = (
     result,
     reason: ending.reason,
     turns,
-    maps: { mine: hiddenOf(myMap), opponent: hiddenOf(opponentMap) },
+    maps,
     ...extras,
   };
 };

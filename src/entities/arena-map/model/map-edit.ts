@@ -178,6 +178,7 @@ export const toggleFence = (map: PvpMap, format: ArenaFormat, fence: Fence): Edi
 export const MAPS_PER_FORMAT = 3;
 
 export const NEW_MAP_ID = "new";
+export const TUTORIAL_MAP_ID = "tutorial";
 
 export const emptyMap = (size: number): PvpMap => ({ rows: size, cols: size, targets: [] });
 

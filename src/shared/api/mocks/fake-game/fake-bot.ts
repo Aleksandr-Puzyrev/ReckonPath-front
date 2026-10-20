@@ -23,9 +23,10 @@ const MISTAKE_CHANCE: Record<League, number> = {
   master: 0.05,
 };
 
-export const createFakeBot = (game: GameState, trophies: number, rng: Rng) => {
+export const createFakeBot = (game: GameState, trophies: number, rng: Rng, isEasy: boolean) => {
   let solver = createSolver(game, { levelId: "u-arena-match", penalty: PVP_SOLVER_BOMB_PENALTY });
-  const mistakeChance = MISTAKE_CHANCE[leagueOf(trophies)];
+  // The easy bot of the training and the first bot match only guesses (Part 1 §5.12) (лёгкий бот тренировки и первого матча с ботом только угадывает).
+  const mistakeChance = isEasy ? 1 : MISTAKE_CHANCE[leagueOf(trophies)];
 
   return {
     thinkMs: () => (rng() < TIMEOUT_CHANCE ? null : THINK_MIN_MS + rng() * THINK_RANGE_MS),

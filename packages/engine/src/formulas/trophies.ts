@@ -6,7 +6,7 @@ import type { MatchKind, MatchOutcome } from "./match-result";
 
 const DRAW_DIVISOR = 50;
 const DRAW_CAP = 5;
-const SEASON_RESET_THRESHOLD = 2000;
+export const SEASON_RESET_THRESHOLD = 2000;
 const SEASON_RESET_DIVISOR = 2;
 
 export const roundHalfAwayFromZero = (value: number) => {

@@ -9,6 +9,7 @@ import { useArenaMapsQuery } from "@entities/arena-map";
 import { matchSession, useMatchStore } from "@entities/match";
 import type { MatchPhase, SearchError } from "@entities/match";
 import { haptic } from "@shared/haptics";
+import { useFindMatch } from "@widgets/find-match";
 
 const SEARCH_ERROR_TEXTS = {
   MAP_INVALID: "errors.MAP_INVALID",
@@ -48,6 +49,12 @@ export const useArenaSearch = (onToast: (text: string) => void) => {
       }),
     ),
   );
+  const find = useFindMatch({
+    arena: arena.data,
+    maps: maps.data ?? [],
+    onError: (messageKey) => onToast(t(messageKey)),
+    isReplacing: true,
+  });
   const activeMap = maps.data?.find(({ id }) => id === arena.data?.activeMapId) ?? null;
   const isPlaying = TURN_PHASES.has(match.phase);
   const { matchId } = match;
@@ -73,6 +80,8 @@ export const useArenaSearch = (onToast: (text: string) => void) => {
   const failSearch = useEffectEvent((searchError: SearchError | null) => {
     onToast(t(SEARCH_ERROR_TEXTS[searchError ?? "NETWORK"]));
     matchSession.leave();
+    // The arena home shows the ban only after re-reading the arena (главная арены покажет бан, только перечитав арену).
+    if (searchError === "BANNED") void arena.refetch();
     const mapId = arena.data?.activeMapId;
     if (searchError === "MAP_INVALID" && mapId != null) {
       router.replace({ pathname: "/arena/map/[id]", params: { id: mapId } });
@@ -111,5 +120,10 @@ export const useArenaSearch = (onToast: (text: string) => void) => {
       router.replace({ pathname: "/arena/match/[id]", params: { id: runningId } });
     },
     handleToMatch: openMatch,
+    handleVsMap: () =>
+      find.handleAsync(() => {
+        matchSession.cancelSearch();
+        matchSession.leave();
+      }),
   };
 };

@@ -5,7 +5,7 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { styles } from "./system-illustration-styles";
 
-export type IllustrationTone = "accent" | "warning";
+export type IllustrationTone = "accent" | "warning" | "danger";
 
 interface ISystemIllustration {
   tone: IllustrationTone;
@@ -20,7 +20,11 @@ const SystemIllustration = ({ tone, Icon }: ISystemIllustration) => {
     { length: Math.floor(size / 2 / ringGap) },
     (_, index) => (index + 1) * ringGap * 2,
   );
-  const iconColor = tone === "accent" ? theme.colors.accent.cyan : theme.colors.status.warning;
+  const iconColor = {
+    accent: theme.colors.accent.cyan,
+    warning: theme.colors.status.warning,
+    danger: theme.colors.status.danger,
+  }[tone];
 
   return (
     <View style={styles.root} importantForAccessibility="no-hide-descendants">

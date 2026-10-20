@@ -18,6 +18,7 @@ interface IMatchSheets {
   isMuted: boolean;
   onEmote: (emote: Emote) => void;
   onMuteToggle: () => void;
+  canSurrender: boolean;
   onSurrender: () => void;
   onClose: () => void;
 }
@@ -27,6 +28,7 @@ const MatchSheets = ({
   isMuted,
   onEmote,
   onMuteToggle,
+  canSurrender,
   onSurrender,
   onClose,
 }: IMatchSheets) => {
@@ -56,12 +58,14 @@ const MatchSheets = ({
             isOn={isMuted}
             onToggle={onMuteToggle}
           />
-          <Button
-            testID="match-surrender"
-            label={t("match.surrender.action")}
-            variant="danger"
-            onPress={onSurrender}
-          />
+          {canSurrender ? (
+            <Button
+              testID="match-surrender"
+              label={t("match.surrender.action")}
+              variant="danger"
+              onPress={onSurrender}
+            />
+          ) : null}
         </View>
       </Sheet>
     </>

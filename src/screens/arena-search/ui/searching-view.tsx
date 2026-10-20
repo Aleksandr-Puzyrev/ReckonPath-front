@@ -19,6 +19,7 @@ interface ISearchingView {
   activeMap: ArenaMap | null;
   waitedSec: number;
   isAsyncAvailable: boolean;
+  onVsMap: () => void;
   onCancel: () => void;
 }
 
@@ -29,6 +30,7 @@ const SearchingView = ({
   activeMap,
   waitedSec,
   isAsyncAvailable,
+  onVsMap,
   onCancel,
 }: ISearchingView) => {
   const { t } = useTranslation();
@@ -74,13 +76,7 @@ const SearchingView = ({
       )}
       <View style={styles.actions}>
         {isAsyncAvailable ? (
-          // TODO: start the async match (stage 4 task 8)
-          <Button
-            testID="search-vs-map"
-            label={t("search.vsMap")}
-            isDisabled
-            onPress={() => undefined}
-          />
+          <Button testID="search-vs-map" label={t("search.vsMap")} onPress={onVsMap} />
         ) : null}
         <Button
           testID="search-cancel"

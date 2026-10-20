@@ -3,7 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react-native";
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
-import { bootstrapQueryOptions, useBootstrapQuery } from "@entities/app-config";
+import { bootstrapQueryOptions, useBanStore, useBootstrapQuery } from "@entities/app-config";
 import { apiClient } from "@shared/api";
 import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
@@ -40,9 +40,40 @@ const countBootstrapRequests = () => {
   return counter;
 };
 
-afterEach(() => mockServer.reset());
+afterEach(() => {
+  mockServer.reset();
+  useBanStore.getState().reset();
+});
+
+const banWith = (scope: string) =>
+  mockServer.use(
+    http.get(mockUrl("/me"), () =>
+      HttpResponse.json(
+        { error: { code: "BANNED", details: { scope, until: null, reason: "Cheating" } } },
+        { status: 403 },
+      ),
+    ),
+  );
 
 describe("useSystemSignalRefetch", () => {
+  test("keeps a full ban for the ban screen (decision 0038 #7)", async () => {
+    await setup();
+    banWith("all");
+
+    await apiClient.GET("/me");
+
+    expect(useBanStore.getState().ban).toEqual({ scope: "all", until: null, reason: "Cheating" });
+  });
+
+  test("leaves an arena ban to the arena (decision 0038 #6)", async () => {
+    await setup();
+    banWith("arena");
+
+    await apiClient.GET("/me");
+
+    expect(useBanStore.getState().ban).toBeNull();
+  });
+
   test("re-reads the bootstrap after a 426 from another request (NET-03)", async () => {
     const queryClient = await setup();
     const bootstrap = countBootstrapRequests();

@@ -31,3 +31,12 @@ export type {
   Side,
   TurnSkip,
 } from "./model/match-reducer";
+export {
+  startAsyncMatchMutationOptions,
+  surrenderAsyncMatchMutationOptions,
+  tapAsyncMatchMutationOptions,
+} from "./api/async-mutations";
+export { useAsyncMatchStore } from "./model/async-store";
+export type { AsyncTap } from "./model/async-store";
+export { isAsyncFinish } from "./model/async-type";
+export type { AsyncFinish, AsyncMatch, AsyncTapResult } from "./model/async-type";

@@ -12,10 +12,10 @@ interface IFightBlock {
   isOnline: boolean;
   canFight: boolean;
   onFight: () => void;
+  onAsync: () => void;
 }
 
-// TODO: start the async match (stage 4 task 8)
-const FightBlock = ({ format, isOnline, canFight, onFight }: IFightBlock) => {
+const FightBlock = ({ format, isOnline, canFight, onFight, onAsync }: IFightBlock) => {
   const { t } = useTranslation();
 
   return (
@@ -36,8 +36,8 @@ const FightBlock = ({ format, isOnline, canFight, onFight }: IFightBlock) => {
           label={t("arena.async")}
           size="l"
           variant="secondary"
-          isDisabled
-          onPress={() => undefined}
+          isDisabled={!canFight}
+          onPress={onAsync}
         />
       </View>
       <Text variant="body.s" style={styles.secondary}>

@@ -24,6 +24,7 @@ interface ITextField extends Pick<
   | "maxLength"
   | "autoComplete"
   | "keyboardType"
+  | "multiline"
 > {
   label: string;
   error?: string;
@@ -49,7 +50,12 @@ const TextField = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
   const hasError = error !== undefined;
-  styles.useVariants({ isFocused, hasError, hasToggle: secureToggle !== undefined });
+  styles.useVariants({
+    isFocused,
+    hasError,
+    hasToggle: secureToggle !== undefined,
+    isMultiline: input.multiline === true,
+  });
 
   return (
     <View style={styles.field}>

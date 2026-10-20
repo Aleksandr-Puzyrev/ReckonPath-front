@@ -4,6 +4,7 @@ import type { AppStateStatus } from "react-native";
 import { apiClient, setApiSession } from "@shared/api";
 import { fakeGameServer } from "@shared/api/mocks/fake-game/fake-game-server";
 import { mockServer } from "@shared/test-utils/api-mock";
+import { WS_CLOSE } from "@shared/ws";
 
 import { matchSession } from "./match-session";
 import { useMatchStore } from "./match-store";
@@ -75,6 +76,33 @@ describe("matchSession", () => {
       expect.objectContaining({ phase: "myTurn", turn: 1, current: "me", firstPlayer: "me" }),
     );
     expect(state().opponent?.isBot).toBe(false);
+  });
+
+  test("starts the training match against the mentor without a map (decision 0037 #2)", async () => {
+    jest.useFakeTimers();
+    matchSession.training(5);
+    expect(state()).toEqual(expect.objectContaining({ phase: "searching", isTraining: true }));
+
+    await untilMyTurn();
+
+    expect(state()).toEqual(
+      expect.objectContaining({
+        phase: "myTurn",
+        isTraining: true,
+        opponent: expect.objectContaining({ id: "mentor", isBot: true }),
+        format: expect.objectContaining({ turnSec: 10 }),
+      }),
+    );
+  });
+
+  test("fails the search as banned when the server closes the queue with 4003 (decision 0038 #6)", async () => {
+    await startSearch();
+    await jest.advanceTimersByTimeAsync(10);
+
+    fakeGameServer.closeConnections(WS_CLOSE.BANNED);
+    await jest.advanceTimersByTimeAsync(10);
+
+    expect(state()).toEqual(expect.objectContaining({ phase: "idle", searchError: "BANNED" }));
   });
 
   test("sends a tap and records the server's answer (PVP-01)", async () => {

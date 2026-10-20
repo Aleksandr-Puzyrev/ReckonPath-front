@@ -3,7 +3,12 @@ import { useEffect, useState } from "react";
 
 import { SoftUpdateSheet } from "@screens/system";
 import { useInterstitialStore } from "@entities/ad";
-import { isSoftUpdateSnoozed, useSystemNoticeStore, useSystemState } from "@entities/app-config";
+import {
+  isSoftUpdateSnoozed,
+  useBanStore,
+  useSystemNoticeStore,
+  useSystemState,
+} from "@entities/app-config";
 
 import LinkOfferHost from "../account/link-offer-host";
 import AdsConsentHost from "../ads/ads-consent-host";
@@ -26,6 +31,7 @@ const RootStack = () => {
   useEffect(() => {
     useInterstitialStore.getState().markLaunched(launchedAt);
   }, [launchedAt]);
+  const isBanned = useBanStore((ban) => ban.ban !== null);
   const isUpdateRequired = state.kind === "forcedUpdate";
   const isMaintenance = state.kind === "maintenance" && !isMaintenanceDismissed;
   const isSoftUpdateOpen =
@@ -34,11 +40,15 @@ const RootStack = () => {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={!isUpdateRequired && !isMaintenance}>
+        <Stack.Protected guard={!isUpdateRequired && !isMaintenance && !isBanned}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
           <Stack.Screen name="arena/history/[id]" />
           <Stack.Screen name="arena/map/[id]" options={{ gestureEnabled: false }} />
+          <Stack.Screen
+            name="arena/onboarding"
+            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
+          />
           <Stack.Screen
             name="arena/search"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}
@@ -49,6 +59,10 @@ const RootStack = () => {
           />
           <Stack.Screen
             name="arena/result/[id]"
+            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
+          />
+          <Stack.Screen
+            name="arena/async/[id]"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}
           />
           <Stack.Screen
@@ -63,6 +77,9 @@ const RootStack = () => {
         </Stack.Protected>
         <Stack.Protected guard={isMaintenance}>
           <Stack.Screen name="system/maintenance" options={{ gestureEnabled: false }} />
+        </Stack.Protected>
+        <Stack.Protected guard={isBanned && !isUpdateRequired && !isMaintenance}>
+          <Stack.Screen name="system/banned" options={{ gestureEnabled: false }} />
         </Stack.Protected>
       </Stack>
       {state.kind === "softUpdate" ? (

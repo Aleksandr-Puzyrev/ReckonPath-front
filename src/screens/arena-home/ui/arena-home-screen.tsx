@@ -18,6 +18,7 @@ import { useArenaHome } from "../model/use-arena-home";
 
 import ArenaHomeBody from "./arena-home-body";
 import ArenaMapPreview from "./arena-map-preview";
+import SeasonSummary from "./season-summary";
 import { styles } from "./arena-home-styles";
 
 const renderMap = (map: ArenaMap, size: number) => (
@@ -37,7 +38,7 @@ const ArenaHomeScreen = () => {
         <TopBar onWalletPress={home.handleWalletPress} />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
-        <ArenaHomeBody home={home} renderMap={renderMap} />
+        <ArenaHomeBody home={home} renderMap={renderMap} onMessage={showToast} />
       </ScrollView>
       {arena === undefined ? null : (
         <MapSwitchSheet
@@ -72,6 +73,13 @@ const ArenaHomeScreen = () => {
         onMessage={(messageKey) => showToast(t(messageKey))}
         onClose={home.handleEarnClose}
       />
+      {home.seasonSummary === null || arena === undefined ? null : (
+        <SeasonSummary
+          summary={home.seasonSummary}
+          nextSeasonId={arena.season.id}
+          onError={(messageKey) => showToast(t(messageKey))}
+        />
+      )}
       <Toast message={toast} onHide={() => setToast(null)} />
     </Screen>
   );

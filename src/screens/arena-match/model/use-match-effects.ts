@@ -41,6 +41,7 @@ interface EffectsInput {
   isMuted: boolean;
   phase: MatchPhase;
   matchId: string | null;
+  isTraining: boolean;
   onToast: (text: string) => void;
 }
 
@@ -51,6 +52,7 @@ export const useMatchEffects = ({
   isMuted,
   phase,
   matchId,
+  isTraining,
   onToast,
 }: EffectsInput) => {
   const { t } = useTranslation();
@@ -82,7 +84,8 @@ export const useMatchEffects = ({
   const leaveLost = useEffectEvent(() => {
     onToast(t("errors.NETWORK"));
     matchSession.leave();
-    router.back();
+    if (isTraining) router.replace("/arena/onboarding");
+    else router.back();
   });
 
   useEffect(() => {
@@ -90,10 +93,10 @@ export const useMatchEffects = ({
   }, [phase]);
 
   useEffect(() => {
-    if (phase === "ended" && matchId !== null) {
+    if (phase === "ended" && matchId !== null && !isTraining) {
       router.replace({ pathname: "/arena/result/[id]", params: { id: matchId } });
     }
-  }, [phase, matchId]);
+  }, [phase, matchId, isTraining]);
 
   const isShown = emote !== null && emoteId !== hiddenEmoteId;
   return { bubble: isShown && !(emote.player === "opponent" && isMuted) ? emote : null };

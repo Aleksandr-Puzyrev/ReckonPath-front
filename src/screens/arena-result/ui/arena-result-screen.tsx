@@ -57,7 +57,11 @@ const ArenaResultScreen = () => {
   const theirTaps = view.myTaps.map(({ cell }) => toIdx(size, cell));
   const myTaps = view.opponentTaps.map(({ cell }) => toIdx(size, cell));
   const after = divisionStateOf(end.trophies.after);
-  const reason = resultReasonOf(end, t);
+  const isAsync = view.norm !== null;
+  const reason = isAsync
+    ? t("async.reason", { count: end.turns.me, norm: view.norm })
+    : resultReasonOf(end, t);
+  const note = isAsync ? t("async.half") : t("match.botTrophies");
 
   return (
     <Screen style={styles.screen}>
@@ -75,7 +79,11 @@ const ArenaResultScreen = () => {
           theirLevel={theirLevel}
           myTaps={myTaps}
           theirTaps={theirTaps}
-          opponentName={opponent.nickname}
+          theirLabel={
+            isAsync
+              ? t("async.mapTaps", { name: opponent.nickname })
+              : t("result.pvp.theirMap", { name: opponent.nickname })
+          }
           zoomed={view.zoomed}
           onZoom={view.handleZoom}
         />
@@ -95,9 +103,9 @@ const ArenaResultScreen = () => {
           isOnHero={false}
         />
         <RewardRow rewards={rewardsOf(end)} />
-        {opponent.isBot ? (
+        {opponent.isBot || isAsync ? (
           <Text variant="caption" style={[styles.secondary, styles.centered]}>
-            {t("match.botTrophies")}
+            {note}
           </Text>
         ) : null}
         <Button testID="result-again" label={t("result.pvp.again")} onPress={view.handleAgain} />

@@ -11,6 +11,7 @@ import type { components } from "../../generated/schema";
 
 import { BOT_NICKNAMES, PLAYER_NICKNAMES } from "./fake-nicknames";
 import { createMatchRoom } from "./match-room";
+import { TRAINING_MENTOR_MAP, TRAINING_PLAYER_MAP } from "./training-maps";
 import type { Side } from "./match-rules";
 import type { MatchRoom } from "./match-room";
 
@@ -19,6 +20,7 @@ type PvpMap = components["schemas"]["PvpMap"];
 export const FAKE_WS_ORIGIN = "wss://game.mock.reckon-path.local";
 const MATCH_ENDPOINT = "wss://game-1.mock.reckon-path.local/v1/match/";
 const MAX_TURNS = 40;
+const TRAINING_TURN_SEC = 10;
 const STATUS_INTERVAL_MS = 1000;
 const FOUND_MIN_MS = 3000;
 const FOUND_RANGE_MS = 5000;
@@ -52,6 +54,7 @@ const DEFAULT_OPTIONS: FakeGameOptions = { hasOpponent: true, opponentMap: null,
 
 let options = DEFAULT_OPTIONS;
 let matchCount = 0;
+let botMatches = 0;
 let queue: Queue | null = null;
 let room: MatchRoom | null = null;
 let peers = new Set<FakePeer>();
@@ -97,7 +100,10 @@ const findMatch = (current: Queue, isBot: boolean) => {
     opponent: opponentOf(rng, isBot, rangeOf(waitedSec(current.joinedAt))),
     myMap: myMap.map,
     opponentMap,
+    isTraining: false,
+    isEasy: isBot && botMatches === 0,
   };
+  if (isBot) botMatches += 1;
   room?.dispose();
   room = createMatchRoom(setup, rng, options.first);
   current.peer.deliver({
@@ -125,6 +131,45 @@ const refusalOf = (mapId: string) => {
   if (queue !== null) return "ALREADY_QUEUED";
   const map = mockArenaMap(mapId);
   return map?.valid === true && map.format === ARENA_FORMAT.size ? null : "MAP_INVALID";
+};
+
+const startTraining = (peer: FakePeer, id: string | undefined) => {
+  if (room !== null && !room.isOver()) {
+    peer.deliver({ t: "error", id, d: { code: "IN_MATCH" } });
+    return;
+  }
+  peer.deliver({ t: "ack", id });
+  matchCount += 1;
+  const matchId = `match_${matchCount}`;
+  const { size, targets, bombHint } = ARENA_FORMAT;
+  const setup = {
+    matchId,
+    format: { size, targets, turnSec: TRAINING_TURN_SEC, bombHint, maxTurns: MAX_TURNS },
+    opponent: {
+      id: "mentor",
+      nickname: "Mentor",
+      league: mockLeague(0),
+      trophies: 0,
+      isBot: true,
+      label: "training",
+    },
+    myMap: TRAINING_PLAYER_MAP,
+    opponentMap: TRAINING_MENTOR_MAP,
+    isTraining: true,
+    isEasy: true,
+  };
+  room?.dispose();
+  room = createMatchRoom(setup, rngFromKey(`fake-training-${matchCount}`), "me");
+  peer.deliver({
+    t: "match.found",
+    d: {
+      matchId,
+      endpoint: `${MATCH_ENDPOINT}${matchId}`,
+      ticket: `ticket_${matchCount}`,
+      opponent: setup.opponent,
+      format: setup.format,
+    },
+  });
 };
 
 const joinQueue = (peer: FakePeer, id: string | undefined, mapId: string) => {
@@ -156,7 +201,10 @@ const pong = (peer: FakePeer, c: number) => peer.deliver({ t: "pong", d: { c, s:
 
 const handleEntry = (peer: FakePeer, message: ClientMessage) => {
   if (message.t === "ping") pong(peer, message.d.c);
-  if (message.t === "queue.join") joinQueue(peer, message.id, message.d.mapId);
+  if (message.t === "queue.join") {
+    if (message.d.mode === "training") startTraining(peer, message.id);
+    else joinQueue(peer, message.id, message.d.mapId ?? "");
+  }
   if (message.t !== "queue.leave") return;
   if (queue?.peer === peer) stopQueue();
   peer.deliver({ t: "ack", id: message.id });
@@ -217,5 +265,6 @@ export const fakeGameServer = {
     peers = new Set();
     options = DEFAULT_OPTIONS;
     matchCount = 0;
+    botMatches = 0;
   },
 };

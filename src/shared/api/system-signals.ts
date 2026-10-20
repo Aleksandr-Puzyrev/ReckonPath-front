@@ -1,6 +1,6 @@
-export type SystemSignal = "upgradeRequired" | "maintenance";
+export type SystemSignal = "upgradeRequired" | "maintenance" | "banned";
 
-type SystemSignalListener = (signal: SystemSignal) => void;
+type SystemSignalListener = (signal: SystemSignal, details: unknown) => void;
 
 const listeners = new Set<SystemSignalListener>();
 
@@ -11,6 +11,6 @@ export const onSystemSignal = (listener: SystemSignalListener) => {
   };
 };
 
-export const emitSystemSignal = (signal: SystemSignal) => {
-  listeners.forEach((listener) => listener(signal));
+export const emitSystemSignal = (signal: SystemSignal, details: unknown = undefined) => {
+  listeners.forEach((listener) => listener(signal, details));
 };

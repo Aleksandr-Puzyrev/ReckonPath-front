@@ -22,6 +22,7 @@ type ArenaProfile = components["schemas"]["Arena"]["profile"];
 type MatchDetails = components["schemas"]["MatchDetails"];
 type SeasonStep = components["schemas"]["SeasonStep"];
 type SeasonReward = components["schemas"]["SeasonReward"];
+type SeasonSummary = components["schemas"]["SeasonSummary"];
 
 const STATE_NAME = "arena-profile";
 const DAY_MS = 86_400_000;
@@ -38,6 +39,21 @@ const TRACK_REWARDS: readonly SeasonReward[] = [
   { currency: "emerald", amount: 20 },
 ];
 
+// The design 18.3 summary of the season before the mock one, without the season frame the mock catalog lacks (итог прошлого сезона из дизайна 18.3, без сезонной рамки, которой нет в каталоге мока).
+const LAST_SEASON: Omit<SeasonSummary, "claimed"> = {
+  seasonId: 1,
+  peakLeague: "GOLD",
+  peakDivision: 1,
+  rank: 312,
+  wins: 64,
+  rewards: [
+    { currency: "coin", amount: 1500 },
+    { currency: "emerald", amount: 60 },
+  ],
+  trophiesBefore: 3120,
+  trophiesAfter: 2560,
+};
+
 interface ArenaProfileState {
   trophies: number;
   peak: number;
@@ -50,6 +66,8 @@ interface ArenaProfileState {
   winsToday: number;
   history: MatchDetails[];
   claimedSteps: number[];
+  onboardingDone: boolean;
+  isLastSeasonClaimed: boolean;
 }
 
 const START_STATE: ArenaProfileState = {
@@ -64,6 +82,8 @@ const START_STATE: ArenaProfileState = {
   winsToday: 0,
   history: [],
   claimedSteps: [],
+  onboardingDone: false,
+  isLastSeasonClaimed: false,
 };
 
 // Fields added later get their start values in a state saved before them (поля, добавленные позже, получают начальные значения в состоянии, сохранённом до них).
@@ -108,6 +128,29 @@ export const mockArenaProfile = (): ArenaProfile => ({
 
 export const mockMatchHistory = () => state.history;
 
+export const mockOnboardingDone = () => state.onboardingDone;
+
+export const completeMockOnboarding = () => {
+  state = { ...state, onboardingDone: true };
+  saveMockState(STATE_NAME, state);
+};
+
+export const mockLastSeason = (): SeasonSummary | null =>
+  state.isLastSeasonClaimed ? null : { ...LAST_SEASON, claimed: false };
+
+const creditReward = ({ currency, amount = 0 }: SeasonReward) => {
+  if (currency === "coin") creditCoins(amount);
+  if (currency === "emerald") creditEmeralds(amount);
+};
+
+export const claimMockLastSeason = () => {
+  if (state.isLastSeasonClaimed) return { duplicate: true, rewards: LAST_SEASON.rewards };
+  LAST_SEASON.rewards.forEach(creditReward);
+  state = { ...state, isLastSeasonClaimed: true };
+  saveMockState(STATE_NAME, state);
+  return { duplicate: false, rewards: LAST_SEASON.rewards };
+};
+
 const rewardOf = (step: number) => TRACK_REWARDS[(step - 1) % TRACK_REWARDS.length] ?? {};
 
 const stepStateOf = (step: number): SeasonStep["state"] => {
@@ -126,8 +169,7 @@ export const claimMockStep = (step: number) => {
   if (stepState === "locked") return null;
   const reward = rewardOf(step);
   if (stepState === "claimed") return { duplicate: true, reward };
-  if (reward.currency === "coin") creditCoins(reward.amount ?? 0);
-  if (reward.currency === "emerald") creditEmeralds(reward.amount ?? 0);
+  creditReward(reward);
   state = { ...state, claimedSteps: [...state.claimedSteps, step] };
   saveMockState(STATE_NAME, state);
   return { duplicate: false, reward, inventoryAdded: [] };
@@ -140,7 +182,18 @@ interface MatchRecord {
   details: Omit<MatchDetails, "trophiesDelta">;
 }
 
-const rewardsOf = (outcome: MatchOutcome, now: number) => {
+const ASYNC_WIN_COINS = WIN_COINS / 2;
+
+// An async win pays half the coins and no first-win emeralds (decision 0036 #2) (асинхронная победа даёт половину монет и без изумрудов за первые победы).
+const asyncRewardsOf = (outcome: MatchOutcome) => {
+  const unchanged = { winDay: state.winDay, winsToday: state.winsToday };
+  if (outcome !== "win") return { rewards: [], ...unchanged };
+  creditCoins(ASYNC_WIN_COINS);
+  return { rewards: [{ currency: "coin", amount: ASYNC_WIN_COINS }], ...unchanged };
+};
+
+const rewardsOf = (outcome: MatchOutcome, kind: MatchKind, now: number) => {
+  if (kind === "async") return asyncRewardsOf(outcome);
   if (outcome !== "win") return { rewards: [], winDay: state.winDay, winsToday: state.winsToday };
   const day = Math.floor(now / DAY_MS);
   const winsBefore = day === state.winDay ? state.winsToday : 0;
@@ -158,10 +211,11 @@ export const recordMockMatch = ({ outcome, kind, opponentTrophies, details }: Ma
   const raw = trophyDelta({ myTrophies: before, opponentTrophies, outcome, kind });
   const after = applyTrophies(before, raw, state.seasonFloor);
   const rp = rankPoints(outcome, kind);
-  const { rewards, winDay, winsToday } = rewardsOf(outcome, Date.now());
+  const { rewards, winDay, winsToday } = rewardsOf(outcome, kind, Date.now());
   const xp = xpFor("match") + (outcome === "win" ? xpFor("matchWin") : 0);
   creditXp(xp);
   state = {
+    ...state,
     trophies: after,
     peak: Math.max(state.peak, after),
     seasonFloor: Math.max(state.seasonFloor, rangeOf(after).min),
@@ -172,7 +226,6 @@ export const recordMockMatch = ({ outcome, kind, opponentTrophies, details }: Ma
     winDay,
     winsToday,
     history: [{ ...details, trophiesDelta: after - before }, ...state.history],
-    claimedSteps: state.claimedSteps,
   };
   saveMockState(STATE_NAME, state);
   return {

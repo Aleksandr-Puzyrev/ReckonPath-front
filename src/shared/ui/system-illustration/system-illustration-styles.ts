@@ -18,6 +18,7 @@ export const styles = StyleSheet.create((theme) => {
         tone: {
           accent: { borderColor: theme.colors.accent.cyan },
           warning: { borderColor: theme.colors.status.warning },
+          danger: { borderColor: theme.colors.status.danger },
         },
       },
     },
@@ -34,6 +35,7 @@ export const styles = StyleSheet.create((theme) => {
         tone: {
           accent: { borderColor: theme.colors.accent.cyan },
           warning: { borderColor: theme.colors.status.warning },
+          danger: { borderColor: theme.colors.status.danger },
         },
       },
     },
@@ -44,6 +46,7 @@ export const styles = StyleSheet.create((theme) => {
         tone: {
           accent: { backgroundColor: theme.colors.accent.cyan },
           warning: { backgroundColor: theme.colors.status.warning },
+          danger: { backgroundColor: theme.colors.status.danger },
         },
       },
     },

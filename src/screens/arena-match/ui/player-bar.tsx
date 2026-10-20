@@ -3,11 +3,11 @@ import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@shared/ui/text";
+import { TimerRing } from "@shared/ui/timer-ring";
 
 import WifiOffIcon from "@assets/icons/arena/wifi-off.svg";
 
 import { styles } from "./arena-match-styles";
-import TimerRing from "./timer-ring";
 
 interface IPlayerBar {
   side: "me" | "opponent";

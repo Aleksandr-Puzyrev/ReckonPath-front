@@ -35,7 +35,7 @@ export const createMatchRoom = (setup: MatchSetup, rng: Rng, first: Side | null)
     me: createMatchBoard(opponentMap, format.bombHint),
     opponent: createMatchBoard(myMap, format.bombHint),
   };
-  const bot = createFakeBot(boards.opponent, mockTrophies(), rng);
+  const bot = createFakeBot(boards.opponent, mockTrophies(), rng, setup.isEasy);
   const taps: RoomTap[] = [];
   let sink: Sink | null = null;
   let seq = 0;

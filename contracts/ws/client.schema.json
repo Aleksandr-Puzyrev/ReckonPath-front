@@ -20,9 +20,13 @@
             },
             "mapId": {
               "type": "string"
+            },
+            "mode": {
+              "enum": ["ranked", "training"],
+              "description": "training: the onboarding match against the mentor, without a map (decision 0037 #2, to agree with the backend)"
             }
           },
-          "required": ["format", "mapId"]
+          "required": ["format"]
         }
       },
       "required": ["t", "d"]

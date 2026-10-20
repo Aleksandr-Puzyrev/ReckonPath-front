@@ -599,6 +599,22 @@ paths:
                   botNorm: { type: integer }
         default: { $ref: "#/components/responses/Error" }
 
+  /arena/onboarding:
+    post:
+      operationId: completeArenaOnboarding
+      description: Marks the arena onboarding as done (decision 0037 #1, to agree with the backend).
+      responses:
+        "200":
+          description: The new flag
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [onboardingDone]
+                properties:
+                  onboardingDone: { type: boolean }
+        default: { $ref: "#/components/responses/Error" }
+
   /arena/async:
     post:
       operationId: startAsyncMatch
@@ -608,6 +624,20 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AsyncMatch" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/async/{id}/surrender:
+    post:
+      operationId: surrenderAsyncMatch
+      description: Ends the async match as a loss (decision 0036 #1, to agree with the backend).
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: The final result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AsyncFinish" }
         default: { $ref: "#/components/responses/Error" }
 
   /arena/async/{id}/tap:
@@ -697,6 +727,47 @@ paths:
                   inventoryAdded:
                     type: array
                     items: { type: string }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/season/summary/claim:
+    post:
+      operationId: claimSeasonSummary
+      description: Claims the rewards of the finished season (decision 0038 #1, to agree with the backend); a repeat answers duplicate without an error.
+      responses:
+        "200":
+          description: The credited rewards
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [duplicate, rewards, wallet]
+                properties:
+                  duplicate: { type: boolean }
+                  rewards:
+                    type: array
+                    items: { $ref: "#/components/schemas/SeasonReward" }
+                  wallet: { $ref: "#/components/schemas/Wallet" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /support/tickets:
+    post:
+      operationId: createSupportTicket
+      description: A support request (Part 7 §6); the ban appeal uses topic ban_appeal (decision 0038 #5).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SupportTicket" }
+      responses:
+        "200":
+          description: The created ticket
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ticketId]
+                properties:
+                  ticketId: { type: string }
         default: { $ref: "#/components/responses/Error" }
 
 components:
@@ -1354,7 +1425,7 @@ components:
 
     Arena:
       type: object
-      required: [profile, season, format, activeMapId, unlocked, onboardingDone]
+      required: [profile, season, format, activeMapId, unlocked, onboardingDone, lastSeason]
       properties:
         profile:
           type: object
@@ -1384,6 +1455,61 @@ components:
         activeMapId: { type: [string, "null"] }
         unlocked: { type: boolean }
         onboardingDone: { type: boolean }
+        lastSeason:
+          description: The finished season until its summary is claimed (decision 0038 #1, to agree with the backend)
+          oneOf:
+            - { $ref: "#/components/schemas/SeasonSummary" }
+            - { type: "null" }
+
+    SeasonSummary:
+      type: object
+      required:
+        [
+          seasonId,
+          peakLeague,
+          peakDivision,
+          rank,
+          wins,
+          rewards,
+          trophiesBefore,
+          trophiesAfter,
+          claimed,
+        ]
+      properties:
+        seasonId: { type: integer }
+        peakLeague: { type: string }
+        peakDivision: { type: integer }
+        rank: { type: [integer, "null"] }
+        wins: { type: integer }
+        rewards:
+          type: array
+          items: { $ref: "#/components/schemas/SeasonReward" }
+        trophiesBefore: { type: integer }
+        trophiesAfter: { type: integer }
+        claimed: { type: boolean }
+
+    SupportTicket:
+      type: object
+      required: [topic, message, diagnostics]
+      properties:
+        topic: { type: string }
+        message: { type: string, maxLength: 1000 }
+        diagnostics:
+          type: object
+          required: [appVersion, device, userId]
+          properties:
+            appVersion: { type: string }
+            device: { type: string }
+            userId: { type: string }
+
+    BanDetails:
+      description: The BANNED error details (Part 7 §2)
+      type: object
+      required: [scope]
+      properties:
+        scope: { type: string, enum: [all, arena] }
+        until: { type: [string, "null"], format: date-time }
+        reason: { type: string }
 
     AsyncMatch:
       type: object
@@ -1404,6 +1530,10 @@ components:
         norm: { type: integer }
         turnSec: { type: integer }
         bombHint: { type: boolean }
+        deadline:
+          type: string
+          format: date-time
+          description: The first turn's deadline (decision 0036 #5, to agree with the backend)
         skin: { type: object }
 
     TapOutcome:
@@ -1437,7 +1567,7 @@ components:
         rp: { type: integer }
         rewards:
           type: array
-          items: { type: object }
+          items: { type: object, additionalProperties: true }
         map:
           type: object
           required: [targets, bombs]

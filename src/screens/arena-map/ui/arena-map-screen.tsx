@@ -2,33 +2,30 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BackHandler, ScrollView, View } from "react-native";
-import type { LayoutChangeEvent } from "react-native";
-import { useUnistyles } from "react-native-unistyles";
 
-import { levelOfMap, NEW_MAP_ID } from "@entities/arena-map";
+import { NEW_MAP_ID } from "@entities/arena-map";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
 import { leagueLabelOf } from "@widgets/arena-hero";
-import { BoardEditor } from "@widgets/board";
 
 import { useMapEditor } from "../model/use-map-editor";
 
 import { styles } from "./arena-map-styles";
+import EditorBoard from "./editor-board";
 import EditorDialogs from "./editor-dialogs";
 import EditorFooter from "./editor-footer";
 import EditorHeader from "./editor-header";
 import EditorStatus from "./editor-status";
 import StatusLine from "./status-line";
 import ToolPalette from "./tool-palette";
+import TutorialEditor from "./tutorial-editor";
 
 const ArenaMapScreen = () => {
   const { t } = useTranslation();
-  const { theme } = useUnistyles();
   const { id = NEW_MAP_ID } = useLocalSearchParams<{ id: string }>();
   const [toast, setToast] = useState<ToastMessage | null>(null);
-  const [boardWidth, setBoardWidth] = useState(0);
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
   const editor = useMapEditor(id, showToast);
   const onBack = editor.isReady ? editor.handleBack : null;
@@ -55,8 +52,14 @@ const ArenaMapScreen = () => {
 
   const { session, format, check } = editor;
   const canSave = editor.isOnline && !editor.isSaving;
-  const handleLayout = ({ nativeEvent }: LayoutChangeEvent) =>
-    setBoardWidth(nativeEvent.layout.width);
+  if (editor.isTutorial) {
+    return (
+      <>
+        <TutorialEditor editor={editor} canSave={canSave} />
+        <Toast message={toast} onHide={() => setToast(null)} />
+      </>
+    );
+  }
 
   return (
     <Screen style={styles.screen}>
@@ -97,22 +100,7 @@ const ArenaMapScreen = () => {
             {t("map.clear")}
           </Text>
         </View>
-        <View testID="editor-board-area" style={styles.boardArea} onLayout={handleLayout}>
-          {boardWidth > 0 ? (
-            <BoardEditor
-              level={levelOfMap(session.map)}
-              size={boardWidth - theme.sizes.arena.coordinates}
-              fx={editor.fx}
-              gesture={editor.gesture}
-              taps={check.taps}
-              errors={editor.errorCells}
-              onStrokeStart={editor.handleStrokeStart}
-              onStrokeCell={editor.handleStrokeCell}
-              onStrokeEdge={editor.handleStrokeEdge}
-              onStrokeEnd={editor.handleStrokeEnd}
-            />
-          ) : null}
-        </View>
+        <EditorBoard editor={editor} />
         <StatusLine text={editor.statusText} isValid={editor.status.kind === "valid"} />
         {check.check === null ? null : (
           <Text variant="body.s" style={styles.secondary} testID="editor-check">

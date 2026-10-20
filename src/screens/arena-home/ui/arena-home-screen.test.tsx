@@ -84,6 +84,8 @@ const renderArena = async () => {
 
 const renderOpenArena = async () => {
   passLevels(12);
+  await apiClient.POST("/arena/onboarding");
+  await apiClient.POST("/arena/season/summary/claim");
   await renderArena();
   await screen.findByText("Сигнал против сигнала.");
 };
@@ -115,13 +117,108 @@ describe("ArenaHomeScreen", () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith("/levels");
   });
 
+  test("opens the onboarding on the first visit of the open arena (decision 0037 #4)", async () => {
+    passLevels(12);
+    await renderArena();
+
+    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/arena/onboarding"));
+  });
+
+  test("skips the onboarding once it is done", async () => {
+    await renderOpenArena();
+
+    expect(mockRouter.push).not.toHaveBeenCalledWith("/arena/onboarding");
+  });
+
+  test("shows the summary of the finished season once (decision 0038 #2, design 18.3)", async () => {
+    passLevels(12);
+    await apiClient.POST("/arena/onboarding");
+    await renderArena();
+
+    expect(await screen.findByText("Сезон 01 завершён")).toBeOnTheScreen();
+    expect(screen.getByText("Пик: GOLD I")).toBeOnTheScreen();
+    expect(screen.getByText("Место #312 в мире · 64 победы")).toBeOnTheScreen();
+    expect(screen.getByTestId("summary-reset")).toHaveTextContent(
+      /3[\s\u00a0\u202f]120.*2[\s\u00a0\u202f]560/,
+    );
+    await fireEvent.press(screen.getByTestId("summary-claim"));
+    expect(await screen.findByTestId("summary-claimed")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("summary-next"));
+
+    await waitFor(() => expect(screen.queryByTestId("season-summary")).toBeNull());
+    expect((await apiClient.GET("/me")).data?.wallet.coins).toBeGreaterThanOrEqual(1500);
+  });
+
+  test("claims the season rewards when the summary is closed unclaimed (decision 0038 #3)", async () => {
+    passLevels(12);
+    await apiClient.POST("/arena/onboarding");
+    await renderArena();
+
+    await fireEvent.press(await screen.findByTestId("summary-next"));
+
+    await waitFor(() => expect(screen.queryByTestId("season-summary")).toBeNull());
+    expect((await apiClient.GET("/arena")).data?.lastSeason).toBeNull();
+  });
+
+  test("keeps the summary away while the onboarding is due", async () => {
+    passLevels(12);
+    await renderArena();
+
+    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/arena/onboarding"));
+    expect(screen.queryByTestId("season-summary")).toBeNull();
+  });
+
+  test("shows the arena ban with the term and leads to the campaign (ACC-14)", async () => {
+    passLevels(12);
+    mockServer.use(
+      http.get(mockUrl("/arena"), () =>
+        HttpResponse.json(
+          {
+            error: {
+              code: "BANNED",
+              details: { scope: "arena", until: "2026-10-12T00:00:00Z", reason: "бустинг кубков" },
+            },
+          },
+          { status: 403 },
+        ),
+      ),
+    );
+    await renderArena();
+
+    expect(await screen.findByText("Арена недоступна")).toBeOnTheScreen();
+    expect(screen.getByText(/Причина: бустинг кубков\. До 12 октября/)).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("ban-campaign"));
+    expect(mockRouter.navigate).toHaveBeenCalledWith("/levels");
+  });
+
+  test("sends an appeal from the arena ban (decision 0038 #5)", async () => {
+    passLevels(12);
+    mockServer.use(
+      http.get(mockUrl("/arena"), () =>
+        HttpResponse.json(
+          { error: { code: "BANNED", details: { scope: "arena", until: null, reason: "читы" } } },
+          { status: 403 },
+        ),
+      ),
+    );
+    await renderArena();
+    await fireEvent.press(await screen.findByTestId("ban-appeal"));
+    expect(screen.getByTestId("appeal-send")).toBeDisabled();
+
+    await fireEvent.changeText(screen.getByTestId("appeal-message"), "Это не я");
+    await waitFor(() => expect(screen.getByTestId("appeal-send")).toBeEnabled());
+    await fireEvent.press(screen.getByTestId("appeal-send"));
+
+    expect(await screen.findByText("Обращение отправлено")).toBeOnTheScreen();
+  });
+
   test("shows the league, the trophies, the season and the format", async () => {
     await renderOpenArena();
 
     expect(screen.getAllByText("BRONZE III").length).toBeGreaterThan(0);
     expect(screen.getByText("5×5 · 1 цели · 5 с на ход")).toBeOnTheScreen();
     expect(screen.getByText("0 / 267 → BRONZE II")).toBeOnTheScreen();
-    expect(screen.getByText(/^01 · \d+д$/)).toBeOnTheScreen();
+    expect(screen.getByText(/^02 · \d+д$/)).toBeOnTheScreen();
     expect(screen.getByTestId("arena-fight")).toBeEnabled();
   });
 
@@ -216,6 +313,19 @@ describe("ArenaHomeScreen", () => {
     expect(data?.activeMapId).toEqual(expect.any(String));
   });
 
+  test("starts a match against another player's map (decision 0036 #3)", async () => {
+    await renderOpenArena();
+
+    await fireEvent.press(screen.getByTestId("arena-async"));
+
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        pathname: "/arena/async/[id]",
+        params: { id: "async_1" },
+      }),
+    );
+  });
+
   test("claims an available season step and marks it claimed", async () => {
     Array.from({ length: 5 }, (_, index) => win(`m${index}`));
     await renderOpenArena();
@@ -223,7 +333,7 @@ describe("ArenaHomeScreen", () => {
     await fireEvent.press(await screen.findByRole("button", { name: "Забрать" }));
 
     expect(await screen.findAllByLabelText("Получено")).toHaveLength(1);
-    await waitFor(() => expect(screen.getByLabelText("Монеты: 18820")).toBeOnTheScreen());
+    await waitFor(() => expect(screen.getByLabelText("Монеты: 20320")).toBeOnTheScreen());
   });
 
   test("lists the last matches and opens one (decision 0031 #7)", async () => {

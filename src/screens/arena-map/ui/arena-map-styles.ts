@@ -53,6 +53,20 @@ export const styles = StyleSheet.create((theme, runtime) => ({
       },
     },
   },
+  tutorialHeader: {
+    alignItems: "center",
+    gap: theme.space[1],
+  },
+  tutorialSteps: {
+    gap: theme.space[2],
+    padding: theme.space[4],
+    borderRadius: theme.radius.l,
+    backgroundColor: theme.colors.bg.surface,
+  },
+  tutorialTool: {
+    width: "50%",
+    padding: theme.space[1],
+  },
   palette: {
     flexDirection: "row",
     flexWrap: "wrap",

@@ -57,6 +57,7 @@ const SearchBody = ({ search }: ISearchBody) => {
         activeMap={search.activeMap}
         waitedSec={search.waitedSec}
         isAsyncAvailable={search.isAsyncAvailable}
+        onVsMap={search.handleVsMap}
         onCancel={search.handleCancel}
       />
     );

@@ -19,6 +19,7 @@ import {
   paintCell,
   toggleCell,
   toggleFence,
+  TUTORIAL_MAP_ID,
   useArenaMapsQuery,
   useEditorStore,
 } from "@entities/arena-map";
@@ -28,11 +29,19 @@ import { useSaveArenaMap } from "@features/save-arena-map";
 import { useIsOnline } from "@shared/api";
 import { useBoardFx } from "@widgets/board";
 
+import {
+  TUTORIAL_BOMBS,
+  TUTORIAL_MAP,
+  tutorialHintKey,
+  tutorialRefusalKey,
+} from "./editor-tutorial";
 import { statusTextOf } from "./status-text";
 import { useBotCheck } from "./use-bot-check";
+import { useFinishTutorial } from "./use-finish-tutorial";
 
 export type EditorTool = CellTool | "fence";
 export type EditorDialog = "random" | "exit" | "rename" | null;
+export type ReadyMapEditor = Extract<ReturnType<typeof useMapEditor>, { isReady: true }>;
 
 const PAINT_TOOLS: ReadonlySet<EditorTool> = new Set(["stream", "rock", "erase"]);
 
@@ -50,15 +59,22 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
   // A new map keeps editing under the id the server gave it (новая карта продолжает редактироваться под id, выданным сервером).
   const [savedNewId, setSavedNewId] = useState<string | null>(null);
   const mapId = savedNewId ?? id;
+  const isTutorial = id === TUTORIAL_MAP_ID;
   const [hasLeft, setHasLeft] = useState(false);
   const check = useBotCheck();
   const format = arena.data?.format;
   const existing = maps.data?.find((map) => map.id === mapId);
   const formatMaps = (maps.data ?? []).filter((map) => map.format === format?.size);
   const nameOf = (n: number) => t("map.defaultName", { n });
+  const finishTutorial = useFinishTutorial((messageKey) => onToast(t(messageKey)));
 
   useEffect(() => {
     if (format === undefined || hasLeft) return;
+    if (mapId === TUTORIAL_MAP_ID) {
+      const tutorial = { name: t("map.tutorial.title"), map: TUTORIAL_MAP };
+      useEditorStore.getState().open(mapId, tutorial, null);
+      return;
+    }
     if (mapId === NEW_MAP_ID) {
       const name = nameOf(
         nextMapNumber(
@@ -115,8 +131,16 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
   const errorCells = "cells" in status ? status.cells.map((cell) => toIdx(map.cols, cell)) : [];
   const needInternet = () => onToast(t("arena.needInternet"));
   const isDirty = isSessionDirty(session);
+  const counts = countElements(map);
+  const formatLimits = limitsOf(format, map);
 
   const refuse = (refusal: EditRefusal, idx: Idx | null) => {
+    const tutorialKey = isTutorial ? tutorialRefusalKey(refusal, tool) : null;
+    if (tutorialKey !== null) {
+      if (idx !== null) fx.play(idx, [{ type: "blocked", cell: idx }]);
+      onToast(t(tutorialKey, { max: formatLimits.bombs }));
+      return;
+    }
     if (refusal.kind === "limit") {
       setFlash((current) => ({ tool, key: current.key + 1 }));
       onToast(t("map.err.limit", { max: refusal.max }));
@@ -133,9 +157,18 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
     else useEditorStore.getState().strokeTo(result.map);
   };
 
+  const isOverTutorialBombs = (current: typeof map, row: number, col: number) =>
+    isTutorial &&
+    tool === "bomb" &&
+    countElements(current).bombs >= TUTORIAL_BOMBS &&
+    !(current.bombs ?? []).some(([r, c]) => r === row && c === col);
+
+  const isStream = (row: number, col: number) =>
+    (map.streams ?? []).some(([r, c]) => r === row && c === col);
+
   const save = (onFinish?: () => void) =>
     saving.save(
-      mapId === NEW_MAP_ID ? null : mapId,
+      mapId === NEW_MAP_ID || mapId === TUTORIAL_MAP_ID ? null : mapId,
       { name: session.name, format: format.size, map },
       onFinish,
     );
@@ -147,8 +180,10 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
     profile: arena.data?.profile,
     tool,
     gesture: tool === "fence" ? ("edge" as const) : ("cell" as const),
-    counts: countElements(map),
-    limits: limitsOf(format, map),
+    isTutorial,
+    tutorialHintKey: tutorialHintKey(counts, formatLimits.targets),
+    counts,
+    limits: isTutorial ? { ...formatLimits, bombs: TUTORIAL_BOMBS } : formatLimits,
     flash,
     status,
     statusText: statusTextOf(status, t),
@@ -158,7 +193,7 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
     dialog,
     isDirty,
     isOnline,
-    isSaving: saving.isPending,
+    isSaving: saving.isPending || finishTutorial.isPending,
     isRandomPending: random.isPending,
     handleToolSelect: setTool,
     handleStrokeStart: () => {
@@ -169,8 +204,16 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
       if (tool === "fence" || (index > 0 && !PAINT_TOOLS.has(tool))) return;
       const current = useEditorStore.getState().session?.map ?? map;
       const [row, col] = toCell(map.cols, idx);
+      if (isOverTutorialBombs(current, row, col)) {
+        refuse({ kind: "limit", max: TUTORIAL_BOMBS }, idx);
+        return;
+      }
       const edit = index === 0 ? toggleCell : paintCell;
-      commit(edit(current, format, tool, [row, col]), idx);
+      const result = edit(current, format, tool, [row, col]);
+      commit(result, idx);
+      if (isTutorial && tool === "target" && !("refusal" in result) && isStream(row, col)) {
+        onToast(t("map.tutorial.streamTarget"));
+      }
     },
     handleStrokeEdge: ([a, b]: [Idx, Idx], index: number) => {
       const current = useEditorStore.getState().session?.map ?? map;
@@ -209,8 +252,12 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
       random.requestRandom(format.size);
     },
     handleCheck: () => check.start(map),
-    handleSave: () => save(),
+    handleSave: () => {
+      if (!isTutorial) save();
+      else if (status.kind === "valid") save(() => finishTutorial.finish(leave));
+    },
     handleBack: () => {
+      if (isTutorial) return;
       if (dialog !== null) setDialog(null);
       else if (isDirty) setDialog("exit");
       else leave();

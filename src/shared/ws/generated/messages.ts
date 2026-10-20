@@ -5,7 +5,16 @@ import { z } from "zod";
 export const queueJoinClientMessageSchema = z.object({
   t: z.literal("queue.join"),
   id: z.string().optional(),
-  d: z.object({ format: z.number().int(), mapId: z.string() }),
+  d: z.object({
+    format: z.number().int(),
+    mapId: z.string().optional(),
+    mode: z
+      .enum(["ranked", "training"])
+      .describe(
+        "training: the onboarding match against the mentor, without a map (decision 0037 #2, to agree with the backend)",
+      )
+      .optional(),
+  }),
 });
 export type QueueJoinClientMessage = z.infer<typeof queueJoinClientMessageSchema>;
 

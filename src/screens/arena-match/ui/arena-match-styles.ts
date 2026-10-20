@@ -21,15 +21,6 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     alignItems: "center",
     gap: theme.space[3],
   },
-  ring: {
-    width: theme.sizes.timerRing.size,
-    height: theme.sizes.timerRing.size,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  ringSvg: {
-    position: "absolute",
-  },
   avatar: {
     width: theme.sizes.avatar.match - theme.sizes.timerRing.stroke * 2,
     height: theme.sizes.avatar.match - theme.sizes.timerRing.stroke * 2,
@@ -93,6 +84,15 @@ export const styles = StyleSheet.create((theme, runtime) => ({
   turnLine: {
     textAlign: "center",
     color: theme.colors.text.secondary,
+  },
+  hint: {
+    gap: theme.space[2],
+    padding: theme.space[4],
+    borderRadius: theme.radius.l,
+    borderWidth: 2,
+    borderColor: theme.colors.accent.cyan,
+    backgroundColor: theme.colors.bg.surface,
+    boxShadow: theme.elevation[2],
   },
   controls: {
     flexDirection: "row",

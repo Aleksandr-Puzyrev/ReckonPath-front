@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
-import { matchSession, useMatchStore } from "@entities/match";
+import { matchSession, useAsyncMatchStore, useMatchStore } from "@entities/match";
 import type { MatchEnd, MatchOpponent } from "@entities/match";
 import { useAccountStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
@@ -13,10 +13,13 @@ import ArenaResultScreen from "./arena-result-screen";
 const mockRouter = { back: jest.fn(), replace: jest.fn(), push: jest.fn() };
 const mockInterstitial = { finishLevel: jest.fn(), showIfDue: jest.fn(async () => undefined) };
 
+const mockParams: { id: string; mode?: string } = { id: "m1" };
+
 jest.mock("expo-router", () => ({
   get router() {
     return mockRouter;
   },
+  useLocalSearchParams: () => mockParams,
 }));
 jest.mock("@shared/ui/sheet", () => ({
   Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
@@ -182,5 +185,43 @@ describe("ArenaResultScreen", () => {
     expect(await screen.findByText("Нет карты для боя")).toBeOnTheScreen();
     expect(screen.getByText("Победа")).toBeOnTheScreen();
     expect(useMatchStore.getState().end).toBeNull();
+  });
+
+  test("compares an async result with the norm (decision 0036 #7)", async () => {
+    mockParams.mode = "async";
+    useAsyncMatchStore.getState().start(
+      {
+        asyncId: "a1",
+        author: { id: "u9", nickname: "Milo", league: "BRONZE" },
+        map: { rows: 5, cols: 5 },
+        bombCount: 0,
+        targetsCount: 1,
+        norm: 11,
+        turnSec: 5,
+        bombHint: true,
+      },
+      100,
+    );
+    useAsyncMatchStore.getState().receiveFinish(
+      {
+        finished: true,
+        result: "win",
+        turnsUsed: 9,
+        norm: 11,
+        trophiesDelta: 11,
+        rp: 5,
+        rewards: [{ currency: "coin", amount: 20 }, { xp: 10 }],
+        map: { targets: [[2, 2]], bombs: [] },
+      },
+      [2, 2],
+    );
+    await renderResult();
+
+    expect(screen.getByText("Ты: 9 ходов · Норма: 11")).toBeOnTheScreen();
+    expect(screen.getByText("против карты ×0,5")).toBeOnTheScreen();
+    expect(screen.getAllByText("Карта Milo · твои тапы").length).toBeGreaterThan(0);
+    expect(screen.queryByTestId("result-my-map")).toBeNull();
+    mockParams.mode = undefined;
+    useAsyncMatchStore.getState().reset();
   });
 });

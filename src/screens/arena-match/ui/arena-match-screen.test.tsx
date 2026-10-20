@@ -184,6 +184,49 @@ describe("ArenaMatchScreen", () => {
     expect(screen.getByText("Восстанавливаем связь…")).toBeOnTheScreen();
   });
 
+  test("shows the mentor, the step hint and no surrender in training (decision 0037 #6)", async () => {
+    playing({ isTraining: true, opponent: { ...OPPONENT, id: "mentor", isBot: true } });
+    await renderMatch();
+
+    expect(screen.getByText("Наставник · ТРЕНИРОВКА")).toBeOnTheScreen();
+    expect(screen.getByText("лёгкий бот · кубки не меняются")).toBeOnTheScreen();
+    expect(screen.getByText(/сдаться нельзя — это тренировка/)).toBeOnTheScreen();
+    expect(screen.getByText("Тапни любую клетку")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("match-menu"));
+    expect(screen.queryByTestId("match-surrender")).toBeNull();
+  });
+
+  test("goes on to the editor tutorial after the training ends (decision 0037 #6)", async () => {
+    const leave = jest.spyOn(matchSession, "leave").mockImplementation(() => undefined);
+    playing({ isTraining: true });
+    await renderMatch();
+
+    await act(() =>
+      useMatchStore.setState({
+        phase: "ended",
+        end: {
+          result: "loss",
+          reason: "targets",
+          turns: { me: 4, opponent: 4 },
+          maps: { mine: { targets: [], bombs: [] }, opponent: { targets: [], bombs: [] } },
+          trophies: { before: 0, after: 0, delta: 0 },
+          league: { changed: false },
+          rp: 0,
+          rewards: [],
+        },
+      }),
+    );
+    expect(screen.getByText("Наставник оказался быстрее")).toBeOnTheScreen();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByTestId("training-next"));
+
+    expect(leave).toHaveBeenCalled();
+    expect(mockRouter.replace).toHaveBeenCalledWith({
+      pathname: "/arena/map/[id]",
+      params: { id: "tutorial" },
+    });
+  });
+
   test("moves on to the result screen when the match ends (decision 0035 #3)", async () => {
     playing();
     await renderMatch();

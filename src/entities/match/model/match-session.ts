@@ -1,6 +1,6 @@
 import { AppState } from "react-native";
 
-import { ws } from "@shared/ws";
+import { WS_CLOSE, ws } from "@shared/ws";
 import type { ClientMessage, ServerMessage } from "@shared/ws";
 
 import type { Cell } from "./match-reducer";
@@ -45,9 +45,11 @@ const bind = () => {
       handleFound(message);
     }),
   );
-  const offClosed = ws.onClosed(({ scope }) => {
+  const offClosed = ws.onClosed(({ scope, code }) => {
     if (scope === "match") store().markLost();
-    else if (store().phase === "searching") store().failSearch("NETWORK");
+    else if (store().phase === "searching") {
+      store().failSearch(code === WS_CLOSE.BANNED ? "BANNED" : "NETWORK");
+    }
   });
   const offStatus = ws.onStatus(({ scope, isOpen }) => {
     if (scope === "match") store().setReconnecting(!isOpen);
@@ -68,6 +70,12 @@ export const matchSession = {
     store().startSearch();
     ws.connect();
     ws.send("queue.join", { format, mapId });
+  },
+  training: (format: number) => {
+    bind();
+    store().startTraining();
+    ws.connect();
+    ws.send("queue.join", { format, mode: "training" });
   },
   cancelSearch: () => {
     ws.send("queue.leave");

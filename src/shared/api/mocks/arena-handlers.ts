@@ -7,10 +7,14 @@ import { mockActiveMapId } from "./arena-map-handlers";
 import { mockPassedLevels } from "./attempts-handlers";
 import { ARENA_FORMAT } from "./mock-arena-format";
 import {
+  claimMockLastSeason,
   claimMockStep,
   mockArenaProfile,
+  mockLastSeason,
   mockMatchHistory,
+  mockOnboardingDone,
   mockSeasonTrack,
+  completeMockOnboarding,
 } from "./mock-arena-profile";
 import { mockWallet } from "./mock-wallet";
 import { mockUrl } from "./mock-url";
@@ -19,6 +23,7 @@ type Arena = components["schemas"]["Arena"];
 
 const ARENA_UNLOCK_LEVEL = 12;
 const SEASON_DAYS = 28;
+const MOCK_SEASON_ID = 2;
 const DAY_MS = 86_400_000;
 const HISTORY_PAGE = 20;
 const HTTP_BAD_REQUEST = 400;
@@ -29,14 +34,15 @@ const claimSchema = z.object({ step: z.number().int() });
 export const arenaMock = (now = Date.now()): Arena => ({
   profile: mockArenaProfile(),
   season: {
-    id: 1,
+    id: MOCK_SEASON_ID,
     endsAt: new Date(now + SEASON_DAYS * DAY_MS).toISOString(),
     track: mockSeasonTrack(),
   },
   format: ARENA_FORMAT,
   activeMapId: mockActiveMapId(),
   unlocked: mockPassedLevels() >= ARENA_UNLOCK_LEVEL,
-  onboardingDone: false,
+  onboardingDone: mockOnboardingDone(),
+  lastSeason: mockLastSeason(),
 });
 
 const summaryOf = ({
@@ -62,6 +68,13 @@ export const arenaHandlers = [
       ? HttpResponse.json({ error: { code: "NOT_FOUND" } }, { status: HTTP_NOT_FOUND })
       : HttpResponse.json(match);
   }),
+  http.post(mockUrl("/arena/onboarding"), () => {
+    completeMockOnboarding();
+    return HttpResponse.json({ onboardingDone: true });
+  }),
+  http.post(mockUrl("/arena/season/summary/claim"), () =>
+    HttpResponse.json({ ...claimMockLastSeason(), wallet: mockWallet() }),
+  ),
   http.post(mockUrl("/arena/season/claim"), async ({ request }) => {
     const body = claimSchema.safeParse(await request.json().catch(() => null));
     const claimed = body.success ? claimMockStep(body.data.step) : null;

@@ -10,13 +10,14 @@ import { emitSystemSignal } from "./system-signals";
 
 const WRITE_METHODS: ReadonlySet<string> = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const HTTP_UPGRADE_REQUIRED = 426;
+const HTTP_FORBIDDEN = 403;
 const HTTP_SERVICE_UNAVAILABLE = 503;
 
-const readsAsMaintenance = async (response: Response) => {
+const envelopeOf = async (response: Response) => {
   try {
-    return readErrorEnvelope(await response.clone().json()).code === "MAINTENANCE";
+    return readErrorEnvelope(await response.clone().json());
   } catch {
-    return false;
+    return null;
   }
 };
 
@@ -34,8 +35,15 @@ export const apiMiddleware: Middleware = {
   },
   onResponse: async ({ response }) => {
     if (response.status === HTTP_UPGRADE_REQUIRED) emitSystemSignal("upgradeRequired");
-    if (response.status === HTTP_SERVICE_UNAVAILABLE && (await readsAsMaintenance(response))) {
+    if (response.status !== HTTP_SERVICE_UNAVAILABLE && response.status !== HTTP_FORBIDDEN) {
+      return response;
+    }
+    const envelope = await envelopeOf(response);
+    if (response.status === HTTP_SERVICE_UNAVAILABLE && envelope?.code === "MAINTENANCE") {
       emitSystemSignal("maintenance");
+    }
+    if (response.status === HTTP_FORBIDDEN && envelope?.code === "BANNED") {
+      emitSystemSignal("banned", envelope.details);
     }
     return response;
   },

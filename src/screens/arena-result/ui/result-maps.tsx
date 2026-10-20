@@ -17,7 +17,7 @@ interface IResultMaps {
   theirLevel: LevelInput;
   myTaps: readonly Idx[];
   theirTaps: readonly Idx[];
-  opponentName: string;
+  theirLabel: string;
   zoomed: ZoomedMap;
   onZoom: (map: ZoomedMap) => void;
 }
@@ -27,7 +27,7 @@ const ResultMaps = ({
   theirLevel,
   myTaps,
   theirTaps,
-  opponentName,
+  theirLabel,
   zoomed,
   onZoom,
 }: IResultMaps) => {
@@ -56,7 +56,7 @@ const ResultMaps = ({
         <Pressable
           testID="result-their-map"
           accessibilityRole="button"
-          accessibilityLabel={t("result.pvp.theirMap", { name: opponentName })}
+          accessibilityLabel={theirLabel}
           onPress={() => onZoom("theirs")}
           style={styles.map}
         >
@@ -66,7 +66,7 @@ const ResultMaps = ({
             size={theme.sizes.arena.detailsMap}
           />
           <Text variant="caption" style={styles.secondary}>
-            {t("result.pvp.theirMap", { name: opponentName })}
+            {theirLabel}
           </Text>
         </Pressable>
       </View>

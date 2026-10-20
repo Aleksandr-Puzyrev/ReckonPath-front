@@ -441,6 +441,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/arena/onboarding": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Marks the arena onboarding as done (decision 0037 */
+    post: operations["completeArenaOnboarding"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/arena/async": {
     parameters: {
       query?: never;
@@ -451,6 +468,23 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["startAsyncMatch"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/async/{id}/surrender": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Ends the async match as a loss (decision 0036 */
+    post: operations["surrenderAsyncMatch"];
     delete?: never;
     options?: never;
     head?: never;
@@ -515,6 +549,40 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["claimSeasonStep"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/season/summary/claim": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Claims the rewards of the finished season (decision 0038 */
+    post: operations["claimSeasonSummary"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/support/tickets": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A support request (Part 7 §6); the ban appeal uses topic ban_appeal (decision 0038 */
+    post: operations["createSupportTicket"];
     delete?: never;
     options?: never;
     head?: never;
@@ -981,6 +1049,36 @@ export interface components {
       activeMapId: string | null;
       unlocked: boolean;
       onboardingDone: boolean;
+      /** @description The finished season until its summary is claimed (decision 0038 */
+      lastSeason: components["schemas"]["SeasonSummary"] | null;
+    };
+    SeasonSummary: {
+      seasonId: number;
+      peakLeague: string;
+      peakDivision: number;
+      rank: number | null;
+      wins: number;
+      rewards: components["schemas"]["SeasonReward"][];
+      trophiesBefore: number;
+      trophiesAfter: number;
+      claimed: boolean;
+    };
+    SupportTicket: {
+      topic: string;
+      message: string;
+      diagnostics: {
+        appVersion: string;
+        device: string;
+        userId: string;
+      };
+    };
+    /** @description The BANNED error details (Part 7 §2) */
+    BanDetails: {
+      /** @enum {string} */
+      scope: "all" | "arena";
+      /** Format: date-time */
+      until?: string | null;
+      reason?: string;
     };
     AsyncMatch: {
       asyncId: string;
@@ -996,6 +1094,11 @@ export interface components {
       norm: number;
       turnSec: number;
       bombHint: boolean;
+      /**
+       * Format: date-time
+       * @description The first turn's deadline (decision 0036
+       */
+      deadline?: string;
       skin?: Record<string, never>;
     };
     /** @enum {string} */
@@ -1019,7 +1122,9 @@ export interface components {
       norm: number;
       trophiesDelta: number;
       rp: number;
-      rewards: Record<string, never>[];
+      rewards: {
+        [key: string]: unknown;
+      }[];
       map: {
         targets: components["schemas"]["Cells"];
         bombs: components["schemas"]["Cells"];
@@ -1859,6 +1964,29 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  completeArenaOnboarding: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The new flag */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            onboardingDone: boolean;
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
   startAsyncMatch: {
     parameters: {
       query?: never;
@@ -1875,6 +2003,29 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["AsyncMatch"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  surrenderAsyncMatch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The final result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["AsyncFinish"];
         };
       };
       default: components["responses"]["Error"];
@@ -1993,6 +2144,58 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  claimSeasonSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The credited rewards */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            duplicate: boolean;
+            rewards: components["schemas"]["SeasonReward"][];
+            wallet: components["schemas"]["Wallet"];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  createSupportTicket: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SupportTicket"];
+      };
+    };
+    responses: {
+      /** @description The created ticket */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            ticketId: string;
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
 }
 type FlattenedDeepRequired<T> = {
   [K in keyof T]-?: FlattenedDeepRequired<
@@ -2092,6 +2295,9 @@ export const seasonRewardCurrencyValues: ReadonlyArray<
 export const seasonStepStateValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["SeasonStep"]["state"]
 > = ["claimed", "available", "locked"];
+export const banDetailsScopeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["BanDetails"]["scope"]
+> = ["all", "arena"];
 export const tapOutcomeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["TapOutcome"]
 > = ["pelang", "target", "bomb"];

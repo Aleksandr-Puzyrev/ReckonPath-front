@@ -41,6 +41,9 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0033 | [`0033-search-and-vs.md`](0033-search-and-vs.md) | Search and VS: tasks 5 and 6 merged, bot after 20 s, no-map dialog, IN_MATCH details proposal, search and stopped states, link sheet before the first match, VS layout, matchStore, search errors |
 | 0034 | [`0034-live-match.md`](0034-live-match.md) | Live match: end overlay until task 7, emote mapping, layout, texts, opponent board from server results, timer and haptics, menu and surrender, connection states, keep-awake, route |
 | 0035 | [`0035-match-result.md`](0035-match-result.md) | Match result: spec rewards with XP, league-change moment only, result screen layout, reason texts, map zoom, buttons, interstitial counting matches, effects, data refresh |
+| 0036 | [`0036-async-match.md`](0036-async-match.md) | Async match: surrender endpoint proposal, half coins, entry points, screen with the author card and norm, server deadline timer, mock rules, result and history for async |
+| 0037 | [`0037-arena-onboarding.md`](0037-arena-onboarding.md) | Arena onboarding: onboarding endpoint and training queue proposals, 1 target in the tutorial, steps and skipping, rule cards, training match, editor tutorial, easy first bot, analytics TODO |
+| 0038 | [`0038-season-summary-and-ban.md`](0038-season-summary-and-ban.md) | Season summary and arena ban: `lastSeason` and claim proposals, modal on the arena home, claim on close, ban texts, appeal sheet via support tickets, arena and full ban detection, mock season 2 |
 
 ## Template
 

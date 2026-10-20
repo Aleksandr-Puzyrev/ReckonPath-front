@@ -1,8 +1,9 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react-native";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { http, HttpResponse } from "msw/http";
 
 import { matchSession, useMatchStore } from "@entities/match";
 import { i18n } from "@shared/i18n";
-import { mockServer } from "@shared/test-utils/api-mock";
+import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import ArenaSearchScreen from "./arena-search-screen";
@@ -59,11 +60,20 @@ describe("ArenaSearchScreen", () => {
     expect(screen.queryByTestId("search-vs-map")).toBeNull();
   });
 
-  test("offers the async match from 10 s, inactive until task 8 (ARN-06)", async () => {
+  test("switches to the async match from 10 s (ARN-06, decision 0036 #3)", async () => {
+    const cancel = jest.spyOn(matchSession, "cancelSearch").mockImplementation(() => undefined);
     useMatchStore.setState({ phase: "searching", waitedSec: 10, isAsyncAvailable: true });
     await renderSearch();
 
-    expect(screen.getByTestId("search-vs-map")).toBeDisabled();
+    await fireEvent.press(screen.getByTestId("search-vs-map"));
+
+    expect(cancel).toHaveBeenCalled();
+    await waitFor(() =>
+      expect(mockRouter.replace).toHaveBeenCalledWith({
+        pathname: "/arena/async/[id]",
+        params: { id: "async_1" },
+      }),
+    );
   });
 
   test("cancels the search (ARN-07)", async () => {
@@ -148,6 +158,30 @@ describe("ArenaSearchScreen", () => {
       pathname: "/arena/match/[id]",
       params: { id: "m9" },
     });
+  });
+
+  test("goes back to the arena and re-reads it after a ban (decision 0038 #6)", async () => {
+    let arenaRequests = 0;
+    mockServer.use(
+      http.get(mockUrl("/arena"), () => {
+        arenaRequests += 1;
+        return HttpResponse.json(
+          {
+            error: { code: "BANNED", details: { scope: "arena", until: null, reason: "Boosting" } },
+          },
+          { status: 403 },
+        );
+      }),
+    );
+    useMatchStore.setState({ phase: "searching" });
+    await renderSearch();
+    const before = arenaRequests;
+
+    await setMatch({ phase: "idle", searchError: "BANNED" });
+
+    expect(await screen.findByText("Доступ ограничен")).toBeOnTheScreen();
+    expect(mockRouter.back).toHaveBeenCalled();
+    await waitFor(() => expect(arenaRequests).toBeGreaterThan(before));
   });
 
   test("goes back with a toast when the search loses the connection", async () => {

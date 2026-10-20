@@ -1,3 +1,4 @@
+import { apiClient } from "../../api-client";
 import { mockServer } from "../mock-server";
 
 import { fakeGameServer } from "./fake-game-server";
@@ -108,5 +109,41 @@ describe("fakeGameServer queue", () => {
     entry.send({ t: "ping", d: { c: 4_900 } });
 
     expect(entry.last("pong")).toEqual({ t: "pong", d: { c: 4_900, s: 5_000 } });
+  });
+});
+
+describe("fakeGameServer training", () => {
+  afterEach(() => {
+    jest.useRealTimers();
+    mockServer.reset();
+  });
+
+  test("starts the training at once with the mentor and 10 s turns (decision 0037 #2)", async () => {
+    jest.useFakeTimers();
+    const entry = connectPeer(ENTRY_URL);
+
+    entry.send({ t: "queue.join", id: "train", d: { format: 5, mode: "training" } });
+
+    expect(entry.last("match.found")?.d).toEqual(
+      expect.objectContaining({
+        opponent: expect.objectContaining({ isBot: true, label: "training" }),
+        format: expect.objectContaining({ turnSec: 10 }),
+      }),
+    );
+  });
+
+  test("ends the training without trophies or a history row", async () => {
+    jest.useFakeTimers();
+    const entry = connectPeer(ENTRY_URL);
+    entry.send({ t: "queue.join", id: "train", d: { format: 5, mode: "training" } });
+    const found = entry.last("match.found");
+    const match = connectPeer(`${found?.d.endpoint ?? ""}?ticket=${found?.d.ticket ?? ""}`);
+    await jest.advanceTimersByTimeAsync(3_000);
+
+    match.send({ t: "match.surrender", id: "s" });
+
+    expect(match.last("match.end")?.d.trophies).toEqual({ before: 0, after: 0, delta: 0 });
+    const { data } = await apiClient.GET("/arena/matches");
+    expect(data?.items).toEqual([]);
   });
 });

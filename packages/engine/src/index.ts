@@ -57,7 +57,12 @@ export {
   xpToNext,
 } from "./formulas/rewards";
 export type { XpSource } from "./formulas/rewards";
-export { applyTrophies, seasonReset, trophyDelta } from "./formulas/trophies";
+export {
+  applyTrophies,
+  SEASON_RESET_THRESHOLD,
+  seasonReset,
+  trophyDelta,
+} from "./formulas/trophies";
 export { createSolver, observeTap, chooseMove, scoreCells } from "./solver/solver";
 export type { CellScore, SolverState } from "./solver/solver";
 export { computeNorm, validateLevelNorm } from "./solver/norm";

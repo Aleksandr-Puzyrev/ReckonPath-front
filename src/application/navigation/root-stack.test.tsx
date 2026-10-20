@@ -1,13 +1,14 @@
-import { screen } from "@testing-library/react-native";
+import { act, screen } from "@testing-library/react-native";
 import { Slot } from "expo-router";
 import { renderRouter } from "expo-router/testing-library";
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 import { Text } from "react-native";
 
-import { useSystemNoticeStore } from "@entities/app-config";
+import { useBanStore, useSystemNoticeStore } from "@entities/app-config";
 import { useInterstitialStore } from "@entities/ad";
 import { useAccountStore } from "@entities/session";
+import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
 import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
@@ -45,6 +46,7 @@ const renderApp = (options: Parameters<typeof renderRouter>[1] = {}) => {
       daily: () => <Text>daily</Text>,
       "system/update": () => <Text>update</Text>,
       "system/maintenance": () => <Text>maintenance</Text>,
+      "system/banned": () => <Text>banned</Text>,
     },
     options,
   );
@@ -56,6 +58,7 @@ describe("RootStack", () => {
   beforeEach(() => {
     useSystemNoticeStore.getState().reset();
     useAccountStore.getState().reset();
+    useBanStore.getState().reset();
   });
 
   afterEach(() => mockServer.reset());
@@ -107,6 +110,25 @@ describe("RootStack", () => {
     await renderApp();
 
     expect(await screen.findByText("maintenance")).toBeOnTheScreen();
+  });
+
+  test("locks the app on the ban screen after a full ban from any request (decision 0038 #7)", async () => {
+    mockServer.use(
+      http.get(mockUrl("/me"), () =>
+        HttpResponse.json(
+          { error: { code: "BANNED", details: { scope: "all", until: null, reason: "Cheating" } } },
+          { status: 403 },
+        ),
+      ),
+    );
+
+    await renderApp();
+    await act(async () => {
+      await apiClient.GET("/me");
+    });
+
+    expect(await screen.findByText("banned")).toBeOnTheScreen();
+    expect(screen.queryByText("home")).not.toBeOnTheScreen();
   });
 
   test("opens the app after maintenance was dismissed", async () => {

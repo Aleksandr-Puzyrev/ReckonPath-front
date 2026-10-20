@@ -6,6 +6,7 @@ import { getResponse } from "msw/utils/get-response";
 
 import { resetMockAds } from "./ads-handlers";
 import { resetMockArenaMaps } from "./arena-map-handlers";
+import { resetMockAsync } from "./async-handlers";
 import { resetMockAttempts } from "./attempts-handlers";
 import { resetMockAuth } from "./auth-handlers";
 import { resetMockDaily } from "./daily-handlers";
@@ -14,6 +15,7 @@ import { resetMockArenaProfile } from "./mock-arena-profile";
 import { resetMockPlayer } from "./mock-player";
 import { resetMockMapCheck } from "./mock-map-check";
 import { resetMockShop } from "./mock-shop";
+import { resetMockSupport } from "./support-handlers";
 import { resetMockWallet } from "./mock-wallet";
 import { resetMockPurchases } from "./shop-handlers";
 import { handlers } from "./handlers";
@@ -45,9 +47,11 @@ export const mockServer = {
     resetMockDaily();
     resetMockWallet();
     resetMockShop();
+    resetMockSupport();
     resetMockPurchases();
     resetMockAds();
     resetMockArenaMaps();
+    resetMockAsync();
     resetMockMapCheck();
     resetMockArenaProfile();
     resetMockPlayer();

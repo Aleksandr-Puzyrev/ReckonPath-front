@@ -1,9 +1,9 @@
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useArenaQuery } from "@entities/arena";
 import { useArenaMapsQuery } from "@entities/arena-map";
-import { useServerMinute, useSystemState } from "@entities/app-config";
+import { banOf, useServerMinute, useSystemState } from "@entities/app-config";
 import { useMatchHistoryQuery } from "@entities/match";
 import { useProgressStore } from "@entities/progress";
 import { useActivateArenaMap } from "@features/activate-arena-map";
@@ -38,10 +38,20 @@ export const useArenaHome = (onError: (messageKey: ErrorMessageKey) => void) => 
     isReplacing: false,
   });
   const format = arena.data?.format;
+  const isUnlocked = isArenaUnlocked(best);
+  const isOnboardingDue = isUnlocked && arena.data?.onboardingDone === false;
+
+  useEffect(() => {
+    if (isOnboardingDue) router.push("/arena/onboarding");
+  }, [isOnboardingDue]);
   const formatMaps = (maps.data ?? []).filter(({ format: size }) => size === format?.size);
 
+  const ban = banOf(arena.error);
+
   return {
-    isUnlocked: isArenaUnlocked(best),
+    isUnlocked,
+    ban: ban?.scope === "arena" ? ban : null,
+    seasonSummary: isOnboardingDue ? null : (arena.data?.lastSeason ?? null),
     passed: passedTowardsArena(best),
     arena: arena.data,
     isPending: arena.isPending,
