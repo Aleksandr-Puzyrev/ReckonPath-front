@@ -3,7 +3,7 @@ import { View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { useUnistyles } from "react-native-unistyles";
 
-import { styles } from "./arena-match-styles";
+import { styles } from "./timer-ring-styles";
 
 interface ITimerRing {
   share: number;
