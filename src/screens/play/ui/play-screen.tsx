@@ -5,6 +5,7 @@ import { View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 
 import { DAILY_UNLOCK_LEVEL } from "@features/daily-today";
+import { RESUME_PARAM } from "@entities/level";
 import { formatDayMonth } from "@shared/lib";
 import { CoachMark } from "@shared/ui/coach-mark";
 import { Dialog } from "@shared/ui/dialog";
@@ -30,11 +31,12 @@ import TutorialCoach from "./tutorial-coach";
 interface IPlayLevel {
   mode: string;
   id: string;
+  isResuming: boolean;
 }
 
-const PlayLevel = ({ mode, id }: IPlayLevel) => {
+const PlayLevel = ({ mode, id, isResuming }: IPlayLevel) => {
   const { t, i18n } = useTranslation();
-  const play = usePlayScreen(mode, id);
+  const play = usePlayScreen(mode, id, isResuming);
   const [boardSize, setBoardSize] = useState(0);
   const target = play.play;
 
@@ -178,8 +180,14 @@ const PlayLevel = ({ mode, id }: IPlayLevel) => {
 
 // A new level gets fresh screen state even when the route is reused (новый уровень получает свежее состояние экрана, даже если маршрут переиспользуется).
 const PlayScreen = () => {
-  const { mode = "", id = "" } = useLocalSearchParams<{ mode: string; id: string }>();
-  return <PlayLevel key={`${mode}/${id}`} mode={mode} id={id} />;
+  const {
+    mode = "",
+    id = "",
+    resume,
+  } = useLocalSearchParams<{ mode: string; id: string; resume?: string }>();
+  return (
+    <PlayLevel key={`${mode}/${id}`} mode={mode} id={id} isResuming={resume === RESUME_PARAM} />
+  );
 };
 
 export default PlayScreen;

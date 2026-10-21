@@ -4,6 +4,7 @@ export {
   ensureSessionMutationOptions,
   hasSavedSession,
   revokeSession,
+  endSession,
   switchSession,
 } from "./api/session-api";
 export { useAccountStore } from "./model/account-store";

@@ -138,5 +138,8 @@ export const useGameSessionStore = create<GameSessionState>()(
   ),
 );
 
+// The route value that resumes the saved attempt without asking (значение маршрута, продолжающее сохранённую попытку без вопроса).
+export const RESUME_PARAM = "1";
+
 export const selectHasSavedSession = (levelId: string) => (state: GameSessionState) =>
   state.levelId === levelId && state.actions.length > 0;

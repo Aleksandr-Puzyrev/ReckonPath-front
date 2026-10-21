@@ -16,6 +16,7 @@ import {
 } from "@entities/match";
 import { errorMessageKey } from "@shared/api";
 import { haptic } from "@shared/haptics";
+import { useTapConfirm } from "@features/confirm-pvp-tap";
 import { useBoardFx } from "@widgets/board";
 
 export const useArenaAsync = (onToast: (text: string) => void) => {
@@ -28,6 +29,9 @@ export const useArenaAsync = (onToast: (text: string) => void) => {
   const { match, finish } = game;
   const size = match?.map.rows ?? 0;
   const asyncId = match?.asyncId ?? null;
+  const confirm = useTapConfirm(
+    game.pendingCell === null && finish === null && !isFlagMode ? String(game.turnsUsed) : null,
+  );
   const isRevealed = (idx: Idx) => game.taps.some(({ cell }) => toIdx(size, cell) === idx);
 
   const tap = useMutation({
@@ -84,7 +88,7 @@ export const useArenaAsync = (onToast: (text: string) => void) => {
       bombNear,
     })),
     flags: game.flags.map((cell) => toIdx(size, cell)),
-    pendingCell: game.pendingCell === null ? null : toIdx(size, game.pendingCell),
+    pendingCell: game.pendingCell === null ? confirm.selected : toIdx(size, game.pendingCell),
     found: game.taps.filter(({ outcome }) => outcome === "target").length,
     turnsUsed: game.turnsUsed,
     deadline: game.deadline,
@@ -99,6 +103,7 @@ export const useArenaAsync = (onToast: (text: string) => void) => {
       }
       if (asyncId === null || game.pendingCell !== null || isRevealed(idx) || finish !== null)
         return;
+      if (!confirm.shouldSend(idx)) return;
       const [row, col] = toCell(size, idx);
       game.setPendingCell([row, col]);
       tap.mutate({ id: asyncId, turn: game.turnsUsed + 1, cell: [row, col] });

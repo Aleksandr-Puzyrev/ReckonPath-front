@@ -4,13 +4,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AccessibilityInfo, AppState, BackHandler } from "react-native";
 
-import type { GameEvent, Idx } from "@reckon-path/engine";
+import type { GameEvent, Idx, LevelInput } from "@reckon-path/engine";
 
 import { TUTORIAL } from "@reckon-path/content";
 
 import { useClockOffset } from "@entities/app-config";
 import { dailyDayQueryOptions } from "@entities/daily";
-import { selectHasSavedSession, useGameSessionStore } from "@entities/level";
+import { replaySession, selectHasSavedSession, useGameSessionStore } from "@entities/level";
 import type { Attempt } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
 import { useRulesStore } from "@entities/rules";
@@ -64,7 +64,19 @@ const isCountedDailyInPlay = (play: PlayLevel) => {
   );
 };
 
-export const usePlayScreen = (mode: string, id: string) => {
+// «Продолжить» on Home already chose to resume, so only a lost attempt still shows its sheet («Продолжить» на главной уже выбрал продолжение, поэтому лист остаётся только у проигранной попытки).
+const initialOverlayOf = (
+  level: LevelInput | null,
+  hasSavedSession: boolean,
+  isResuming: boolean,
+): PlayOverlay => {
+  if (level === null || !hasSavedSession) return "none";
+  if (!isResuming) return "resume";
+  const { actions } = useGameSessionStore.getState();
+  return replaySession(level, actions).status === "lost" ? "lose" : "none";
+};
+
+export const usePlayScreen = (mode: string, id: string, isResuming: boolean) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const clockOffset = useClockOffset();
@@ -89,7 +101,9 @@ export const usePlayScreen = (mode: string, id: string) => {
   );
   const guides = usePlayGuides(level);
   const interstitial = useInterstitial();
-  const [overlay, setOverlay] = useState<PlayOverlay>(hasSavedSession ? "resume" : "none");
+  const [overlay, setOverlay] = useState<PlayOverlay>(() =>
+    initialOverlayOf(level, hasSavedSession, isResuming),
+  );
   const [pending, setPending] = useState<PendingOverlay | null>(null);
   const [isFlagMode, setIsFlagMode] = useState(false);
   const [isRecord, setIsRecord] = useState(false);

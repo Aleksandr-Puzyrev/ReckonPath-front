@@ -4,7 +4,7 @@ import { View } from "react-native";
 
 import type { Ban } from "@entities/app-config";
 import { useMeQuery } from "@entities/wallet";
-import { AppealSheet } from "@features/submit-appeal";
+import { SupportSheet } from "@features/contact-support";
 import { Button } from "@shared/ui/button";
 import { SystemIllustration } from "@shared/ui/system-illustration";
 import { Text } from "@shared/ui/text";
@@ -54,8 +54,10 @@ const BanNotice = ({ ban, onCampaign, onMessage }: IBanNotice) => {
           />
         )}
       </View>
-      <AppealSheet
+      <SupportSheet
         isOpen={isAppealOpen}
+        topic="ban_appeal"
+        title={t("system.banned.appeal")}
         onSent={() => {
           setIsAppealOpen(false);
           onMessage(t("system.appeal.sent"));

@@ -7,7 +7,7 @@ import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { useAccountStore } from "../model/account-store";
 import { useSessionStore } from "../model/session-store";
 
-import { apiSession, ensureSession } from "./session-api";
+import { apiSession, ensureSession, endSession } from "./session-api";
 
 const secureStore = jest.requireMock<{ __reset: () => void }>("expo-secure-store");
 
@@ -156,5 +156,33 @@ describe("session refresh", () => {
     const [{ response }] = await Promise.all([apiClient.GET("/me"), ensureSession()]);
 
     expect(response.status).toBe(200);
+  });
+});
+
+describe("endSession", () => {
+  test("ends the session so the next ensure starts a new guest (decision 0040 #3)", async () => {
+    await ensureSession();
+    useAccountStore.getState().markSignedIn();
+    const guests = watchGuestSignIns();
+
+    await endSession();
+    expect(useSessionStore.getState().accessToken).toBeNull();
+    expect(useAccountStore.getState().hasLogin).toBe(false);
+    await ensureSession();
+
+    expect(guests).toHaveLength(1);
+  });
+
+  test("keeps the account when the server cannot end the session", async () => {
+    await ensureSession();
+    useAccountStore.getState().markSignedIn();
+    mockServer.use(
+      http.post(mockUrl("/auth/logout"), () =>
+        HttpResponse.json({ error: { code: "INTERNAL" } }, { status: 500 }),
+      ),
+    );
+
+    await expect(endSession()).rejects.toMatchObject({ code: "INTERNAL" });
+    expect(useAccountStore.getState().hasLogin).toBe(true);
   });
 });

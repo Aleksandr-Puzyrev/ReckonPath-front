@@ -13,12 +13,44 @@
     "retry": "Try again",
     "offline": "You’re offline. Campaign and daily work without internet",
     "updatedAt": "Updated {{time}}",
-    "later": "Later"
+    "later": "Later",
+    "updating": "Updating…"
   },
   "home": {
+    "eyebrow": "Now playing",
     "level": "Level {{n}}",
+    "moves_one": "{{count}} move",
+    "moves_other": "{{count}} moves",
     "play": "Play",
-    "continue": "Continue"
+    "continue": "Continue",
+    "found": "found {{found}} / {{total}}",
+    "campaignDone": "Campaign complete",
+    "doneEyebrow": "Signal path",
+    "doneText_one": "All {{total}} levels. {{count}} level is below 3★.",
+    "doneText_other": "All {{total}} levels. {{count}} levels are below 3★.",
+    "doneAll": "All {{total}} levels.",
+    "collect": "Collect 3★",
+    "daily": "Daily bearing",
+    "today": "Today",
+    "stats": {
+      "streak": "Streak",
+      "trophies": "Trophies",
+      "stars": "Stars",
+      "levels": "Levels"
+    },
+    "links": {
+      "arena": "Arena · PvP",
+      "arenaLocked": "from level {{n}}",
+      "shop": "Shop"
+    },
+    "preview": "Level {{n}} preview",
+    "tour": {
+      "current": "This is your current level",
+      "levels": "All levels are here",
+      "next": "Next",
+      "gotIt": "Got it",
+      "step": "{{n}} / {{total}}"
+    }
   },
   "play": {
     "hud": {
@@ -301,7 +333,17 @@
     "skip": "Skip",
     "movesLimit": "Each level has a move limit. Fewer moves, more stars",
     "next": "Next",
-    "resultNote": "The first level is always 3★. From now on moves are limited"
+    "resultNote": "The first level is always 3★. From now on moves are limited",
+    "language": {
+      "title": "Choose language",
+      "subtitle": "Выбери язык",
+      "ru": "Русский",
+      "ruHint": "Интерфейс и тексты на русском",
+      "en": "English",
+      "enHint": "Interface and texts in English",
+      "note": "Your system language isn’t supported yet. You can change it later in Settings.",
+      "continue": "Continue"
+    }
   },
   "errors": {
     "generic": "Something went wrong. Please try again",
@@ -613,9 +655,74 @@
     "equippedToast": "Equipped: {{item}}"
   },
   "settings": {
+    "title": "Settings",
+    "made": "Made with love for signals",
+    "group": {
+      "game": "Game",
+      "look": "Appearance",
+      "account": "Account",
+      "help": "Help",
+      "about": "About"
+    },
+    "sound": "Sounds",
+    "music": "Music",
+    "vibration": "Haptics",
+    "coordinates": "Show coordinates",
+    "coordinatesHint": "A1…G7 around the board",
+    "pvpConfirm": "Confirm taps in PvP",
+    "pvpConfirmHint": "second tap sends",
+    "rivalSkins": "Others’ skins in PvP",
+    "rivalSkinsHint": "off — standard style",
     "theme": {
+      "title": "Theme",
       "light": "Light",
-      "dark": "Dark"
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Language",
+      "ru": "Русский",
+      "en": "English",
+      "set": "Language: English"
+    },
+    "account": {
+      "status": "Status",
+      "guest": "Guest",
+      "link": "Link account",
+      "signOut": "Sign out",
+      "signedOut": "You signed out",
+      "delete": "Delete account",
+      "deletionAt": "Deletion {{date}}"
+    },
+    "rules": "Game rules",
+    "support": "Contact support",
+    "version": "Version",
+    "playerId": "Player ID",
+    "copied": "ID copied",
+    "rate": "Rate the game",
+    "delete": {
+      "title": "Delete account",
+      "what": "What gets deleted",
+      "noRestore": "It can’t be restored after 30 days.",
+      "campaign": "Campaign progress",
+      "campaignValue_one": "{{count}} level · {{stars}} ★",
+      "campaignValue_other": "{{count}} levels · {{stars}} ★",
+      "currency": "Currency",
+      "collection": "Collection",
+      "collectionValue_one": "{{count}} item",
+      "collectionValue_other": "{{count}} items",
+      "arena": "Arena",
+      "arenaValue_one": "{{league}} · {{count}} trophy",
+      "arenaValue_other": "{{league}} · {{count}} trophies",
+      "continue": "Continue",
+      "cancel": "Cancel",
+      "confirmTitle": "Confirm with your nickname",
+      "confirmBody": "Type your nickname “{{nickname}}” to delete the account for good.",
+      "mismatch": "Nickname doesn’t match",
+      "forever": "Delete forever",
+      "scheduledTitle": "Account will be deleted on {{date}}",
+      "scheduledBody": "Sign in before then to cancel the deletion.",
+      "restore": "Cancel deletion"
     }
   },
   "arena": {

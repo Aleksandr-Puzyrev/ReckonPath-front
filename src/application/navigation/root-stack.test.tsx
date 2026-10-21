@@ -15,6 +15,7 @@ import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import RootStack from "./root-stack";
 
+jest.mock("../splash/splash-gate", () => () => null);
 jest.mock("@shared/ui/sheet", () => ({
   Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
     isOpen ? children : null,

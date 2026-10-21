@@ -112,6 +112,24 @@ export interface paths {
     get: operations["getMe"];
     put?: never;
     post?: never;
+    /** @description Schedules the deletion in 30 days (Part 1 §7.6). */
+    delete: operations["deleteMe"];
+    options?: never;
+    head?: never;
+    patch: operations["patchMe"];
+    trace?: never;
+  };
+  "/me/restore": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Cancels the scheduled deletion. */
+    post: operations["restoreMe"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1356,6 +1374,84 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  deleteMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          confirmNickname: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The deletion date */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            /** Format: date-time */
+            deletionScheduledAt: string;
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  patchMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          nickname?: string;
+          /** @enum {string} */
+          locale?: "ru" | "en";
+        };
+      };
+    };
+    responses: {
+      /** @description The updated player */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Me"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  restoreMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Deletion cancelled */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
   postAttemptsBatch: {
     parameters: {
       query?: never;
@@ -2205,6 +2301,9 @@ type FlattenedDeepRequired<T> = {
 type ReadonlyArray<T> = [Exclude<T, undefined>] extends [unknown[]]
   ? Readonly<Exclude<T, undefined>>
   : Readonly<Exclude<T, undefined>[]>;
+export const pathsMePatchRequestBodyContentApplicationJsonLocaleValues: ReadonlyArray<
+  FlattenedDeepRequired<paths>["/me"]["patch"]["requestBody"]["content"]["application/json"]["locale"]
+> = ["ru", "en"];
 export const platformValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Platform"]
 > = ["ios", "android"];

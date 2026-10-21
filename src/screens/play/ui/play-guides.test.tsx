@@ -170,6 +170,6 @@ describe("PlayScreen guides", () => {
     await fireEvent.press(screen.getByTestId("pause"));
     await fireEvent(screen.getByTestId("sound"), "valueChange", false);
     await fireEvent(screen.getByTestId("music"), "valueChange", true);
-    expect(useSettingsStore.getState()).toMatchObject({ isSoundOn: false, isMusicOn: true });
+    expect(useSettingsStore.getState().volume).toEqual({ sound: 0, music: 40 });
   });
 });

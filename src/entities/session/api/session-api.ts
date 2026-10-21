@@ -5,7 +5,12 @@ import { apiClient, ApiError, readData, readErrorEnvelope } from "@shared/api";
 import type { ApiSession, components } from "@shared/api";
 
 import { useAccountStore } from "../model/account-store";
-import { readDeviceId, readRefreshToken, saveRefreshToken } from "../model/secure-session";
+import {
+  deleteRefreshToken,
+  readDeviceId,
+  readRefreshToken,
+  saveRefreshToken,
+} from "../model/secure-session";
 import { useSessionStore } from "../model/session-store";
 
 type TokenPair = components["schemas"]["TokenPair"];
@@ -69,6 +74,15 @@ export const revokeSession = async (refreshToken: string) => {
   if (response.ok) return;
   const { code, details } = readErrorEnvelope(error);
   throw new ApiError(response.status, code, details);
+};
+
+// The server session ends first, so a failed sign-out leaves the account as it was (сначала завершается серверная сессия, поэтому неудачный выход оставляет аккаунт как есть).
+export const endSession = async () => {
+  const refreshToken = await readRefreshToken();
+  if (refreshToken !== null) await revokeSession(refreshToken);
+  await deleteRefreshToken();
+  useSessionStore.getState().reset();
+  useAccountStore.getState().reset();
 };
 
 export const apiSession: ApiSession = {

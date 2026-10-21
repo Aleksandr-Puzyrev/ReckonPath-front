@@ -44,6 +44,10 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0036 | [`0036-async-match.md`](0036-async-match.md) | Async match: surrender endpoint proposal, half coins, entry points, screen with the author card and norm, server deadline timer, mock rules, result and history for async |
 | 0037 | [`0037-arena-onboarding.md`](0037-arena-onboarding.md) | Arena onboarding: onboarding endpoint and training queue proposals, 1 target in the tutorial, steps and skipping, rule cards, training match, editor tutorial, easy first bot, analytics TODO |
 | 0038 | [`0038-season-summary-and-ban.md`](0038-season-summary-and-ban.md) | Season summary and arena ban: `lastSeason` and claim proposals, modal on the arena home, claim on close, ban texts, appeal sheet via support tickets, arena and full ban detection, mock season 2 |
+| 0039 | [`0039-offline-tails-plan.md`](0039-offline-tails-plan.md) | Plan after stage 4: offline tails first (settings, Home, splash and onboarding, level editor and play by code, worlds 3–8 content with agent-made covers), then stage 5 on mocks; out of the block |
+| 0040 | [`0040-settings.md`](0040-settings.md) | Settings: volumes, hidden high contrast and notifications, account rows with sign out and deletion, clipboard / store review / application libraries, coordinates on game boards, PvP tap confirmation, theme and language, about |
+| 0041 | [`0041-home.md`](0041-home.md) | Home: two «Сегодня» cards with the arena, world subtitle, direct resume, hero with preview and element chips, campaign complete, streak restore card, quick links, offline and first load |
+| 0042 | [`0042-splash-and-onboarding.md`](0042-splash-and-onboarding.md) | Splash and app onboarding: design and Part 4 texts, dark native splash, in-app sonar splash with a 2.5 s cap and the «Обновляем…» banner, language step for unsupported system languages, Home coach marks after level 3 |
 
 ## Template
 

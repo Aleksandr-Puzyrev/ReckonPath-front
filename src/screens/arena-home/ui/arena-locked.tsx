@@ -2,13 +2,12 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { ARENA_UNLOCK_LEVEL } from "@features/arena-access";
 import { Button } from "@shared/ui/button";
 import { Gradient } from "@shared/ui/gradient";
 import { Text } from "@shared/ui/text";
 
 import LockIcon from "@assets/icons/arena/lock.svg";
-
-import { ARENA_UNLOCK_LEVEL } from "../model/arena-unlock";
 
 import { styles } from "./arena-locked-styles";
 

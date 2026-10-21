@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react-
 import type { ReactNode } from "react";
 
 import { matchSession, useMatchStore } from "@entities/match";
+import { useSettingsStore } from "@entities/settings";
 import { i18n } from "@shared/i18n";
 import { mockServer } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
@@ -118,6 +119,20 @@ describe("ArenaMatchScreen", () => {
     await fireEvent.press(screen.getByTestId("cell-7"));
 
     expect(tap).toHaveBeenCalledWith([1, 2]);
+  });
+
+  test("asks for a second tap when the PvP tap confirmation is on (decision 0040 #7)", async () => {
+    const tap = jest.spyOn(matchSession, "tap").mockImplementation(() => undefined);
+    useSettingsStore.getState().togglePvpTapConfirm();
+    playing();
+    await renderMatch();
+
+    await fireEvent.press(screen.getByTestId("cell-7"));
+    expect(tap).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByTestId("cell-7"));
+
+    expect(tap).toHaveBeenCalledWith([1, 2]);
+    useSettingsStore.getState().reset();
   });
 
   test("puts a flag in any turn (decision 0034 #5)", async () => {

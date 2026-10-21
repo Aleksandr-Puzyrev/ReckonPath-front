@@ -20,9 +20,9 @@ interface IPauseSheet {
 
 const PauseSheet = ({ isOpen, onResume, onRestart, onRules, onExit, note }: IPauseSheet) => {
   const { t } = useTranslation();
-  const isSoundOn = useSettingsStore((state) => state.isSoundOn);
-  const isMusicOn = useSettingsStore((state) => state.isMusicOn);
-  const { toggleSound, toggleMusic } = useSettingsStore.getState();
+  const isSoundOn = useSettingsStore((state) => state.volume.sound > 0);
+  const isMusicOn = useSettingsStore((state) => state.volume.music > 0);
+  const { toggleVolume } = useSettingsStore.getState();
 
   return (
     <Sheet isOpen={isOpen} onDismiss={onResume}>
@@ -47,13 +47,13 @@ const PauseSheet = ({ isOpen, onResume, onRestart, onRules, onExit, note }: IPau
           testID="sound"
           label={t("play.pause.sound")}
           isOn={isSoundOn}
-          onToggle={toggleSound}
+          onToggle={() => toggleVolume("sound")}
         />
         <SwitchRow
           testID="music"
           label={t("play.pause.music")}
           isOn={isMusicOn}
-          onToggle={toggleMusic}
+          onToggle={() => toggleVolume("music")}
         />
       </View>
       <Button label={t("play.pause.exit")} onPress={onExit} variant="ghost" />

@@ -13,12 +13,48 @@
     "retry": "Повторить",
     "offline": "Нет сети. Кампания и дейли работают без интернета",
     "updatedAt": "Обновлено {{time}}",
-    "later": "Позже"
+    "later": "Позже",
+    "updating": "Обновляем…"
   },
   "home": {
+    "eyebrow": "Текущая игра",
     "level": "Уровень {{n}}",
+    "moves_one": "{{count}} ход",
+    "moves_few": "{{count}} хода",
+    "moves_many": "{{count}} ходов",
+    "moves_other": "{{count}} хода",
     "play": "Играть",
-    "continue": "Продолжить"
+    "continue": "Продолжить",
+    "found": "найдено {{found}} / {{total}}",
+    "campaignDone": "Кампания пройдена",
+    "doneEyebrow": "Путь сигнала",
+    "doneText_one": "Все {{total}} уровней. Остался {{count}} уровень не на 3★.",
+    "doneText_few": "Все {{total}} уровней. Осталось {{count}} уровня не на 3★.",
+    "doneText_many": "Все {{total}} уровней. Осталось {{count}} уровней не на 3★.",
+    "doneText_other": "Все {{total}} уровней. Осталось {{count}} уровня не на 3★.",
+    "doneAll": "Все {{total}} уровней.",
+    "collect": "Собрать 3★",
+    "daily": "Пеленг дня",
+    "today": "Сегодня",
+    "stats": {
+      "streak": "Серия",
+      "trophies": "Кубки",
+      "stars": "Звёзды",
+      "levels": "Уровни"
+    },
+    "links": {
+      "arena": "Арена · PvP",
+      "arenaLocked": "с уровня {{n}}",
+      "shop": "Витрина"
+    },
+    "preview": "Превью уровня {{n}}",
+    "tour": {
+      "current": "Здесь твой текущий уровень",
+      "levels": "Все уровни — здесь",
+      "next": "Дальше",
+      "gotIt": "Понятно",
+      "step": "{{n}} / {{total}}"
+    }
   },
   "play": {
     "hud": {
@@ -331,7 +367,17 @@
     "skip": "Пропустить",
     "movesLimit": "На уровень даётся ограниченное число ходов. Чем меньше потратишь, тем больше звёзд",
     "next": "Далее",
-    "resultNote": "Первый уровень — всегда 3★. Дальше ходы будут ограничены"
+    "resultNote": "Первый уровень — всегда 3★. Дальше ходы будут ограничены",
+    "language": {
+      "title": "Choose language",
+      "subtitle": "Выбери язык",
+      "ru": "Русский",
+      "ruHint": "Интерфейс и тексты на русском",
+      "en": "English",
+      "enHint": "Interface and texts in English",
+      "note": "Язык системы пока не поддерживается. Поменять можно в настройках.",
+      "continue": "Продолжить"
+    }
   },
   "errors": {
     "generic": "Что-то пошло не так. Попробуй ещё раз",
@@ -663,9 +709,80 @@
     "equippedToast": "Экипировано: {{item}}"
   },
   "settings": {
+    "title": "Настройки",
+    "made": "Сделано с любовью к сигналам",
+    "group": {
+      "game": "Игра",
+      "look": "Оформление",
+      "account": "Аккаунт",
+      "help": "Помощь",
+      "about": "О приложении"
+    },
+    "sound": "Звуки",
+    "music": "Музыка",
+    "vibration": "Вибрация",
+    "coordinates": "Показывать координаты",
+    "coordinatesHint": "A1…G7 по краям поля",
+    "pvpConfirm": "Подтверждение тапа в PvP",
+    "pvpConfirmHint": "второй тап — отправить",
+    "rivalSkins": "Чужие скины в PvP",
+    "rivalSkinsHint": "выкл — стандартный стиль",
     "theme": {
+      "title": "Тема",
       "light": "Светлая",
-      "dark": "Тёмная"
+      "dark": "Тёмная",
+      "system": "Как в системе"
+    },
+    "language": {
+      "title": "Язык",
+      "ru": "Русский",
+      "en": "English",
+      "set": "Язык: русский"
+    },
+    "account": {
+      "status": "Статус",
+      "guest": "Гость",
+      "link": "Привязать аккаунт",
+      "signOut": "Выйти",
+      "signedOut": "Ты вышел из аккаунта",
+      "delete": "Удалить аккаунт",
+      "deletionAt": "Удаление {{date}}"
+    },
+    "rules": "Правила игры",
+    "support": "Написать в поддержку",
+    "version": "Версия",
+    "playerId": "ID игрока",
+    "copied": "ID скопирован",
+    "rate": "Оценить игру",
+    "delete": {
+      "title": "Удаление аккаунта",
+      "what": "Что удалится",
+      "noRestore": "Восстановить после 30 дней будет нельзя.",
+      "campaign": "Прогресс кампании",
+      "campaignValue_one": "{{count}} уровень · {{stars}} ★",
+      "campaignValue_few": "{{count}} уровня · {{stars}} ★",
+      "campaignValue_many": "{{count}} уровней · {{stars}} ★",
+      "campaignValue_other": "{{count}} уровня · {{stars}} ★",
+      "currency": "Валюта",
+      "collection": "Коллекция",
+      "collectionValue_one": "{{count}} предмет",
+      "collectionValue_few": "{{count}} предмета",
+      "collectionValue_many": "{{count}} предметов",
+      "collectionValue_other": "{{count}} предмета",
+      "arena": "Арена",
+      "arenaValue_one": "{{league}} · {{count}} кубок",
+      "arenaValue_few": "{{league}} · {{count}} кубка",
+      "arenaValue_many": "{{league}} · {{count}} кубков",
+      "arenaValue_other": "{{league}} · {{count}} кубка",
+      "continue": "Продолжить",
+      "cancel": "Отмена",
+      "confirmTitle": "Подтверди ником",
+      "confirmBody": "Введи свой ник «{{nickname}}», чтобы удалить аккаунт навсегда.",
+      "mismatch": "Ник не совпадает",
+      "forever": "Удалить навсегда",
+      "scheduledTitle": "Аккаунт будет удалён {{date}}",
+      "scheduledBody": "Войди до этой даты, чтобы отменить удаление.",
+      "restore": "Отменить удаление"
     }
   },
   "arena": {

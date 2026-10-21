@@ -6,7 +6,8 @@ import { initReactI18next } from "react-i18next";
 
 import en from "./locales/en.json";
 import ru from "./locales/ru.json";
-import { FALLBACK_LANGUAGE, resolveLanguage } from "./resolve-language";
+import { FALLBACK_LANGUAGE, resolveLanguage, SUPPORTED_LANGUAGES } from "./resolve-language";
+import type { AppLanguage } from "./resolve-language";
 
 export const resources = {
   ru: { translation: ru },
@@ -19,15 +20,29 @@ declare module "i18next" {
   }
 }
 
-// TODO: the language chosen in settings overrides the system one once the settings screen exists
+const systemLanguageCode = () => getLocales()[0]?.languageCode?.toLowerCase() ?? null;
+
+const systemLanguage = () => resolveLanguage(systemLanguageCode());
+
+export const isSystemLanguageSupported = () => {
+  const code = systemLanguageCode();
+  return code !== null && (SUPPORTED_LANGUAGES as readonly string[]).includes(code);
+};
+
 const i18n = createInstance();
 
 i18n.use(initReactI18next).init({
   resources,
-  lng: resolveLanguage(getLocales()[0]?.languageCode),
+  lng: systemLanguage(),
   fallbackLng: FALLBACK_LANGUAGE,
   interpolation: { escapeValue: false },
   initAsync: false,
 });
+
+// A language chosen in the settings wins over the system one (язык, выбранный в настройках, важнее системного).
+export const applyLanguage = (language: AppLanguage | null) => {
+  const next = language ?? systemLanguage();
+  if (i18n.language !== next) void i18n.changeLanguage(next);
+};
 
 export default i18n;

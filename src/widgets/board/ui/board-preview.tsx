@@ -1,10 +1,12 @@
+import { useEffect } from "react";
 import { View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
 import { createBoard } from "@reckon-path/engine";
-import type { LevelInput } from "@reckon-path/engine";
+import type { GameState, LevelInput } from "@reckon-path/engine";
 
 import { computeBoardGeometry } from "../model/board-geometry";
+import { buildCellVisuals } from "../model/cell-visuals";
 import type { CellVisual } from "../model/cell-visuals";
 import { useBoardFx } from "../model/use-board-fx";
 
@@ -14,6 +16,7 @@ import { styles } from "./board-styles";
 interface IBoardPreview {
   level: LevelInput;
   size: number;
+  game?: GameState | null;
 }
 
 const CLOSED_CELL: CellVisual = {
@@ -27,11 +30,22 @@ const CLOSED_CELL: CellVisual = {
   isBuoy: false,
 };
 
-const BoardPreview = ({ level, size }: IBoardPreview) => {
+const PREVIEW_OPTIONS = { flags: [], lastCell: null, showHidden: false };
+
+// An unfinished attempt shows its opened tiles; otherwise every tile is closed (незаконченная попытка показывает открытые клетки, иначе все клетки закрыты).
+const visualsOf = (kinds: readonly unknown[], game: GameState | null) =>
+  game === null ? kinds.map(() => CLOSED_CELL) : buildCellVisuals(game, PREVIEW_OPTIONS);
+
+const BoardPreview = ({ level, size, game = null }: IBoardPreview) => {
   const { board } = createBoard(level);
   const geometry = computeBoardGeometry(board.rows, board.cols, size);
-  const visuals = useSharedValue<CellVisual[]>(board.kinds.map(() => CLOSED_CELL));
+  const cells = visualsOf(board.kinds, game);
+  const visuals = useSharedValue<CellVisual[]>(cells);
   const fx = useBoardFx();
+
+  useEffect(() => {
+    visuals.set(cells);
+  }, [visuals, cells]);
 
   return (
     <View

@@ -203,11 +203,11 @@ describe("ArenaHomeScreen", () => {
     );
     await renderArena();
     await fireEvent.press(await screen.findByTestId("ban-appeal"));
-    expect(screen.getByTestId("appeal-send")).toBeDisabled();
+    expect(screen.getByTestId("support-send")).toBeDisabled();
 
-    await fireEvent.changeText(screen.getByTestId("appeal-message"), "Это не я");
-    await waitFor(() => expect(screen.getByTestId("appeal-send")).toBeEnabled());
-    await fireEvent.press(screen.getByTestId("appeal-send"));
+    await fireEvent.changeText(screen.getByTestId("support-message"), "Это не я");
+    await waitFor(() => expect(screen.getByTestId("support-send")).toBeEnabled());
+    await fireEvent.press(screen.getByTestId("support-send"));
 
     expect(await screen.findByText("Обращение отправлено")).toBeOnTheScreen();
   });

@@ -11,6 +11,7 @@ import { arenaMapHandlers } from "./arena-map-handlers";
 import { attemptsHandlers } from "./attempts-handlers";
 import { authHandlers } from "./auth-handlers";
 import { dailyHandlers } from "./daily-handlers";
+import { meHandlers } from "./me-handlers";
 import { mockUrl } from "./mock-url";
 import { shopHandlers } from "./shop-handlers";
 import { supportHandlers } from "./support-handlers";
@@ -43,6 +44,7 @@ export const handlers = [
   ...authHandlers,
   ...attemptsHandlers,
   ...dailyHandlers,
+  ...meHandlers,
   ...walletHandlers,
   ...shopHandlers,
   ...adsHandlers,

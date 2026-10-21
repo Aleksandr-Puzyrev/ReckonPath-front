@@ -15,7 +15,12 @@ export const styles = StyleSheet.create((theme) => ({
   },
   actions: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "flex-end",
     gap: theme.space[3],
+  },
+  caption: {
+    marginRight: "auto",
+    color: theme.colors.text.secondary,
   },
 }));

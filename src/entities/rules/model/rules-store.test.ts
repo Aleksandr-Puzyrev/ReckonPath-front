@@ -28,12 +28,23 @@ describe("useRulesStore", () => {
     const { migrate } = useRulesStore.persist.getOptions();
     expect(
       migrate?.({ seenCards: ["beacon", "laser"], tutorial: "done", hasSeenMovesHint: true }, 0),
-    ).toEqual({ seenCards: ["beacon"], tutorial: "done", hasSeenMovesHint: true });
+    ).toEqual({
+      seenCards: ["beacon"],
+      tutorial: "done",
+      hasSeenMovesHint: true,
+      hasSeenHomeTour: false,
+    });
     expect(migrate?.({ tutorial: 5 }, 0)).toEqual({
       seenCards: [],
       tutorial: "pending",
       hasSeenMovesHint: false,
+      hasSeenHomeTour: false,
     });
+  });
+
+  test("remembers the Home tour (decision 0042 #5)", () => {
+    store().markHomeTourSeen();
+    expect(store().hasSeenHomeTour).toBe(true);
   });
 });
 

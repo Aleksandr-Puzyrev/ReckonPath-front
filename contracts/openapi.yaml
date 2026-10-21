@@ -134,6 +134,55 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Me" }
         default: { $ref: "#/components/responses/Error" }
+    patch:
+      operationId: patchMe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickname: { type: string }
+                locale: { type: string, enum: [ru, en] }
+      responses:
+        "200":
+          description: The updated player
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: deleteMe
+      description: Schedules the deletion in 30 days (Part 1 §7.6).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [confirmNickname]
+              properties:
+                confirmNickname: { type: string }
+      responses:
+        "200":
+          description: The deletion date
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deletionScheduledAt]
+                properties:
+                  deletionScheduledAt: { type: string, format: date-time }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/restore:
+    post:
+      operationId: restoreMe
+      description: Cancels the scheduled deletion.
+      responses:
+        "204": { description: Deletion cancelled }
+        default: { $ref: "#/components/responses/Error" }
 
   /attempts:batch:
     post:

@@ -13,9 +13,11 @@ import { buildCellVisuals } from "../model/cell-visuals";
 import type { CellVisual } from "../model/cell-visuals";
 import { describeRevealedCell } from "../model/describe-cell";
 import type { BoardFx } from "../model/use-board-fx";
+import { useCoordinatesSize } from "../model/use-coordinates-size";
 
 import BoardA11yOverlay from "./board-a11y-overlay";
 import BoardCanvas from "./board-canvas";
+import BoardCoordinates from "./board-coordinates";
 import { styles } from "./board-styles";
 import BoardTooltip from "./board-tooltip";
 
@@ -50,6 +52,7 @@ const Board = ({
 }: IBoard) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
+  const { isCoordinatesOn, boardSize } = useCoordinatesSize(size);
   const board = useGameSessionStore((state) => state.game?.board);
   const visuals = useSharedValue<CellVisual[]>([]);
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
@@ -83,7 +86,7 @@ const Board = ({
   }, [tooltip, theme.motion.toast.duration]);
 
   if (board === undefined) return null;
-  const geometry = computeBoardGeometry(board.rows, board.cols, size);
+  const geometry = computeBoardGeometry(board.rows, board.cols, boardSize);
 
   const handleCellPress = (idx: Idx) => {
     const { game } = useGameSessionStore.getState();
@@ -92,7 +95,7 @@ const Board = ({
     onCellPress(idx);
   };
 
-  return (
+  const content = (
     <View
       style={[
         styles.board,
@@ -118,6 +121,12 @@ const Board = ({
         />
       ) : null}
     </View>
+  );
+
+  return isCoordinatesOn ? (
+    <BoardCoordinates geometry={geometry}>{content}</BoardCoordinates>
+  ) : (
+    content
   );
 };
 

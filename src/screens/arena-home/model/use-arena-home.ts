@@ -7,12 +7,11 @@ import { banOf, useServerMinute, useSystemState } from "@entities/app-config";
 import { useMatchHistoryQuery } from "@entities/match";
 import { useProgressStore } from "@entities/progress";
 import { useActivateArenaMap } from "@features/activate-arena-map";
+import { isArenaUnlocked, passedTowardsArena } from "@features/arena-access";
 import { useClaimSeasonStep } from "@features/claim-season-step";
 import { useIsOnline } from "@shared/api";
 import { useFindMatch } from "@widgets/find-match";
 import type { ErrorMessageKey } from "@shared/api";
-
-import { isArenaUnlocked, passedTowardsArena } from "./arena-unlock";
 
 const HISTORY_ROWS = 5;
 

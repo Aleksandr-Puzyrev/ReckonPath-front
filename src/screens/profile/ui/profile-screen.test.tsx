@@ -62,6 +62,14 @@ describe("ProfileScreen", () => {
     expect(mockRouter.push).toHaveBeenNthCalledWith(2, "/account/sign-in");
   });
 
+  test("opens the settings (design 23.1, decision 0040 #5)", async () => {
+    await renderProfile();
+
+    await fireEvent.press(screen.getByTestId("profile-settings"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/settings");
+  });
+
   test("shows no guest card for an account with a login", async () => {
     mockServer.use(
       http.get(mockUrl("/me"), () =>

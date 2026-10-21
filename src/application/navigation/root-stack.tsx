@@ -14,6 +14,7 @@ import LinkOfferHost from "../account/link-offer-host";
 import AdsConsentHost from "../ads/ads-consent-host";
 import { useSystemSignalRefetch } from "../query/use-system-signal-refetch";
 import { useGuestSession } from "../session/use-guest-session";
+import SplashGate from "../splash/splash-gate";
 import { useAttemptsSync } from "../sync/use-attempts-sync";
 import { useDailyWeekPrefetch } from "../sync/use-daily-week-prefetch";
 
@@ -43,6 +44,9 @@ const RootStack = () => {
         <Stack.Protected guard={!isUpdateRequired && !isMaintenance && !isBanned}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
+          <Stack.Screen name="onboarding/language" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="settings/index" />
+          <Stack.Screen name="settings/deletion" />
           <Stack.Screen name="arena/history/[id]" />
           <Stack.Screen name="arena/map/[id]" options={{ gestureEnabled: false }} />
           <Stack.Screen
@@ -93,6 +97,7 @@ const RootStack = () => {
       ) : null}
       <LinkOfferHost isSuspended={isSoftUpdateOpen} />
       <AdsConsentHost />
+      <SplashGate />
     </>
   );
 };

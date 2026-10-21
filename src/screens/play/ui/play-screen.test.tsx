@@ -16,7 +16,7 @@ import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import PlayScreen from "./play-screen";
 
-const mockParams = { mode: "campaign", id: "c-a" };
+const mockParams: { mode: string; id: string; resume?: string } = { mode: "campaign", id: "c-a" };
 const mockRouter = { back: jest.fn(), replace: jest.fn(), canGoBack: () => true };
 
 jest.mock("expo-router", () => ({
@@ -75,6 +75,7 @@ describe("PlayScreen", () => {
     jest.useFakeTimers();
     mockParams.mode = "campaign";
     mockParams.id = "c-a";
+    mockParams.resume = undefined;
     mockRouter.replace.mockClear();
     unlockTapInput();
     useGameSessionStore.getState().reset();
@@ -331,6 +332,19 @@ describe("PlayScreen", () => {
     await fireEvent.press(screen.getByText("Продолжить"));
     expect(screen.getByText("3 / 4")).toBeOnTheScreen();
     expect(useGameSessionStore.getState().flags).toEqual([5]);
+  });
+
+  test("resumes a saved game without asking when Home already chose «Продолжить» (decision 0041 #3)", async () => {
+    const first = await renderScreen();
+    await tap(0);
+    await first.unmount();
+    useGameSessionStore.setState({ game: null });
+    mockParams.resume = "1";
+
+    await renderScreen();
+
+    expect(screen.queryByText("Продолжить или начать заново?")).toBeNull();
+    expect(screen.getByText("3 / 4")).toBeOnTheScreen();
   });
 
   test("ends a lost attempt when leaving, so it is not offered again", async () => {

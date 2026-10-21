@@ -14,6 +14,7 @@ import { fakeGameServer } from "./fake-game/fake-game-server";
 import { resetMockArenaProfile } from "./mock-arena-profile";
 import { resetMockPlayer } from "./mock-player";
 import { resetMockMapCheck } from "./mock-map-check";
+import { resetMockMe } from "./me-handlers";
 import { resetMockShop } from "./mock-shop";
 import { resetMockSupport } from "./support-handlers";
 import { resetMockWallet } from "./mock-wallet";
@@ -47,6 +48,7 @@ export const mockServer = {
     resetMockDaily();
     resetMockWallet();
     resetMockShop();
+    resetMockMe();
     resetMockSupport();
     resetMockPurchases();
     resetMockAds();

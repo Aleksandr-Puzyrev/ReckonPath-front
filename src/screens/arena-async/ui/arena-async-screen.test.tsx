@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { useAsyncMatchStore } from "@entities/match";
 import type { AsyncMatch } from "@entities/match";
+import { useSettingsStore } from "@entities/settings";
 import { apiClient } from "@shared/api";
 import { setMockAsyncMap } from "@shared/api/mocks/async-handlers";
 import { i18n } from "@shared/i18n";
@@ -95,6 +96,18 @@ describe("ArenaAsyncScreen", () => {
       }),
     );
     expect(useAsyncMatchStore.getState().finish?.result).toBe("win");
+  });
+
+  test("asks for a second tap when the PvP tap confirmation is on (decision 0040 #7)", async () => {
+    useSettingsStore.getState().togglePvpTapConfirm();
+    await startMatch();
+
+    await fireEvent.press(screen.getByTestId("cell-24"));
+    expect(useAsyncMatchStore.getState().taps).toHaveLength(0);
+    await fireEvent.press(screen.getByTestId("cell-24"));
+
+    await waitFor(() => expect(useAsyncMatchStore.getState().finish?.result).toBe("win"));
+    useSettingsStore.getState().reset();
   });
 
   test("gives up after a confirmation (decision 0036 #1)", async () => {

@@ -8,9 +8,9 @@ import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 import { APP_VERSION } from "@shared/config";
 
-const APPEAL_TOPIC = "ban_appeal";
+export type SupportTopic = "ban_appeal" | "support";
 
-interface AppealCallbacks {
+interface SupportCallbacks {
   onSent: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
 }
@@ -18,7 +18,7 @@ interface AppealCallbacks {
 const deviceOf = () =>
   [Platform.OS, Device.osVersion, Device.modelName].filter((part) => part !== null).join(" ");
 
-export const useSubmitAppeal = ({ onSent, onError }: AppealCallbacks) => {
+export const useContactSupport = (topic: SupportTopic, { onSent, onError }: SupportCallbacks) => {
   const { data: me } = useMeQuery();
   const { mutate, isPending } = useMutation({
     ...createTicketMutationOptions(),
@@ -30,7 +30,7 @@ export const useSubmitAppeal = ({ onSent, onError }: AppealCallbacks) => {
     isPending,
     submit: (message: string) =>
       mutate({
-        topic: APPEAL_TOPIC,
+        topic,
         message,
         diagnostics: { appVersion: APP_VERSION, device: deviceOf(), userId: me?.id ?? "" },
       }),

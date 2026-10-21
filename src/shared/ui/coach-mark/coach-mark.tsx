@@ -12,17 +12,23 @@ export interface CoachAction {
 
 interface ICoachMark {
   text: string;
+  caption?: string;
   action?: CoachAction;
   secondaryAction?: CoachAction;
 }
 
-const CoachMark = ({ text, action, secondaryAction }: ICoachMark) => (
+const CoachMark = ({ text, caption, action, secondaryAction }: ICoachMark) => (
   <View style={styles.card} accessibilityLiveRegion="polite">
     <Text variant="body.m" style={styles.text}>
       {text}
     </Text>
     {action === undefined && secondaryAction === undefined ? null : (
       <View style={styles.actions}>
+        {caption === undefined ? null : (
+          <Text variant="caption" style={styles.caption}>
+            {caption}
+          </Text>
+        )}
         {secondaryAction === undefined ? null : (
           <Button
             label={secondaryAction.label}

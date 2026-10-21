@@ -10,8 +10,10 @@ import type { CellVisual } from "../model/cell-visuals";
 import { remoteVisualsOf } from "../model/remote-visuals";
 import type { RemoteTap } from "../model/remote-visuals";
 import type { BoardFx } from "../model/use-board-fx";
+import { useCoordinatesSize } from "../model/use-coordinates-size";
 
 import BoardCanvas from "./board-canvas";
+import BoardCoordinates from "./board-coordinates";
 import { styles } from "./board-styles";
 
 interface IBoardRemote {
@@ -37,8 +39,9 @@ const BoardRemote = ({
   onCellPress,
   onCellLongPress,
 }: IBoardRemote) => {
+  const { isCoordinatesOn, boardSize } = useCoordinatesSize(size);
   const { board, rules } = createBoard(layout);
-  const geometry = computeBoardGeometry(board.rows, board.cols, size);
+  const geometry = computeBoardGeometry(board.rows, board.cols, boardSize);
   const cells = remoteVisualsOf(board, rules, taps, { flags, pendingCell, isDimmed });
   const visuals = useSharedValue<CellVisual[]>(cells);
 
@@ -46,7 +49,7 @@ const BoardRemote = ({
     visuals.set(cells);
   }, [visuals, cells]);
 
-  return (
+  const content = (
     <View
       testID="board-remote"
       style={[
@@ -63,6 +66,12 @@ const BoardRemote = ({
         onCellLongPress={onCellLongPress}
       />
     </View>
+  );
+
+  return isCoordinatesOn ? (
+    <BoardCoordinates geometry={geometry}>{content}</BoardCoordinates>
+  ) : (
+    content
   );
 };
 

@@ -11,6 +11,7 @@ import { TUTORIAL_MAP_ID, useArenaMapsQuery } from "@entities/arena-map";
 import { layoutLevelOf, matchSession, useMatchStore } from "@entities/match";
 import type { MatchTap } from "@entities/match";
 import { useMeQuery } from "@entities/wallet";
+import { useTapConfirm } from "@features/confirm-pvp-tap";
 import { useBoardFx } from "@widgets/board";
 import type { RemoteTap } from "@widgets/board";
 
@@ -47,6 +48,7 @@ export const useArenaMatch = () => {
     match.current === "me" &&
     (match.phase === "myTurn" || match.phase === "finalTurn") &&
     match.pendingCell === null;
+  const confirm = useTapConfirm(canTap && !isFlagMode ? `${match.turn}:${match.current}` : null);
   const isRevealed = (idx: Idx) => match.myTaps.some((tap) => toIdx(size, tap.cell) === idx);
 
   const toggleFlag = (idx: Idx) => {
@@ -68,7 +70,7 @@ export const useArenaMatch = () => {
     myTaps: match.myTaps.map(remoteOf(size)),
     opponentTaps: match.opponentTaps.map(({ cell }) => toIdx(size, cell)),
     flags: match.flags.map((cell) => toIdx(size, cell)),
-    pendingCell: match.pendingCell === null ? null : toIdx(size, match.pendingCell),
+    pendingCell: match.pendingCell === null ? confirm.selected : toIdx(size, match.pendingCell),
     isDimmed: match.current !== "me",
     trainingHint: match.isTraining ? trainingHintOf(match.myTaps, match.end) : null,
     banner: bannerTextOf(match.phase, match.current, match.skipped, t),
@@ -78,7 +80,7 @@ export const useArenaMatch = () => {
         if (!isRevealed(idx)) toggleFlag(idx);
         return;
       }
-      if (!canTap || isRevealed(idx)) return;
+      if (!canTap || isRevealed(idx) || !confirm.shouldSend(idx)) return;
       const [row, col] = toCell(size, idx);
       matchSession.tap([row, col]);
     },

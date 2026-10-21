@@ -8,42 +8,45 @@ import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
 import { TextField } from "@shared/ui/text-field";
 
-import { APPEAL_MAX_LENGTH, appealSchema } from "../model/appeal-schema";
-import type { AppealSchema } from "../model/appeal-schema";
-import { useSubmitAppeal } from "../model/use-submit-appeal";
+import { SUPPORT_MESSAGE_MAX, supportSchema } from "../model/support-schema";
+import type { SupportSchema } from "../model/support-schema";
+import { useContactSupport } from "../model/use-contact-support";
+import type { SupportTopic } from "../model/use-contact-support";
 
-import { styles } from "./appeal-sheet-styles";
+import { styles } from "./support-sheet-styles";
 
-interface IAppealForm {
+interface ISupportForm {
+  topic: SupportTopic;
+  title: string;
   onSent: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
 }
 
-const DEFAULTS: AppealSchema = { message: "" };
+const DEFAULTS: SupportSchema = { message: "" };
 
-const AppealForm = ({ onSent, onError }: IAppealForm) => {
+const SupportForm = ({ topic, title, onSent, onError }: ISupportForm) => {
   const { t } = useTranslation();
-  const { control, handleSubmit, formState } = useForm<AppealSchema>({
-    resolver: zodResolver(appealSchema),
+  const { control, handleSubmit, formState } = useForm<SupportSchema>({
+    resolver: zodResolver(supportSchema),
     defaultValues: DEFAULTS,
     mode: "onChange",
   });
-  const appeal = useSubmitAppeal({ onSent, onError });
+  const support = useContactSupport(topic, { onSent, onError });
 
   return (
     <View style={styles.sheet}>
       <Text variant="title.m" accessibilityRole="header">
-        {t("system.banned.appeal")}
+        {title}
       </Text>
       <Controller
         control={control}
         name="message"
         render={({ field }) => (
           <TextField
-            testID="appeal-message"
+            testID="support-message"
             label={t("system.appeal.field")}
-            counter={`${field.value.length} / ${APPEAL_MAX_LENGTH}`}
-            maxLength={APPEAL_MAX_LENGTH}
+            counter={`${field.value.length} / ${SUPPORT_MESSAGE_MAX}`}
+            maxLength={SUPPORT_MESSAGE_MAX}
             multiline
             value={field.value}
             onChangeText={field.onChange}
@@ -52,15 +55,15 @@ const AppealForm = ({ onSent, onError }: IAppealForm) => {
         )}
       />
       <Button
-        testID="appeal-send"
+        testID="support-send"
         label={t("system.appeal.send")}
         variant="primary"
         size="l"
-        isDisabled={!formState.isValid || appeal.isPending}
-        onPress={handleSubmit(({ message }) => appeal.submit(message))}
+        isDisabled={!formState.isValid || support.isPending}
+        onPress={handleSubmit(({ message }) => support.submit(message))}
       />
     </View>
   );
 };
 
-export default AppealForm;
+export default SupportForm;

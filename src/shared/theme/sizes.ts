@@ -27,6 +27,12 @@ export const sizes = {
   },
   // The soft update sheet's badge from design 28.2, decision 0014 (значок листа мягкого обновления из дизайна 28.2, решение 0014).
   softUpdateBadge: { size: 52, radius: 16, icon: 26 },
+  // The splash emblem matches the native splash image width; the sonar ring grows to the ring size, design 1.1, decision 0042 (знак сплэша совпадает с шириной картинки системного сплэша; сонарное кольцо растёт до размера кольца, дизайн 1.1, решение 0042).
+  splash: { emblem: 96, ring: 240, ringStroke: 1.5 },
+  // The board preview of the Home hero, design 19.1, decision 0041 (превью поля в геро главной, дизайн 19.1, решение 0041).
+  home: { heroBoard: 200, skeletonTile: 96 },
+  // The settings row tile and the volume slider of design 25.1, decision 0040 (плашка строки настроек и слайдер громкости из дизайна 25.1, решение 0040).
+  settings: { iconTile: 30, iconTileRadius: 9, sliderTrack: 6, sliderThumb: 22 },
   // The daily screen's preview, streak track and calendar from design 20.1, decision 0017 (превью, шкала серии и календарь экрана дейли из дизайна 20.1, решение 0017).
   daily: { preview: 120, milestone: 28, track: 6, calendarGap: 5, rankBadge: 26 },
   timerRing: { size: 56, stroke: 4 },

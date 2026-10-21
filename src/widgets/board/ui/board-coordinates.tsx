@@ -22,8 +22,12 @@ const BoardCoordinates = ({ geometry, children }: IBoardCoordinates) => {
   const rows = Array.from({ length: geometry.rows }, (_, row) => row);
 
   return (
-    <View style={styles.wrap} importantForAccessibility="no-hide-descendants">
-      <View style={[styles.letters, { width: geometry.width }]}>
+    <View style={styles.wrap}>
+      <View
+        style={[styles.letters, { width: geometry.width }]}
+        importantForAccessibility="no-hide-descendants"
+        accessibilityElementsHidden
+      >
         {columns.map((col) => (
           <Text
             key={col}
@@ -39,7 +43,11 @@ const BoardCoordinates = ({ geometry, children }: IBoardCoordinates) => {
         ))}
       </View>
       <View style={styles.row}>
-        <View style={[styles.numbers, { height: geometry.height }]}>
+        <View
+          style={[styles.numbers, { height: geometry.height }]}
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
+        >
           {rows.map((row) => (
             <View
               key={row}

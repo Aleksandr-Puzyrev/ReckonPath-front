@@ -5,6 +5,7 @@ import { ScrollView, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { PREVIEW_LEVEL } from "@entities/level";
+import { Button } from "@shared/ui/button";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
@@ -65,6 +66,13 @@ const ProfileScreen = () => {
             />
           </>
         )}
+        <Button
+          testID="profile-settings"
+          label={t("settings.title")}
+          variant="secondary"
+          size="l"
+          onPress={() => router.push("/settings")}
+        />
       </ScrollView>
       <SlotSheet
         slot={profile.slot}
