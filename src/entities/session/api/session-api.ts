@@ -1,7 +1,7 @@
 import { mutationOptions } from "@tanstack/react-query";
 import { Platform } from "react-native";
 
-import { apiClient, ApiError, readData, readErrorEnvelope } from "@shared/api";
+import { apiClient, ApiError, isSessionRevoked, readData, readErrorEnvelope } from "@shared/api";
 import type { ApiSession, components } from "@shared/api";
 
 import { useAccountStore } from "../model/account-store";
@@ -54,8 +54,7 @@ const refreshAccessToken = async () => {
   // A request that failed during the first sign-in waits for its token (запрос, упавший во время первого входа, ждёт его токен).
   if (refreshToken === null) return signingIn;
   const result = await apiClient.POST("/auth/refresh", { body: { refreshToken } });
-  if (readErrorEnvelope(result.error).code !== "SESSION_REVOKED")
-    return keepTokens(readData(result));
+  if (!isSessionRevoked(readErrorEnvelope(result.error).code)) return keepTokens(readData(result));
   // The revoked token stays until the new guest replaces it, so a failed sign-in is retried by the next 401 (отозванный токен остаётся до замены новым гостем, и неудачный вход повторит следующий 401).
   useSessionStore.getState().reset();
   const accessToken = await signInGuest();

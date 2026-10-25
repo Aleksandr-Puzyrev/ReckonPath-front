@@ -53,7 +53,7 @@ describe("claimSeasonStepMutationOptions", () => {
       reward: { currency: "coin", amount: 200 },
       state: "locked",
     });
-    await expect(claim(1)).rejects.toEqual(expect.objectContaining({ code: "VALIDATION" }));
+    await expect(claim(1)).rejects.toEqual(expect.objectContaining({ code: "validation_failed" }));
   });
 
   test("gives the reward of an available step with the new wallet", async () => {

@@ -48,7 +48,7 @@ const bind = () => {
   const offClosed = ws.onClosed(({ scope, code }) => {
     if (scope === "match") store().markLost();
     else if (store().phase === "searching") {
-      store().failSearch(code === WS_CLOSE.BANNED ? "BANNED" : "NETWORK");
+      store().failSearch(code === WS_CLOSE.BANNED ? "banned" : "NETWORK");
     }
   });
   const offStatus = ws.onStatus(({ scope, isOpen }) => {

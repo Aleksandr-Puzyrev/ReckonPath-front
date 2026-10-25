@@ -9,11 +9,11 @@ describe("readEmpty", () => {
   test("throws an ApiError with the code of a failed response", () => {
     const read = () =>
       readEmpty({
-        error: { error: { code: "MAP_ACTIVE" } },
+        error: { error: { code: "map_active" } },
         response: new Response(null, { status: 409 }),
       });
 
     expect(read).toThrow(ApiError);
-    expect(read).toThrow(expect.objectContaining({ status: 409, code: "MAP_ACTIVE" }));
+    expect(read).toThrow(expect.objectContaining({ status: 409, code: "map_active" }));
   });
 });

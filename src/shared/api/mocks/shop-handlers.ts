@@ -171,19 +171,19 @@ const shopOf = (locale: Locale, now: number) => {
 };
 
 const purchase = (offer: MockItem | MockBundle, expectedPrice: MockPrice, now: number) => {
-  if (!isPurchasable(offer, now)) return errorResponse("OFFER_ENDED", HTTP_UNPROCESSABLE);
+  if (!isPurchasable(offer, now)) return errorResponse("offer_ended", HTTP_UNPROCESSABLE);
   const isItem = "slot" in offer;
-  if (isItem && stockLeftOf(offer) === 0) return errorResponse("SOLD_OUT", HTTP_UNPROCESSABLE);
+  if (isItem && stockLeftOf(offer) === 0) return errorResponse("sold_out", HTTP_UNPROCESSABLE);
   const missing = isItem
     ? [offer.id].filter((id) => !isOwned(id))
     : offer.items.filter((id) => !isOwned(id));
-  if (missing.length === 0) return errorResponse("ALREADY_OWNED", HTTP_CONFLICT);
+  if (missing.length === 0) return errorResponse("already_owned", HTTP_CONFLICT);
   const price = isItem ? offer.price : bundlePriceOf(offer);
   if (!isSamePrice(expectedPrice, price)) {
-    return errorResponse("PRICE_CHANGED", HTTP_UNPROCESSABLE, { price });
+    return errorResponse("price_changed", HTTP_UNPROCESSABLE, { price });
   }
   if (!chargePrice(price)) {
-    return errorResponse("INSUFFICIENT_FUNDS", HTTP_UNPROCESSABLE, { need: shortOf(price) });
+    return errorResponse("insufficient_funds", HTTP_UNPROCESSABLE, { need: shortOf(price) });
   }
   grantItems(missing, "shop", now);
   purchaseCount += 1;
@@ -203,7 +203,7 @@ export const shopHandlers = [
     const id = String(params.file).replace(/\.json$/, "");
     const item = MOCK_ITEMS.find((candidate) => candidate.id === id);
     const skin = Object.entries(skins).find(([skinId]) => skinId === id)?.[1];
-    if (item === undefined || skin === undefined) return errorResponse("NOT_FOUND", HTTP_NOT_FOUND);
+    if (item === undefined || skin === undefined) return errorResponse("not_found", HTTP_NOT_FOUND);
     return HttpResponse.json({ id, type: item.type, version: 1, themes: "both", ...skin });
   }),
   http.get(mockUrl("/shop"), ({ request }) =>
@@ -213,19 +213,20 @@ export const shopHandlers = [
     const text = await request.text();
     const key = request.headers.get("Idempotency-Key");
     const parsed = purchaseSchema.safeParse(parseJson(text));
-    if (key === null || !parsed.success) return errorResponse("VALIDATION", HTTP_BAD_REQUEST);
+    if (key === null || !parsed.success)
+      return errorResponse("validation_failed", HTTP_BAD_REQUEST);
     const body = parsed.data;
     // A repeat with the same key returns the stored answer and charges nothing (SHP-03) (повтор с тем же ключом возвращает сохранённый ответ и ничего не списывает).
     const stored = purchases.get(key);
     if (stored !== undefined) {
-      if (stored.body !== text) return errorResponse("IDEMPOTENCY_MISMATCH", HTTP_CONFLICT);
+      if (stored.body !== text) return errorResponse("idempotency_mismatch", HTTP_CONFLICT);
       return HttpResponse.json(stored.answer);
     }
     const offer =
       "itemId" in body
         ? MOCK_ITEMS.find(({ id }) => id === body.itemId)
         : MOCK_BUNDLES.find(({ id }) => id === body.bundleId);
-    if (offer === undefined) return errorResponse("NOT_FOUND", HTTP_NOT_FOUND);
+    if (offer === undefined) return errorResponse("not_found", HTTP_NOT_FOUND);
     const result = purchase(offer, body.expectedPrice, Date.now());
     if (result instanceof Response) return result;
     purchases.set(key, { body: text, answer: result });
@@ -246,12 +247,12 @@ export const shopHandlers = [
   }),
   http.put(mockUrl("/loadout"), async ({ request }) => {
     const parsed = loadoutSchema.safeParse(parseJson(await request.text()));
-    if (!parsed.success) return errorResponse("VALIDATION", HTTP_BAD_REQUEST);
+    if (!parsed.success) return errorResponse("validation_failed", HTTP_BAD_REQUEST);
     const change = parsed.data;
     const isValid = Object.entries(change).every(
       ([slot, value]) => SLOTS.has(slot) && isEquippable(slot, value),
     );
-    if (!isValid) return errorResponse("NOT_OWNED", HTTP_UNPROCESSABLE);
+    if (!isValid) return errorResponse("not_owned", HTTP_UNPROCESSABLE);
     // Validated above: every key is a slot and every value an owned item of it (проверено выше: каждый ключ — слот, каждое значение — купленный предмет этого слота).
     return HttpResponse.json(equip(change as Loadout));
   }),

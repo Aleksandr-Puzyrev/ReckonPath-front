@@ -51,7 +51,7 @@ export const useRestoreStreakForAd = ({
     },
     onError: (error) => {
       void queryClient.invalidateQueries({ queryKey: adKeys.limits() });
-      if (isApiError(error) && error.code === "LIMIT_REACHED") return;
+      if (isApiError(error) && error.code === "limit_reached") return;
       onError(errorMessageKey(error));
     },
   });

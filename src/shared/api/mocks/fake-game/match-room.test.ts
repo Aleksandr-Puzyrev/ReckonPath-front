@@ -65,7 +65,7 @@ describe("fake match room", () => {
 
     tap(match, [2, 0]);
 
-    expect(match.last("error")).toEqual({ t: "error", id: "tap", d: { code: "NOT_YOUR_TURN" } });
+    expect(match.last("error")).toEqual({ t: "error", id: "tap", d: { code: "not_your_turn" } });
   });
 
   test("refuses a rock and a revealed cell", async () => {
@@ -77,8 +77,8 @@ describe("fake match room", () => {
     tap(match, [2, 0], "again");
 
     expect(match.of("error").map(({ id, d }) => [id, d.code])).toEqual([
-      ["rock", "CELL_ROCK"],
-      ["again", "CELL_REVEALED"],
+      ["rock", "cell_rock"],
+      ["again", "cell_revealed"],
     ]);
   });
 
@@ -97,7 +97,7 @@ describe("fake match room", () => {
     await jest.advanceTimersByTimeAsync(5_400);
     match.send({ t: "match.tap", id: "late", d: { turn: 1, cell: [2, 0] } });
 
-    expect(match.last("error")).toEqual({ t: "error", id: "late", d: { code: "STALE_TURN" } });
+    expect(match.last("error")).toEqual({ t: "error", id: "late", d: { code: "stale_turn" } });
   });
 
   test("gives the opponent two turns after my bomb (PVP-03)", async () => {

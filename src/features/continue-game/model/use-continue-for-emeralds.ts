@@ -4,7 +4,7 @@ import { uuidv7 } from "uuidv7";
 import type { AdMessageKey } from "@entities/ad";
 import { useGameSessionStore } from "@entities/level";
 import { applyWallet, useWalletQuery } from "@entities/wallet";
-import { errorMessageKey, isApiError, useIsOnline } from "@shared/api";
+import { errorMessageKey, isApiError, isInsufficientFunds, useIsOnline } from "@shared/api";
 import { CONTINUE_GEM_PRICE } from "@shared/config";
 import { haptic } from "@shared/haptics";
 
@@ -43,7 +43,7 @@ export const useContinueForEmeralds = ({
       applyContinue();
     },
     onError: (error) => {
-      if (isApiError(error) && error.code === "INSUFFICIENT_FUNDS") {
+      if (isApiError(error) && isInsufficientFunds(error.code)) {
         onShortOfEmeralds(needOf(error.details, shortBy));
         return;
       }

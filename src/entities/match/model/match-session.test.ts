@@ -102,7 +102,7 @@ describe("matchSession", () => {
     fakeGameServer.closeConnections(WS_CLOSE.BANNED);
     await jest.advanceTimersByTimeAsync(10);
 
-    expect(state()).toEqual(expect.objectContaining({ phase: "idle", searchError: "BANNED" }));
+    expect(state()).toEqual(expect.objectContaining({ phase: "idle", searchError: "banned" }));
   });
 
   test("sends a tap and records the server's answer (PVP-01)", async () => {

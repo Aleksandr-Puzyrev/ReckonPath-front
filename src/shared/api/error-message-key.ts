@@ -1,20 +1,20 @@
-import { isApiError } from "./api-error";
+import { isApiError, isInsufficientFunds } from "./api-error";
 import type { ApiErrorCode } from "./api-error";
 
 const CODES_WITH_TEXT = [
-  "NICK_TAKEN",
-  "EMAIL_TAKEN",
-  "INVALID_CREDENTIALS",
-  "INSUFFICIENT_FUNDS",
-  "ALREADY_OWNED",
-  "OFFER_ENDED",
-  "SOLD_OUT",
-  "PRICE_CHANGED",
-  "LIMIT_REACHED",
-  "MAP_INVALID",
-  "IN_MATCH",
-  "FRIENDS_LIMIT",
-  "RATE_LIMITED",
+  "nick_taken",
+  "email_taken",
+  "invalid_credentials",
+  "insufficient_funds",
+  "already_owned",
+  "offer_ended",
+  "sold_out",
+  "price_changed",
+  "limit_reached",
+  "map_invalid",
+  "in_match",
+  "friends_limit",
+  "too_many_requests",
 ] as const satisfies readonly ApiErrorCode[];
 
 type CodeWithText = (typeof CODES_WITH_TEXT)[number];
@@ -26,6 +26,7 @@ const hasText = (code: ApiErrorCode): code is CodeWithText =>
 export const errorMessageKey = (error: unknown): ErrorMessageKey => {
   if (!isApiError(error)) return "errors.NETWORK";
   // TODO: report codes without a text to Sentry once it is set up
-  if (error.code === null || !hasText(error.code)) return "errors.generic";
-  return `errors.${error.code}`;
+  const code = isInsufficientFunds(error.code) ? "insufficient_funds" : error.code;
+  if (code === null || !hasText(code)) return "errors.generic";
+  return `errors.${code}`;
 };

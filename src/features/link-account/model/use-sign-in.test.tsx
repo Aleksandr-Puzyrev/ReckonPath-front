@@ -89,7 +89,7 @@ describe("useSignIn", () => {
     await act(async () => result.current.submit({ ...CREDENTIALS, password: "000000" }));
 
     await waitFor(() =>
-      expect(handlers.onWrongCredentials).toHaveBeenCalledWith("errors.INVALID_CREDENTIALS"),
+      expect(handlers.onWrongCredentials).toHaveBeenCalledWith("errors.invalid_credentials"),
     );
     expect(useSessionStore.getState().accessToken).toBe("a_guest");
   });

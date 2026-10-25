@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 describe("apiClient", () => {
-  test("sends the app, platform, locale and request id headers", async () => {
+  test("sends the app, platform, locale, language and request id headers", async () => {
     const requests = captureRequests("get", "/bootstrap");
 
     await apiClient.GET("/bootstrap");
@@ -40,6 +40,7 @@ describe("apiClient", () => {
     expect(headers?.get("X-App-Version")).toBe(APP_VERSION);
     expect(headers?.get("X-Platform")).toBe("ios");
     expect(headers?.get("X-Locale")).toMatch(/^(ru|en)$/);
+    expect(headers?.get("Accept-Language")).toBe(headers?.get("X-Locale"));
     expect(headers?.get("X-Request-Id")).toMatch(UUID_V7);
   });
 
@@ -81,7 +82,10 @@ describe("apiClient", () => {
       http.get(mockUrl("/bootstrap"), ({ request }) =>
         request.headers.get("Authorization") === "Bearer token-2"
           ? HttpResponse.json(bootstrapMock())
-          : HttpResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: HTTP_UNAUTHORIZED }),
+          : HttpResponse.json(
+              { error: { code: "unauthenticated" } },
+              { status: HTTP_UNAUTHORIZED },
+            ),
       ),
     );
 
@@ -99,7 +103,10 @@ describe("apiClient", () => {
         bodies.push(await request.json());
         return request.headers.get("Authorization") === "Bearer token-2"
           ? new HttpResponse(null, { status: 204 })
-          : HttpResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: HTTP_UNAUTHORIZED });
+          : HttpResponse.json(
+              { error: { code: "unauthenticated" } },
+              { status: HTTP_UNAUTHORIZED },
+            );
       }),
     );
 
@@ -112,7 +119,7 @@ describe("apiClient", () => {
   test("returns the 401 when there is no session to refresh", async () => {
     mockServer.use(
       http.get(mockUrl("/bootstrap"), () =>
-        HttpResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: HTTP_UNAUTHORIZED }),
+        HttpResponse.json({ error: { code: "unauthenticated" } }, { status: HTTP_UNAUTHORIZED }),
       ),
     );
 
@@ -126,11 +133,31 @@ describe("apiClient", () => {
     setApiSession({ getAccessToken: () => null, refreshAccessToken: refresh });
     mockServer.use(
       http.post(mockUrl("/auth/refresh"), () =>
-        HttpResponse.json({ error: { code: "SESSION_REVOKED" } }, { status: HTTP_UNAUTHORIZED }),
+        HttpResponse.json({ error: { code: "session_revoked" } }, { status: HTTP_UNAUTHORIZED }),
       ),
     );
 
     const { response } = await apiClient.POST("/auth/refresh", { body: { refreshToken: "r" } });
+
+    expect(response.status).toBe(HTTP_UNAUTHORIZED);
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  test("does not refresh on a 401 from sign-in, where it means wrong credentials", async () => {
+    const refresh = jest.fn(async () => "token-2");
+    setApiSession({ getAccessToken: () => "token-1", refreshAccessToken: refresh });
+    mockServer.use(
+      http.post(mockUrl("/auth/login"), () =>
+        HttpResponse.json(
+          { error: { code: "invalid_credentials" } },
+          { status: HTTP_UNAUTHORIZED },
+        ),
+      ),
+    );
+
+    const { response } = await apiClient.POST("/auth/login", {
+      body: { login: "nova", password: "secret-pass" },
+    });
 
     expect(response.status).toBe(HTTP_UNAUTHORIZED);
     expect(refresh).not.toHaveBeenCalled();
@@ -141,7 +168,7 @@ describe("apiClient", () => {
     const unsubscribe = onSystemSignal(listener);
     mockServer.use(
       http.get(mockUrl("/bootstrap"), () =>
-        HttpResponse.json({ error: { code: "UPGRADE_REQUIRED" } }, { status: 426 }),
+        HttpResponse.json({ error: { code: "app_update_required" } }, { status: 426 }),
       ),
     );
 
@@ -156,7 +183,7 @@ describe("apiClient", () => {
     const unsubscribe = onSystemSignal(listener);
     mockServer.use(
       http.get(mockUrl("/bootstrap"), () =>
-        HttpResponse.json({ error: { code: "MAINTENANCE" } }, { status: 503 }),
+        HttpResponse.json({ error: { code: "maintenance" } }, { status: 503 }),
       ),
       http.get(mockUrl("/me"), () => new HttpResponse("busy", { status: 503 })),
     );
@@ -175,7 +202,7 @@ describe("apiClient", () => {
     const details = { scope: "all", until: null, reason: "Cheating" };
     mockServer.use(
       http.get(mockUrl("/me"), () =>
-        HttpResponse.json({ error: { code: "BANNED", details } }, { status: 403 }),
+        HttpResponse.json({ error: { code: "banned", details } }, { status: 403 }),
       ),
     );
 

@@ -87,7 +87,24 @@ describe("createWsClient", () => {
     expect(statuses).toHaveLength(1);
   });
 
-  test("sends a message with an id over the right connection", () => {
+  test("reads the backend's snake_case messages", () => {
+    const context = setup();
+    const statuses: ServerMessage[] = [];
+    context.client.on("queue.status", (message) => statuses.push(message));
+    context.client.connect();
+    context.last().handlers.onOpen();
+
+    context.receive({
+      t: "queue.status",
+      d: { waited_sec: 3, range: 100, async_available: false },
+    });
+
+    expect(statuses[0]).toEqual(
+      expect.objectContaining({ d: { waitedSec: 3, range: 100, asyncAvailable: false } }),
+    );
+  });
+
+  test("sends a message with an id over the right connection in snake_case", () => {
     const context = setup();
     context.client.connect();
     context.last().handlers.onOpen();
@@ -100,7 +117,7 @@ describe("createWsClient", () => {
     expect(entry.sent.at(-1)).toEqual({
       t: "queue.join",
       id: joinId,
-      d: { format: 7, mapId: "map_1" },
+      d: { format: 7, map_id: "map_1" },
     });
     expect(match.sent.at(-1)).toEqual({ t: "match.tap", id: tapId, d: { turn: 1, cell: [4, 2] } });
   });

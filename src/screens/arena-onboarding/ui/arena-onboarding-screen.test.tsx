@@ -107,7 +107,7 @@ describe("ArenaOnboardingScreen", () => {
   test("offers a retry and a way back when the arena does not load", async () => {
     mockServer.use(
       http.get(mockUrl("/arena"), () =>
-        HttpResponse.json({ error: { code: "VALIDATION" } }, { status: 400 }),
+        HttpResponse.json({ error: { code: "validation_failed" } }, { status: 400 }),
       ),
     );
     await render(<ArenaOnboardingScreen />, { wrapper: createQueryWrapper() });

@@ -1,5 +1,5 @@
 export { apiClient, fetchAssetJson } from "./api-client";
-export { ApiError, isApiError } from "./api-error";
+export { ApiError, isApiError, isInsufficientFunds, isSessionRevoked } from "./api-error";
 export type { ApiErrorCode, ApiErrorDetails } from "./api-error";
 export { RequestTimeoutError } from "./api-fetch";
 export { accessToken, refreshAccessToken, setApiSession } from "./api-session";
@@ -11,6 +11,7 @@ export { readData } from "./read-data";
 export { readEmpty } from "./read-empty";
 export { readErrorEnvelope } from "./read-error-envelope";
 export { onSystemSignal } from "./system-signals";
+export { serverClockOffset, subscribeServerClock } from "./server-clock";
 export { useIsOnline } from "./use-is-online";
 export type { SystemSignal } from "./system-signals";
 export { retryDelay, shouldRetry } from "./retry-policy";

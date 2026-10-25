@@ -39,7 +39,7 @@ const countBatches = () => {
 const answerBatch = (status: number) =>
   mockServer.use(
     http.post(mockUrl("/attempts:batch"), () =>
-      HttpResponse.json({ error: { code: "VALIDATION" } }, { status }),
+      HttpResponse.json({ error: { code: "validation_failed" } }, { status }),
     ),
   );
 

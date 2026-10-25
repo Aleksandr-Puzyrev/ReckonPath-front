@@ -12,8 +12,8 @@ import { haptic } from "@shared/haptics";
 import { useFindMatch } from "@widgets/find-match";
 
 const SEARCH_ERROR_TEXTS = {
-  MAP_INVALID: "errors.MAP_INVALID",
-  BANNED: "system.banned.title",
+  map_invalid: "errors.map_invalid",
+  banned: "system.banned.title",
   NETWORK: "errors.NETWORK",
 } as const;
 
@@ -81,9 +81,9 @@ export const useArenaSearch = (onToast: (text: string) => void) => {
     onToast(t(SEARCH_ERROR_TEXTS[searchError ?? "NETWORK"]));
     matchSession.leave();
     // The arena home shows the ban only after re-reading the arena (главная арены покажет бан, только перечитав арену).
-    if (searchError === "BANNED") void arena.refetch();
+    if (searchError === "banned") void arena.refetch();
     const mapId = arena.data?.activeMapId;
-    if (searchError === "MAP_INVALID" && mapId != null) {
+    if (searchError === "map_invalid" && mapId != null) {
       router.replace({ pathname: "/arena/map/[id]", params: { id: mapId } });
     } else {
       router.back();

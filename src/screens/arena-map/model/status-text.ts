@@ -10,5 +10,5 @@ export const statusTextOf = (status: MapStatus, t: TFunction) => {
   if (status.kind === "limit") return t("map.err.limit", { max: status.max });
   if (status.kind === "bridge") return t("map.err.bridge");
   if (status.kind === "trivial") return t("map.err.trivial", { count: status.norm });
-  return t("errors.MAP_INVALID");
+  return t("errors.map_invalid");
 };

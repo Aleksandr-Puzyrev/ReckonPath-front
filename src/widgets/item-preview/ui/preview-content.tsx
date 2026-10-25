@@ -55,7 +55,7 @@ const PreviewContent = ({
   const purchase = usePurchaseItem(target, view.price, {
     onShortOf,
     onPurchased: () => setIsSuccess(true),
-    onOwned: () => onToast(t("errors.ALREADY_OWNED")),
+    onOwned: () => onToast(t("errors.already_owned")),
     onEnded: setEnded,
     onError: (messageKey) => onToast(t(messageKey)),
   });
@@ -127,8 +127,8 @@ const PreviewContent = ({
       />
       <Dialog
         isOpen={ended !== null}
-        title={ended === "SOLD_OUT" ? t("shop.soldOut") : t("shop.ended.title")}
-        message={ended === "OFFER_ENDED" ? t("shop.ended.body") : undefined}
+        title={ended === "sold_out" ? t("shop.soldOut") : t("shop.ended.title")}
+        message={ended === "offer_ended" ? t("shop.ended.body") : undefined}
         onCancel={handleEndedClose}
         actions={[{ label: t("shop.gotIt"), variant: "primary", onPress: handleEndedClose }]}
       />

@@ -25,7 +25,7 @@ describe("systemStateOf", () => {
   });
 
   test("requires an update when a request answered 426", () => {
-    const state = systemStateOf(undefined, new ApiError(426, "UPGRADE_REQUIRED"), APP_VERSION);
+    const state = systemStateOf(undefined, new ApiError(426, "app_update_required"), APP_VERSION);
 
     expect(state).toEqual({ kind: "forcedUpdate", storeUrl: null, message: null });
   });
@@ -53,7 +53,7 @@ describe("systemStateOf", () => {
   });
 
   test("shows maintenance from a 503 with its details", () => {
-    const error = new ApiError(503, "MAINTENANCE", { until: "2026-09-26T12:30:00Z" });
+    const error = new ApiError(503, "maintenance", { until: "2026-09-26T12:30:00Z" });
 
     expect(systemStateOf(undefined, error, APP_VERSION)).toEqual({
       kind: "maintenance",

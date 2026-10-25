@@ -6,6 +6,7 @@ import { ApiError } from "./api-error";
 import { createApiFetch } from "./api-fetch";
 import type { Transport } from "./api-fetch";
 import { apiMiddleware } from "./api-middleware";
+import { createBackendTransport } from "./backend-transport";
 import type { paths } from "./generated/schema";
 import type * as MockServerModule from "./mocks/mock-server";
 
@@ -28,7 +29,7 @@ const backend = resolveBackend();
 
 export const apiClient = createClient<paths>({
   baseUrl: `${backend.origin}${API_PATH}`,
-  fetch: createApiFetch(backend.transport),
+  fetch: createApiFetch(createBackendTransport(backend.transport)),
 });
 
 apiClient.use(apiMiddleware);

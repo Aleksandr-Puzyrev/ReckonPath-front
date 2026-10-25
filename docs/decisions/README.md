@@ -51,6 +51,8 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0043 | [`0043-level-editor.md`](0043-level-editor.md) | Level editor 4a: split with 4b (share, play by code), elements and parameters, arena editor layout with title and move limit, bot + 50 % default with a warning, online saving with a local draft, my levels, new level sheet, tryout mode |
 | 0044 | [`0044-share-and-play-code.md`](0044-share-and-play-code.md) | Sharing and playing by code 4b: challenge `x` from the tryout, no author, code play screen with a challenge result, Part 1 code errors, `reckonpath://play?c=`, share and play-code sheets, texts |
 | 0045 | [`0045-worlds-3-8-content.md`](0045-worlds-3-8-content.md) | Worlds 3–8 content in three batches with card approval, first-number rule for the new modes, covers of worlds 5–8, bomb first-tap check, bomb coach card with world 5, modes of worlds 7–8 |
+| 0046 | [`0046-backend-integration.md`](0046-backend-integration.md) | Backend audit answers: offline and online both required, content most likely from `packages/content`, missing screens added, all backend-only features (VK ID, Yandex ID, consents, captcha, devices, documents, offline coin cap) join the product; the backend adapts to the Part 7 conventions |
+| 0047 | [`0047-backend-api-conventions.md`](0047-backend-api-conventions.md) | Client adopts the backend conventions: boundary conversion in `shared/api` and `shared/ws` (envelope, snake_case, errors), lower snake_case code catalogue, `Date` for server time, idempotency left to the backend |
 
 ## Template
 

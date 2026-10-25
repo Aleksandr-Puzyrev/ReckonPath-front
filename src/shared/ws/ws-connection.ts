@@ -1,3 +1,5 @@
+import { toCamelKeys, toSnakeKeys } from "@shared/lib";
+
 import { serverMessageSchema } from "./generated/messages";
 import type { ClientMessage, ServerMessage } from "./generated/messages";
 import { reconnectDelay } from "./reconnect-delay";
@@ -49,7 +51,7 @@ export const createWsConnection = (options: ConnectionOptions) => {
   // Messages sent while (re)connecting wait for the socket instead of getting lost (сообщения, отправленные во время подключения, ждут сокет, а не теряются).
   const send = (message: ClientMessage) => {
     if (socket !== null && isOpen) {
-      socket.send(JSON.stringify(message));
+      socket.send(JSON.stringify(toSnakeKeys(message)));
       return true;
     }
     if (!isWanted) return false;
@@ -128,7 +130,7 @@ export const createWsConnection = (options: ConnectionOptions) => {
       // TODO: report malformed WebSocket messages to Sentry once it is set up
       return;
     }
-    const parsed = serverMessageSchema.safeParse(json);
+    const parsed = serverMessageSchema.safeParse(toCamelKeys(json));
     // TODO: report invalid WebSocket messages to Sentry once it is set up
     if (parsed.success) deliver(parsed.data);
   };

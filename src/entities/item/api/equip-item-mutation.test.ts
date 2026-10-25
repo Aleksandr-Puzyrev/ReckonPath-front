@@ -43,7 +43,7 @@ describe("equipItemMutationOptions", () => {
       (rejection: unknown) => rejection,
     );
 
-    expect(error).toMatchObject({ code: "NOT_OWNED" });
+    expect(error).toMatchObject({ code: "not_owned" });
   });
 
   test("refuses an owned item in another slot", async () => {
@@ -51,7 +51,7 @@ describe("equipItemMutationOptions", () => {
 
     const error: unknown = await equip({ frame: "reef" }).catch((rejection: unknown) => rejection);
 
-    expect(error).toMatchObject({ code: "NOT_OWNED" });
+    expect(error).toMatchObject({ code: "not_owned" });
   });
 
   test("refuses more than three badges", async () => {
@@ -59,6 +59,6 @@ describe("equipItemMutationOptions", () => {
       (rejection: unknown) => rejection,
     );
 
-    expect(error).toMatchObject({ code: "VALIDATION" });
+    expect(error).toMatchObject({ code: "validation_failed" });
   });
 });

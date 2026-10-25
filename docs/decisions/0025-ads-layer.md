@@ -27,7 +27,7 @@ Date: 2026-10-10. Taken by the agent while implementing; to be confirmed by the 
 
 ## Sign-in (answer given to question 4)
 
-VK ID is not planned for now: sign-in stays by login and password. Updates 0019 #1 and #21.
+VK ID is not planned for now: sign-in stays by login and password. Updates 0019 #1 and #21. Superseded by 0046 #5 (VK ID and Yandex ID join the product).
 
 ## Consequences
 

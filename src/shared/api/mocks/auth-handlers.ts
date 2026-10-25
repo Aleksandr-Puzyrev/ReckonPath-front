@@ -50,7 +50,7 @@ export const authHandlers = [
     if (!validRefreshTokens.delete(refreshToken)) {
       validRefreshTokens.clear();
       return HttpResponse.json(
-        { error: { code: "SESSION_REVOKED" } },
+        { error: { code: "session_revoked" } },
         { status: HTTP_UNAUTHORIZED },
       );
     }
@@ -64,13 +64,13 @@ export const authHandlers = [
   http.post(mockUrl("/auth/register"), async ({ request }) => {
     const { nickname } = registerBodySchema.parse(await request.json());
     if (nickname.toLowerCase() === TAKEN_NICKNAME)
-      return errorResponse("NICK_TAKEN", HTTP_CONFLICT);
+      return errorResponse("nick_taken", HTTP_CONFLICT);
     return HttpResponse.json({ user: { id: GUEST.id, nickname, isGuest: false } });
   }),
   http.post(mockUrl("/auth/login"), async ({ request }) => {
     const { password } = loginBodySchema.parse(await request.json());
     if (password === WRONG_PASSWORD) {
-      return errorResponse("INVALID_CREDENTIALS", HTTP_UNPROCESSABLE);
+      return errorResponse("invalid_credentials", HTTP_UNPROCESSABLE);
     }
     return HttpResponse.json({ ...issueTokenPair(), ...SAVED_ACCOUNT });
   }),

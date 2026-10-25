@@ -167,7 +167,7 @@ describe("ArenaSearchScreen", () => {
         arenaRequests += 1;
         return HttpResponse.json(
           {
-            error: { code: "BANNED", details: { scope: "arena", until: null, reason: "Boosting" } },
+            error: { code: "banned", details: { scope: "arena", until: null, reason: "Boosting" } },
           },
           { status: 403 },
         );
@@ -177,7 +177,7 @@ describe("ArenaSearchScreen", () => {
     await renderSearch();
     const before = arenaRequests;
 
-    await setMatch({ phase: "idle", searchError: "BANNED" });
+    await setMatch({ phase: "idle", searchError: "banned" });
 
     expect(await screen.findByText("Доступ ограничен")).toBeOnTheScreen();
     expect(mockRouter.back).toHaveBeenCalled();

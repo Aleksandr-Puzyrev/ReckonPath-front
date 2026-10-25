@@ -80,7 +80,7 @@ describe("fakeGameServer queue", () => {
 
     joinQueue(entry, "unknown");
 
-    expect(entry.last("error")).toEqual({ t: "error", id: "join", d: { code: "MAP_INVALID" } });
+    expect(entry.last("error")).toEqual({ t: "error", id: "join", d: { code: "map_invalid" } });
   });
 
   test("refuses a second ticket", async () => {
@@ -88,7 +88,7 @@ describe("fakeGameServer queue", () => {
 
     joinQueue(entry, "any", "again");
 
-    expect(entry.last("error")?.d.code).toBe("ALREADY_QUEUED");
+    expect(entry.last("error")?.d.code).toBe("already_queued");
   });
 
   test("refuses the search during a match (Part 1 §5.5)", async () => {
@@ -97,7 +97,7 @@ describe("fakeGameServer queue", () => {
     joinQueue(entry, mapId, "again");
 
     expect(entry.last("error")?.d).toEqual({
-      code: "IN_MATCH",
+      code: "in_match",
       details: { matchId: "match_1", endpoint: expect.stringContaining("/v1/match/match_1") },
     });
   });

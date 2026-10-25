@@ -120,7 +120,7 @@ describe("usePurchaseItem", () => {
   });
 
   test("turns the button to equip for an item bought elsewhere (SHP-05)", async () => {
-    failWith("ALREADY_OWNED");
+    failWith("already_owned");
     const handlers = callbacks();
     const { result } = await renderPurchase({ itemId: "reef" }, { emeralds: 480 }, handlers);
 
@@ -129,7 +129,7 @@ describe("usePurchaseItem", () => {
     await waitFor(() => expect(handlers.onOwned).toHaveBeenCalled());
   });
 
-  test.each(["OFFER_ENDED", "SOLD_OUT"])("reports %s (SHP-06, SHP-07)", async (code) => {
+  test.each(["offer_ended", "sold_out"])("reports %s (SHP-06, SHP-07)", async (code) => {
     failWith(code);
     const handlers = callbacks();
     const { result } = await renderPurchase({ itemId: "reef" }, { emeralds: 480 }, handlers);
@@ -144,7 +144,7 @@ describe("usePurchaseItem", () => {
     const { result } = await renderPurchase({ itemId: "reef" }, { emeralds: 400 }, handlers);
 
     await act(async () => result.current.handleBuy());
-    await waitFor(() => expect(handlers.onError).toHaveBeenCalledWith("errors.PRICE_CHANGED"));
+    await waitFor(() => expect(handlers.onError).toHaveBeenCalledWith("errors.price_changed"));
     expect(result.current.price).toEqual({ emeralds: 480 });
 
     await act(async () => result.current.handleBuy());

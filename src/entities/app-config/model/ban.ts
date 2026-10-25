@@ -14,4 +14,4 @@ export const banOfDetails = (details: unknown): Ban =>
   banSchema.parse(typeof details === "object" && details !== null ? details : {});
 
 export const banOf = (error: unknown): Ban | null =>
-  isApiError(error) && error.code === "BANNED" ? banOfDetails(error.details) : null;
+  isApiError(error) && error.code === "banned" ? banOfDetails(error.details) : null;

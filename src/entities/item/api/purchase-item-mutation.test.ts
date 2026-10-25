@@ -58,7 +58,7 @@ describe("purchaseItemMutationOptions", () => {
       idempotencyKey: "k2",
     });
 
-    expect(error).toMatchObject({ code: "INSUFFICIENT_FUNDS", details: { need: 840 } });
+    expect(error).toMatchObject({ code: "insufficient_funds", details: { need: 840 } });
   });
 
   test("charges once for a repeat with the same key (SHP-03, SHP-04)", async () => {
@@ -87,7 +87,7 @@ describe("purchaseItemMutationOptions", () => {
       idempotencyKey: "k2",
     });
 
-    expect(error).toMatchObject({ code: "ALREADY_OWNED" });
+    expect(error).toMatchObject({ code: "already_owned" });
   });
 
   test("accepts a purchase within 10 s after the window and refuses a later one (SHP-06)", async () => {
@@ -105,7 +105,7 @@ describe("purchaseItemMutationOptions", () => {
       idempotencyKey: "k2",
     });
 
-    expect(error).toMatchObject({ code: "OFFER_ENDED" });
+    expect(error).toMatchObject({ code: "offer_ended" });
   });
 
   test("returns the new price when it changed", async () => {
@@ -115,7 +115,7 @@ describe("purchaseItemMutationOptions", () => {
       idempotencyKey: "k1",
     });
 
-    expect(error).toMatchObject({ code: "PRICE_CHANGED", details: { price: { emeralds: 480 } } });
+    expect(error).toMatchObject({ code: "price_changed", details: { price: { emeralds: 480 } } });
   });
 
   test("lowers a bundle by its owned parts and grants only the rest (SHP-08)", async () => {
@@ -147,6 +147,6 @@ describe("purchaseItemMutationOptions", () => {
       idempotencyKey: "k1",
     });
 
-    expect(error).toMatchObject({ code: "IDEMPOTENCY_MISMATCH" });
+    expect(error).toMatchObject({ code: "idempotency_mismatch" });
   });
 });

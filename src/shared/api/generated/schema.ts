@@ -404,7 +404,7 @@ export interface paths {
     get?: never;
     put: operations["putArenaMap"];
     post?: never;
-    /** @description The active map cannot be deleted (409 MAP_ACTIVE, decision 0029). */
+    /** @description The active map cannot be deleted (409 map_active, decision 0029). */
     delete: operations["deleteArenaMap"];
     options?: never;
     head?: never;
@@ -617,7 +617,7 @@ export interface paths {
     /** @description The player's own levels (Part 7 §4), newest first. */
     get: operations["listCustomLevels"];
     put?: never;
-    /** @description Saves a new level; LIMIT_REACHED at 20, MAP_INVALID when the validator refuses it. */
+    /** @description Saves a new level; limit_reached at 20, map_invalid when the validator refuses it. */
     post: operations["createCustomLevel"];
     delete?: never;
     options?: never;
@@ -660,36 +660,84 @@ export interface components {
     };
     /** @enum {string} */
     ErrorCode:
-      | "VALIDATION"
-      | "UNAUTHORIZED"
-      | "SESSION_REVOKED"
-      | "BANNED"
-      | "FORBIDDEN"
-      | "NOT_FOUND"
-      | "IDEMPOTENCY_MISMATCH"
-      | "ALREADY_OWNED"
-      | "IN_MATCH"
-      | "ALREADY_QUEUED"
-      | "NICK_TAKEN"
-      | "NOT_OWNED"
-      | "MAP_ACTIVE"
-      | "EMAIL_TAKEN"
-      | "INVALID_CREDENTIALS"
-      | "ACCOUNT_CONFLICT"
-      | "INSUFFICIENT_FUNDS"
-      | "OFFER_ENDED"
-      | "SOLD_OUT"
-      | "PRICE_CHANGED"
-      | "LIMIT_REACHED"
-      | "MAP_INVALID"
-      | "ATTEMPT_REJECTED"
-      | "STREAK_NOT_RESTORABLE"
-      | "FRIENDS_LIMIT"
-      | "LINK_REQUIRED"
-      | "UPGRADE_REQUIRED"
-      | "RATE_LIMITED"
-      | "MAINTENANCE"
-      | "INTERNAL";
+      | "validation_failed"
+      | "unauthenticated"
+      | "session_revoked"
+      | "banned"
+      | "forbidden"
+      | "not_found"
+      | "idempotency_mismatch"
+      | "already_owned"
+      | "in_match"
+      | "already_queued"
+      | "nick_taken"
+      | "not_owned"
+      | "map_active"
+      | "email_taken"
+      | "invalid_credentials"
+      | "account_conflict"
+      | "insufficient_funds"
+      | "offer_ended"
+      | "sold_out"
+      | "price_changed"
+      | "limit_reached"
+      | "map_invalid"
+      | "attempt_rejected"
+      | "streak_not_restorable"
+      | "friends_limit"
+      | "link_required"
+      | "app_update_required"
+      | "too_many_requests"
+      | "maintenance"
+      | "internal_error"
+      | "invalid_token"
+      | "invalid_refresh_token"
+      | "refresh_token_reused"
+      | "invalid_json"
+      | "route_not_found"
+      | "document_not_found"
+      | "device_not_found"
+      | "level_not_found"
+      | "game_not_found"
+      | "not_linked"
+      | "server_busy"
+      | "not_enough_gems"
+      | "cannot_continue"
+      | "account_exists"
+      | "already_linked"
+      | "identity_taken"
+      | "provider_already_linked"
+      | "last_login_method"
+      | "concurrent_signin"
+      | "missing_provider_params"
+      | "oauth_rejected"
+      | "provider_not_supported"
+      | "provider_unavailable"
+      | "email_not_verified"
+      | "email_required"
+      | "same_email"
+      | "invalid_code"
+      | "too_many_attempts"
+      | "password_required"
+      | "wrong_password"
+      | "reauth_required"
+      | "required_consent"
+      | "no_device"
+      | "no_push_tokens"
+      | "level_locked"
+      | "cell_open"
+      | "invalid_cell"
+      | "game_over"
+      | "game_not_lost"
+      | "stale_game"
+      | "unknown_pack"
+      | "not_in_pack"
+      | "captcha_failed"
+      | "captcha_unavailable"
+      | "invalid_app_version"
+      | "invalid_document_type"
+      | "body_too_large"
+      | "method_not_allowed";
     Bootstrap: {
       /** Format: date-time */
       serverTime: string;
@@ -699,7 +747,7 @@ export interface components {
         storeUrl: string;
         message?: string;
       };
-      /** @description null when there is no maintenance; shape follows the MAINTENANCE error details */
+      /** @description null when there is no maintenance; shape follows the maintenance error details */
       maintenance: null | {
         /** Format: date-time */
         until?: string;
@@ -1141,7 +1189,7 @@ export interface components {
         userId: string;
       };
     };
-    /** @description The BANNED error details (Part 7 §2) */
+    /** @description The banned error details (Part 7 §2) */
     BanDetails: {
       /** @enum {string} */
       scope: "all" | "arena";
@@ -2457,36 +2505,84 @@ export const platformValues: ReadonlyArray<
 export const errorCodeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["ErrorCode"]
 > = [
-  "VALIDATION",
-  "UNAUTHORIZED",
-  "SESSION_REVOKED",
-  "BANNED",
-  "FORBIDDEN",
-  "NOT_FOUND",
-  "IDEMPOTENCY_MISMATCH",
-  "ALREADY_OWNED",
-  "IN_MATCH",
-  "ALREADY_QUEUED",
-  "NICK_TAKEN",
-  "NOT_OWNED",
-  "MAP_ACTIVE",
-  "EMAIL_TAKEN",
-  "INVALID_CREDENTIALS",
-  "ACCOUNT_CONFLICT",
-  "INSUFFICIENT_FUNDS",
-  "OFFER_ENDED",
-  "SOLD_OUT",
-  "PRICE_CHANGED",
-  "LIMIT_REACHED",
-  "MAP_INVALID",
-  "ATTEMPT_REJECTED",
-  "STREAK_NOT_RESTORABLE",
-  "FRIENDS_LIMIT",
-  "LINK_REQUIRED",
-  "UPGRADE_REQUIRED",
-  "RATE_LIMITED",
-  "MAINTENANCE",
-  "INTERNAL",
+  "validation_failed",
+  "unauthenticated",
+  "session_revoked",
+  "banned",
+  "forbidden",
+  "not_found",
+  "idempotency_mismatch",
+  "already_owned",
+  "in_match",
+  "already_queued",
+  "nick_taken",
+  "not_owned",
+  "map_active",
+  "email_taken",
+  "invalid_credentials",
+  "account_conflict",
+  "insufficient_funds",
+  "offer_ended",
+  "sold_out",
+  "price_changed",
+  "limit_reached",
+  "map_invalid",
+  "attempt_rejected",
+  "streak_not_restorable",
+  "friends_limit",
+  "link_required",
+  "app_update_required",
+  "too_many_requests",
+  "maintenance",
+  "internal_error",
+  "invalid_token",
+  "invalid_refresh_token",
+  "refresh_token_reused",
+  "invalid_json",
+  "route_not_found",
+  "document_not_found",
+  "device_not_found",
+  "level_not_found",
+  "game_not_found",
+  "not_linked",
+  "server_busy",
+  "not_enough_gems",
+  "cannot_continue",
+  "account_exists",
+  "already_linked",
+  "identity_taken",
+  "provider_already_linked",
+  "last_login_method",
+  "concurrent_signin",
+  "missing_provider_params",
+  "oauth_rejected",
+  "provider_not_supported",
+  "provider_unavailable",
+  "email_not_verified",
+  "email_required",
+  "same_email",
+  "invalid_code",
+  "too_many_attempts",
+  "password_required",
+  "wrong_password",
+  "reauth_required",
+  "required_consent",
+  "no_device",
+  "no_push_tokens",
+  "level_locked",
+  "cell_open",
+  "invalid_cell",
+  "game_over",
+  "game_not_lost",
+  "stale_game",
+  "unknown_pack",
+  "not_in_pack",
+  "captcha_failed",
+  "captcha_unavailable",
+  "invalid_app_version",
+  "invalid_document_type",
+  "body_too_large",
+  "method_not_allowed",
 ];
 export const attemptModeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Attempt"]["mode"]

@@ -50,9 +50,9 @@ const parseLevel = async (request: Request) => {
 export const customLevelHandlers = [
   http.get(mockUrl("/levels/custom"), () => HttpResponse.json({ items: state.levels })),
   http.post(mockUrl("/levels/custom"), async ({ request }) => {
-    if (state.levels.length >= LEVELS_LIMIT) return errorOf("LIMIT_REACHED", HTTP_UNPROCESSABLE);
+    if (state.levels.length >= LEVELS_LIMIT) return errorOf("limit_reached", HTTP_UNPROCESSABLE);
     const level = await parseLevel(request);
-    if (level === null) return errorOf("MAP_INVALID", HTTP_UNPROCESSABLE);
+    if (level === null) return errorOf("map_invalid", HTTP_UNPROCESSABLE);
     const id = `custom-${state.count + 1}`;
     const saved: CustomLevel = { id, level, updatedAt: new Date().toISOString() };
     save({ levels: [saved, ...state.levels], count: state.count + 1 });
@@ -60,9 +60,9 @@ export const customLevelHandlers = [
   }),
   http.put(mockUrl("/levels/custom/:id"), async ({ request, params }) => {
     const id = String(params.id);
-    if (!state.levels.some((entry) => entry.id === id)) return errorOf("NOT_FOUND", HTTP_NOT_FOUND);
+    if (!state.levels.some((entry) => entry.id === id)) return errorOf("not_found", HTTP_NOT_FOUND);
     const level = await parseLevel(request);
-    if (level === null) return errorOf("MAP_INVALID", HTTP_UNPROCESSABLE);
+    if (level === null) return errorOf("map_invalid", HTTP_UNPROCESSABLE);
     const saved: CustomLevel = { id, level, updatedAt: new Date().toISOString() };
     save({ ...state, levels: [saved, ...state.levels.filter((entry) => entry.id !== id)] });
     return HttpResponse.json(saved);

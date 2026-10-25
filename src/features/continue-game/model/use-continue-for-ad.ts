@@ -52,7 +52,7 @@ export const useContinueForAd = ({ onContinued, onMessage }: ContinueForAdCallba
     },
     onError: (error) => {
       void queryClient.invalidateQueries({ queryKey: adKeys.limits() });
-      if (isApiError(error) && error.code === "LIMIT_REACHED") return;
+      if (isApiError(error) && error.code === "limit_reached") return;
       onMessage(errorMessageKey(error));
     },
   });

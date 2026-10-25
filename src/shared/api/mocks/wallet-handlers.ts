@@ -12,7 +12,7 @@ const insufficientFunds = (price: number) =>
   HttpResponse.json(
     {
       error: {
-        code: "INSUFFICIENT_FUNDS",
+        code: "insufficient_funds",
         details: { need: price - mockWallet().emeralds },
       },
     },

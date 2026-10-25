@@ -47,8 +47,8 @@ export const useFindMatch = ({ arena, maps, onError, isReplacing }: FindMatchOpt
       setIsNoMapOpen(false);
       search(mapId);
     },
-    onDraft: () => onError("errors.MAP_INVALID"),
-    onMapsLimit: () => onError("errors.LIMIT_REACHED"),
+    onDraft: () => onError("errors.map_invalid"),
+    onMapsLimit: () => onError("errors.limit_reached"),
     onError,
   });
   const asyncStart = useMutation({

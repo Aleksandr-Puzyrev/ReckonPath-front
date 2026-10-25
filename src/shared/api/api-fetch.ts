@@ -4,7 +4,13 @@ export type Transport = (request: Request) => Promise<Response>;
 
 export const REQUEST_TIMEOUT_MS = 10_000;
 const HTTP_UNAUTHORIZED = 401;
-const SESSION_PATHS = ["/v1/auth/guest", "/v1/auth/refresh"];
+const SESSION_PATHS = [
+  "/v1/auth/guest",
+  "/v1/auth/refresh",
+  "/v1/auth/login",
+  "/v1/auth/register",
+  "/v1/auth/oauth/",
+];
 
 export class RequestTimeoutError extends Error {
   constructor() {
@@ -13,10 +19,10 @@ export class RequestTimeoutError extends Error {
   }
 }
 
-// A 401 from sign-in or refresh itself is final, or the refresh would wait for itself (401 от входа или самого refresh окончательный, иначе refresh ждал бы сам себя).
+// A 401 from sign-in or refresh is final: there it means wrong credentials, and a refresh would wait for itself (401 от входа или refresh окончательный: там он значит неверные данные, а refresh ждал бы сам себя).
 const isSessionRequest = (request: Request) => {
   const { pathname } = new URL(request.url);
-  return SESSION_PATHS.some((path) => pathname.endsWith(path));
+  return SESSION_PATHS.some((path) => pathname.includes(path));
 };
 
 const withToken = (request: Request, token: string | null) => {

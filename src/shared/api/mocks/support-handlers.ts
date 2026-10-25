@@ -22,7 +22,10 @@ export const supportHandlers = [
   http.post(mockUrl("/support/tickets"), async ({ request }) => {
     const body = ticketSchema.safeParse(await request.json().catch(() => null));
     if (!body.success) {
-      return HttpResponse.json({ error: { code: "VALIDATION" } }, { status: HTTP_BAD_REQUEST });
+      return HttpResponse.json(
+        { error: { code: "validation_failed" } },
+        { status: HTTP_BAD_REQUEST },
+      );
     }
     count += 1;
     return HttpResponse.json({ ticketId: `ticket_${count}` });

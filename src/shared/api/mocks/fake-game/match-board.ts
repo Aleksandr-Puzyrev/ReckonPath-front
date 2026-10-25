@@ -16,7 +16,7 @@ export interface BoardTap {
   bombNear: boolean;
 }
 
-export type TapRefusal = "CELL_ROCK" | "CELL_REVEALED" | "OUTSIDE";
+export type TapRefusal = "cell_rock" | "cell_revealed" | "OUTSIDE";
 
 export const createMatchBoard = (map: PvpMap, bombHint: boolean) => {
   const { board, rules } = createBoard({
@@ -51,8 +51,8 @@ export const tapBoard = (
   const { rows, cols, kinds } = game.board;
   if (row < 0 || col < 0 || row >= rows || col >= cols) return "OUTSIDE";
   const idx = toIdx(cols, [row, col]);
-  if (kinds[idx] === "rock") return "CELL_ROCK";
-  if (game.revealed.has(idx)) return "CELL_REVEALED";
+  if (kinds[idx] === "rock") return "cell_rock";
+  if (game.revealed.has(idx)) return "cell_revealed";
   const { state, events } = applyTap(game, idx);
   return { game: state, events, idx, ...outcomeOf(state, idx, events) };
 };

@@ -165,13 +165,13 @@ const tap = (entry: AsyncGame, cell: Cell, now: number) => {
 };
 
 const notFound = () =>
-  HttpResponse.json({ error: { code: "NOT_FOUND" } }, { status: HTTP_NOT_FOUND });
+  HttpResponse.json({ error: { code: "not_found" } }, { status: HTTP_NOT_FOUND });
 
 export const asyncHandlers = [
   http.post(mockUrl("/arena/async"), () => {
     const entry = start();
     if (entry === null)
-      return HttpResponse.json({ error: { code: "INTERNAL" } }, { status: HTTP_INTERNAL });
+      return HttpResponse.json({ error: { code: "internal_error" } }, { status: HTTP_INTERNAL });
     return HttpResponse.json(
       {
         asyncId: entry.id,
@@ -198,7 +198,10 @@ export const asyncHandlers = [
     const body = tapSchema.safeParse(await request.json().catch(() => null));
     const answer = body.success ? tap(entry, body.data.cell, Date.now()) : null;
     if (answer === null) {
-      return HttpResponse.json({ error: { code: "VALIDATION" } }, { status: HTTP_BAD_REQUEST });
+      return HttpResponse.json(
+        { error: { code: "validation_failed" } },
+        { status: HTTP_BAD_REQUEST },
+      );
     }
     return HttpResponse.json(answer);
   }),

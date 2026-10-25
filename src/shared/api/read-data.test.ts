@@ -11,11 +11,11 @@ describe("readData", () => {
   test("throws an ApiError with the status and the code of a failed response", () => {
     const read = () =>
       readData({
-        error: { error: { code: "NOT_FOUND" } },
+        error: { error: { code: "not_found" } },
         response: new Response(null, { status: 404 }),
       });
 
     expect(read).toThrow(ApiError);
-    expect(read).toThrow(expect.objectContaining({ status: 404, code: "NOT_FOUND" }));
+    expect(read).toThrow(expect.objectContaining({ status: 404, code: "not_found" }));
   });
 });

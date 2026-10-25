@@ -1,3 +1,5 @@
+import { toSnakeKeys } from "@shared/lib";
+
 import type { WsTransport } from "../../../ws/ws-transport";
 
 import { fakeGameServer } from "./fake-game-server";
@@ -24,7 +26,7 @@ export const fakeTransport: WsTransport = (url, { onOpen, onMessage, onClose }) 
   const peer: FakePeer = {
     deliver: (message) =>
       later(() => {
-        if (!isClosed) onMessage(JSON.stringify(message));
+        if (!isClosed) onMessage(JSON.stringify(toSnakeKeys(message)));
       }),
     close: shut,
   };

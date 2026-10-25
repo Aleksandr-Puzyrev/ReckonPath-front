@@ -4,7 +4,7 @@ import { banOf, banOfDetails } from "./ban";
 
 describe("banOf", () => {
   test("reads the scope, the end and the reason of a BANNED error (Part 7 §2)", () => {
-    const error = new ApiError(403, "BANNED", {
+    const error = new ApiError(403, "banned", {
       scope: "arena",
       until: "2026-10-12T00:00:00Z",
       reason: "Boosting",
@@ -22,7 +22,7 @@ describe("banOf", () => {
   });
 
   test("ignores other errors", () => {
-    expect(banOf(new ApiError(403, "FORBIDDEN"))).toBeNull();
+    expect(banOf(new ApiError(403, "forbidden"))).toBeNull();
     expect(banOf(new Error("network"))).toBeNull();
   });
 });

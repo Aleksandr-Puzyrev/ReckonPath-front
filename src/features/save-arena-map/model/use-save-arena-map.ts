@@ -39,7 +39,7 @@ export const useSaveArenaMap = ({
     ...activateArenaMapMutationOptions(),
     onSuccess: ({ activeMapId }) => onActivated(activeMapId),
     onError: (error) => {
-      if (hasCode(error, "MAP_INVALID")) onDraft();
+      if (hasCode(error, "map_invalid")) onDraft();
       else onError(errorMessageKey(error));
     },
     onSettled: refresh,
@@ -54,7 +54,7 @@ export const useSaveArenaMap = ({
       void refresh();
     },
     onError: (error) => {
-      if (hasCode(error, "LIMIT_REACHED")) onMapsLimit();
+      if (hasCode(error, "limit_reached")) onMapsLimit();
       else onError(errorMessageKey(error));
     },
   });
@@ -72,7 +72,7 @@ export const useSaveArenaMap = ({
           activate.mutate(map.id, {
             onSuccess: () => onFinish?.(),
             onError: (error) => {
-              if (hasCode(error, "MAP_INVALID")) onFinish?.();
+              if (hasCode(error, "map_invalid")) onFinish?.();
             },
           });
         },

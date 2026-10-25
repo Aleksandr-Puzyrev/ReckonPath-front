@@ -1,6 +1,8 @@
 import { rngFromKey } from "@reckon-path/engine";
 import type { Rng } from "@reckon-path/engine";
 
+import { toCamelKeys } from "@shared/lib";
+
 import { clientMessageSchema } from "../../../ws/generated/messages";
 import type { ClientMessage, ServerMessage } from "../../../ws/generated/messages";
 import { mockArenaMap } from "../arena-map-handlers";
@@ -127,15 +129,15 @@ const sendStatus = (current: Queue) => {
 };
 
 const refusalOf = (mapId: string) => {
-  if (room !== null && !room.isOver()) return "IN_MATCH";
-  if (queue !== null) return "ALREADY_QUEUED";
+  if (room !== null && !room.isOver()) return "in_match";
+  if (queue !== null) return "already_queued";
   const map = mockArenaMap(mapId);
-  return map?.valid === true && map.format === ARENA_FORMAT.size ? null : "MAP_INVALID";
+  return map?.valid === true && map.format === ARENA_FORMAT.size ? null : "map_invalid";
 };
 
 const startTraining = (peer: FakePeer, id: string | undefined) => {
   if (room !== null && !room.isOver()) {
-    peer.deliver({ t: "error", id, d: { code: "IN_MATCH" } });
+    peer.deliver({ t: "error", id, d: { code: "in_match" } });
     return;
   }
   peer.deliver({ t: "ack", id });
@@ -176,7 +178,7 @@ const joinQueue = (peer: FakePeer, id: string | undefined, mapId: string) => {
   const refusal = refusalOf(mapId);
   if (refusal !== null) {
     const details =
-      refusal === "IN_MATCH" && room !== null
+      refusal === "in_match" && room !== null
         ? { details: { matchId: room.matchId, endpoint: `${MATCH_ENDPOINT}${room.matchId}` } }
         : {};
     peer.deliver({ t: "error", id, d: { code: refusal, ...details } });
@@ -217,7 +219,7 @@ const handleMatch = (peer: FakePeer, current: MatchRoom, message: ClientMessage)
 
 const parse = (data: string) => {
   try {
-    const parsed = clientMessageSchema.safeParse(JSON.parse(data));
+    const parsed = clientMessageSchema.safeParse(toCamelKeys(JSON.parse(data)));
     return parsed.success ? parsed.data : null;
   } catch {
     return null;

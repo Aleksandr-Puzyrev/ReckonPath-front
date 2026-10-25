@@ -79,7 +79,7 @@ describe("useGuestSession", () => {
   test("does not retry a sign-in the server rejected", async () => {
     jest.useFakeTimers();
     const guest = failGuestSignIn(1, () =>
-      HttpResponse.json({ error: { code: "VALIDATION" } }, { status: HTTP_BAD_REQUEST }),
+      HttpResponse.json({ error: { code: "validation_failed" } }, { status: HTTP_BAD_REQUEST }),
     );
     await renderGuestSession();
 
@@ -96,7 +96,7 @@ describe("useGuestSession", () => {
       return { remove: () => undefined };
     });
     const guest = failGuestSignIn(1, () =>
-      HttpResponse.json({ error: { code: "VALIDATION" } }, { status: HTTP_BAD_REQUEST }),
+      HttpResponse.json({ error: { code: "validation_failed" } }, { status: HTTP_BAD_REQUEST }),
     );
     await renderGuestSession();
     await waitFor(() => expect(guest.count).toBe(1));

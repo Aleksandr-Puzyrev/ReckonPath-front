@@ -79,14 +79,17 @@ export const adsHandlers = [
   http.post(mockUrl("/ads/intent"), async ({ request }) => {
     const body = intentSchema.safeParse(await request.json().catch(() => null));
     if (!body.success) {
-      return HttpResponse.json({ error: { code: "VALIDATION" } }, { status: HTTP_BAD_REQUEST });
+      return HttpResponse.json(
+        { error: { code: "validation_failed" } },
+        { status: HTTP_BAD_REQUEST },
+      );
     }
     const { placement } = body.data;
     const now = Date.now();
     const left = DAILY_LIMITS[placement] - usedToday(placement, now);
     if (left <= 0) {
       return HttpResponse.json(
-        { error: { code: "LIMIT_REACHED", details: { kind: placement, resetAt: resetAtOf(now) } } },
+        { error: { code: "limit_reached", details: { kind: placement, resetAt: resetAtOf(now) } } },
         { status: HTTP_UNPROCESSABLE },
       );
     }
@@ -104,7 +107,7 @@ export const adsHandlers = [
   http.get(mockUrl("/ads/intent/:id"), ({ params }) => {
     const intent = intents.get(String(params.id));
     if (intent === undefined) {
-      return HttpResponse.json({ error: { code: "NOT_FOUND" } }, { status: HTTP_NOT_FOUND });
+      return HttpResponse.json({ error: { code: "not_found" } }, { status: HTTP_NOT_FOUND });
     }
     const now = Date.now();
     if (!intent.isRewarded && now - intent.createdAt > INTENT_TTL_MS) {

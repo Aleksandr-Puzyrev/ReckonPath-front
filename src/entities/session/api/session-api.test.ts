@@ -44,7 +44,7 @@ const serveMeFor = (accessToken: string) =>
     http.get(mockUrl("/me"), ({ request }) =>
       request.headers.get("Authorization") === `Bearer ${accessToken}`
         ? HttpResponse.json({})
-        : HttpResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: HTTP_UNAUTHORIZED }),
+        : HttpResponse.json({ error: { code: "unauthenticated" } }, { status: HTTP_UNAUTHORIZED }),
     ),
   );
 
@@ -140,7 +140,7 @@ describe("session refresh", () => {
     const deviceIds = watchGuestSignIns();
     mockServer.use(
       http.post(mockUrl("/auth/refresh"), () =>
-        HttpResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: HTTP_UNAUTHORIZED }),
+        HttpResponse.json({ error: { code: "unauthenticated" } }, { status: HTTP_UNAUTHORIZED }),
       ),
     );
 
@@ -178,11 +178,11 @@ describe("endSession", () => {
     useAccountStore.getState().markSignedIn();
     mockServer.use(
       http.post(mockUrl("/auth/logout"), () =>
-        HttpResponse.json({ error: { code: "INTERNAL" } }, { status: 500 }),
+        HttpResponse.json({ error: { code: "internal_error" } }, { status: 500 }),
       ),
     );
 
-    await expect(endSession()).rejects.toMatchObject({ code: "INTERNAL" });
+    await expect(endSession()).rejects.toMatchObject({ code: "internal_error" });
     expect(useAccountStore.getState().hasLogin).toBe(true);
   });
 });

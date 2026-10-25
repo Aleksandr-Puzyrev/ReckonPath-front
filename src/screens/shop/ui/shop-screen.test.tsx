@@ -122,7 +122,7 @@ describe("ShopScreen", () => {
   test("offers a retry after a failed load", async () => {
     mockServer.use(
       http.get(mockUrl("/shop"), () =>
-        HttpResponse.json({ error: { code: "INTERNAL" } }, { status: 500 }),
+        HttpResponse.json({ error: { code: "internal_error" } }, { status: 500 }),
       ),
     );
     await render(<ShopScreen />, { wrapper: createQueryWrapper() });

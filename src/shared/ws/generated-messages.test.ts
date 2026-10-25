@@ -60,7 +60,7 @@ const SERVER_MESSAGES = [
     d: { turn: 3, player: "opponent", cell: [2, 5], outcome: "bomb" },
   },
   { t: "match.opponent", seq: 16, d: { connection: "reconnecting" } },
-  { t: "error", id: "c5", d: { code: "NOT_YOUR_TURN" } },
+  { t: "error", id: "c5", d: { code: "not_your_turn" } },
   { t: "pong", d: { c: 1727352000123, s: 1727352000180 } },
 ];
 

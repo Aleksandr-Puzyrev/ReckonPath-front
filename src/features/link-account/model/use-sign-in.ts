@@ -39,7 +39,7 @@ export const useSignIn = ({ onSignedIn, onWrongCredentials, onError }: SignInCal
       load.mutate(session);
     },
     onError: (error) => {
-      if (isApiError(error) && error.code === "INVALID_CREDENTIALS") {
+      if (isApiError(error) && error.code === "invalid_credentials") {
         onWrongCredentials(errorMessageKey(error));
         return;
       }

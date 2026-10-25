@@ -12,12 +12,18 @@ import {
 import type { Currency, Price } from "@entities/item";
 import { useAccountStore } from "@entities/session";
 import { applyWallet, useWalletQuery } from "@entities/wallet";
-import { errorMessageKey, isApiError, retryDelay, shouldRetry } from "@shared/api";
+import {
+  errorMessageKey,
+  isApiError,
+  isInsufficientFunds,
+  retryDelay,
+  shouldRetry,
+} from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 import { PURCHASE_CONFIRM_FROM_EMERALDS } from "@shared/config";
 
 export type PurchaseTarget = { itemId: string } | { bundleId: string };
-export type EndedReason = "OFFER_ENDED" | "SOLD_OUT";
+export type EndedReason = "offer_ended" | "sold_out";
 
 export interface PurchaseCallbacks {
   onShortOf: (amount: number, currency: Currency) => void;
@@ -61,21 +67,21 @@ export const usePurchaseItem = (
     onError: (error) => {
       const code = isApiError(error) ? error.code : null;
       const details = isApiError(error) ? error.details : {};
-      if (code === "INSUFFICIENT_FUNDS") {
+      if (isInsufficientFunds(code)) {
         onShortOf(needOf(details, shortBy), currency);
         return;
       }
-      if (code === "ALREADY_OWNED") {
+      if (code === "already_owned") {
         void refreshShop();
         onOwned();
         return;
       }
-      if (code === "OFFER_ENDED" || code === "SOLD_OUT") {
+      if (code === "offer_ended" || code === "sold_out") {
         void refreshShop();
         onEnded(code);
         return;
       }
-      if (code === "PRICE_CHANGED" && isPrice(details.price)) {
+      if (code === "price_changed" && isPrice(details.price)) {
         setChangedPrice(details.price);
         setIsRepriced(true);
         onError(errorMessageKey(error));

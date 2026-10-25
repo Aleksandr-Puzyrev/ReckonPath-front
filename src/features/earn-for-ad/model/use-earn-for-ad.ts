@@ -36,7 +36,7 @@ export const useEarnForAd = (onMessage: (messageKey: AdMessageKey) => void) => {
       void refreshCounters();
     },
     onError: (error) => {
-      if (isApiError(error) && error.code === "LIMIT_REACHED") {
+      if (isApiError(error) && error.code === "limit_reached") {
         void refreshCounters();
         return;
       }

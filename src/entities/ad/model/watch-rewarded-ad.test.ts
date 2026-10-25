@@ -68,12 +68,12 @@ describe("watchRewardedAd", () => {
   test("fails over the daily limit (ADS-04)", async () => {
     mockServer.use(
       http.post(mockUrl("/ads/intent"), () =>
-        HttpResponse.json({ error: { code: "LIMIT_REACHED" } }, { status: 422 }),
+        HttpResponse.json({ error: { code: "limit_reached" } }, { status: 422 }),
       ),
     );
 
     const outcome = expect(watchRewardedAd("gems")).rejects.toMatchObject({
-      code: "LIMIT_REACHED",
+      code: "limit_reached",
     });
     await jest.advanceTimersByTimeAsync(0);
 

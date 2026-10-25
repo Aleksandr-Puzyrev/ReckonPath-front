@@ -71,7 +71,7 @@ describe("arena map mutations", () => {
     await save(client);
     await save(client);
 
-    expect(await codeOf(save(client))).toBe("LIMIT_REACHED");
+    expect(await codeOf(save(client))).toBe("limit_reached");
   });
 
   test("activates a valid map and reports it in the arena profile", async () => {
@@ -90,7 +90,7 @@ describe("arena map mutations", () => {
 
     expect(
       await codeOf(new MutationObserver(client, activateArenaMapMutationOptions()).mutate(id)),
-    ).toBe("MAP_INVALID");
+    ).toBe("map_invalid");
   });
 
   test("deletes an inactive map", async () => {
@@ -109,7 +109,7 @@ describe("arena map mutations", () => {
 
     expect(
       await codeOf(new MutationObserver(client, deleteArenaMapMutationOptions()).mutate(id)),
-    ).toBe("MAP_ACTIVE");
+    ).toBe("map_active");
   });
 
   test("validates a map without saving it", async () => {

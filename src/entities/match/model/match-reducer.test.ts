@@ -217,7 +217,7 @@ describe("receiveMatchMessage", () => {
       {
         t: "error",
         id: "j",
-        d: { code: "IN_MATCH", details: { matchId: "m9", endpoint: "wss://n/m9" } },
+        d: { code: "in_match", details: { matchId: "m9", endpoint: "wss://n/m9" } },
       },
     ]);
 
@@ -230,13 +230,13 @@ describe("receiveMatchMessage", () => {
   });
 
   test("stops the search on an invalid map (ARN-04)", () => {
-    expect(run([{ t: "error", id: "j", d: { code: "MAP_INVALID" } }])).toEqual(
-      expect.objectContaining({ phase: "idle", searchError: "MAP_INVALID" }),
+    expect(run([{ t: "error", id: "j", d: { code: "map_invalid" } }])).toEqual(
+      expect.objectContaining({ phase: "idle", searchError: "map_invalid" }),
     );
   });
 
   test("drops the pending tap when the server refuses it (PVP-02, PVP-08)", () => {
-    const state = run([{ t: "error", id: "tap", d: { code: "STALE_TURN" } }], {
+    const state = run([{ t: "error", id: "tap", d: { code: "stale_turn" } }], {
       ...started,
       pendingCell: [1, 1],
     });

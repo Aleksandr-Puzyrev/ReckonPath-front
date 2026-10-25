@@ -60,7 +60,7 @@ describe("ad queries", () => {
 
     const error: unknown = await requestIntent("gems").catch((rejection: unknown) => rejection);
 
-    expect(error).toMatchObject({ code: "LIMIT_REACHED", details: { kind: "gems" } });
+    expect(error).toMatchObject({ code: "limit_reached", details: { kind: "gems" } });
   });
 
   test("grant a continue as a right, not currency", async () => {

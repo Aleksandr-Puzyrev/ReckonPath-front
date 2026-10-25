@@ -7,7 +7,7 @@ import { formatClockTime } from "@shared/lib";
 import type { ToastMessage } from "@shared/ui/toast";
 
 const isStillMaintenance = (error: unknown) =>
-  error === null || (isApiError(error) && error.code === "MAINTENANCE");
+  error === null || (isApiError(error) && error.code === "maintenance");
 
 export const useMaintenanceScreen = () => {
   const { t, i18n } = useTranslation();

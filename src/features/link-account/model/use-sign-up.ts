@@ -19,8 +19,8 @@ export interface SignUpCallbacks {
 
 const fieldOf = (error: unknown): SignUpField | null => {
   if (!isApiError(error)) return null;
-  if (error.code === "NICK_TAKEN") return "nickname";
-  if (error.code === "EMAIL_TAKEN") return "email";
+  if (error.code === "nick_taken") return "nickname";
+  if (error.code === "email_taken") return "email";
   return null;
 };
 

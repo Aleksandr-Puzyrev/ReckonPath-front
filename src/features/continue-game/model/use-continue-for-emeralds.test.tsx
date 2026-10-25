@@ -93,7 +93,7 @@ describe("useContinueForEmeralds", () => {
     mockServer.use(
       http.post(mockUrl("/continue"), () =>
         HttpResponse.json(
-          { error: { code: "INSUFFICIENT_FUNDS", details: { need: 7 } } },
+          { error: { code: "insufficient_funds", details: { need: 7 } } },
           { status: 422 },
         ),
       ),

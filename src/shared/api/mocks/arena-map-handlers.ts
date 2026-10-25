@@ -71,22 +71,24 @@ export const arenaMapHandlers = [
   http.get(mockUrl("/arena/maps"), () => HttpResponse.json(state.maps)),
   http.post(mockUrl("/arena/maps/validate"), async ({ request }) => {
     const body = await readBody(request, validateSchema);
-    if (!body.success) return errorResponse("VALIDATION", HTTP_BAD_REQUEST);
+    if (!body.success) return errorResponse("validation_failed", HTTP_BAD_REQUEST);
     return HttpResponse.json(checkMockMap(ARENA_FORMAT, body.data.map));
   }),
   http.post(mockUrl("/arena/maps/random"), async ({ request }) => {
     const body = await readBody(request, randomSchema);
-    if (!body.success) return errorResponse("VALIDATION", HTTP_BAD_REQUEST);
+    if (!body.success) return errorResponse("validation_failed", HTTP_BAD_REQUEST);
     const random = randomMockMap(ARENA_FORMAT);
-    return random === null ? errorResponse("INTERNAL", HTTP_INTERNAL) : HttpResponse.json(random);
+    return random === null
+      ? errorResponse("internal_error", HTTP_INTERNAL)
+      : HttpResponse.json(random);
   }),
   http.post(mockUrl("/arena/maps"), async ({ request }) => {
     const body = await readBody(request, inputSchema);
-    if (!body.success) return errorResponse("VALIDATION", HTTP_BAD_REQUEST);
+    if (!body.success) return errorResponse("validation_failed", HTTP_BAD_REQUEST);
     const input = body.data;
     const sameFormat = state.maps.filter(({ format }) => format === input.format);
     if (sameFormat.length >= MAPS_PER_FORMAT)
-      return errorResponse("LIMIT_REACHED", HTTP_UNPROCESSABLE);
+      return errorResponse("limit_reached", HTTP_UNPROCESSABLE);
     const count = state.count + 1;
     const map: ArenaMap = {
       ...input,
@@ -101,9 +103,9 @@ export const arenaMapHandlers = [
   }),
   http.put(mockUrl("/arena/maps/:id"), async ({ request, params }) => {
     const current = findMap(params.id);
-    if (current === undefined) return errorResponse("NOT_FOUND", HTTP_NOT_FOUND);
+    if (current === undefined) return errorResponse("not_found", HTTP_NOT_FOUND);
     const body = await readBody(request, inputSchema);
-    if (!body.success) return errorResponse("VALIDATION", HTTP_BAD_REQUEST);
+    if (!body.success) return errorResponse("validation_failed", HTTP_BAD_REQUEST);
     const map: ArenaMap = {
       ...current,
       ...body.data,
@@ -114,16 +116,16 @@ export const arenaMapHandlers = [
   }),
   http.delete(mockUrl("/arena/maps/:id"), ({ params }) => {
     const map = findMap(params.id);
-    if (map === undefined) return errorResponse("NOT_FOUND", HTTP_NOT_FOUND);
-    if (map.active) return errorResponse("MAP_ACTIVE", HTTP_CONFLICT);
+    if (map === undefined) return errorResponse("not_found", HTTP_NOT_FOUND);
+    if (map.active) return errorResponse("map_active", HTTP_CONFLICT);
     saveState({ ...state, maps: state.maps.filter(({ id }) => id !== map.id) });
     return new HttpResponse(null, { status: HTTP_NO_CONTENT });
   }),
   http.post(mockUrl("/arena/maps/:id/activate"), ({ params }) => {
     const map = findMap(params.id);
-    if (map === undefined) return errorResponse("NOT_FOUND", HTTP_NOT_FOUND);
+    if (map === undefined) return errorResponse("not_found", HTTP_NOT_FOUND);
     if (!map.valid) {
-      return errorResponse("MAP_INVALID", HTTP_UNPROCESSABLE, { errors: map.errors });
+      return errorResponse("map_invalid", HTTP_UNPROCESSABLE, { errors: map.errors });
     }
     saveState({
       ...state,

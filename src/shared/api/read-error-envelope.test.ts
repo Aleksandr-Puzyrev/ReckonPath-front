@@ -3,8 +3,8 @@ import { readErrorEnvelope } from "./read-error-envelope";
 describe("readErrorEnvelope", () => {
   test("reads the code and details of the envelope", () => {
     expect(
-      readErrorEnvelope({ error: { code: "INSUFFICIENT_FUNDS", details: { need: 240 } } }),
-    ).toEqual({ code: "INSUFFICIENT_FUNDS", details: { need: 240 } });
+      readErrorEnvelope({ error: { code: "insufficient_funds", details: { need: 240 } } }),
+    ).toEqual({ code: "insufficient_funds", details: { need: 240 } });
   });
 
   test("keeps the details of a code the contract does not know, without the code", () => {

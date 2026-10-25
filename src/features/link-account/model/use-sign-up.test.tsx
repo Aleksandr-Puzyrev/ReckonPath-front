@@ -42,7 +42,7 @@ describe("useSignUp", () => {
     await act(async () => result.current.submit({ ...SIGN_UP, nickname: "Kira" }));
 
     await waitFor(() =>
-      expect(handlers.onFieldError).toHaveBeenCalledWith("nickname", "errors.NICK_TAKEN"),
+      expect(handlers.onFieldError).toHaveBeenCalledWith("nickname", "errors.nick_taken"),
     );
     expect(useAccountStore.getState().hasLogin).toBe(false);
   });
@@ -50,7 +50,7 @@ describe("useSignUp", () => {
   test("puts a taken e-mail under the e-mail field", async () => {
     mockServer.use(
       http.post(mockUrl("/auth/register"), () =>
-        HttpResponse.json({ error: { code: "EMAIL_TAKEN" } }, { status: 409 }),
+        HttpResponse.json({ error: { code: "email_taken" } }, { status: 409 }),
       ),
     );
     const handlers = callbacks();
@@ -59,7 +59,7 @@ describe("useSignUp", () => {
     await act(async () => result.current.submit(SIGN_UP));
 
     await waitFor(() =>
-      expect(handlers.onFieldError).toHaveBeenCalledWith("email", "errors.EMAIL_TAKEN"),
+      expect(handlers.onFieldError).toHaveBeenCalledWith("email", "errors.email_taken"),
     );
   });
 

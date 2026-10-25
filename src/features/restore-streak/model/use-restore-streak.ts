@@ -5,7 +5,7 @@ import type { AdMessageKey } from "@entities/ad";
 import { dailyKeys } from "@entities/daily";
 import { streakKeys } from "@entities/streak";
 import { applyWallet, useWalletQuery } from "@entities/wallet";
-import { errorMessageKey, isApiError } from "@shared/api";
+import { errorMessageKey, isApiError, isInsufficientFunds } from "@shared/api";
 
 import { restoreStreakMutationOptions } from "../api/restore-streak-mutation";
 
@@ -36,7 +36,7 @@ export const useRestoreStreak = (
       onRestored(streak.current);
     },
     onError: (error) => {
-      if (isApiError(error) && error.code === "INSUFFICIENT_FUNDS") {
+      if (isApiError(error) && isInsufficientFunds(error.code)) {
         onShortOfEmeralds(needOf(error.details, shortBy));
         return;
       }

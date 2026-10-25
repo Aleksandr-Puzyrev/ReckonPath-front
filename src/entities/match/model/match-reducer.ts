@@ -21,7 +21,7 @@ export type MapLayout = MessageOf<"match.state">["d"]["opponentMap"];
 export type MatchEnd = MessageOf<"match.end">["d"];
 export type TurnSkip = NonNullable<MessageOf<"match.turn">["d"]["skipped"]>[number];
 export type MatchEmote = MessageOf<"match.emote">["d"];
-export type SearchError = "MAP_INVALID" | "BANNED" | "NETWORK";
+export type SearchError = "map_invalid" | "banned" | "NETWORK";
 
 export interface MatchTap {
   turn: number;
@@ -107,7 +107,7 @@ export const INITIAL_MATCH: MatchState = {
   event: null,
 };
 
-const SEARCH_ERRORS: ReadonlySet<string> = new Set(["MAP_INVALID", "BANNED"]);
+const SEARCH_ERRORS: ReadonlySet<string> = new Set(["map_invalid", "banned"]);
 
 const withEvent = (state: MatchState, kind: MatchEventKind, count = 0): MatchState => ({
   ...state,
@@ -202,7 +202,7 @@ const receiveSnapshot = (state: MatchState, { d }: MessageOf<"match.snapshot">):
 
 const receiveError = (state: MatchState, { d }: MessageOf<"error">): MatchState => {
   if (
-    d.code === "IN_MATCH" &&
+    d.code === "in_match" &&
     d.details?.matchId !== undefined &&
     d.details.endpoint !== undefined
   ) {
@@ -213,7 +213,7 @@ const receiveError = (state: MatchState, { d }: MessageOf<"error">): MatchState 
     };
   }
   if (SEARCH_ERRORS.has(d.code) && state.phase === "searching") {
-    return { ...state, phase: "idle", searchError: d.code === "BANNED" ? "BANNED" : "MAP_INVALID" };
+    return { ...state, phase: "idle", searchError: d.code === "banned" ? "banned" : "map_invalid" };
   }
   return { ...state, pendingCell: null };
 };

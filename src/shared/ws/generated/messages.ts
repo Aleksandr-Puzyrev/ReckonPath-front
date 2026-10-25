@@ -313,20 +313,20 @@ export const errorServerMessageSchema = z.object({
   id: z.string().optional(),
   d: z.object({
     code: z.enum([
-      "NOT_YOUR_TURN",
-      "CELL_REVEALED",
-      "CELL_ROCK",
-      "STALE_TURN",
-      "MATCH_OVER",
-      "IN_MATCH",
-      "ALREADY_QUEUED",
-      "MAP_INVALID",
-      "BANNED",
+      "not_your_turn",
+      "cell_revealed",
+      "cell_rock",
+      "stale_turn",
+      "match_over",
+      "in_match",
+      "already_queued",
+      "map_invalid",
+      "banned",
     ]),
     details: z
       .object({ matchId: z.string().optional(), endpoint: z.string().optional() })
       .describe(
-        "IN_MATCH: the running match to return to (decision 0033 #4, to agree with the backend)",
+        "in_match: the running match to return to (decision 0033 #4, to agree with the backend)",
       )
       .optional(),
   }),

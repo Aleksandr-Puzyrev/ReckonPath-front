@@ -65,7 +65,7 @@ export const arenaHandlers = [
   http.get(mockUrl("/arena/matches/:id"), ({ params }) => {
     const match = mockMatchHistory().find(({ matchId }) => matchId === String(params.id));
     return match === undefined
-      ? HttpResponse.json({ error: { code: "NOT_FOUND" } }, { status: HTTP_NOT_FOUND })
+      ? HttpResponse.json({ error: { code: "not_found" } }, { status: HTTP_NOT_FOUND })
       : HttpResponse.json(match);
   }),
   http.post(mockUrl("/arena/onboarding"), () => {
@@ -79,7 +79,10 @@ export const arenaHandlers = [
     const body = claimSchema.safeParse(await request.json().catch(() => null));
     const claimed = body.success ? claimMockStep(body.data.step) : null;
     if (claimed === null) {
-      return HttpResponse.json({ error: { code: "VALIDATION" } }, { status: HTTP_BAD_REQUEST });
+      return HttpResponse.json(
+        { error: { code: "validation_failed" } },
+        { status: HTTP_BAD_REQUEST },
+      );
     }
     return HttpResponse.json({ ...claimed, wallet: mockWallet() });
   }),

@@ -117,7 +117,7 @@ describe("RootStack", () => {
     mockServer.use(
       http.get(mockUrl("/me"), () =>
         HttpResponse.json(
-          { error: { code: "BANNED", details: { scope: "all", until: null, reason: "Cheating" } } },
+          { error: { code: "banned", details: { scope: "all", until: null, reason: "Cheating" } } },
           { status: 403 },
         ),
       ),

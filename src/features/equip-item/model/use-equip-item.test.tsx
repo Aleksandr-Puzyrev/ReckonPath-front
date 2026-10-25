@@ -83,7 +83,7 @@ describe("useEquipItem", () => {
   test("rolls back and reports a refused equip", async () => {
     mockServer.use(
       http.put(mockUrl("/loadout"), () =>
-        HttpResponse.json({ error: { code: "NOT_OWNED" } }, { status: 422 }),
+        HttpResponse.json({ error: { code: "not_owned" } }, { status: 422 }),
       ),
     );
     const handlers = callbacks();

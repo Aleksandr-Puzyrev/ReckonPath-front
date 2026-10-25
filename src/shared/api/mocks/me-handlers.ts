@@ -42,7 +42,7 @@ const meOf = () => ({
 });
 
 const validation = () =>
-  HttpResponse.json({ error: { code: "VALIDATION" } }, { status: HTTP_BAD_REQUEST });
+  HttpResponse.json({ error: { code: "validation_failed" } }, { status: HTTP_BAD_REQUEST });
 
 export const meHandlers = [
   http.get(mockUrl("/me"), () => HttpResponse.json(meOf())),

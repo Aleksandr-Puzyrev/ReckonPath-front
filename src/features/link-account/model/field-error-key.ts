@@ -6,9 +6,9 @@ const FIELD_ERROR_KEYS = [
   "account.errors.email",
   "account.errors.passwordWeak",
   "account.errors.consent",
-  "errors.NICK_TAKEN",
-  "errors.EMAIL_TAKEN",
-  "errors.INVALID_CREDENTIALS",
+  "errors.nick_taken",
+  "errors.email_taken",
+  "errors.invalid_credentials",
 ] as const;
 
 type FieldErrorKey = (typeof FIELD_ERROR_KEYS)[number] | "errors.generic";

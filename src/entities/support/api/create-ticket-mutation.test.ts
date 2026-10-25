@@ -21,6 +21,6 @@ describe("createTicketMutationOptions", () => {
   });
 
   test("refuses an empty message", async () => {
-    await expect(send("")).rejects.toMatchObject({ code: "VALIDATION" });
+    await expect(send("")).rejects.toMatchObject({ code: "validation_failed" });
   });
 });

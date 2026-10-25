@@ -150,7 +150,7 @@ describe("Shop purchase", () => {
   test("explains an ended offer and closes the preview (SHP-06)", async () => {
     mockServer.use(
       http.post(mockUrl("/shop/purchase"), () =>
-        HttpResponse.json({ error: { code: "OFFER_ENDED" } }, { status: 422 }),
+        HttpResponse.json({ error: { code: "offer_ended" } }, { status: 422 }),
       ),
     );
     await renderShop();
@@ -167,7 +167,7 @@ describe("Shop purchase", () => {
   test("says the last copy is gone and closes the preview (SHP-07)", async () => {
     mockServer.use(
       http.post(mockUrl("/shop/purchase"), () =>
-        HttpResponse.json({ error: { code: "SOLD_OUT" } }, { status: 422 }),
+        HttpResponse.json({ error: { code: "sold_out" } }, { status: 422 }),
       ),
     );
     await renderShop();

@@ -6,7 +6,7 @@ const HTTP_SERVER_ERROR = 500;
 
 const isRetryable = (error: unknown) => {
   if (!isApiError(error)) return true;
-  return error.status >= HTTP_SERVER_ERROR && error.code !== "MAINTENANCE";
+  return error.status >= HTTP_SERVER_ERROR && error.code !== "maintenance";
 };
 
 export const shouldRetry = (failureCount: number, error: unknown) =>

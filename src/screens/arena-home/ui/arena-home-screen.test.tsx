@@ -175,7 +175,7 @@ describe("ArenaHomeScreen", () => {
         HttpResponse.json(
           {
             error: {
-              code: "BANNED",
+              code: "banned",
               details: { scope: "arena", until: "2026-10-12T00:00:00Z", reason: "бустинг кубков" },
             },
           },
@@ -196,7 +196,7 @@ describe("ArenaHomeScreen", () => {
     mockServer.use(
       http.get(mockUrl("/arena"), () =>
         HttpResponse.json(
-          { error: { code: "BANNED", details: { scope: "arena", until: null, reason: "читы" } } },
+          { error: { code: "banned", details: { scope: "arena", until: null, reason: "читы" } } },
           { status: 403 },
         ),
       ),
@@ -384,14 +384,14 @@ describe("ArenaHomeScreen", () => {
     mockServer.use(
       http.get(mockUrl("/arena"), () =>
         isBroken
-          ? HttpResponse.json({ error: { code: "RATE_LIMITED" } }, { status: 429 })
+          ? HttpResponse.json({ error: { code: "too_many_requests" } }, { status: 429 })
           : undefined,
       ),
     );
     passLevels(12);
     await renderArena();
 
-    expect(await screen.findByText("RATE_LIMITED")).toBeOnTheScreen();
+    expect(await screen.findByText("too_many_requests")).toBeOnTheScreen();
     isBroken = false;
     await fireEvent.press(screen.getByTestId("arena-retry"));
 

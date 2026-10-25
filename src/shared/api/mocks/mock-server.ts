@@ -9,6 +9,7 @@ import { resetMockArenaMaps } from "./arena-map-handlers";
 import { resetMockAsync } from "./async-handlers";
 import { resetMockAttempts } from "./attempts-handlers";
 import { resetMockAuth } from "./auth-handlers";
+import { serveBackendStyle } from "./backend-style";
 import { resetMockCustomLevels } from "./custom-level-handlers";
 import { resetMockDaily } from "./daily-handlers";
 import { fakeGameServer } from "./fake-game/fake-game-server";
@@ -31,7 +32,7 @@ let overrides: HttpHandler[] = [];
 const respond = async (request: Request): Promise<Response> => {
   const response = await getResponse([...overrides, ...handlers], request);
   if (response === undefined) {
-    return HttpResponse.json({ error: { code: "NOT_FOUND" } }, { status: HTTP_NOT_FOUND });
+    return HttpResponse.json({ error: { code: "not_found" } }, { status: HTTP_NOT_FOUND });
   }
   // HttpResponse.error() is a network failure, which fetch reports by rejecting (HttpResponse.error() — это сбой сети, о котором fetch сообщает отказом).
   if (response.type === "error") throw new TypeError("Network request failed");
@@ -61,5 +62,5 @@ export const mockServer = {
     resetMockPlayer();
     fakeGameServer.reset();
   },
-  fetch: respond,
+  fetch: serveBackendStyle(respond),
 };

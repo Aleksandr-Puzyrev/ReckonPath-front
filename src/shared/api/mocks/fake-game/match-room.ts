@@ -139,9 +139,9 @@ export const createMatchRoom = (setup: MatchSetup, rng: Rng, first: Side | null)
   const timeOut = (player: Side) => advance(rules.endTurn(player, "timeout"), player);
 
   const refusalOf = (d: TapMessage["d"]): ErrorCode | BoardTap | null => {
-    if (isOver) return "MATCH_OVER";
-    if (d.turn !== turn) return "STALE_TURN";
-    if (current !== "me" || !hasStarted) return "NOT_YOUR_TURN";
+    if (isOver) return "match_over";
+    if (d.turn !== turn) return "stale_turn";
+    if (current !== "me" || !hasStarted) return "not_your_turn";
     const [row = -1, col = -1] = d.cell;
     const result = tapBoard(boards.me, [row, col]);
     return result === "OUTSIDE" ? null : result;
@@ -166,7 +166,7 @@ export const createMatchRoom = (setup: MatchSetup, rng: Rng, first: Side | null)
 
   const surrender = (id: string | undefined) => {
     if (isOver) {
-      push({ t: "error", id, d: { code: "MATCH_OVER" } });
+      push({ t: "error", id, d: { code: "match_over" } });
       return;
     }
     push({ t: "ack", id });

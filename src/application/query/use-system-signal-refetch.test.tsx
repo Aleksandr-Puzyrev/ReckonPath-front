@@ -49,7 +49,7 @@ const banWith = (scope: string) =>
   mockServer.use(
     http.get(mockUrl("/me"), () =>
       HttpResponse.json(
-        { error: { code: "BANNED", details: { scope, until: null, reason: "Cheating" } } },
+        { error: { code: "banned", details: { scope, until: null, reason: "Cheating" } } },
         { status: 403 },
       ),
     ),
@@ -80,7 +80,7 @@ describe("useSystemSignalRefetch", () => {
     mockServer.use(
       http.get(mockUrl("/me"), () =>
         HttpResponse.json(
-          { error: { code: "UPGRADE_REQUIRED" } },
+          { error: { code: "app_update_required" } },
           { status: HTTP_UPGRADE_REQUIRED },
         ),
       ),
@@ -99,7 +99,7 @@ describe("useSystemSignalRefetch", () => {
       http.get(mockUrl("/bootstrap"), () => {
         requests += 1;
         return HttpResponse.json(
-          { error: { code: "UPGRADE_REQUIRED" } },
+          { error: { code: "app_update_required" } },
           { status: HTTP_UPGRADE_REQUIRED },
         );
       }),

@@ -18,7 +18,7 @@ export const useSaveCustomLevel = ({ onSaved, onLimit, onError }: SaveCallbacks)
     ...saveCustomLevelMutationOptions(),
     onSuccess: ({ id }) => onSaved(id),
     onError: (error) => {
-      if (isApiError(error) && error.code === "LIMIT_REACHED") onLimit();
+      if (isApiError(error) && error.code === "limit_reached") onLimit();
       else onError(errorMessageKey(error));
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: customLevelKeys.all }),

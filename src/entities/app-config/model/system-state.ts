@@ -21,7 +21,7 @@ const maintenanceDetailsSchema = z.object({
 const errorCodeOf = (error: unknown) => (isApiError(error) ? error.code : null);
 
 const maintenanceOf = (bootstrap: Bootstrap | undefined, error: unknown) => {
-  if (isApiError(error) && error.code === "MAINTENANCE") {
+  if (isApiError(error) && error.code === "maintenance") {
     return maintenanceDetailsSchema.catch({}).parse(error.details);
   }
   return bootstrap?.maintenance ?? null;
@@ -34,7 +34,7 @@ export const systemStateOf = (
 ): SystemState => {
   const version = bootstrap?.version;
   const isBelowMin = version !== undefined && compareVersions(appVersion, version.min) < 0;
-  if (isBelowMin || errorCodeOf(error) === "UPGRADE_REQUIRED") {
+  if (isBelowMin || errorCodeOf(error) === "app_update_required") {
     return {
       kind: "forcedUpdate",
       storeUrl: version?.storeUrl ?? null,

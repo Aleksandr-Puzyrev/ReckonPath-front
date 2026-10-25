@@ -16,16 +16,16 @@ describe("shouldRetry", () => {
 
   test("retries a timeout and a server error", () => {
     expect(shouldRetry(0, new RequestTimeoutError())).toBe(true);
-    expect(shouldRetry(0, new ApiError(500, "INTERNAL"))).toBe(true);
+    expect(shouldRetry(0, new ApiError(500, "internal_error"))).toBe(true);
   });
 
   test("does not retry a client error", () => {
-    expect(shouldRetry(0, new ApiError(404, "NOT_FOUND"))).toBe(false);
-    expect(shouldRetry(0, new ApiError(426, "UPGRADE_REQUIRED"))).toBe(false);
+    expect(shouldRetry(0, new ApiError(404, "not_found"))).toBe(false);
+    expect(shouldRetry(0, new ApiError(426, "app_update_required"))).toBe(false);
   });
 
   test("does not retry maintenance", () => {
-    expect(shouldRetry(0, new ApiError(503, "MAINTENANCE"))).toBe(false);
+    expect(shouldRetry(0, new ApiError(503, "maintenance"))).toBe(false);
   });
 });
 

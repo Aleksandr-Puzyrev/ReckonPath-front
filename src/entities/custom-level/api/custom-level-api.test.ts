@@ -40,10 +40,10 @@ describe("custom level API", () => {
     await expect(
       save(null, levelOfDraft({ ...draft, map: { ...draft.map, targets: [] } }, null, 6)),
     ).rejects.toMatchObject({
-      code: "MAP_INVALID",
+      code: "map_invalid",
     });
     for (let index = 0; index < 20; index += 1) await save(null);
 
-    await expect(save(null)).rejects.toMatchObject({ code: "LIMIT_REACHED" });
+    await expect(save(null)).rejects.toMatchObject({ code: "limit_reached" });
   });
 });

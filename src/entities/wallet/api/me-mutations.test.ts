@@ -37,7 +37,7 @@ describe("me mutations", () => {
   test("refuses another nickname", async () => {
     await expect(
       new MutationObserver(queryClient, deleteMeMutationOptions()).mutate("Somebody"),
-    ).rejects.toMatchObject({ code: "VALIDATION" });
+    ).rejects.toMatchObject({ code: "validation_failed" });
   });
 
   test("cancels a scheduled deletion", async () => {
