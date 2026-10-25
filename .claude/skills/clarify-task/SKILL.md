@@ -20,13 +20,14 @@ Implements `.claude/rules/05-rule-task-clarification.md`. The goal: every behavi
 4. UI task: find the screen via `design/README.md`, read only its fragment (`data-screen-label`) or its image in `design/shots/`; note both themes.
 5. Design gaps: where the design lacks a screen, state, or interaction, or contradicts itself, look at the prototype (`../peleng/src/game/`, read-only; there is no PvP prototype) and bring its behaviour as an option in the questions — never adopt it silently.
 6. Existing code: check what is already implemented and reusable.
+7. Backend: if the task consumes server data, run the `check-backend` skill for that entity (`../reckon-path-backend`, read-only). Its mismatches go into `docs/backend-discrepancies.md`; those that change the task (the backend cannot serve what the spec needs, or does it differently) become questions in step 3.
 
 ## 2. Build the requirement map
 
 For yourself, list each requirement with its source (`Part 4 §5.2`, `design 19.3`, `decision 0003 #2`). Then list:
 
 * **Gaps** — things the task needs that no source states (a text, a number, a state, an error, a transition, an edge case).
-* **Conflicts** — spec vs design, spec part vs spec part, spec vs a decision, spec vs Expo/library reality.
+* **Conflicts** — spec vs design, spec part vs spec part, spec vs a decision, spec vs Expo/library reality, spec or client vs the backend.
 * **Scope edges** — neighbouring features that must NOT be built now.
 
 Walk the checklist in rule 05 ("What must be checked") so no category is missed.

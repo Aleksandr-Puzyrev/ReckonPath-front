@@ -12,6 +12,7 @@ Server state belongs exclusively to TanStack Query v5. Source: spec Part 7 (API 
 ## Contract and client
 
 * Types come from the OpenAPI contract via `openapi-typescript`; the client is `openapi-fetch` (Part 8 §2.3, §9.1). Generated code is never edited or duplicated by hand.
+* The backend's own `docs/swagger.yaml` (`../reckon-path-backend`) is not the client contract: it is compared with spec Part 7 and `contracts/openapi.yaml` by the `check-backend` skill and is never copied into `contracts/` without a recorded decision.
 * Until the contract file exists in this repository, the agent must not invent endpoints, fields, or error codes: use only what spec Part 7 states, and ask about anything missing.
 * The HTTP client lives in `shared/api` with middleware exactly per Part 8 §9.1: headers (`Authorization`, `X-App-Version`, `X-Platform`, `X-Locale`, `X-Request-Id`), single-flight refresh on 401, 426 → update screen, 503 `maintenance` → maintenance screen, 10 s timeout.
 * Error codes from responses map to i18n keys `errors.<CODE>`; unknown codes → generic text + Sentry.

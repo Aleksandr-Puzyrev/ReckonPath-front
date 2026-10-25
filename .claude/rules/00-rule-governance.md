@@ -17,6 +17,7 @@ A lower-priority instruction must not override, weaken, or bypass a higher one.
 
 Requirements come only from the sources in `docs/README.md`, in this order: decisions (`docs/decisions/`) → spec Part 6 (engine, normative) → the rest of the spec (`docs/spec/`) → design (`design/`, the main UI reference). The prototype (`../peleng`) is advisory only: consulted where the design has gaps, never a source of a decision by itself — the developer decides.
 
+* The backend repository (`../reckon-path-backend`, read-only) is not a requirement source: it is checked against these sources, and every mismatch is reported (`03-rule-scope-boundaries.md`, `check-backend` skill).
 * The agent must not invent a requirement, a behaviour, a text, a number, a color, or a size that none of these sources states.
 * On a conflict between sources, or a gap, the agent must stop and ask the developer (`05-rule-task-clarification.md`) — never pick "the most likely" option silently.
 * Technical defaults already fixed by these rules or by spec Part 8 are not requirements to ask about.

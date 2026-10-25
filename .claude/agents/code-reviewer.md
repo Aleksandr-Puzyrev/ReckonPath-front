@@ -22,7 +22,7 @@ Lint, type check, and tests are mechanical — run them once (`npx expo lint`, `
 ## Checklist (cite the rule in each finding)
 
 * **Requirements** — `00`, `05`: nothing invented; spec ↔ design conflicts and design gaps were asked, not decided silently (prototype behaviour adopted only with a recorded decision); answers recorded in `docs/decisions/`.
-* **Scope** — `03`: no backend/admin code; nothing outside the task.
+* **Scope** — `03`: no backend/admin code; nothing outside the task; nothing changed in `../reckon-path-backend`; the client, `contracts/`, or the spec not adapted to the backend without a recorded decision.
 * **Architecture** — `06`: correct layer and slice; imports only downward; no sideways slice imports; public API via `index.ts`; route files thin; no new library without approval; no edits to `ios/`/`android/`.
 * **Naming** — `07`: kebab-case files with suffixes; spec domain terms; props `I<Component>`; engine names and topic modules follow the `09` exception.
 * **Style** — `08`: minimal code; no `any`, `!`, unjustified `as`; no manual memoization; no ternary chains; no magic values; no `console.log`; no empty `catch`.

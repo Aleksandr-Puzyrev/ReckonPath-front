@@ -9,7 +9,7 @@ Rules hold operational constraints only. Product requirements live in `docs/` (s
 | 00 | `00-rule-governance.md` | always | Priority order, source priority, language, how rules are authored |
 | 01 | `01-rule-task-bootstrap.md` | always | Mandatory pre-task sequence: rules, spec, design, decisions, Expo docs |
 | 02 | `02-rule-skill-first.md` | always | Use an applicable skill before manual work; what to do when a skill fails |
-| 03 | `03-rule-scope-boundaries.md` | always | Project scope (mobile client only) and agent scope; four-option handoff |
+| 03 | `03-rule-scope-boundaries.md` | always | Project scope (mobile client only), backend repository read-only, agent scope; four-option handoff |
 | 05 | `05-rule-task-clarification.md` | always | No code from an incomplete task; spec-first clarification, confirmation before coding |
 | 06 | `06-rule-architecture-fsd.md` | always | Stack, Feature-Sliced layers, import direction, directory layout |
 | 07 | `07-rule-naming-conventions.md` | always | kebab-case files, suffixes, components, variables, types, stores, queries |

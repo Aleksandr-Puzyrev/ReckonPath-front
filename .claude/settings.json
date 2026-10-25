@@ -2,6 +2,15 @@
   "enabledPlugins": {
     "expo@claude-plugins-official": true
   },
+  "permissions": {
+    "deny": [
+      "Edit(//Users/aleksandr/Desktop/Aleksandr/ShoveArena/reckon-path-backend/**)",
+      "Write(//Users/aleksandr/Desktop/Aleksandr/ShoveArena/reckon-path-backend/**)",
+      "NotebookEdit(//Users/aleksandr/Desktop/Aleksandr/ShoveArena/reckon-path-backend/**)",
+      "Read(//Users/aleksandr/Desktop/Aleksandr/ShoveArena/reckon-path-backend/.env)",
+      "Read(//Users/aleksandr/Desktop/Aleksandr/ShoveArena/reckon-path-backend/**/.env)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {

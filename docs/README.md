@@ -8,6 +8,7 @@ Where every requirement for Reckon Path lives. Agents start here to locate the o
 | Specification, original single file | [`PELENGE_TZ.md`](PELENGE_TZ.md) | Same content as `spec/`; `.docx`/`.pdf`/`.html` copies are not used by agents |
 | Design (screens, both themes) | [`../design/README.md`](../design/README.md) | Visual reference; the spec wins on conflict |
 | Decisions and answers to clarifying questions | [`decisions/`](decisions/) | Binding; extends the spec |
+| Backend (outside the repo, read-only, partly implemented) | `../reckon-path-backend` (Go; contract in `docs/swagger.yaml`) | Not a requirement source: checked against the sources above; mismatches with how it should be in [`backend-discrepancies.md`](backend-discrepancies.md) (`check-backend` skill) |
 | Prototypes (outside the repo, read-only) | `../peleng/src/game/` (campaign, daily, editor, level codes); `../arena` is a different game and is not used (0007) | Advisory only: consulted where the design has gaps; the developer decides |
 
 ## Source priority
@@ -19,6 +20,8 @@ When sources disagree, the higher one wins. An agent must not resolve a conflict
 3. The rest of the spec.
 4. Design in `../design/` — the main reference for building screens and UI; not fully worked out.
 5. Prototypes — only where the design has gaps or inconsistencies, and always with a question to the developer (`decisions/0002-setup-follow-ups.md`).
+
+The backend is outside this order: it implements the requirements and is checked against them, never the reverse.
 
 ## Naming
 
