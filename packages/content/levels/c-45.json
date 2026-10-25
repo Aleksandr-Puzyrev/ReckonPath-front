@@ -1,0 +1,29 @@
+{
+  "v": 2,
+  "id": "c-45",
+  "title": {
+    "ru": "Вязкий брод",
+    "en": "Sticky ford"
+  },
+  "world": 4,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [1, 5],
+    [5, 1]
+  ],
+  "streams": [
+    [3, 4],
+    [3, 5],
+    [3, 6]
+  ],
+  "heavy": [
+    [3, 0],
+    [3, 1],
+    [3, 2],
+    [3, 3]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 9,
+  "stars": [6, 7]
+}

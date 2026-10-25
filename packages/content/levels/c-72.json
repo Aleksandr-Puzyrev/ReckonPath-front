@@ -1,0 +1,17 @@
+{
+  "v": 2,
+  "id": "c-72",
+  "title": {
+    "ru": "Штормовой курс",
+    "en": "Storm course"
+  },
+  "world": 6,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[5, 5]],
+  "bombs": [[2, 4]],
+  "buoys": [[0, 6]],
+  "probeMode": "direction",
+  "moveLimit": 6,
+  "stars": [4, 5]
+}

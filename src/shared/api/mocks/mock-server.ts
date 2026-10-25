@@ -9,6 +9,7 @@ import { resetMockArenaMaps } from "./arena-map-handlers";
 import { resetMockAsync } from "./async-handlers";
 import { resetMockAttempts } from "./attempts-handlers";
 import { resetMockAuth } from "./auth-handlers";
+import { resetMockCustomLevels } from "./custom-level-handlers";
 import { resetMockDaily } from "./daily-handlers";
 import { fakeGameServer } from "./fake-game/fake-game-server";
 import { resetMockArenaProfile } from "./mock-arena-profile";
@@ -49,6 +50,7 @@ export const mockServer = {
     resetMockWallet();
     resetMockShop();
     resetMockMe();
+    resetMockCustomLevels();
     resetMockSupport();
     resetMockPurchases();
     resetMockAds();

@@ -1,0 +1,26 @@
+{
+  "v": 2,
+  "id": "c-46",
+  "title": {
+    "ru": "Тропа стаи",
+    "en": "Flock trail"
+  },
+  "world": 4,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [0, 6],
+    [6, 3]
+  ],
+  "heavy": [
+    [0, 3],
+    [1, 3],
+    [2, 3],
+    [3, 3],
+    [4, 3]
+  ],
+  "beacons": [[3, 6]],
+  "probeMode": "distance",
+  "moveLimit": 8,
+  "stars": [6, 7]
+}

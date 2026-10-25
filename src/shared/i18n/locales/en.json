@@ -852,7 +852,9 @@
       "bridge": "Bridge",
       "bomb": "Bomb",
       "erase": "Erase",
-      "random": "Random"
+      "random": "Random",
+      "beacon": "Beacon",
+      "buoy": "Buoy"
     },
     "hints": {
       "target": "tap a tile — target",
@@ -862,7 +864,9 @@
       "rock": "tap — rock",
       "bridge": "streams only",
       "bomb": "tap — bomb",
-      "erase": "tap — clear tile"
+      "erase": "tap — clear tile",
+      "beacon": "tap — beacon",
+      "buoy": "tap — buoy"
     },
     "counter": "{{count}}/{{max}}",
     "save": "Save",
@@ -1038,5 +1042,74 @@
       }
     },
     "next": "Next"
+  },
+  "editor": {
+    "list": {
+      "title": "My levels",
+      "hint": "Delete with the button in a row. Up to 20 levels.",
+      "new": "+ New level",
+      "delete": "Delete",
+      "deleteBody": "The level code will stop working for everyone you sent it to.",
+      "empty": "No levels yet. Build one and play it.",
+      "size": "{{rows}}×{{cols}}"
+    },
+    "new": {
+      "title": "New level",
+      "mode": "Hint mode",
+      "create": "Create",
+      "rows": "Rows",
+      "cols": "Columns"
+    },
+    "name": "Title",
+    "limit": "Move limit",
+    "botHint_one": "the bot solves it in ~{{count}}",
+    "botHint_other": "the bot solves it in ~{{count}}",
+    "tryout": "Play it yourself",
+    "defaultName": "Level {{n}}",
+    "limitWarn": "Fewer than the bot needs — the level may be unsolvable",
+    "fog": "Fog",
+    "order": "Targets in order",
+    "bombHint": "“Bomb nearby” mark",
+    "saved": "Level saved",
+    "limitReached": "You already have 20 levels — delete one to save a new one",
+    "backToEditor": "Back to editor",
+    "decrease": "Fewer",
+    "increase": "More",
+    "invalid": "The level fails the check"
+  },
+  "code": {
+    "share": {
+      "title": "Share level",
+      "code": "Level code",
+      "copy": "Copy",
+      "copied": "Code copied",
+      "link": "Share link",
+      "challenge": "Add a challenge",
+      "challengeHint_one": "my result: {{count}} move",
+      "challengeHint_other": "my result: {{count}} moves",
+      "open": "Share"
+    },
+    "play": {
+      "title": "Play a code",
+      "field": "Level code",
+      "paste": "Paste",
+      "eyebrow": "Player level",
+      "challenge": "Author’s challenge",
+      "challengeValue_one": "{{count}} move",
+      "challengeValue_other": "{{count}} moves",
+      "play": "Play",
+      "error": {
+        "CODE_INVALID": "Invalid code",
+        "CODE_NEWER": "The code is from a newer version — update the game",
+        "LEVEL_INVALID": "The level fails the check"
+      }
+    },
+    "result": {
+      "mine_one": "Your result: {{count}} move",
+      "mine_other": "Your result: {{count}} moves",
+      "beaten": "Challenge beaten!",
+      "missed": "Challenge not beaten — try again",
+      "toLevels": "To levels"
+    }
   }
 }

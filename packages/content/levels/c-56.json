@@ -1,0 +1,16 @@
+{
+  "v": 2,
+  "id": "c-56",
+  "title": {
+    "ru": "Буй на краю",
+    "en": "Buoy at the edge"
+  },
+  "world": 5,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[5, 5]],
+  "buoys": [[0, 6]],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

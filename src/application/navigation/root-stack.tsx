@@ -45,6 +45,12 @@ const RootStack = () => {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
           <Stack.Screen name="onboarding/language" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="editor/index" />
+          <Stack.Screen name="editor/[id]" options={{ gestureEnabled: false }} />
+          <Stack.Screen
+            name="editor/tryout"
+            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
+          />
           <Stack.Screen name="settings/index" />
           <Stack.Screen name="settings/deletion" />
           <Stack.Screen name="arena/history/[id]" />
@@ -67,6 +73,11 @@ const RootStack = () => {
           />
           <Stack.Screen
             name="arena/async/[id]"
+            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
+          />
+          <Stack.Screen name="play/index" options={{ presentation: "modal" }} />
+          <Stack.Screen
+            name="play/code"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}
           />
           <Stack.Screen

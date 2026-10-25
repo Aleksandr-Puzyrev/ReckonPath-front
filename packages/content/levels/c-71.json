@@ -1,0 +1,18 @@
+{
+  "v": 2,
+  "id": "c-71",
+  "title": {
+    "ru": "Два курса",
+    "en": "Two courses"
+  },
+  "world": 6,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [1, 1],
+    [5, 5]
+  ],
+  "probeMode": "direction",
+  "moveLimit": 8,
+  "stars": [6, 7]
+}

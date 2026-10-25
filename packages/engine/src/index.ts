@@ -18,9 +18,22 @@ export type {
   Stars,
   TapResult,
 } from "./model/types";
-export { DEFAULT_ENGINE_CONFIG, PVP_SOLVER_BOMB_PENALTY } from "./config/engine-config";
+export {
+  DEFAULT_ENGINE_CONFIG,
+  FOG_MAX,
+  FOG_MIN,
+  MAX_BEACONS,
+  MAX_BOARD_SIZE,
+  MAX_BUOYS,
+  MAX_MOVE_LIMIT,
+  MAX_ROCK_SHARE,
+  MAX_TARGETS,
+  MIN_BOARD_SIZE,
+  PVP_SOLVER_BOMB_PENALTY,
+  TITLE_MAX_LENGTH,
+} from "./config/engine-config";
 export type { EngineConfig, RatingConfig } from "./config/engine-config";
-export { edgeKey, toCell, toIdx } from "./grid/grid";
+export { edgeKey, gridNeighbors, toCell, toIdx } from "./grid/grid";
 export { levelSchema } from "./level/level-schema";
 export type { LevelInput } from "./level/level-schema";
 export { createBoard } from "./level/create-board";
@@ -34,7 +47,7 @@ export {
   moveLimitOf,
   stars,
 } from "./game/game";
-export { heatOf, heatThresholds, probeValue } from "./probe/probe";
+export { directionOf, heatOf, heatThresholds, probeValue } from "./probe/probe";
 export { validateLevel } from "./validator/validate-level";
 export type {
   PvpElement,

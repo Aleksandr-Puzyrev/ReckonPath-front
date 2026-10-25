@@ -1,0 +1,23 @@
+{
+  "v": 2,
+  "id": "c-25",
+  "title": {
+    "ru": "Первый ручей",
+    "en": "First stream"
+  },
+  "world": 3,
+  "rows": 6,
+  "cols": 6,
+  "targets": [[2, 4]],
+  "streams": [
+    [0, 2],
+    [1, 2],
+    [2, 2],
+    [3, 2],
+    [4, 2],
+    [5, 2]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

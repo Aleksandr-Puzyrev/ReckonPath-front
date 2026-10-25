@@ -12,10 +12,18 @@ import type { WorldItem } from "../model/build-list-items";
 
 import { styles } from "./world-header-styles";
 
-const COVERS: readonly GradientName[] = ["world1", "world2", "world3", "world4"];
+const COVERS: readonly GradientName[] = [
+  "world1",
+  "world2",
+  "world3",
+  "world4",
+  "world5",
+  "world6",
+  "world7",
+  "world8",
+];
 
-// TODO: covers for worlds 5–8 come from the designer; until then they repeat worlds 1–4
-const coverOf = (world: number) => COVERS[(world - 1) % COVERS.length] ?? "world1";
+const coverOf = (world: number) => COVERS[world - 1] ?? "world1";
 
 interface IWorldHeader {
   item: WorldItem;

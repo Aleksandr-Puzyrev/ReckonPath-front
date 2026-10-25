@@ -28,7 +28,7 @@
     ]
   ],
   "probeMode": "distance",
-  "introduces": "fence",
   "moveLimit": 6,
-  "stars": [3, 4]
+  "stars": [3, 4],
+  "introduces": "fence"
 }

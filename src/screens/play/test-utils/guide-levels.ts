@@ -13,6 +13,8 @@ export const CAMPAIGN: readonly LevelInput[] = [
   { ...BASE, id: "c-1" },
   { ...BASE, id: "c-2", moveLimit: 6, stars: [3, 4] },
   { ...BASE, id: "c-3", moveLimit: 6, stars: [3, 4], beacons: [[3, 3]] },
+  { ...BASE, id: "c-4", moveLimit: 6, stars: [3, 4], bombs: [[2, 0]] },
+  { ...BASE, id: "c-5", moveLimit: 6, stars: [3, 4], bombs: [[2, 0]], bombHint: false },
 ];
 
 export const LEVEL_LESSONS = { "c-3": ["flags"] };

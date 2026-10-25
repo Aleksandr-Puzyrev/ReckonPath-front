@@ -18,6 +18,8 @@ import type { RuleCardId } from "@entities/rules";
 import { canSkip, highlightOf, isTapAllowed, stepAfterTap } from "@features/tutorial";
 import type { TutorialStep } from "@features/tutorial";
 
+import { bombCoachHighlight } from "./bomb-coach-highlight";
+
 export interface OpenCards {
   cards: readonly RuleCardId[];
   index: number;
@@ -50,11 +52,18 @@ export const usePlayGuides = (level: LevelInput | null) => {
   const firstCell = game === null ? null : toIdx(game.board.cols, TUTORIAL.firstCell);
   const isTutorialActive = isTutorial && tutorialState === "pending";
 
-  const metCards = CATALOGUE_ORDER.filter((id) => id === "distance" || seenCards.includes(id));
+  const bombHighlight = seenCards.includes("bombNear") ? null : bombCoachHighlight(game);
+  const isBombCoachOpen = bombHighlight !== null && !isTutorialActive;
+
+  const metCards = CATALOGUE_ORDER.filter(
+    (id) =>
+      id === "distance" ||
+      (seenCards.includes(id) && !(id === "bombNear" && level?.bombHint === false)),
+  );
   const cardsBeforeLevel: OpenCards | null =
     cardQueue.length > 0 ? { cards: cardQueue, index: 0, isBrowsable: false } : null;
   const shownCards = openCards ?? cardsBeforeLevel;
-  const isBlocking = shownCards !== null || isRulesOpen || isMovesHintOpen;
+  const isBlocking = shownCards !== null || isRulesOpen || isMovesHintOpen || isBombCoachOpen;
 
   const closeCards = () => {
     if (openCards === null) {
@@ -80,11 +89,12 @@ export const usePlayGuides = (level: LevelInput | null) => {
     highlight:
       isTutorialActive && game !== null && firstCell !== null
         ? highlightOf(tutorialStep, game.board, firstCell)
-        : null,
+        : bombHighlight,
     shownCards,
     metCards,
     isRulesOpen,
     isMovesHintOpen,
+    isBombCoachOpen,
     isBlocking,
     allowsTap,
     handleTutorialTap: () => setTutorialStep(stepAfterTap(tutorialStep)),
@@ -97,6 +107,7 @@ export const usePlayGuides = (level: LevelInput | null) => {
       rules.markMovesHintSeen();
       setIsMovesHintOpen(false);
     },
+    handleBombCoachClose: () => rules.markSeen(["bombNear"]),
     handleCardsClose: closeCards,
     handleRulesOpen: () => setIsRulesOpen(true),
     handleRulesClose: () => setIsRulesOpen(false),

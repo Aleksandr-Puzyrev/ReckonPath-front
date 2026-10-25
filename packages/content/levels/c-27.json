@@ -1,0 +1,31 @@
+{
+  "v": 2,
+  "id": "c-27",
+  "title": {
+    "ru": "Ручей и забор",
+    "en": "Stream and fence"
+  },
+  "world": 3,
+  "rows": 6,
+  "cols": 6,
+  "targets": [[1, 5]],
+  "streams": [
+    [0, 3],
+    [1, 3],
+    [2, 3],
+    [3, 3]
+  ],
+  "fences": [
+    [
+      [3, 4],
+      [4, 4]
+    ],
+    [
+      [3, 5],
+      [4, 5]
+    ]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 3]
+}

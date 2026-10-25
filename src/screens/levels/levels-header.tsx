@@ -15,12 +15,11 @@ import { styles } from "./levels-header-styles";
 interface ILevelsHeader {
   stars: number;
   maxStars: number;
+  onEditor: () => void;
+  onPlayCode: () => void;
 }
 
-// TODO: the editor and play-by-code screens come with their own tasks (spec Part 4 §11)
-const ignorePress = () => undefined;
-
-const LevelsHeader = ({ stars, maxStars }: ILevelsHeader) => {
+const LevelsHeader = ({ stars, maxStars, onEditor, onPlayCode }: ILevelsHeader) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const iconSize = theme.sizes.icon.s;
@@ -40,22 +39,20 @@ const LevelsHeader = ({ stars, maxStars }: ILevelsHeader) => {
       <View style={styles.buttons}>
         <View style={styles.button}>
           <Button
+            testID="levels-editor"
             label={t("levels.editor")}
-            isDisabled
-            onPress={ignorePress}
+            onPress={onEditor}
             icon={
-              <EditorIcon width={iconSize} height={iconSize} color={theme.colors.text.disabled} />
+              <EditorIcon width={iconSize} height={iconSize} color={theme.colors.text.primary} />
             }
           />
         </View>
         <View style={styles.button}>
           <Button
+            testID="levels-play-code"
             label={t("levels.playCode")}
-            isDisabled
-            onPress={ignorePress}
-            icon={
-              <CodeIcon width={iconSize} height={iconSize} color={theme.colors.text.disabled} />
-            }
+            onPress={onPlayCode}
+            icon={<CodeIcon width={iconSize} height={iconSize} color={theme.colors.text.primary} />}
           />
         </View>
       </View>

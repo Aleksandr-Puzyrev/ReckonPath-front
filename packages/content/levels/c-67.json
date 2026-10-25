@@ -1,0 +1,17 @@
+{
+  "v": 2,
+  "id": "c-67",
+  "title": {
+    "ru": "Бухточка",
+    "en": "Cove"
+  },
+  "world": 6,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[4, 4]],
+  "rocks": [[1, 5]],
+  "beacons": [[6, 0]],
+  "probeMode": "distance",
+  "moveLimit": 3,
+  "stars": [2, 3]
+}

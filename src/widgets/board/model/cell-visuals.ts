@@ -2,7 +2,7 @@ import { isStale } from "@reckon-path/engine";
 import type { Direction, GameState, Heat, HotColdCompare, Idx, Reveal } from "@reckon-path/engine";
 
 export type CellContent =
-  | { type: "hidden"; hasFlag: boolean; ghost: "target" | "bomb" | null }
+  | { type: "hidden"; hasFlag: boolean; ghost: "target" | "bomb" | "buoy" | null }
   | { type: "distance"; value: number; heat: Heat }
   | { type: "direction"; dir: Direction }
   | { type: "hotcold"; cmp: HotColdCompare }
@@ -55,6 +55,7 @@ const visibleUnderFog = (game: GameState) => {
 const ghostOf = (game: GameState, idx: Idx) => {
   if (game.board.targets.includes(idx)) return "target";
   if (game.board.bombs.includes(idx)) return "bomb";
+  if (game.board.buoys.includes(idx)) return "buoy";
   return null;
 };
 

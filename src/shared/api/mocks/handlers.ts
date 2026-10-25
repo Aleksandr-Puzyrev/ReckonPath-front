@@ -10,6 +10,7 @@ import { asyncHandlers } from "./async-handlers";
 import { arenaMapHandlers } from "./arena-map-handlers";
 import { attemptsHandlers } from "./attempts-handlers";
 import { authHandlers } from "./auth-handlers";
+import { customLevelHandlers } from "./custom-level-handlers";
 import { dailyHandlers } from "./daily-handlers";
 import { meHandlers } from "./me-handlers";
 import { mockUrl } from "./mock-url";
@@ -52,4 +53,5 @@ export const handlers = [
   ...arenaMapHandlers,
   ...asyncHandlers,
   ...supportHandlers,
+  ...customLevelHandlers,
 ];

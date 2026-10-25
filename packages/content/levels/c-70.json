@@ -1,0 +1,21 @@
+{
+  "v": 2,
+  "id": "c-70",
+  "title": {
+    "ru": "Курс между скал",
+    "en": "Course through the rocks"
+  },
+  "world": 6,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[3, 4]],
+  "rocks": [
+    [2, 2],
+    [3, 3],
+    [4, 4],
+    [2, 4]
+  ],
+  "probeMode": "direction",
+  "moveLimit": 7,
+  "stars": [5, 6]
+}

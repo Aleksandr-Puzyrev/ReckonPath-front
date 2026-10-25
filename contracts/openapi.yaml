@@ -819,6 +819,65 @@ paths:
                   ticketId: { type: string }
         default: { $ref: "#/components/responses/Error" }
 
+  /levels/custom:
+    get:
+      operationId: listCustomLevels
+      description: The player's own levels (Part 7 §4), newest first.
+      responses:
+        "200":
+          description: Up to 20 levels
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/CustomLevel" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      operationId: createCustomLevel
+      description: Saves a new level; LIMIT_REACHED at 20, MAP_INVALID when the validator refuses it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CustomLevelInput" }
+      responses:
+        "201":
+          description: The saved level
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CustomLevel" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /levels/custom/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      operationId: updateCustomLevel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CustomLevelInput" }
+      responses:
+        "200":
+          description: The saved level
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CustomLevel" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: deleteCustomLevel
+      responses:
+        "204": { description: Deleted }
+        default: { $ref: "#/components/responses/Error" }
+
 components:
   securitySchemes:
     bearer:
@@ -1536,6 +1595,26 @@ components:
         trophiesBefore: { type: integer }
         trophiesAfter: { type: integer }
         claimed: { type: boolean }
+
+    CustomLevelInput:
+      type: object
+      required: [level]
+      properties:
+        level:
+          description: Level v2 (contracts/schemas/level.schema.json)
+          type: object
+          additionalProperties: true
+
+    CustomLevel:
+      type: object
+      required: [id, level, updatedAt]
+      properties:
+        id: { type: string }
+        level:
+          description: Level v2 (contracts/schemas/level.schema.json)
+          type: object
+          additionalProperties: true
+        updatedAt: { type: string, format: date-time }
 
     SupportTicket:
       type: object

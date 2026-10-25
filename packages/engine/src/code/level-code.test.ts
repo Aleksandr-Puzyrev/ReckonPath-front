@@ -74,6 +74,23 @@ describe("level codes", () => {
     expect(decodeLevel(code)).toEqual({ ok: false, error: "CODE_NEWER" });
   });
 
+  test("carries the author's challenge and reads it back (decision 0044 #1)", () => {
+    expect(decodeLevel(encodeLevel(level, 7))).toMatchObject({ ok: true, challenge: 7 });
+    expect(decodeLevel(encodeLevel(level))).toMatchObject({ ok: true, challenge: null });
+  });
+
+  test("ignores a challenge that is not a positive whole number", () => {
+    const code = rp2({ v: 2, r: 5, c: 5, t: [[4, 4]], m: "distance", x: -2 });
+
+    expect(decodeLevel(code)).toMatchObject({ ok: true, challenge: null });
+  });
+
+  test("tells a level that fails the check from a broken code (Part 1 §7.4)", () => {
+    const code = rp2({ v: 2, r: 5, c: 5, t: [[4, 4]], b: [[4, 4]], m: "distance" });
+
+    expect(decodeLevel(code)).toEqual({ ok: false, error: "LEVEL_INVALID" });
+  });
+
   test("a legacy code without a title or walls decodes", () => {
     const decoded = decodeLevel(legacy({ v: 1, r: 5, c: 5, t: [[4, 4]] }));
     expect(decoded).toMatchObject({ ok: true, level: { fences: [], streams: [] } });

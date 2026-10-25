@@ -74,7 +74,7 @@ Coordinates are `[row, col]`, zero-based. Levels use the level v2 format (`contr
 
 ## `kind: "codeDecode"`
 
-`{ code, expect: { level } | { error } }` — `decodeLevel`. The `RP2-` codes were built independently in Python (`zlib` raw deflate, level 9), so decoding is checked against another deflate implementation; `PELENG1-` codes follow the prototype format. Errors: `CODE_INVALID`, `CODE_NEWER`.
+`{ code, expect: { level, challenge? } | { error } }` — `decodeLevel`; `challenge` is the author's best result from key `x` (decision 0044), `null` when absent or not a positive whole number. The `RP2-` codes were built independently in Python (`zlib` raw deflate, level 9), so decoding is checked against another deflate implementation; `PELENG1-` codes follow the prototype format. Errors: `CODE_INVALID`, `CODE_NEWER`, `LEVEL_INVALID` (a well-formed code whose level fails the validator).
 
 ## `kind: "codeRoundTrip"`
 

@@ -1,0 +1,24 @@
+{
+  "v": 2,
+  "id": "c-65",
+  "title": {
+    "ru": "Камни и мины",
+    "en": "Stones and mines"
+  },
+  "world": 6,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[3, 3]],
+  "bombs": [
+    [3, 5],
+    [5, 1]
+  ],
+  "rocks": [
+    [2, 2],
+    [2, 3],
+    [4, 4]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

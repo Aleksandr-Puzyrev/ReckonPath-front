@@ -1,0 +1,24 @@
+{
+  "v": 2,
+  "id": "c-32",
+  "title": {
+    "ru": "Через мост",
+    "en": "Across the bridge"
+  },
+  "world": 3,
+  "rows": 6,
+  "cols": 6,
+  "targets": [[4, 4]],
+  "streams": [
+    [2, 0],
+    [2, 1],
+    [2, 2],
+    [2, 3],
+    [2, 4],
+    [2, 5]
+  ],
+  "bridges": [[2, 0]],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

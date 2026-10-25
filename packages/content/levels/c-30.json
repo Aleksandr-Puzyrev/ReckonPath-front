@@ -1,0 +1,20 @@
+{
+  "v": 2,
+  "id": "c-30",
+  "title": {
+    "ru": "Тихий плёс",
+    "en": "Quiet reach"
+  },
+  "world": 3,
+  "rows": 6,
+  "cols": 6,
+  "targets": [[4, 1]],
+  "streams": [
+    [2, 2],
+    [2, 3]
+  ],
+  "beacons": [[5, 5]],
+  "probeMode": "distance",
+  "moveLimit": 4,
+  "stars": [2, 3]
+}

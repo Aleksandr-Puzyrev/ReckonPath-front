@@ -1,0 +1,16 @@
+{
+  "v": 2,
+  "id": "c-50",
+  "title": {
+    "ru": "Значок мины",
+    "en": "Mine mark"
+  },
+  "world": 5,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[3, 3]],
+  "bombs": [[3, 4]],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

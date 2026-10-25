@@ -3,7 +3,7 @@ import type { LevelInput } from "@reckon-path/engine";
 
 import { TUTORIAL_LEVEL, WORLD_PLANS } from "../world-plans";
 
-import { firstNumberShare } from "./first-tap";
+import { firstNumberShare, isBombOnFirstTap } from "./first-tap";
 import { expectedFactor, limitsFor } from "./level-limits";
 import type { LevelLimits } from "./level-limits";
 
@@ -51,6 +51,7 @@ export const checkLevel = (level: LevelInput, number: number): LevelReport => {
       ? ["LIMITS_OUT_OF_DATE"]
       : []),
     ...(firstShare > MAX_FIRST_NUMBER_SHARE ? ["FIRST_NUMBER"] : []),
+    ...(isBombOnFirstTap(level) ? ["BOMB_FIRST_TAP"] : []),
   ];
   const warnings = deviation !== null && deviation > MAX_CURVE_DEVIATION ? ["CURVE"] : [];
 

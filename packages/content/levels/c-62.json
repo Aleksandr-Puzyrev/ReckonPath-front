@@ -1,0 +1,19 @@
+{
+  "v": 2,
+  "id": "c-62",
+  "title": {
+    "ru": "Первая скала",
+    "en": "First rock"
+  },
+  "world": 6,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[3, 5]],
+  "rocks": [
+    [1, 1],
+    [5, 1]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

@@ -48,6 +48,9 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0040 | [`0040-settings.md`](0040-settings.md) | Settings: volumes, hidden high contrast and notifications, account rows with sign out and deletion, clipboard / store review / application libraries, coordinates on game boards, PvP tap confirmation, theme and language, about |
 | 0041 | [`0041-home.md`](0041-home.md) | Home: two «Сегодня» cards with the arena, world subtitle, direct resume, hero with preview and element chips, campaign complete, streak restore card, quick links, offline and first load |
 | 0042 | [`0042-splash-and-onboarding.md`](0042-splash-and-onboarding.md) | Splash and app onboarding: design and Part 4 texts, dark native splash, in-app sonar splash with a 2.5 s cap and the «Обновляем…» banner, language step for unsupported system languages, Home coach marks after level 3 |
+| 0043 | [`0043-level-editor.md`](0043-level-editor.md) | Level editor 4a: split with 4b (share, play by code), elements and parameters, arena editor layout with title and move limit, bot + 50 % default with a warning, online saving with a local draft, my levels, new level sheet, tryout mode |
+| 0044 | [`0044-share-and-play-code.md`](0044-share-and-play-code.md) | Sharing and playing by code 4b: challenge `x` from the tryout, no author, code play screen with a challenge result, Part 1 code errors, `reckonpath://play?c=`, share and play-code sheets, texts |
+| 0045 | [`0045-worlds-3-8-content.md`](0045-worlds-3-8-content.md) | Worlds 3–8 content in three batches with card approval, first-number rule for the new modes, covers of worlds 5–8, bomb first-tap check, bomb coach card with world 5, modes of worlds 7–8 |
 
 ## Template
 

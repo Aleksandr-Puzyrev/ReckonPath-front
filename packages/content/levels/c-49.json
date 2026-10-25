@@ -1,0 +1,16 @@
+{
+  "v": 2,
+  "id": "c-49",
+  "title": {
+    "ru": "Первая мина",
+    "en": "First mine"
+  },
+  "world": 5,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[1, 5]],
+  "bombs": [[5, 1]],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

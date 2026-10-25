@@ -1,0 +1,28 @@
+{
+  "v": 2,
+  "id": "c-34",
+  "title": {
+    "ru": "Переправа",
+    "en": "The crossing"
+  },
+  "world": 3,
+  "rows": 6,
+  "cols": 6,
+  "targets": [[3, 1]],
+  "streams": [
+    [0, 2],
+    [1, 2],
+    [2, 2],
+    [3, 2],
+    [4, 2],
+    [5, 2],
+    [3, 3],
+    [3, 4],
+    [3, 5]
+  ],
+  "bridges": [[4, 2]],
+  "beacons": [[5, 5]],
+  "probeMode": "distance",
+  "moveLimit": 4,
+  "stars": [3, 3]
+}

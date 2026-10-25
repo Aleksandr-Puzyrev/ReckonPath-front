@@ -39,6 +39,7 @@ const TARGET_RING_SHARE = 0.36;
 const ORDER_SHARE = 0.36;
 const TOWER_SHARE = 0.34;
 const BUOY_SHARE = 0.14;
+const BUOY_GHOST_SHARE = 0.22;
 const PLAQUE_PADDING = 6;
 const FLAG_POLE = 2;
 const FLAG_PENNANT = { width: 0.62, height: 0.52 };
@@ -83,6 +84,24 @@ const drawPin = (canvas: SkCanvas, scene: BoardScene, cx: number, cy: number, al
   paint.setAlphaf(alpha);
   canvas.drawCircle(cx, cy, radius, paint);
   canvas.drawCircle(cx, cy, radius * PIN_DOT_SHARE, solidPaint(scene.skin.elements.pinDot, alpha));
+};
+
+// A buoy is a disc split in two colours (буй — диск из двух цветов).
+const drawBuoy = (
+  canvas: SkCanvas,
+  scene: BoardScene,
+  cx: number,
+  cy: number,
+  r: number,
+  alpha: number,
+) => {
+  "worklet";
+  const [top = "", bottom = ""] = scene.skin.elements.buoy;
+  canvas.drawCircle(cx, cy, r, solidPaint(bottom, alpha));
+  canvas.save();
+  canvas.clipRect({ x: cx - r, y: cy - r, width: 2 * r, height: r }, ClipOp.Intersect, true);
+  canvas.drawCircle(cx, cy, r, solidPaint(top, alpha));
+  canvas.restore();
 };
 
 const drawFlag = (canvas: SkCanvas, scene: BoardScene, cx: number, cy: number) => {
@@ -289,16 +308,7 @@ const drawRevealed = (
   }
   if (visual.isBuoy) {
     const r = cell * BUOY_SHARE;
-    const [top = "", bottom = ""] = elements.buoy;
-    canvas.drawCircle(x + BADGE_INSET + r, y + BADGE_INSET + r, r, solidPaint(bottom));
-    canvas.save();
-    canvas.clipRect(
-      { x: x + BADGE_INSET, y: y + BADGE_INSET, width: 2 * r, height: r },
-      ClipOp.Intersect,
-      true,
-    );
-    canvas.drawCircle(x + BADGE_INSET + r, y + BADGE_INSET + r, r, solidPaint(top));
-    canvas.restore();
+    drawBuoy(canvas, scene, x + BADGE_INSET + r, y + BADGE_INSET + r, r, 1);
   }
 };
 
@@ -333,6 +343,8 @@ const drawCell = (
       const size = cell * MINE_SHARE;
       drawMine(canvas, scene, cx - size / 2, cy - size / 2, size, elements.mineBadge, GHOST_ALPHA);
     }
+    if (content.ghost === "buoy")
+      drawBuoy(canvas, scene, cx, cy, cell * BUOY_GHOST_SHARE, GHOST_ALPHA);
     if (idx === fx.pressedCell)
       canvas.drawRRect(roundRect(x, y, cell, cell, radius), solidPaint(scene.skin.pressedTint));
   } else {

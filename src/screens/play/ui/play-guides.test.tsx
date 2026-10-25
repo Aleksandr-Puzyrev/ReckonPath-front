@@ -162,6 +162,50 @@ describe("PlayScreen guides", () => {
     expect(screen.getByText("Забор стоит между клетками. Сигнал обходит его")).toBeOnTheScreen();
   });
 
+  describe("mine mark coach", () => {
+    const NEXT_TO_BOMB = 4;
+
+    beforeEach(() => {
+      useRulesStore.getState().skipTutorial();
+      useRulesStore.getState().markMovesHintSeen();
+      useRulesStore.getState().markSeen(["bomb"]);
+      unlockUpTo("c-1", "c-2", "c-3", "c-4");
+    });
+
+    test("explains the first mine mark once and blocks taps until «Понятно» (Part 4 §2.3)", async () => {
+      await renderScreen("c-4");
+      await tap(NEXT_TO_BOMB);
+
+      expect(screen.getByText("Значок мины")).toBeOnTheScreen();
+      await tap(0);
+      expect(movesUsed()).toBe(1);
+      await fireEvent.press(screen.getByText("Понятно"));
+
+      expect(screen.queryByText("Значок мины")).toBeNull();
+      expect(useRulesStore.getState().seenCards).toContain("bombNear");
+    });
+
+    test("stays silent and hides the mark from the rules when the level has no mine mark (LVL-BN6)", async () => {
+      useRulesStore.getState().markSeen(["bombNear"]);
+      await renderScreen("c-5");
+      await tap(NEXT_TO_BOMB);
+
+      expect(screen.queryByText("Значок мины")).toBeNull();
+      await fireEvent.press(screen.getByTestId("pause"));
+      await fireEvent.press(screen.getByTestId("pause-rules"));
+      expect(screen.queryByTestId("rule-bombNear")).toBeNull();
+      expect(screen.getByTestId("rule-bomb")).toBeOnTheScreen();
+    });
+
+    test("does not show the coach on a level without the mark even before it was seen", async () => {
+      await renderScreen("c-5");
+      await tap(NEXT_TO_BOMB);
+
+      expect(screen.queryByText("Значок мины")).toBeNull();
+      expect(movesUsed()).toBe(1);
+    });
+  });
+
   test("saves the sound and music switches from the pause menu", async () => {
     useRulesStore.getState().skipTutorial();
     useRulesStore.getState().markMovesHintSeen();

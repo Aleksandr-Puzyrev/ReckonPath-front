@@ -1,0 +1,15 @@
+{
+  "v": 2,
+  "id": "c-68",
+  "title": {
+    "ru": "Стрелка",
+    "en": "The arrow"
+  },
+  "world": 6,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[2, 4]],
+  "probeMode": "direction",
+  "moveLimit": 6,
+  "stars": [4, 5]
+}

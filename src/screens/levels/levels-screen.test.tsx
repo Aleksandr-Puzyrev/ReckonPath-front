@@ -42,6 +42,22 @@ describe("LevelsScreen", () => {
 
   afterEach(() => jest.useRealTimers());
 
+  test("opens «Мои уровни» from the editor button (decision 0043 #6)", async () => {
+    await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
+
+    await fireEvent.press(screen.getByTestId("levels-editor"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/editor");
+  });
+
+  test("opens «Играть по коду» (decision 0044 #7)", async () => {
+    await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
+
+    await fireEvent.press(screen.getByTestId("levels-play-code"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/play");
+  });
+
   test("opens the current level at once", async () => {
     await render(<LevelsScreen />, { wrapper: createQueryWrapper() });
     await fireEvent.press(screen.getByTestId("level-c-a"));

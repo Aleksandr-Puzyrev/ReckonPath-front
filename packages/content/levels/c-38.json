@@ -1,0 +1,18 @@
+{
+  "v": 2,
+  "id": "c-38",
+  "title": {
+    "ru": "Ближайшая",
+    "en": "The nearest"
+  },
+  "world": 4,
+  "rows": 6,
+  "cols": 6,
+  "targets": [
+    [1, 4],
+    [4, 1]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 9,
+  "stars": [6, 7]
+}

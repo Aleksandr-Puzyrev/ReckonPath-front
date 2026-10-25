@@ -20,7 +20,7 @@ export {
   selectHasSavedSession,
   useGameSessionStore,
 } from "./model/game-session-store";
-export { replaySession } from "./model/replay-session";
+export { replaySession, startGame } from "./model/replay-session";
 export type { ContinueMethod, SessionAction } from "./model/replay-session";
 export { attemptOf } from "./model/session-attempt";
 export { PREVIEW_LEVEL } from "./model/preview-level";

@@ -10,6 +10,15 @@ export const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.bg.surface,
     boxShadow: theme.elevation[2],
   },
+  body: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: theme.space[4],
+  },
+  texts: {
+    flex: 1,
+    gap: theme.space[1],
+  },
   text: {
     color: theme.colors.text.primary,
   },

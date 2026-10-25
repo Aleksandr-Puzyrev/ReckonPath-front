@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { View } from "react-native";
 
 import { Button } from "../button";
@@ -11,17 +12,29 @@ export interface CoachAction {
 }
 
 interface ICoachMark {
+  title?: string;
+  icon?: ReactNode;
   text: string;
   caption?: string;
   action?: CoachAction;
   secondaryAction?: CoachAction;
 }
 
-const CoachMark = ({ text, caption, action, secondaryAction }: ICoachMark) => (
+const CoachMark = ({ title, icon, text, caption, action, secondaryAction }: ICoachMark) => (
   <View style={styles.card} accessibilityLiveRegion="polite">
-    <Text variant="body.m" style={styles.text}>
-      {text}
-    </Text>
+    <View style={styles.body}>
+      {icon}
+      <View style={styles.texts}>
+        {title === undefined ? null : (
+          <Text variant="title.s" style={styles.text}>
+            {title}
+          </Text>
+        )}
+        <Text variant="body.m" style={styles.text}>
+          {text}
+        </Text>
+      </View>
+    </View>
     {action === undefined && secondaryAction === undefined ? null : (
       <View style={styles.actions}>
         {caption === undefined ? null : (

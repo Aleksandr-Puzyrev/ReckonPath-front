@@ -42,6 +42,14 @@ describe("buildCellVisuals", () => {
     expect(shown[3]?.content).toMatchObject({ ghost: "bomb" });
   });
 
+  test("shows a hidden buoy as a ghost for the level editor (decision 0043 #2)", () => {
+    const game = makeGame({ buoys: [[0, 1]] });
+
+    expect(buildCellVisuals(game, { ...defaults, showHidden: true })[1]?.content).toMatchObject({
+      ghost: "buoy",
+    });
+  });
+
   test("greys out answers given before a target was found", () => {
     const game = tapAll(
       makeGame({

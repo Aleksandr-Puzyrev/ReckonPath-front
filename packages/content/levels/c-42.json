@@ -1,0 +1,18 @@
+{
+  "v": 2,
+  "id": "c-42",
+  "title": {
+    "ru": "Передышка",
+    "en": "Breather"
+  },
+  "world": 4,
+  "rows": 6,
+  "cols": 6,
+  "targets": [
+    [2, 2],
+    [3, 4]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 9,
+  "stars": [6, 7]
+}

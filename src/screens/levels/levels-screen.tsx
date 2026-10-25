@@ -64,6 +64,8 @@ const LevelsScreen = () => {
           <LevelsHeader
             stars={campaignStars(CAMPAIGN_WORLDS, best)}
             maxStars={campaignMaxStars(CAMPAIGN_WORLDS)}
+            onEditor={() => router.push("/editor")}
+            onPlayCode={() => router.push("/play")}
           />
         }
         onLevelPress={handleLevelPress}

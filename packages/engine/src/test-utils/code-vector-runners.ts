@@ -18,8 +18,8 @@ const runCrc8: VectorRunner = (raw) => {
 const codeDecodeVectorSchema = z.object({
   code: z.string(),
   expect: z.union([
-    z.object({ level: z.unknown() }),
-    z.object({ error: z.enum(["CODE_INVALID", "CODE_NEWER"]) }),
+    z.object({ level: z.unknown(), challenge: z.number().int().nullable().default(null) }),
+    z.object({ error: z.enum(["CODE_INVALID", "CODE_NEWER", "LEVEL_INVALID"]) }),
   ]),
 });
 
@@ -27,7 +27,7 @@ const runCodeDecode: VectorRunner = (raw) => {
   const vector = codeDecodeVectorSchema.parse(raw);
   const expected =
     "level" in vector.expect
-      ? { ok: true, level: vector.expect.level }
+      ? { ok: true, level: vector.expect.level, challenge: vector.expect.challenge }
       : { ok: false, error: vector.expect.error };
   expect(decodeLevel(vector.code)).toEqual(expected);
 };

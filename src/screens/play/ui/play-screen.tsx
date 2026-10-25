@@ -21,6 +21,7 @@ import { PauseSheet } from "@widgets/pause-menu";
 
 import { usePlayScreen } from "../model/use-play-screen";
 
+import BombCoach from "./bomb-coach";
 import DeclinedBar from "./declined-bar";
 import LevelUnavailable from "./level-unavailable";
 import PlayGuides from "./play-guides";
@@ -99,6 +100,9 @@ const PlayLevel = ({ mode, id, isResuming }: IPlayLevel) => {
           onNext={play.guides.handleTutorialNext}
           onSkip={play.handleTutorialSkip}
         />
+      ) : null}
+      {play.guides.isBombCoachOpen ? (
+        <BombCoach onClose={play.guides.handleBombCoachClose} />
       ) : null}
       {play.overlay === "declined" ? (
         <DeclinedBar onRestart={play.handleRestart} onExit={play.handleExit} />

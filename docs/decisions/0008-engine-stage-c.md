@@ -7,7 +7,7 @@ Date: 2026-10-01. Asked by: engine stage C (clarify-task). Answered by: develope
 | 1 | Code prefix (`PELENG2-` in the spec) | **`RP2-`** (product name, shorter code). The decoder still accepts the prototype's `PELENG1-`. | Part 6 §7.2 |
 | 2 | Compression for `deflateRaw` | **`fflate`** (pure JS, works on Hermes). Encoders may produce different bytes than Go's `compress/flate`; vectors check decoding of fixed codes and encode→decode round trips, not identical strings. | Part 6 §7.2 |
 | 3 | `crc8` variant | **CRC-8/SMBUS**: polynomial 0x07, init 0x00, no reflection, xorout 0, over the UTF-8 bytes of the base64url part; two lowercase hex characters. Format `RP2-<base64url>-<crc>`. | Part 6 §7.2 |
-| 4 | `x: challenge` | Not encoded for now; ignored when decoding. Added with the «Play by code» challenge feature once its format is defined. | Part 6 §7.2 |
+| 4 | `x: challenge` | **Superseded by 0044 #1.** Not encoded for now; ignored when decoding. Added with the «Play by code» challenge feature once its format is defined. | Part 6 §7.2 |
 | 5 | Match state machine in TS | **Not implemented in TS.** The match is server-authoritative (Part 8 §6.3); stage C delivers hand-derived match vectors (`kind: "match"`, from PVP-01…31) for the Go engine. | Part 6 §4.2, §9 |
 | 6 | Code contents | `v, n, r, c, t, b, s, g, h, k, f, m, l` + `bc, by, fg, or` + `bh`; `n` is the `{ru, en}` title object; stars are not encoded. | Part 6 §7.1–7.2, §2.5 |
 | 7 | Id of a decoded level | `u-` + FNV-1a-32 of the base64url part (base 36), so a code gives the same norm on every device. | — |

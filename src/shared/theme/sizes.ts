@@ -25,6 +25,8 @@ export const sizes = {
     ringOpacity: 0.22,
     tintOpacity: 0.2,
   },
+  // The bomb coach's icon tile with a faint danger tint (плитка иконки подсказки про бомбу с лёгким красным фоном).
+  bombCoach: { tile: 40, tileRadius: 12, icon: 22, tintOpacity: 0.16 },
   // The soft update sheet's badge from design 28.2, decision 0014 (значок листа мягкого обновления из дизайна 28.2, решение 0014).
   softUpdateBadge: { size: 52, radius: 16, icon: 26 },
   // The splash emblem matches the native splash image width; the sonar ring grows to the ring size, design 1.1, decision 0042 (знак сплэша совпадает с шириной картинки системного сплэша; сонарное кольцо растёт до размера кольца, дизайн 1.1, решение 0042).

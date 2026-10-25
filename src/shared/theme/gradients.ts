@@ -21,4 +21,8 @@ export const gradients = {
   world2: { colors: ["#1C5A86", "#2FA8C9", "#8CEAF0"], locations: [0, 0.6, 1], angle: 135 },
   world3: { colors: ["#5A2230", "#A5404F", "#FF8A6A"], locations: [0, 0.55, 1], angle: 135 },
   world4: { colors: ["#40506A", "#7A8CA8"], angle: 135 },
+  world5: { colors: ["#4A1F2B", "#B4473A", "#FFB65D"], locations: [0, 0.6, 1], angle: 135 },
+  world6: { colors: ["#2F3B45", "#6B7C86", "#D9C9A3"], locations: [0, 0.6, 1], angle: 135 },
+  world7: { colors: ["#3B3F63", "#7C86B8", "#D6DDF0"], locations: [0, 0.6, 1], angle: 135 },
+  world8: { colors: ["#0B2547", "#1F5FA8", "#4FD6E3"], locations: [0, 0.6, 1], angle: 135 },
 } satisfies Record<string, Gradient>;

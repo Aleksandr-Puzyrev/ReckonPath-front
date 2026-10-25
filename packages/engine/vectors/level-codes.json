@@ -74,8 +74,25 @@
   },
   {
     "kind": "codeDecode",
+    "name": "decode-rp2-challenge",
+    "note": "RP2 code with the author's challenge x = 7 moves, built in Python (decision 0044 #1).",
+    "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKOkoVSlbmtQA-fc",
+    "expect": {
+      "level": {
+        "v": 2,
+        "id": "u-16zb1r2",
+        "rows": 5,
+        "cols": 5,
+        "targets": [[2, 3]],
+        "probeMode": "distance"
+      },
+      "challenge": 7
+    }
+  },
+  {
+    "kind": "codeDecode",
     "name": "decode-rp2-ignores-challenge",
-    "note": "Key x (challenge) is reserved and ignored (decision 0008 #4).",
+    "note": "Key x (challenge) that is not a positive whole number is ignored (decision 0044 #1).",
     "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKOkoVSlbVSrn5ZanFSlbmtbUA-98",
     "expect": {
       "level": {
@@ -85,7 +102,8 @@
         "cols": 5,
         "targets": [[2, 3]],
         "probeMode": "distance"
-      }
+      },
+      "challenge": null
     }
   },
   {
@@ -145,10 +163,10 @@
   {
     "kind": "codeDecode",
     "name": "decode-rp2-invalid-level",
-    "note": "Valid code, but the level fails the validator (target on a rock) -> CODE_INVALID.",
+    "note": "Valid code, but the level fails the validator (target on a rock) -> LEVEL_INVALID (decision 0044 #4).",
     "code": "RP2-q1YqU7Iy0lEqUrIy1VFKBpMlSlbR0UY6xrGxOkq5SlZKKZnFJYl5yalKOkrZcKlaAA-14",
     "expect": {
-      "error": "CODE_INVALID"
+      "error": "LEVEL_INVALID"
     }
   },
   {

@@ -1,0 +1,16 @@
+{
+  "v": 2,
+  "id": "c-55",
+  "title": {
+    "ru": "Первый буй",
+    "en": "First buoy"
+  },
+  "world": 5,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[2, 4]],
+  "buoys": [[5, 1]],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4]
+}

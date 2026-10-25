@@ -15,8 +15,9 @@ const SUPPORTED_VERSION = 2;
 const LEGACY_VERSION = 1;
 const ID_RADIX = 36;
 
-export type CodeError = "CODE_INVALID" | "CODE_NEWER";
-export type DecodeResult = { ok: true; level: LevelInput } | { ok: false; error: CodeError };
+export type CodeError = "CODE_INVALID" | "CODE_NEWER" | "LEVEL_INVALID";
+export type DecodeResult =
+  { ok: true; level: LevelInput; challenge: number | null } | { ok: false; error: CodeError };
 
 const COMPACT_KEYS = {
   n: "title",
@@ -38,12 +39,13 @@ const COMPACT_KEYS = {
   bh: "bombHint",
 } as const;
 
-// Reserved for the author's challenge, not encoded yet (зарезервирован для челленджа автора, пока не кодируется).
+// The author's best result in moves, the challenge to beat (decision 0044 #1) (лучший результат автора в ходах — вызов, который нужно побить).
 const CHALLENGE_KEY = "x";
 const VERSION_KEY = "v";
 
 const invalid: DecodeResult = { ok: false, error: "CODE_INVALID" };
 const newer: DecodeResult = { ok: false, error: "CODE_NEWER" };
+const unplayable: DecodeResult = { ok: false, error: "LEVEL_INVALID" };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -54,8 +56,9 @@ const isCompactKey = (key: string): key is keyof typeof COMPACT_KEYS =>
 
 const idFor = (payload: string) => `u-${fnv1a32(payload).toString(ID_RADIX)}`;
 
-export const encodeLevel = (level: LevelInput) => {
+export const encodeLevel = (level: LevelInput, challenge: number | null = null) => {
   const compact: Record<string, unknown> = { [VERSION_KEY]: SUPPORTED_VERSION };
+  if (challenge !== null) compact[CHALLENGE_KEY] = challenge;
   Object.entries(COMPACT_KEYS).forEach(([short, long]) => {
     const value = level[long];
     if (value !== undefined && value !== null) compact[short] = value;
@@ -65,13 +68,16 @@ export const encodeLevel = (level: LevelInput) => {
   return `${CODE_PREFIX}${payload}-${toHex2(crc8(strToU8(payload)))}`;
 };
 
-const accept = (candidate: Record<string, unknown>): DecodeResult => {
+const accept = (candidate: Record<string, unknown>, challenge: number | null): DecodeResult => {
   const parsed = levelSchema.safeParse(candidate);
   if (!parsed.success) return invalid;
-  if (validateLevel(parsed.data, { kind: "custom" }).length > 0) return invalid;
+  if (validateLevel(parsed.data, { kind: "custom" }).length > 0) return unplayable;
 
-  return { ok: true, level: parsed.data };
+  return { ok: true, level: parsed.data, challenge };
 };
+
+const challengeOf = (value: unknown) =>
+  typeof value === "number" && Number.isInteger(value) && value > 0 ? value : null;
 
 const parseJson = (bytes: Uint8Array | null): unknown => {
   if (bytes === null) return undefined;
@@ -109,7 +115,7 @@ const decodeCurrent = (body: string): DecodeResult => {
     if (!isCompactKey(short)) return newer;
     level[COMPACT_KEYS[short]] = value;
   }
-  return accept(level);
+  return accept(level, challengeOf(compact[CHALLENGE_KEY]));
 };
 
 // The limit counts UTF-16 units; a cut must not split a surrogate pair (лимит в UTF-16 единицах; нельзя разрезать суррогатную пару).
@@ -123,17 +129,20 @@ const decodeLegacy = (payload: string): DecodeResult => {
   if (!isRecord(legacy) || legacy.v !== LEGACY_VERSION) return invalid;
 
   const title = typeof legacy.n === "string" ? { ru: truncateTitle(legacy.n) } : undefined;
-  return accept({
-    v: SUPPORTED_VERSION,
-    id: idFor(payload),
-    ...(title === undefined ? {} : { title }),
-    rows: legacy.r,
-    cols: legacy.c,
-    targets: legacy.t,
-    fences: legacy.w ?? [],
-    streams: legacy.k ?? [],
-    probeMode: "distance",
-  });
+  return accept(
+    {
+      v: SUPPORTED_VERSION,
+      id: idFor(payload),
+      ...(title === undefined ? {} : { title }),
+      rows: legacy.r,
+      cols: legacy.c,
+      targets: legacy.t,
+      fences: legacy.w ?? [],
+      streams: legacy.k ?? [],
+      probeMode: "distance",
+    },
+    null,
+  );
 };
 
 export const decodeLevel = (code: string): DecodeResult => {

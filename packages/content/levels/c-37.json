@@ -1,0 +1,18 @@
+{
+  "v": 2,
+  "id": "c-37",
+  "title": {
+    "ru": "Две цели",
+    "en": "Two targets"
+  },
+  "world": 4,
+  "rows": 6,
+  "cols": 6,
+  "targets": [
+    [1, 1],
+    [4, 4]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 9,
+  "stars": [6, 7]
+}

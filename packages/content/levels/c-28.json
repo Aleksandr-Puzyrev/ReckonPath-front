@@ -1,0 +1,23 @@
+{
+  "v": 2,
+  "id": "c-28",
+  "title": {
+    "ru": "Маяк над водой",
+    "en": "Beacon over water"
+  },
+  "world": 3,
+  "rows": 6,
+  "cols": 6,
+  "targets": [[4, 4]],
+  "streams": [
+    [1, 2],
+    [2, 2],
+    [3, 2],
+    [4, 2],
+    [5, 2]
+  ],
+  "beacons": [[0, 0]],
+  "probeMode": "distance",
+  "moveLimit": 4,
+  "stars": [2, 3]
+}

@@ -1,0 +1,20 @@
+{
+  "v": 2,
+  "id": "c-59",
+  "title": {
+    "ru": "Молчаливые мины",
+    "en": "Silent mines"
+  },
+  "world": 5,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[5, 1]],
+  "bombs": [
+    [2, 2],
+    [3, 5]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [3, 4],
+  "bombHint": false
+}

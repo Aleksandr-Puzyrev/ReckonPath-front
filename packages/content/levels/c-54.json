@@ -1,0 +1,17 @@
+{
+  "v": 2,
+  "id": "c-54",
+  "title": {
+    "ru": "Тихая стоянка",
+    "en": "Quiet mooring"
+  },
+  "world": 5,
+  "rows": 7,
+  "cols": 7,
+  "targets": [[4, 2]],
+  "bombs": [[1, 5]],
+  "beacons": [[6, 6]],
+  "probeMode": "distance",
+  "moveLimit": 3,
+  "stars": [2, 3]
+}
