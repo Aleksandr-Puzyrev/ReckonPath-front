@@ -10,7 +10,7 @@ import RedoIcon from "@assets/icons/arena/redo.svg";
 import UndoIcon from "@assets/icons/arena/undo.svg";
 import ChevronLeftIcon from "@assets/icons/levels/chevron-left.svg";
 
-import { styles } from "./arena-map-styles";
+import { styles } from "./editor-kit-styles";
 
 interface IEditorHeader {
   name: string;
@@ -18,7 +18,7 @@ interface IEditorHeader {
   canRedo: boolean;
   canSave: boolean;
   onBack: () => void;
-  onRename: () => void;
+  onRename?: () => void;
   onUndo: () => void;
   onRedo: () => void;
   onSave: () => void;
@@ -49,17 +49,25 @@ const EditorHeader = ({
         onPress={onBack}
         icon={<ChevronLeftIcon width={iconSize} height={iconSize} color={colorOf(true)} />}
       />
-      <Pressable
-        testID="editor-name"
-        accessibilityRole="button"
-        accessibilityLabel={`${t("map.rename")}: ${name}`}
-        onPress={onRename}
-        style={styles.name}
-      >
-        <Text variant="title.m" numberOfLines={1}>
-          {name}
-        </Text>
-      </Pressable>
+      {onRename === undefined ? (
+        <View style={styles.name}>
+          <Text variant="title.m" numberOfLines={1} accessibilityRole="header">
+            {name}
+          </Text>
+        </View>
+      ) : (
+        <Pressable
+          testID="editor-name"
+          accessibilityRole="button"
+          accessibilityLabel={`${t("map.rename")}: ${name}`}
+          onPress={onRename}
+          style={styles.name}
+        >
+          <Text variant="title.m" numberOfLines={1}>
+            {name}
+          </Text>
+        </Pressable>
+      )}
       <IconButton
         testID="editor-undo"
         accessibilityLabel={t("map.undo")}

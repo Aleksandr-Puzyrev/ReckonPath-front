@@ -12,12 +12,11 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@shared/ui/text";
 
-import type { EditorTool } from "../model/use-map-editor";
-
-import { styles } from "./arena-map-styles";
+import { styles } from "./editor-kit-styles";
 
 interface IToolTile {
-  tool: EditorTool | "random";
+  tool: string;
+  label: string;
   count: number | null;
   max: number | null;
   isSelected: boolean;
@@ -28,7 +27,16 @@ interface IToolTile {
 
 const DIM = 0.3;
 
-const ToolTile = ({ tool, count, max, isSelected, isDisabled, flashKey, onPress }: IToolTile) => {
+const ToolTile = ({
+  tool,
+  label,
+  count,
+  max,
+  isSelected,
+  isDisabled,
+  flashKey,
+  onPress,
+}: IToolTile) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const isReducedMotion = useReducedMotion();
@@ -50,7 +58,6 @@ const ToolTile = ({ tool, count, max, isSelected, isDisabled, flashKey, onPress 
     );
   }, [flashKey, isReducedMotion, opacity, theme.motion.duration.fast]);
 
-  const label = t(`map.tools.${tool}`);
   const counter = count === null || max === null ? null : t("map.counter", { count, max });
 
   return (

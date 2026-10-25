@@ -9,6 +9,7 @@ import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
 import { leagueLabelOf } from "@widgets/arena-hero";
+import { EditorHeader, StatusLine } from "@widgets/editor-kit";
 
 import { useMapEditor } from "../model/use-map-editor";
 
@@ -16,9 +17,7 @@ import { styles } from "./arena-map-styles";
 import EditorBoard from "./editor-board";
 import EditorDialogs from "./editor-dialogs";
 import EditorFooter from "./editor-footer";
-import EditorHeader from "./editor-header";
 import EditorStatus from "./editor-status";
-import StatusLine from "./status-line";
 import ToolPalette from "./tool-palette";
 import TutorialEditor from "./tutorial-editor";
 

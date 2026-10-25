@@ -2,7 +2,7 @@ import { View } from "react-native";
 
 import { Text } from "@shared/ui/text";
 
-import { styles } from "./arena-map-styles";
+import { styles } from "./editor-kit-styles";
 
 interface IStatusLine {
   text: string;

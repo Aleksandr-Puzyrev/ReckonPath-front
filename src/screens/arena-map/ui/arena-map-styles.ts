@@ -8,16 +8,6 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     paddingTop: runtime.insets.top,
     paddingHorizontal: theme.space[4],
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.space[1],
-  },
-  name: {
-    flex: 1,
-    minHeight: theme.sizes.touchTarget,
-    justifyContent: "center",
-  },
   content: {
     gap: theme.space[3],
     paddingHorizontal: theme.space[5],
@@ -38,20 +28,6 @@ export const styles = StyleSheet.create((theme, runtime) => ({
   boardArea: {
     alignItems: "center",
     paddingLeft: theme.sizes.arena.coordinates,
-  },
-  status: {
-    paddingVertical: theme.space[2],
-    paddingHorizontal: theme.space[3],
-    borderRadius: theme.radius.m,
-    backgroundColor: theme.colors.bg.sunken,
-  },
-  statusText: {
-    variants: {
-      isValid: {
-        true: { color: theme.colors.status.success },
-        false: { color: theme.colors.status.danger },
-      },
-    },
   },
   tutorialHeader: {
     alignItems: "center",
@@ -75,29 +51,6 @@ export const styles = StyleSheet.create((theme, runtime) => ({
   tileCell: {
     width: "33.333%",
     padding: theme.space[1],
-  },
-  tile: {
-    minHeight: theme.sizes.button.l,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: theme.space[1],
-    borderRadius: theme.radius.m,
-    borderWidth: 1,
-    backgroundColor: theme.colors.bg.surface,
-    variants: {
-      isSelected: {
-        true: { borderColor: theme.colors.accent.cyan },
-        false: { borderColor: theme.colors.border.default },
-      },
-    },
-  },
-  counter: {
-    variants: {
-      isFull: {
-        true: { color: theme.colors.status.warning },
-        false: { color: theme.colors.text.secondary },
-      },
-    },
   },
   footer: {
     flexDirection: "row",

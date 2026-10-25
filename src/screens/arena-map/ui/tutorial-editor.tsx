@@ -5,14 +5,13 @@ import { Button } from "@shared/ui/button";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { leagueLabelOf } from "@widgets/arena-hero";
+import { StatusLine, ToolTile } from "@widgets/editor-kit";
 
 import { TUTORIAL_TOOLS } from "../model/editor-tutorial";
 import type { ReadyMapEditor } from "../model/use-map-editor";
 
 import { styles } from "./arena-map-styles";
 import EditorBoard from "./editor-board";
-import StatusLine from "./status-line";
-import ToolTile from "./tool-tile";
 
 interface ITutorialEditor {
   editor: ReadyMapEditor;
@@ -64,6 +63,7 @@ const TutorialEditor = ({ editor, canSave }: ITutorialEditor) => {
             <View key={tool} style={styles.tutorialTool}>
               <ToolTile
                 tool={tool}
+                label={t(`map.tools.${tool}`)}
                 count={tool === "target" ? counts.targets : counts.bombs}
                 max={tool === "target" ? limits.targets : limits.bombs}
                 isSelected={editor.tool === tool}

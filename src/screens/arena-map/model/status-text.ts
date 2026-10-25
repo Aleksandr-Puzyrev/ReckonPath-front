@@ -1,8 +1,7 @@
 import type { TFunction } from "i18next";
 
 import type { MapStatus } from "@entities/arena-map";
-
-import { cellsRange } from "./cells-range";
+import { cellsRange } from "@shared/lib";
 
 export const statusTextOf = (status: MapStatus, t: TFunction) => {
   if (status.kind === "valid") return t("map.validBot", { count: status.norm });
