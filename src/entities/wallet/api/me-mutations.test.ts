@@ -3,45 +3,33 @@ import { MutationObserver, QueryClient } from "@tanstack/react-query";
 import { apiClient } from "@shared/api";
 import { mockServer } from "@shared/test-utils/api-mock";
 
-import {
-  deleteMeMutationOptions,
-  restoreMeMutationOptions,
-  updateLocaleMutationOptions,
-} from "./me-mutations";
+import { deleteMeMutationOptions, restoreMeMutationOptions } from "./me-mutations";
 
 const queryClient = new QueryClient({ defaultOptions: { mutations: { gcTime: Infinity } } });
 
 const deletionAt = async () => (await apiClient.GET("/me")).data?.flags.deletionScheduledAt;
 
+const remove = (password: string) =>
+  new MutationObserver(queryClient, deleteMeMutationOptions()).mutate(password);
+
 describe("me mutations", () => {
   afterEach(() => mockServer.reset());
 
-  test("saves the chosen language on the server (NET-12)", async () => {
-    const me = await new MutationObserver(queryClient, updateLocaleMutationOptions()).mutate("en");
-
-    expect(me.id).toBeDefined();
-  });
-
-  test("schedules the deletion in 30 days with the right nickname (Part 1 §7.6)", async () => {
+  test("schedules the deletion in 30 days by the password (Part 1 §7.6, decision 0052 #2)", async () => {
     const before = Date.now();
-    const { deletionScheduledAt } = await new MutationObserver(
-      queryClient,
-      deleteMeMutationOptions(),
-    ).mutate("Player4821");
 
-    const days = (new Date(deletionScheduledAt).getTime() - before) / 86_400_000;
+    const { purgeAfter } = await remove("Signal2026");
+
+    const days = (new Date(purgeAfter).getTime() - before) / 86_400_000;
     expect(Math.round(days)).toBe(30);
-    expect(await deletionAt()).toBe(deletionScheduledAt);
   });
 
-  test("refuses another nickname", async () => {
-    await expect(
-      new MutationObserver(queryClient, deleteMeMutationOptions()).mutate("Somebody"),
-    ).rejects.toMatchObject({ code: "validation_failed" });
+  test("refuses a wrong password", async () => {
+    await expect(remove("000000")).rejects.toMatchObject({ code: "wrong_password" });
   });
 
   test("cancels a scheduled deletion", async () => {
-    await new MutationObserver(queryClient, deleteMeMutationOptions()).mutate("Player4821");
+    await remove("Signal2026");
 
     await new MutationObserver(queryClient, restoreMeMutationOptions()).mutate();
 

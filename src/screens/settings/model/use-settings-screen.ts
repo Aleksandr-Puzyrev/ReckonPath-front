@@ -5,13 +5,14 @@ import * as StoreReview from "expo-store-review";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useChangeLanguage } from "@features/change-language";
+import { changeLanguage } from "@features/change-language";
 import { useSignOut } from "@features/sign-out";
 import { RULE_DEMOS, isRuleCardId } from "@entities/rules";
 import { useAccountStore } from "@entities/session";
 import { useMeQuery } from "@entities/wallet";
 import type { ErrorMessageKey } from "@shared/api";
 import { APP_VERSION } from "@shared/config";
+import { formatDayMonth } from "@shared/lib";
 import { i18n } from "@shared/i18n";
 import type { AppLanguage } from "@shared/i18n";
 
@@ -26,7 +27,6 @@ export const useSettingsScreen = (onToast: (text: string) => void) => {
   const [sheet, setSheet] = useState<SettingsSheet>(null);
   const [ruleIndex, setRuleIndex] = useState<number | null>(null);
   const showError = (messageKey: ErrorMessageKey) => onToast(t(messageKey));
-  const changeLanguage = useChangeLanguage(showError);
   const signOut = useSignOut({
     onSignedOut: () => onToast(t("settings.account.signedOut")),
     onError: showError,
@@ -68,6 +68,10 @@ export const useSettingsScreen = (onToast: (text: string) => void) => {
     },
     handleSignOut: signOut.signOut,
     handleDeletion: () => router.push("/settings/deletion"),
+    handleDeleted: (purgeAfter: string) =>
+      onToast(
+        t("settings.delete.scheduledTitle", { date: formatDayMonth(purgeAfter, i18n.language) }),
+      ),
     handleCopyId: () => void copyId(),
     handleRate: () => void rate(),
     handleError: showError,

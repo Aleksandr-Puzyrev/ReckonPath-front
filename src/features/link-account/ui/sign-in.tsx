@@ -7,14 +7,11 @@ import type { ErrorMessageKey } from "@shared/api";
 import { Button } from "@shared/ui/button";
 import { TextField } from "@shared/ui/text-field";
 
-import { savedCardOf } from "../model/progress-card";
 import { signInSchema } from "../model/sign-in-schema";
 import type { SignInSchema } from "../model/sign-in-schema";
-import { useDeviceSummary } from "../model/use-device-summary";
 import { fieldErrorKey } from "../model/field-error-key";
 import { useSignIn } from "../model/use-sign-in";
 
-import AccountConflict from "./account-conflict";
 import FormFooter from "./form-footer";
 import FormHeader from "./form-header";
 import { styles } from "./sign-in-styles";
@@ -22,15 +19,15 @@ import { styles } from "./sign-in-styles";
 interface ISignIn {
   onBack: () => void;
   onSignedIn: () => void;
+  onNeedsCode: (email: string, resendAfter: number) => void;
   onSignUp: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
 }
 
-const DEFAULTS: SignInSchema = { login: "", password: "" };
+const DEFAULTS: SignInSchema = { email: "", password: "" };
 
-const SignIn = ({ onBack, onSignedIn, onSignUp, onError }: ISignIn) => {
+const SignIn = ({ onBack, onSignedIn, onNeedsCode, onSignUp, onError }: ISignIn) => {
   const { t } = useTranslation();
-  const device = useDeviceSummary();
   const { control, handleSubmit, setError } = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
     defaultValues: DEFAULTS,
@@ -38,24 +35,13 @@ const SignIn = ({ onBack, onSignedIn, onSignUp, onError }: ISignIn) => {
   const signIn = useSignIn({
     onSignedIn,
     onWrongCredentials: (messageKey) => setError("password", { message: messageKey }),
+    onNeedsCode,
     onError,
   });
   const errorText = (message?: string) => {
     const key = fieldErrorKey(message);
     return key === undefined ? undefined : t(key);
   };
-
-  if (signIn.conflict !== null) {
-    return (
-      <AccountConflict
-        device={device}
-        saved={savedCardOf(signIn.conflict)}
-        isPending={signIn.isPending}
-        onLoad={signIn.handleLoadSaved}
-        onCancel={signIn.handleCancelConflict}
-      />
-    );
-  }
 
   return (
     <View style={styles.form}>
@@ -66,13 +52,13 @@ const SignIn = ({ onBack, onSignedIn, onSignUp, onError }: ISignIn) => {
       />
       <Controller
         control={control}
-        name="login"
+        name="email"
         render={({ field, fieldState }) => (
           <TextField
-            testID="sign-in-login"
-            label={t("account.signIn.login")}
-            placeholder={t("account.signIn.loginPlaceholder")}
-            autoComplete="username"
+            testID="sign-in-email"
+            label={t("account.signUp.email")}
+            keyboardType="email-address"
+            autoComplete="email"
             value={field.value}
             onChangeText={field.onChange}
             onBlur={field.onBlur}

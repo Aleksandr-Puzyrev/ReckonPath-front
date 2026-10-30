@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
+import { useAccountStore } from "@entities/session";
 import { useDailyRecordStore } from "@entities/daily";
 import { CAMPAIGN_LEVELS } from "@entities/level";
 import { useProgressStore } from "@entities/progress";
@@ -55,6 +56,7 @@ describe("DailyScreen", () => {
   });
 
   afterEach(() => {
+    useAccountStore.getState().reset();
     mockServer.reset();
     jest.useRealTimers();
   });
@@ -66,17 +68,29 @@ describe("DailyScreen", () => {
   });
 
   test("shows the day, the streak, the calendar and the day's top", async () => {
+    useAccountStore.getState().markSignedIn();
     unlockDaily();
     await renderScreen(createQueryWrapper());
 
     expect(screen.getByText("28 сентября · понедельник")).toBeOnTheScreen();
     expect(screen.getByText("Пеленг дня")).toBeOnTheScreen();
     expect(screen.getByText("Последние 30 дней")).toBeOnTheScreen();
+    expect(screen.getByLabelText(/подряд/)).toBeOnTheScreen();
     expect(await screen.findByText("Nova")).toBeOnTheScreen();
     expect(screen.getByText("В среднем 9 ходов")).toBeOnTheScreen();
   });
 
+  test("shows a guest the day and the calendar without the streak or the top (decision 0051 #4)", async () => {
+    unlockDaily();
+    await renderScreen(createQueryWrapper());
+
+    expect(screen.getByText("Последние 30 дней")).toBeOnTheScreen();
+    expect(screen.queryByText("В среднем 9 ходов")).toBeNull();
+    expect(screen.queryByLabelText(/подряд/)).toBeNull();
+  });
+
   test("keeps the daily playable offline with a note instead of the standings", async () => {
+    useAccountStore.getState().markSignedIn();
     unlockDaily();
     mockServer.use(http.get(mockUrl("/daily/:date"), () => HttpResponse.error()));
     await renderScreen(createQueryWrapper());

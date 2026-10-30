@@ -8,7 +8,7 @@ import type { AppStateStatus } from "react-native";
 
 import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
-import { useSessionStore } from "@entities/session";
+import { useAccountStore, useSessionStore } from "@entities/session";
 import { attemptFixture } from "@shared/test-utils/attempt-fixture";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
@@ -35,6 +35,12 @@ const renderSync = () => {
   return renderHook(useAttemptsSync, { wrapper });
 };
 
+// A session belongs to an account only (сессия бывает только у аккаунта).
+const signIn = async (refreshToken: string) => {
+  await setItemAsync("reckon-path.refresh-token", refreshToken);
+  useAccountStore.getState().markSignedIn();
+};
+
 const queueAttempt = () => useOutboxStore.getState().enqueue(attemptFixture());
 
 const isQueueEmpty = () => expect(useOutboxStore.getState().attempts).toEqual([]);
@@ -45,6 +51,7 @@ afterEach(() => {
   useOutboxStore.getState().reset();
   useProgressStore.getState().reset();
   useSessionStore.getState().reset();
+  useAccountStore.getState().reset();
   onlineManager.setOnline(true);
   jest.useRealTimers();
   jest.restoreAllMocks();
@@ -52,7 +59,7 @@ afterEach(() => {
 
 describe("useAttemptsSync", () => {
   test("sends the queue on launch", async () => {
-    await setItemAsync("reckon-path.refresh-token", "r_saved");
+    await signIn("r_saved");
     queueAttempt();
 
     await renderSync();
@@ -63,7 +70,7 @@ describe("useAttemptsSync", () => {
   test("sends attempts played before the first sign-in once the guest exists (ACC-03)", async () => {
     queueAttempt();
     await renderSync();
-    await setItemAsync("reckon-path.refresh-token", "r_1");
+    await signIn("r_1");
 
     await act(async () => useSessionStore.getState().setAccessToken("a_1"));
 
@@ -71,7 +78,7 @@ describe("useAttemptsSync", () => {
   });
 
   test("sends the queue when the network comes back", async () => {
-    await setItemAsync("reckon-path.refresh-token", "r_saved");
+    await signIn("r_saved");
     onlineManager.setOnline(false);
     await renderSync();
     queueAttempt();
@@ -87,7 +94,7 @@ describe("useAttemptsSync", () => {
       listeners.push(listener);
       return { remove: () => undefined };
     });
-    await setItemAsync("reckon-path.refresh-token", "r_saved");
+    await signIn("r_saved");
     await renderSync();
     await waitFor(() => expect(useProgressStore.getState().best).toEqual({}));
     const batches = countBatches();
@@ -100,7 +107,7 @@ describe("useAttemptsSync", () => {
 
   test("sends a waiting queue every minute", async () => {
     jest.useFakeTimers();
-    await setItemAsync("reckon-path.refresh-token", "r_saved");
+    await signIn("r_saved");
     await renderSync();
     await act(() => jest.advanceTimersByTimeAsync(0));
     const batches = countBatches();
@@ -113,7 +120,7 @@ describe("useAttemptsSync", () => {
 
   test("does not call the server every minute with an empty queue", async () => {
     jest.useFakeTimers();
-    await setItemAsync("reckon-path.refresh-token", "r_saved");
+    await signIn("r_saved");
     await renderSync();
     await act(() => jest.advanceTimersByTimeAsync(0));
     const batches = countBatches();

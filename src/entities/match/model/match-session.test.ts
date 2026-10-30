@@ -3,6 +3,7 @@ import type { AppStateStatus } from "react-native";
 
 import { apiClient, setApiSession } from "@shared/api";
 import { fakeGameServer } from "@shared/api/mocks/fake-game/fake-game-server";
+import { ACCOUNT_SESSION } from "@shared/test-utils/account-session";
 import { mockServer } from "@shared/test-utils/api-mock";
 import { WS_CLOSE } from "@shared/ws";
 
@@ -49,7 +50,11 @@ const untilMyTurn = async () => {
 
 describe("matchSession", () => {
   beforeAll(() =>
-    setApiSession({ getAccessToken: () => "access", refreshAccessToken: async () => "access" }),
+    setApiSession({
+      ...ACCOUNT_SESSION,
+      getAccessToken: () => "access",
+      refreshAccessToken: async () => "access",
+    }),
   );
 
   afterEach(() => {

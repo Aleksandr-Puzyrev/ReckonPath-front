@@ -57,14 +57,16 @@ const DailyContent = () => {
           hasSavedGame={daily.hasSavedGame}
           onPlay={daily.handlePlay}
         />
-        <StreakCard streak={daily.streak} />
+        {daily.hasLogin ? <StreakCard streak={daily.streak} /> : null}
         <DailyCalendar todayKey={daily.todayKey} results={daily.results} />
-        <DayLeaderboard
-          top={daily.top}
-          median={daily.median}
-          myPlace={daily.myPlace}
-          hasPlayed={daily.hasPlayed}
-        />
+        {daily.hasLogin ? (
+          <DayLeaderboard
+            top={daily.top}
+            median={daily.median}
+            myPlace={daily.myPlace}
+            hasPlayed={daily.hasPlayed}
+          />
+        ) : null}
       </ScrollView>
       <EarnSheet
         isOpen={daily.earnShortBy !== null}

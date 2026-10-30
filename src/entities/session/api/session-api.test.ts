@@ -1,4 +1,4 @@
-import { deleteItemAsync, getItemAsync } from "expo-secure-store";
+import { getItemAsync, setItemAsync } from "expo-secure-store";
 import { http, HttpResponse } from "msw/http";
 
 import { apiClient, setApiSession } from "@shared/api";
@@ -7,30 +7,18 @@ import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { useAccountStore } from "../model/account-store";
 import { useSessionStore } from "../model/session-store";
 
-import { apiSession, ensureSession, endSession } from "./session-api";
+import { apiSession, deviceInfo, endSession, hasSavedSession, startSession } from "./session-api";
 
 const secureStore = jest.requireMock<{ __reset: () => void }>("expo-secure-store");
 
 const HTTP_UNAUTHORIZED = 401;
+const REFRESH_KEY = "reckon-path.refresh-token";
+const TOKENS = { accessToken: "a_0", refreshToken: "r_0", expiresIn: 900 };
 
-const watchGuestSignIns = () => {
-  const deviceIds: string[] = [];
-  mockServer.use(
-    http.post(mockUrl("/auth/guest"), async ({ request }) => {
-      const body: unknown = await request.clone().json();
-      if (typeof body === "object" && body !== null && "deviceId" in body) {
-        deviceIds.push(String(body.deviceId));
-      }
-      return undefined;
-    }),
-  );
-  return deviceIds;
-};
-
-const watchRefreshes = () => {
+const watchRequests = (path: string) => {
   const counter = { count: 0 };
   mockServer.use(
-    http.post(mockUrl("/auth/refresh"), () => {
+    http.post(mockUrl(path), () => {
       counter.count += 1;
       return undefined;
     }),
@@ -48,6 +36,14 @@ const serveMeFor = (accessToken: string) =>
     ),
   );
 
+const signIn = async () => {
+  const { data } = await apiClient.POST("/auth/login", {
+    body: { email: "nova@mail.ru", password: "secret-pass", device: await deviceInfo() },
+  });
+  await startSession(data ?? TOKENS);
+  useAccountStore.getState().markSignedIn();
+};
+
 beforeEach(() => setApiSession(apiSession));
 
 afterEach(() => {
@@ -58,46 +54,39 @@ afterEach(() => {
   setApiSession(null);
 });
 
-describe("ensureSession", () => {
-  test("creates a guest silently on a clean install (ACC-01)", async () => {
-    await ensureSession();
+describe("the local guest (decision 0048 #2)", () => {
+  test("has no session and asks the server for none", async () => {
+    const refreshes = watchRequests("/auth/refresh");
 
-    expect(await getItemAsync("reckon-path.refresh-token")).toBe("r_1");
-    expect(useSessionStore.getState().accessToken).toBe("a_1");
+    expect(await hasSavedSession()).toBe(false);
+    expect(await apiSession.refreshAccessToken()).toBeNull();
+    expect(refreshes.count).toBe(0);
   });
 
-  test("does not create another guest when a session is saved", async () => {
-    await ensureSession();
-    const deviceIds = watchGuestSignIns();
+  test("ignores a token an older build left for the server guest", async () => {
+    await setItemAsync(REFRESH_KEY, "r_old_guest");
 
-    await ensureSession();
-
-    expect(deviceIds).toEqual([]);
-  });
-
-  test("keeps the device id between guests", async () => {
-    const deviceIds = watchGuestSignIns();
-    await ensureSession();
-    await deleteItemAsync("reckon-path.refresh-token");
-    await ensureSession();
-
-    expect(deviceIds).toHaveLength(2);
-    expect(deviceIds[1]).toBe(deviceIds[0]);
-  });
-
-  test("shares one sign-in between concurrent calls", async () => {
-    const deviceIds = watchGuestSignIns();
-
-    await Promise.all([ensureSession(), ensureSession()]);
-
-    expect(deviceIds).toHaveLength(1);
+    expect(await hasSavedSession()).toBe(false);
   });
 });
 
-describe("session refresh", () => {
+describe("the account session", () => {
+  test("describes the device for sign-in", async () => {
+    expect(await deviceInfo()).toEqual(
+      expect.objectContaining({ platform: "ios", deviceId: expect.any(String) }),
+    );
+  });
+
+  test("keeps the tokens after sign-in", async () => {
+    await signIn();
+
+    expect(await hasSavedSession()).toBe(true);
+    expect(useSessionStore.getState().accessToken).toBe("a_1");
+  });
+
   test("refreshes once for three requests with an expired token (NET-09)", async () => {
-    await ensureSession();
-    const refreshes = watchRefreshes();
+    await signIn();
+    const refreshes = watchRequests("/auth/refresh");
     serveMeFor("a_2");
 
     const results = await Promise.all([
@@ -108,36 +97,23 @@ describe("session refresh", () => {
 
     expect(refreshes.count).toBe(1);
     expect(results.map(({ response }) => response.status)).toEqual([200, 200, 200]);
-    expect(await getItemAsync("reckon-path.refresh-token")).toBe("r_2");
+    expect(await getItemAsync(REFRESH_KEY)).toBe("r_2");
   });
 
-  test("starts a new guest when the stolen refresh token revoked the session (ACC-15)", async () => {
-    await ensureSession();
+  test("turns into the local guest and offers signing in again when revoked (decision 0050 #8)", async () => {
+    await signIn();
     await apiClient.POST("/auth/refresh", { body: { refreshToken: "r_1" } });
-    const deviceIds = watchGuestSignIns();
     serveMeFor("a_3");
 
     const { response } = await apiClient.GET("/me");
 
-    expect(response.status).toBe(200);
-    expect(deviceIds).toEqual([await getItemAsync("reckon-path.device-id")]);
-    expect(await getItemAsync("reckon-path.refresh-token")).toBe("r_3");
-  });
-
-  test("offers signing in again when an account with a login is revoked (decision 0019 #17)", async () => {
-    await ensureSession();
-    useAccountStore.getState().markSignedIn();
-    await apiClient.POST("/auth/refresh", { body: { refreshToken: "r_1" } });
-    serveMeFor("a_3");
-
-    await apiClient.GET("/me");
-
+    expect(response.status).toBe(HTTP_UNAUTHORIZED);
     expect(useAccountStore.getState()).toMatchObject({ hasLogin: false, offer: "signInLost" });
+    expect(await getItemAsync(REFRESH_KEY)).toBeNull();
   });
 
   test("keeps the session on a 401 from the refresh that is not a revocation", async () => {
-    await ensureSession();
-    const deviceIds = watchGuestSignIns();
+    await signIn();
     mockServer.use(
       http.post(mockUrl("/auth/refresh"), () =>
         HttpResponse.json({ error: { code: "unauthenticated" } }, { status: HTTP_UNAUTHORIZED }),
@@ -146,36 +122,25 @@ describe("session refresh", () => {
 
     await expect(apiSession.refreshAccessToken()).rejects.toThrow();
 
-    expect(deviceIds).toEqual([]);
-    expect(await getItemAsync("reckon-path.refresh-token")).toBe("r_1");
-  });
-
-  test("lets a request rejected during the first sign-in wait for its token", async () => {
-    serveMeFor("a_1");
-
-    const [{ response }] = await Promise.all([apiClient.GET("/me"), ensureSession()]);
-
-    expect(response.status).toBe(200);
+    expect(await getItemAsync(REFRESH_KEY)).toBe("r_1");
   });
 });
 
 describe("endSession", () => {
-  test("ends the session so the next ensure starts a new guest (decision 0040 #3)", async () => {
-    await ensureSession();
-    useAccountStore.getState().markSignedIn();
-    const guests = watchGuestSignIns();
+  test("signs out to the local guest (decision 0050 #8)", async () => {
+    await signIn();
+    const logouts = watchRequests("/auth/logout");
 
     await endSession();
+
+    expect(logouts.count).toBe(1);
     expect(useSessionStore.getState().accessToken).toBeNull();
     expect(useAccountStore.getState().hasLogin).toBe(false);
-    await ensureSession();
-
-    expect(guests).toHaveLength(1);
+    expect(await getItemAsync(REFRESH_KEY)).toBeNull();
   });
 
   test("keeps the account when the server cannot end the session", async () => {
-    await ensureSession();
-    useAccountStore.getState().markSignedIn();
+    await signIn();
     mockServer.use(
       http.post(mockUrl("/auth/logout"), () =>
         HttpResponse.json({ error: { code: "internal_error" } }, { status: 500 }),

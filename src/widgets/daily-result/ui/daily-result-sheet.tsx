@@ -9,6 +9,7 @@ import { levelStarsOf, useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
 import type { Attempt } from "@entities/outbox";
 import { streakForecastOf, useStreakQuery } from "@entities/streak";
+import { useAccountStore } from "@entities/session";
 import { useDailyToday } from "@features/daily-today";
 import { useIsOnline } from "@shared/api";
 import { formatDuration } from "@shared/lib";
@@ -45,6 +46,7 @@ const DailyResultSheet = ({ isOpen, dayKey, attempt, onAgain, onHome }: IDailyRe
   const record = useDailyRecordStore((state) => state.days[dayKey]);
   const { todayKey, yesterdayKey } = useDailyToday();
   const { data: streak } = useStreakQuery();
+  const hasLogin = useAccountStore((state) => state.hasLogin);
   const isOnline = useIsOnline();
   const isPending = useOutboxStore((state) =>
     state.attempts.some(({ attemptId }) => attemptId === attempt?.attemptId),
@@ -118,14 +120,16 @@ const DailyResultSheet = ({ isOpen, dayKey, attempt, onAgain, onHome }: IDailyRe
           {t(NOTE_KEYS[standing.note])}
         </Text>
       )}
-      <View style={styles.streak}>
-        <FlameIcon width={iconSize} height={iconSize} color={theme.colors.feedback.warm} />
-        <Text variant="title.s">
-          {t(isCounted ? "daily.result.streakToday" : "daily.result.streak", {
-            count: forecast.current,
-          })}
-        </Text>
-      </View>
+      {hasLogin ? (
+        <View style={styles.streak}>
+          <FlameIcon width={iconSize} height={iconSize} color={theme.colors.feedback.warm} />
+          <Text variant="title.s">
+            {t(isCounted ? "daily.result.streakToday" : "daily.result.streak", {
+              count: forecast.current,
+            })}
+          </Text>
+        </View>
+      ) : null}
       {standing.topPercent === null ? null : (
         <Text variant="body.s" style={styles.muted}>
           {t("daily.result.top", { percent: standing.topPercent })}

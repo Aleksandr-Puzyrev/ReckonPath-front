@@ -80,11 +80,10 @@ const SettingsSheets = ({ screen, onToast }: ISettingsSheets) => {
       )}
       <DeleteAccountSheet
         isOpen={screen.sheet === "delete"}
-        nickname={screen.me?.nickname ?? ""}
         summary={<DeletionSummary />}
-        onScheduled={() => {
+        onDeleted={(purgeAfter) => {
           close();
-          screen.handleDeletion();
+          screen.handleDeleted(purgeAfter);
         }}
         onError={screen.handleError}
         onClose={close}

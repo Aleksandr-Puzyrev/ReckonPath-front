@@ -4,7 +4,7 @@ import { AdUnavailableError, adsProvider } from "@shared/ads";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
 import { useInterstitialStore } from "./interstitial-store";
-import { watchRewardedAd } from "./watch-rewarded-ad";
+import { watchGuestRewardedAd, watchRewardedAd } from "./watch-rewarded-ad";
 
 const watch = async (placement: Parameters<typeof watchRewardedAd>[0] = "gems") => {
   const outcome = watchRewardedAd(placement);
@@ -78,5 +78,30 @@ describe("watchRewardedAd", () => {
     await jest.advanceTimersByTimeAsync(0);
 
     await outcome;
+  });
+});
+
+describe("watchGuestRewardedAd (decision 0051 #11)", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+    useInterstitialStore.getState().reset();
+  });
+
+  test("shows the configured unit without asking the server", async () => {
+    const intents = jest.fn();
+    mockServer.use(http.post(mockUrl("/ads/intent"), intents));
+    const show = jest.spyOn(adsProvider, "showRewarded");
+
+    expect(await watchGuestRewardedAd("guest-unit")).toBe(true);
+    expect(show).toHaveBeenCalledWith(expect.objectContaining({ unitId: "guest-unit" }));
+    expect(intents).not.toHaveBeenCalled();
+    expect(useInterstitialStore.getState().lastAdAt).not.toBeNull();
+    mockServer.reset();
+  });
+
+  test("grants nothing for an ad closed early", async () => {
+    jest.spyOn(adsProvider, "showRewarded").mockResolvedValue({ rewarded: false });
+
+    expect(await watchGuestRewardedAd("guest-unit")).toBe(false);
   });
 });

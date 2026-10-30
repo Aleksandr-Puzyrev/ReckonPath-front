@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import type { LevelInput } from "@reckon-path/engine";
 
+import { useAccountStore } from "@entities/session";
 import { useDailyRecordStore } from "@entities/daily";
 import { useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
@@ -80,6 +81,7 @@ describe("DailyResultSheet", () => {
   });
 
   afterEach(async () => {
+    useAccountStore.getState().reset();
     await act(async () => onlineManager.setOnline(true));
     jest.useRealTimers();
   });
@@ -101,12 +103,20 @@ describe("DailyResultSheet", () => {
   });
 
   test("shows the server's place, the top share and the new streak day", async () => {
+    useAccountStore.getState().markSignedIn();
     countAttempt({ rank: 134, percentile: 88, ranked: true });
     await renderSheet();
 
     expect(screen.getByText(/^#134$/)).toBeOnTheScreen();
     expect(screen.getByText("Топ 12%")).toBeOnTheScreen();
     expect(screen.getByText("Серия 1 день · +1")).toBeOnTheScreen();
+  });
+
+  test("shows a guest no streak (decision 0051 #4)", async () => {
+    countAttempt({ rank: 134, percentile: 88, ranked: true });
+    await renderSheet();
+
+    expect(screen.queryByText(/^Серия/)).toBeNull();
   });
 
   test("tells the result will be sent once online", async () => {

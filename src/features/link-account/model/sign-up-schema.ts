@@ -26,6 +26,7 @@ export const signUpSchema = z.object({
       "account.errors.passwordWeak",
     ),
   isConsentGiven: z.boolean().refine(Boolean, "account.errors.consent"),
+  isMarketingAllowed: z.boolean(),
 });
 
 export type SignUpSchema = z.infer<typeof signUpSchema>;

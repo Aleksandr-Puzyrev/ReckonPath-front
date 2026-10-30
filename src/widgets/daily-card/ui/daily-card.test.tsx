@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
+import { useAccountStore } from "@entities/session";
 import { useDailyRecordStore } from "@entities/daily";
 import { CAMPAIGN_LEVELS } from "@entities/level";
 import { useProgressStore } from "@entities/progress";
@@ -34,7 +35,10 @@ describe("DailyCard", () => {
     useDailyRecordStore.getState().reset();
   });
 
-  afterEach(() => jest.useRealTimers());
+  afterEach(() => {
+    useAccountStore.getState().reset();
+    jest.useRealTimers();
+  });
 
   test("stays closed before campaign level 6", async () => {
     const onOpen = jest.fn();
@@ -57,6 +61,7 @@ describe("DailyCard", () => {
   });
 
   test("shows today's result and the streak with it", async () => {
+    useAccountStore.getState().markSignedIn();
     unlockDaily();
     useDailyRecordStore.getState().recordCounted("2026-09-28", {
       attemptId: "a",
@@ -69,6 +74,21 @@ describe("DailyCard", () => {
 
     expect(screen.getByText("Сыграно: 7 ходов")).toBeOnTheScreen();
     expect(screen.getByText("1")).toBeOnTheScreen();
+  });
+
+  test("shows a guest the result without the streak (decision 0051 #4)", async () => {
+    unlockDaily();
+    useDailyRecordStore.getState().recordCounted("2026-09-28", {
+      attemptId: "a",
+      result: "won",
+      movesUsed: 7,
+      stars: 3,
+      durationMs: 1,
+    });
+    await renderCard();
+
+    expect(screen.getByText("Сыграно: 7 ходов")).toBeOnTheScreen();
+    expect(screen.queryByText("1")).toBeNull();
   });
 
   test("opens the daily", async () => {

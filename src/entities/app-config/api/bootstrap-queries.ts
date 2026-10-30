@@ -8,6 +8,8 @@ const BOOTSTRAP_STALE_MS = 5 * 60_000;
 export const appConfigKeys = {
   all: ["app-config"] as const,
   bootstrap: () => [...appConfigKeys.all, "bootstrap"] as const,
+  version: () => [...appConfigKeys.all, "version"] as const,
+  maintenance: () => [...appConfigKeys.all, "maintenance"] as const,
 };
 
 const fetchBootstrap = async () => readData(await apiClient.GET("/bootstrap"));

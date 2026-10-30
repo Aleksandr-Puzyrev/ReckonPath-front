@@ -1,11 +1,10 @@
 export {
   apiSession,
-  ensureSession,
-  ensureSessionMutationOptions,
-  hasSavedSession,
-  revokeSession,
+  deviceInfo,
   endSession,
-  switchSession,
+  hasSavedSession,
+  leaveAccount,
+  startSession,
 } from "./api/session-api";
 export { useAccountStore } from "./model/account-store";
 export type { LinkOffer } from "./model/account-store";

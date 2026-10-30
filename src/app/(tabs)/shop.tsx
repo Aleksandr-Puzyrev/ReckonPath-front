@@ -1,3 +1,3 @@
-import { ShopScreen } from "@screens/shop";
+import { ShopTab } from "@screens/shop";
 
-export default ShopScreen;
+export default ShopTab;

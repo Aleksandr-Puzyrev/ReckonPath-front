@@ -10,7 +10,7 @@ import { useInterstitialStore } from "@entities/ad";
 import { useAccountStore } from "@entities/session";
 import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
-import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import { maintenanceMock, mockServer, mockUrl, versionMock } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import RootStack from "./root-stack";
@@ -21,14 +21,24 @@ jest.mock("@shared/ui/sheet", () => ({
     isOpen ? children : null,
 }));
 
-const serveBootstrap = (overrides: Partial<ReturnType<typeof bootstrapMock>>) =>
+const serveVersion = (overrides: Parameters<typeof versionMock>[0]) =>
   mockServer.use(
-    http.get(mockUrl("/bootstrap"), () => HttpResponse.json({ ...bootstrapMock(), ...overrides })),
+    http.get(mockUrl("/version"), () =>
+      HttpResponse.json(
+        versionMock({ appStore: "https://apps.apple.com/app/id000", ...overrides }),
+      ),
+    ),
   );
 
-const versions = (min: string, recommended: string) => ({
-  version: { min, recommended, storeUrl: "https://apps.apple.com/app/id000" },
-});
+const serveMaintenance = () =>
+  mockServer.use(
+    http.get(mockUrl("/maintenance"), () =>
+      HttpResponse.json(maintenanceMock({ active: false, message: "Arena servers" })),
+    ),
+  );
+
+const FORCED = { forceUpdate: true };
+const SOFT = { showModal: true, currentVersion: "99.0.0" };
 
 const renderApp = (options: Parameters<typeof renderRouter>[1] = {}) => {
   const QueryWrapper = createQueryWrapper();
@@ -96,8 +106,8 @@ describe("RootStack", () => {
     expect(await screen.findByText("home")).toBeOnTheScreen();
   });
 
-  test("locks the app on the update screen below the minimum version (NET-01)", async () => {
-    serveBootstrap(versions("99.0.0", "99.0.0"));
+  test("locks the app on the update screen when the backend forces it (NET-01)", async () => {
+    serveVersion(FORCED);
 
     await renderApp();
 
@@ -105,8 +115,8 @@ describe("RootStack", () => {
     expect(screen.queryByText("home")).not.toBeOnTheScreen();
   });
 
-  test("shows maintenance from the bootstrap (NET-04)", async () => {
-    serveBootstrap({ maintenance: { message: "Arena servers" } });
+  test("shows maintenance when the backend says the app does not work (NET-04)", async () => {
+    serveMaintenance();
 
     await renderApp();
 
@@ -114,6 +124,7 @@ describe("RootStack", () => {
   });
 
   test("locks the app on the ban screen after a full ban from any request (decision 0038 #7)", async () => {
+    useAccountStore.getState().markSignedIn();
     mockServer.use(
       http.get(mockUrl("/me"), () =>
         HttpResponse.json(
@@ -133,7 +144,7 @@ describe("RootStack", () => {
   });
 
   test("opens the app after maintenance was dismissed", async () => {
-    serveBootstrap({ maintenance: { message: "Arena servers" } });
+    serveMaintenance();
     useSystemNoticeStore.getState().dismissMaintenance();
 
     await renderApp();
@@ -142,7 +153,8 @@ describe("RootStack", () => {
   });
 
   test("puts the update screen before maintenance", async () => {
-    serveBootstrap({ ...versions("99.0.0", "99.0.0"), maintenance: { message: "Arena" } });
+    serveVersion(FORCED);
+    serveMaintenance();
 
     await renderApp();
 
@@ -150,7 +162,7 @@ describe("RootStack", () => {
   });
 
   test("offers the soft update over the app (NET-02)", async () => {
-    serveBootstrap(versions("1.0.0", "99.0.0"));
+    serveVersion(SOFT);
 
     await renderApp();
 
@@ -159,7 +171,7 @@ describe("RootStack", () => {
   });
 
   test("does not offer the soft update again on the day of «Позже» (NET-02)", async () => {
-    serveBootstrap(versions("1.0.0", "99.0.0"));
+    serveVersion(SOFT);
     useSystemNoticeStore.getState().dismissSoftUpdate();
 
     await renderApp();

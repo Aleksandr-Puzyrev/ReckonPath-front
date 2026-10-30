@@ -16,6 +16,6 @@ export {
   handlePreScreenClosed,
   prepareAdsConsent,
 } from "./model/prepare-ads-consent";
-export { watchRewardedAd } from "./model/watch-rewarded-ad";
+export { watchGuestRewardedAd, watchRewardedAd } from "./model/watch-rewarded-ad";
 export type { RewardedOutcome } from "./model/watch-rewarded-ad";
 export { default as AdsPreScreen } from "./ui/ads-pre-screen";

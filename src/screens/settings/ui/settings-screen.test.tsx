@@ -49,6 +49,7 @@ describe("SettingsScreen", () => {
   });
 
   afterEach(async () => {
+    useAccountStore.getState().reset();
     await cleanup();
     useSettingsStore.getState().reset();
     useAccountStore.getState().reset();
@@ -112,26 +113,32 @@ describe("SettingsScreen", () => {
     expect(useAccountStore.getState().hasLogin).toBe(false);
   });
 
-  test("deletes the account after the nickname (design 26.3–26.4)", async () => {
+  test("has nothing to delete for a guest (decision 0051 #7)", async () => {
+    await renderSettings();
+
+    expect(screen.queryByTestId("settings-delete")).toBeNull();
+  });
+
+  test("deletes the account by the password and turns into a guest (design 26.3, decision 0052 #2)", async () => {
+    useAccountStore.getState().markSignedIn();
     await renderSettings();
 
     await fireEvent.press(screen.getByTestId("settings-delete"));
     expect(screen.getByText("Что удалится")).toBeOnTheScreen();
     expect(screen.getByText("Прогресс кампании")).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("delete-continue"));
-    await fireEvent.changeText(screen.getByTestId("delete-nickname"), "Player");
-    expect(await screen.findByText("Ник не совпадает")).toBeOnTheScreen();
-    expect(screen.getByTestId("delete-forever")).toBeDisabled();
-    await fireEvent.changeText(screen.getByTestId("delete-nickname"), "Player4821");
+    await fireEvent.changeText(screen.getByTestId("delete-password"), "Signal2026");
     await waitFor(() => expect(screen.getByTestId("delete-forever")).toBeEnabled());
     await fireEvent.press(screen.getByTestId("delete-forever"));
 
-    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/settings/deletion"));
-    expect((await apiClient.GET("/me")).data?.flags.deletionScheduledAt).not.toBeNull();
+    expect(await screen.findByText(/^Аккаунт будет удалён \d+ \S+$/)).toBeOnTheScreen();
+    expect(useAccountStore.getState().hasLogin).toBe(false);
+    expect(screen.queryByTestId("settings-delete")).toBeNull();
   });
 
   test("leads to the deletion screen once it is scheduled (decision 0040 #15)", async () => {
-    await apiClient.DELETE("/me", { body: { confirmNickname: "Player4821" } });
+    useAccountStore.getState().markSignedIn();
+    await apiClient.DELETE("/me", { body: { password: "Signal2026" } });
     await renderSettings();
 
     expect(screen.getByText(/^Удаление \d+ \S+$/)).toBeOnTheScreen();

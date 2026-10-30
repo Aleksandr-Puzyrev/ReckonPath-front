@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw/http";
 
 import { APP_VERSION } from "@shared/config";
+import { ACCOUNT_SESSION } from "@shared/test-utils/account-session";
 import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
 import { apiClient } from "./api-client";
@@ -22,7 +23,7 @@ const captureRequests = (method: "get" | "post", path: string) => {
   return requests;
 };
 
-const logout = () => apiClient.POST("/auth/logout", { body: { refreshToken: "r" } });
+const logout = () => apiClient.POST("/auth/logout");
 
 afterEach(() => {
   mockServer.reset();
@@ -58,17 +59,18 @@ describe("apiClient", () => {
   test("keeps the idempotency key passed by the action", async () => {
     const writes = captureRequests("post", "/auth/logout");
 
-    await apiClient.POST("/auth/logout", {
-      body: { refreshToken: "r" },
-      headers: { "Idempotency-Key": "action-key" },
-    });
+    await apiClient.POST("/auth/logout", { headers: { "Idempotency-Key": "action-key" } });
 
     expect(writes[0]?.headers.get("Idempotency-Key")).toBe("action-key");
   });
 
   test("sends the access token of the session", async () => {
     const requests = captureRequests("get", "/bootstrap");
-    setApiSession({ getAccessToken: () => "token-1", refreshAccessToken: async () => null });
+    setApiSession({
+      ...ACCOUNT_SESSION,
+      getAccessToken: () => "token-1",
+      refreshAccessToken: async () => null,
+    });
 
     await apiClient.GET("/bootstrap");
 
@@ -77,7 +79,11 @@ describe("apiClient", () => {
 
   test("refreshes the token once for concurrent 401s and repeats the requests", async () => {
     const refresh = jest.fn(async () => "token-2");
-    setApiSession({ getAccessToken: () => "token-1", refreshAccessToken: refresh });
+    setApiSession({
+      ...ACCOUNT_SESSION,
+      getAccessToken: () => "token-1",
+      refreshAccessToken: refresh,
+    });
     mockServer.use(
       http.get(mockUrl("/bootstrap"), ({ request }) =>
         request.headers.get("Authorization") === "Bearer token-2"
@@ -97,9 +103,13 @@ describe("apiClient", () => {
 
   test("repeats a writing request with its body after a refresh", async () => {
     const bodies: unknown[] = [];
-    setApiSession({ getAccessToken: () => "token-1", refreshAccessToken: async () => "token-2" });
+    setApiSession({
+      ...ACCOUNT_SESSION,
+      getAccessToken: () => "token-1",
+      refreshAccessToken: async () => "token-2",
+    });
     mockServer.use(
-      http.post(mockUrl("/auth/logout"), async ({ request }) => {
+      http.patch(mockUrl("/me"), async ({ request }) => {
         bodies.push(await request.json());
         return request.headers.get("Authorization") === "Bearer token-2"
           ? new HttpResponse(null, { status: 204 })
@@ -110,10 +120,10 @@ describe("apiClient", () => {
       }),
     );
 
-    const { response } = await logout();
+    const { response } = await apiClient.PATCH("/me", { body: { locale: "en" } });
 
     expect(response.status).toBe(204);
-    expect(bodies).toEqual([{ refreshToken: "r" }, { refreshToken: "r" }]);
+    expect(bodies).toEqual([{ locale: "en" }, { locale: "en" }]);
   });
 
   test("returns the 401 when there is no session to refresh", async () => {
@@ -130,7 +140,7 @@ describe("apiClient", () => {
 
   test("does not refresh on a 401 from the refresh itself", async () => {
     const refresh = jest.fn(async () => "token-2");
-    setApiSession({ getAccessToken: () => null, refreshAccessToken: refresh });
+    setApiSession({ ...ACCOUNT_SESSION, getAccessToken: () => null, refreshAccessToken: refresh });
     mockServer.use(
       http.post(mockUrl("/auth/refresh"), () =>
         HttpResponse.json({ error: { code: "session_revoked" } }, { status: HTTP_UNAUTHORIZED }),
@@ -145,7 +155,11 @@ describe("apiClient", () => {
 
   test("does not refresh on a 401 from sign-in, where it means wrong credentials", async () => {
     const refresh = jest.fn(async () => "token-2");
-    setApiSession({ getAccessToken: () => "token-1", refreshAccessToken: refresh });
+    setApiSession({
+      ...ACCOUNT_SESSION,
+      getAccessToken: () => "token-1",
+      refreshAccessToken: refresh,
+    });
     mockServer.use(
       http.post(mockUrl("/auth/login"), () =>
         HttpResponse.json(
@@ -156,11 +170,34 @@ describe("apiClient", () => {
     );
 
     const { response } = await apiClient.POST("/auth/login", {
-      body: { login: "nova", password: "secret-pass" },
+      body: {
+        email: "nova@mail.ru",
+        password: "secret-pass",
+        device: { deviceId: "device-1", platform: "ios" },
+      },
     });
 
     expect(response.status).toBe(HTTP_UNAUTHORIZED);
     expect(refresh).not.toHaveBeenCalled();
+  });
+
+  test("keeps a guest's private requests on the device (decision 0051)", async () => {
+    setApiSession({ ...ACCOUNT_SESSION, hasAccount: () => false });
+    const requests = captureRequests("get", "/me");
+
+    const { response } = await apiClient.GET("/me");
+
+    expect(response.status).toBe(HTTP_UNAUTHORIZED);
+    expect(requests).toHaveLength(0);
+  });
+
+  test("lets a guest's public requests through", async () => {
+    setApiSession({ ...ACCOUNT_SESSION, hasAccount: () => false });
+    const requests = captureRequests("get", "/bootstrap");
+
+    await apiClient.GET("/bootstrap");
+
+    expect(requests).toHaveLength(1);
   });
 
   test("signals an update on 426", async () => {

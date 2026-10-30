@@ -4,6 +4,12 @@ export {
   useBootstrapQuery,
   useClockOffset,
 } from "./api/bootstrap-queries";
+export {
+  maintenanceQueryOptions,
+  useMaintenanceQuery,
+  useVersionQuery,
+  versionQueryOptions,
+} from "./api/system-queries";
 export { isSoftUpdateSnoozed, useSystemNoticeStore } from "./model/system-notice-store";
 export { systemStateOf } from "./model/system-state";
 export type { SystemState } from "./model/system-state";

@@ -327,6 +327,7 @@ describe("ArenaHomeScreen", () => {
   });
 
   test("claims an available season step and marks it claimed", async () => {
+    useAccountStore.getState().markSignedIn();
     Array.from({ length: 5 }, (_, index) => win(`m${index}`));
     await renderOpenArena();
 

@@ -4,6 +4,7 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { useDailyRecordStore } from "@entities/daily";
 import { streakForecastOf, useStreakQuery } from "@entities/streak";
+import { useAccountStore } from "@entities/session";
 import {
   DAILY_UNLOCK_LEVEL,
   NextDailyCountdown,
@@ -28,6 +29,7 @@ const DailyCard = ({ onOpen }: IDailyCard) => {
   const { todayKey, yesterdayKey } = useDailyToday();
   const record = useDailyRecordStore((state) => state.days[todayKey]);
   const { data } = useStreakQuery();
+  const hasLogin = useAccountStore((state) => state.hasLogin);
   const streak = streakForecastOf(data, {
     todayKey,
     yesterdayKey,
@@ -62,7 +64,7 @@ const DailyCard = ({ onOpen }: IDailyCard) => {
           <NextDailyCountdown textKey="daily.next" variant="body.s" style={styles.secondary} />
         ) : null}
       </View>
-      {isUnlocked ? (
+      {isUnlocked && hasLogin ? (
         <View style={styles.streak}>
           <FlameIcon width={iconSize} height={iconSize} color={theme.colors.feedback.warm} />
           <Text variant="title.m">{streak.current}</Text>

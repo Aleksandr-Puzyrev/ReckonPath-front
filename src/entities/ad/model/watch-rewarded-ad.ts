@@ -12,6 +12,8 @@ export type RewardedOutcome =
   | { kind: "unavailable" };
 
 const POLL_MS = 1000;
+// Without an intent there is nothing for the network to pass back to the server (без намерения сети нечего передавать обратно серверу).
+const NO_CUSTOM_DATA = "";
 const POLL_ATTEMPTS = 10;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -58,4 +60,12 @@ export const watchRewardedAd = async (
   // A watched rewarded ad counts for the interstitial interval (ADS-07) (досмотренная rewarded-реклама учитывается в интервале межстраничной).
   useInterstitialStore.getState().noteAdShown(Date.now());
   return pollReward(intent.adIntentId);
+};
+
+// A guest has no server: the ad is shown without an intent and the reward is granted on the device (у гостя нет сервера: реклама показывается без намерения, награда выдаётся на устройстве).
+export const watchGuestRewardedAd = async (unitId: string) => {
+  const isPersonalized = await prepareAdsConsent();
+  const isWatched = await showAd(unitId, NO_CUSTOM_DATA, isPersonalized);
+  if (isWatched) useInterstitialStore.getState().noteAdShown(Date.now());
+  return isWatched;
 };

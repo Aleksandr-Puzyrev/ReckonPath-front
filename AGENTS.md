@@ -52,6 +52,15 @@ Run lint, typecheck, format check, and tests before declaring any task done. The
   * Android builds need NDK 27.1.12297006 installed in the Android SDK.
 * The app entry is `index.ts` (not `expo-router/entry`): it configures Unistyles before any route loads.
 
+## Running against the local backend
+
+The backend (`../reckon-path-backend`, read-only for agents) runs locally at `http://127.0.0.1:8080` (decision 0048 #4).
+
+* Copy `.env.example` to `.env.local` (git-ignored): `EXPO_PUBLIC_API_URL=http://127.0.0.1:8080/api`. Restart `npm start` after changing it.
+* Hybrid routing (decision 0048 #1): a dev build sends only the routes listed in `src/shared/api/backend-routes.ts` to the backend; everything else, the WebSocket and the CDN assets stay on the mocks. An empty URL means mocks only. Release builds send everything to the backend.
+* iOS simulator: `127.0.0.1` is the Mac. Android emulator: run `adb reverse tcp:8080 tcp:8080` once per emulator start, so `127.0.0.1` reaches the Mac.
+* A route joins `BACKEND_ROUTES` only together with the client changes for that endpoint (the task that adopts it).
+
 ## Building with EAS
 
 EAS builds, signs, submits, and ships OTA updates (`eas build`, `eas submit`, `eas update`). Run it as `npx eas-cli@latest <command>`. Profiles and channels are defined in spec Part 8 §12.1. Docs: https://docs.expo.dev/eas/index.md

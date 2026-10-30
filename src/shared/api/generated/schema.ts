@@ -20,16 +20,33 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/auth/guest": {
+  "/version": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /** @description The backend compares the X-App-Version header with its minimum and current versions (decision 0049). */
+    get: operations["getVersion"];
     put?: never;
-    post: operations["authGuest"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/maintenance": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getMaintenance"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -45,8 +62,41 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description Turns the current guest into a permanent account (decision 0019 */
+    /** @description Creates an unconfirmed account and e-mails a 6-digit code (decision 0050 */
     post: operations["authRegister"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/register/resend": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["authRegisterResend"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/register/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Confirms the e-mail with the code and opens the account's session. */
+    post: operations["authRegisterVerify"];
     delete?: never;
     options?: never;
     head?: never;
@@ -62,7 +112,6 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description Signs in to an existing account; the caller decides whether to keep the new session (decision 0019 #14). */
     post: operations["authLogin"];
     delete?: never;
     options?: never;
@@ -95,6 +144,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
+    /** @description Ends the session of the bearer token. */
     post: operations["authLogout"];
     delete?: never;
     options?: never;
@@ -112,7 +162,7 @@ export interface paths {
     get: operations["getMe"];
     put?: never;
     post?: never;
-    /** @description Schedules the deletion in 30 days (Part 1 §7.6). */
+    /** @description Schedules the deletion, confirmed by the password, and ends every session of the account (decision 0052 #2). */
     delete: operations["deleteMe"];
     options?: never;
     head?: never;
@@ -738,6 +788,31 @@ export interface components {
       | "invalid_document_type"
       | "body_too_large"
       | "method_not_allowed";
+    VersionInfo: {
+      /** @description Soft update is offered */
+      showModal: boolean;
+      /** @description The app must be updated */
+      forceUpdate: boolean;
+      minVersion: string;
+      currentVersion: string;
+      /** @description Not shown; the client uses its own texts */
+      title?: string;
+      /** @description Not shown; the client uses its own texts */
+      description?: string;
+      /** @description Not shown; the client uses its own texts */
+      buttonText?: string;
+      /** @description Store link; empty when not set */
+      ruStore: string;
+      /** @description Store link; empty when not set */
+      playMarket: string;
+      /** @description Store link; empty when not set */
+      appStore: string;
+    };
+    MaintenanceStatus: {
+      /** @description true while the app works */
+      active: boolean;
+      message: string;
+    };
     Bootstrap: {
       /** Format: date-time */
       serverTime: string;
@@ -768,34 +843,43 @@ export interface components {
       refreshToken: string;
       expiresIn: number;
     };
-    Session: components["schemas"]["TokenPair"] & {
-      user: components["schemas"]["SessionUser"];
+    DeviceInfo: {
+      /** @description Persistent install id */
+      deviceId: string;
+      platform: components["schemas"]["Platform"];
+      /** @description Device model */
+      name?: string;
+      appVersion?: string;
     };
-    SessionUser: {
-      id: string;
-      nickname: string;
-      isGuest: boolean;
-    };
-    LoginResult: components["schemas"]["Session"] & {
-      summary: components["schemas"]["AccountSummary"];
-    };
-    /** @description Shown on the account conflict cards (Part 7 §3 `details.other`) */
-    AccountSummary: {
-      level: number;
-      /** @description null without the arena */
-      league: string | null;
-      stars: number;
-    };
-    RegisterRequest: {
-      nickname: string;
+    LoginRequest: {
       /** Format: email */
       email: string;
       password: string;
+      device: components["schemas"]["DeviceInfo"];
     };
-    LoginRequest: {
-      /** @description Nickname or e-mail */
-      login: string;
+    RegisterRequest: {
+      /** Format: email */
+      email: string;
       password: string;
+      nickname: string;
+      acceptTerms: boolean;
+      acceptPrivacy: boolean;
+      acceptMarketing: boolean;
+    };
+    EmailRequest: {
+      /** Format: email */
+      email: string;
+    };
+    VerifyRequest: {
+      /** Format: email */
+      email: string;
+      /** @description 6 digits from the e-mail */
+      code: string;
+      device: components["schemas"]["DeviceInfo"];
+    };
+    CodeSent: {
+      /** @description Seconds until the code can be sent again */
+      resendAfter: number;
     };
     RefreshRequest: {
       refreshToken: string;
@@ -1186,7 +1270,8 @@ export interface components {
       diagnostics: {
         appVersion: string;
         device: string;
-        userId: string;
+        /** @description Absent for a guest (decision 0051 #10) */
+        userId?: string;
       };
     };
     /** @description The banned error details (Part 7 §2) */
@@ -1323,30 +1408,43 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
-  authGuest: {
+  getVersion: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody: {
-      content: {
-        "application/json": {
-          deviceId: string;
-          platform: components["schemas"]["Platform"];
-          integrityToken?: string;
-        };
-      };
-    };
+    requestBody?: never;
     responses: {
-      /** @description Guest session */
-      201: {
+      /** @description Update flags and store links */
+      200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Session"];
+          "application/json": components["schemas"]["VersionInfo"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getMaintenance: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Whether the app works; active is false during maintenance (decision 0049) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MaintenanceStatus"];
         };
       };
       default: components["responses"]["Error"];
@@ -1365,15 +1463,63 @@ export interface operations {
       };
     };
     responses: {
-      /** @description The guest is now a permanent account */
+      /** @description The code is sent */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CodeSent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  authRegisterResend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EmailRequest"];
+      };
+    };
+    responses: {
+      /** @description The code is sent again */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CodeSent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  authRegisterVerify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["VerifyRequest"];
+      };
+    };
+    responses: {
+      /** @description Session of the new account */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            user: components["schemas"]["SessionUser"];
-          };
+          "application/json": components["schemas"]["TokenPair"];
         };
       };
       default: components["responses"]["Error"];
@@ -1392,13 +1538,13 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Session of the account and a summary of its progress */
+      /** @description Session of the account */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["LoginResult"];
+          "application/json": components["schemas"]["TokenPair"];
         };
       };
       default: components["responses"]["Error"];
@@ -1436,11 +1582,7 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RefreshRequest"];
-      };
-    };
+    requestBody?: never;
     responses: {
       /** @description Signed out */
       204: {
@@ -1483,20 +1625,20 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          confirmNickname: string;
+          password: string;
         };
       };
     };
     responses: {
-      /** @description The deletion date */
-      200: {
+      /** @description When the data is erased for good */
+      202: {
         headers: {
           [name: string]: unknown;
         };
         content: {
           "application/json": {
             /** Format: date-time */
-            deletionScheduledAt: string;
+            purgeAfter: string;
           };
         };
       };

@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw/http";
 import { useDailyRecordStore } from "@entities/daily";
 import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
+import { useAccountStore } from "@entities/session";
 import { ApiError } from "@shared/api";
 import { attemptFixture } from "@shared/test-utils/attempt-fixture";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
@@ -12,7 +13,11 @@ import { syncAttempts } from "./sync-attempts";
 
 const secureStore = jest.requireMock<{ __reset: () => void }>("expo-secure-store");
 
-const signIn = () => setItemAsync("reckon-path.refresh-token", "r_saved");
+// A session belongs to an account only (сессия бывает только у аккаунта).
+const signIn = async () => {
+  await setItemAsync("reckon-path.refresh-token", "r_saved");
+  useAccountStore.getState().markSignedIn();
+};
 
 const queue = (count: number) =>
   Array.from({ length: count }, () => useOutboxStore.getState().enqueue(attemptFixture()));
@@ -46,6 +51,7 @@ const answerBatch = (status: number) =>
 afterEach(() => {
   mockServer.reset();
   secureStore.__reset();
+  useAccountStore.getState().reset();
   useOutboxStore.getState().reset();
   useProgressStore.getState().reset();
   useDailyRecordStore.getState().reset();

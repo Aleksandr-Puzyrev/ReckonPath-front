@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 
 const MS_PER_SECOND = 1000;
 const SHOP_STALE_FALLBACK_SEC = 300;
@@ -29,6 +29,7 @@ export const inventoryQueryOptions = () =>
     staleTime: INVENTORY_STALE_MS,
   });
 
-export const useShopQuery = () => useQuery(shopQueryOptions());
+export const useShopQuery = () => useQuery({ ...shopQueryOptions(), enabled: useHasAccount() });
 
-export const useInventoryQuery = () => useQuery(inventoryQueryOptions());
+export const useInventoryQuery = () =>
+  useQuery({ ...inventoryQueryOptions(), enabled: useHasAccount() });

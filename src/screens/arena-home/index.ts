@@ -1,1 +1,1 @@
-export { default as ArenaHomeScreen } from "./ui/arena-home-screen";
+export { default as ArenaTab } from "./ui/arena-tab";

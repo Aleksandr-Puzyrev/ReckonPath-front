@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 
 const STREAK_STALE_MS = 2 * 60_000;
 
@@ -15,4 +15,4 @@ export const streakQueryOptions = () =>
     staleTime: STREAK_STALE_MS,
   });
 
-export const useStreakQuery = () => useQuery(streakQueryOptions());
+export const useStreakQuery = () => useQuery({ ...streakQueryOptions(), enabled: useHasAccount() });

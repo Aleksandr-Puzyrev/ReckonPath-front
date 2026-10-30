@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 
 const ARENA_STALE_MS = 30_000;
 
@@ -15,4 +15,4 @@ export const arenaQueryOptions = () =>
     staleTime: ARENA_STALE_MS,
   });
 
-export const useArenaQuery = () => useQuery(arenaQueryOptions());
+export const useArenaQuery = () => useQuery({ ...arenaQueryOptions(), enabled: useHasAccount() });

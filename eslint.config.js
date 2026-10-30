@@ -85,7 +85,7 @@ module.exports = defineConfig([
         typescript: { project: "./tsconfig.json" },
         node: true,
       },
-      "boundaries/include": ["src/**/*", "packages/**/*"],
+      "boundaries/include": ["src/**/*", "packages/**/*", "modules/**/*"],
       "boundaries/elements": [
         { type: "app", pattern: "src/app" },
         { type: "application", pattern: "src/application" },
@@ -97,6 +97,7 @@ module.exports = defineConfig([
         { type: "shared", pattern: "src/shared" },
         { type: "engine", pattern: "packages/engine" },
         { type: "content", pattern: "packages/content" },
+        { type: "modules", pattern: "modules/*", capture: ["module"] },
       ],
     },
     rules: {
@@ -115,6 +116,11 @@ module.exports = defineConfig([
             {
               from: { element: { type: "mocks" } },
               allow: { to: { element: { types: { anyOf: ["shared", "engine"] } } } },
+            },
+            // Own native modules are wrapped in shared, like any other platform API (свои нативные модули оборачиваются в shared, как любой другой API платформы).
+            {
+              from: { element: { type: "shared" } },
+              allow: { to: { element: { type: "modules" } } },
             },
             {
               from: { element: { type: "content" } },

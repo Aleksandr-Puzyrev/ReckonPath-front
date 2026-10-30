@@ -2,6 +2,8 @@
 
 Date: 2026-10-02. Asked by: stage 2 task 3 (clarify-task). Answered by: developer.
 
+Superseded by 0048 #2, #8–#14: the guest lives only on the device; there is no server guest.
+
 | # | Question | Decision | Spec reference |
 | --- | --- | --- | --- |
 | 1 | Guest session revoked (`SESSION_REVOKED`) | A new guest is created silently. Local progress stays on the device and goes to the new account with attempts sync (task 4); the old guest's server account is lost. Linked accounts keep the Part 7 behaviour (sign-in screen) with task 7. | Part 7 §2, Part 11 ACC-15 |

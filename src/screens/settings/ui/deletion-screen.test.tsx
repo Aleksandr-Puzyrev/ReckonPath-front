@@ -25,7 +25,7 @@ describe("DeletionScreen", () => {
   });
 
   test("shows the deletion date and cancels the deletion (design 26.4, decision 0040 #15)", async () => {
-    await apiClient.DELETE("/me", { body: { confirmNickname: "Player4821" } });
+    await apiClient.DELETE("/me", { body: { password: "Signal2026" } });
     await render(<DeletionScreen />, { wrapper: createQueryWrapper() });
 
     expect(await screen.findByText(/^Аккаунт будет удалён \d+ \S+$/)).toBeOnTheScreen();

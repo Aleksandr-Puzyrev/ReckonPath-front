@@ -14,19 +14,18 @@ import { styles } from "./soft-update-sheet-styles";
 interface ISoftUpdateSheet {
   isOpen: boolean;
   version: string;
-  storeUrl: string;
-  message: string | null;
+  storeUrl: string | null;
   onDismiss: () => void;
 }
 
-const SoftUpdateSheet = ({ isOpen, version, storeUrl, message, onDismiss }: ISoftUpdateSheet) => {
+const SoftUpdateSheet = ({ isOpen, version, storeUrl, onDismiss }: ISoftUpdateSheet) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const badge = theme.sizes.softUpdateBadge;
 
-  const handleUpdate = () => {
+  const handleUpdate = (url: string) => {
     onDismiss();
-    Linking.openURL(storeUrl);
+    Linking.openURL(url);
   };
 
   return (
@@ -40,23 +39,20 @@ const SoftUpdateSheet = ({ isOpen, version, storeUrl, message, onDismiss }: ISof
           {t("system.update.softTitle", { version })}
         </Text>
       </View>
-      {message === null ? null : (
-        <Text variant="body.m" style={styles.message}>
-          {message}
-        </Text>
-      )}
       <View style={styles.actions}>
         <View style={styles.later}>
           <Button label={t("system.update.later")} onPress={onDismiss} size="l" />
         </View>
-        <View style={styles.update}>
-          <Button
-            label={t("system.update.cta")}
-            onPress={handleUpdate}
-            variant="primary"
-            size="l"
-          />
-        </View>
+        {storeUrl === null ? null : (
+          <View style={styles.update}>
+            <Button
+              label={t("system.update.cta")}
+              onPress={() => handleUpdate(storeUrl)}
+              variant="primary"
+              size="l"
+            />
+          </View>
+        )}
       </View>
     </Sheet>
   );

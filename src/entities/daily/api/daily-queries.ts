@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 
 const DAILY_STALE_MS = 2 * 60_000;
 const HISTORY_DAYS = 30;
@@ -29,6 +29,8 @@ export const dailyHistoryQueryOptions = () =>
     staleTime: DAILY_STALE_MS,
   });
 
-export const useDailyDayQuery = (dayKey: string) => useQuery(dailyDayQueryOptions(dayKey));
+export const useDailyDayQuery = (dayKey: string) =>
+  useQuery({ ...dailyDayQueryOptions(dayKey), enabled: useHasAccount() });
 
-export const useDailyHistoryQuery = () => useQuery(dailyHistoryQueryOptions());
+export const useDailyHistoryQuery = () =>
+  useQuery({ ...dailyHistoryQueryOptions(), enabled: useHasAccount() });

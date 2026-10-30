@@ -9,7 +9,7 @@ import SignUp from "./sign-up";
 
 const callbacks = () => ({
   onBack: jest.fn(),
-  onLinked: jest.fn(),
+  onCodeSent: jest.fn(),
   onSignIn: jest.fn(),
   onError: jest.fn(),
 });
@@ -63,24 +63,19 @@ describe("SignUp", () => {
     expect(screen.getByText("4 / 16")).toBeOnTheScreen();
   });
 
-  test("shows a taken nickname under its field", async () => {
-    const handlers = callbacks();
-    await renderSignUp(handlers);
-    await fill("kira");
-
-    await submit();
-
-    expect(await screen.findByText("Этот ник уже занят")).toBeOnTheScreen();
-    expect(handlers.onLinked).not.toHaveBeenCalled();
-  });
-
-  test("links the account", async () => {
+  test("asks for the code after the form is sent (decision 0050 #2)", async () => {
     const handlers = callbacks();
     await renderSignUp(handlers);
     await fill("Seeker_7");
 
     await submit();
 
-    expect(handlers.onLinked).toHaveBeenCalled();
+    expect(handlers.onCodeSent).toHaveBeenCalledWith("seeker@reckon.app", 60);
+  });
+
+  test("offers the optional news consent (decision 0050 #5)", async () => {
+    await renderSignUp(callbacks());
+
+    expect(screen.getByText("Хочу получать новости и подарки на e-mail")).toBeOnTheScreen();
   });
 });

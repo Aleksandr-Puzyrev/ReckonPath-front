@@ -363,7 +363,9 @@
     "too_many_requests": "Too many tries. Wait a moment",
     "nick_taken": "This nickname is taken",
     "email_taken": "This e-mail is already taken",
-    "invalid_credentials": "Wrong login or password"
+    "invalid_credentials": "Wrong login or password",
+    "invalid_code": "Wrong code",
+    "too_many_attempts": "Too many attempts. Request a new code"
   },
   "system": {
     "update": {
@@ -492,7 +494,6 @@
     "moreInShop": "More in the showroom",
     "default": "Default",
     "level": "Level {{level}}",
-    "levelGuest": "Level {{level}} · guest",
     "xp": "XP {{xp}} / {{max}}",
     "guestNote": "Guest progress is lost on a new phone",
     "have": "Owned",
@@ -528,8 +529,6 @@
     "signIn": {
       "eyebrow": "Welcome back",
       "title": "Sign in",
-      "login": "Nickname or e-mail",
-      "loginPlaceholder": "nickname or e-mail",
       "passwordPlaceholder": "at least 6 characters",
       "submit": "Sign in",
       "submitting": "Signing in…",
@@ -551,30 +550,31 @@
       "consent": "I accept the terms and privacy policy and I’m 12 or older",
       "submit": "Create account",
       "submitting": "Creating…",
-      "hasAccount": "Have an account?"
+      "hasAccount": "Have an account?",
+      "marketing": "Send me news and gifts by e-mail"
     },
     "errors": {
-      "loginRequired": "Enter your nickname or e-mail",
       "passwordShort": "Password must be at least 6 characters",
       "nicknameLength": "Nickname: 3–16 characters",
       "nicknameChars": "Letters, digits and _ only",
       "email": "Check your e-mail",
       "passwordWeak": "Password is too simple",
-      "consent": "Please accept the terms"
+      "consent": "Please accept the terms",
+      "passwordRejected": "This password is too easy — choose another"
     },
-    "conflict": {
-      "header": "Link account",
-      "title": "Two progress saves found",
-      "description": "This account already has progress. If you load it, the progress on this device is deleted.",
-      "thisDevice": "This device",
-      "saved": "Saved",
-      "level": "Level",
-      "arena": "Arena",
-      "noLeague": "—",
-      "load": "Load saved",
-      "confirmTitle": "Keep “{{name}}”?",
-      "confirmMessage": "“{{name}}” progress will be deleted permanently.",
-      "keep": "Keep"
+    "code": {
+      "title": "Confirm your e-mail",
+      "body": "We sent a code to {{email}}. If this address is already registered, the e-mail has a sign-in link instead.",
+      "label": "Code from the e-mail",
+      "submit": "Confirm",
+      "resend": "Send the code again",
+      "resendIn": "Send again in {{time}}"
+    },
+    "gate": {
+      "arenaTitle": "The arena needs an account",
+      "arenaBody": "Sign in or sign up to fight other players",
+      "shopTitle": "The showroom needs an account",
+      "shopBody": "Sign in or sign up to buy items and build your collection"
     }
   },
   "shop": {
@@ -716,13 +716,12 @@
       "arenaValue_other": "{{league}} · {{count}} trophies",
       "continue": "Continue",
       "cancel": "Cancel",
-      "confirmTitle": "Confirm with your nickname",
-      "confirmBody": "Type your nickname “{{nickname}}” to delete the account for good.",
-      "mismatch": "Nickname doesn’t match",
       "forever": "Delete forever",
       "scheduledTitle": "Account will be deleted on {{date}}",
       "scheduledBody": "Sign in before then to cancel the deletion.",
-      "restore": "Cancel deletion"
+      "restore": "Cancel deletion",
+      "passwordLabel": "Account password",
+      "passwordHint": "Enter your password to confirm"
     }
   },
   "arena": {

@@ -8,34 +8,26 @@ import { Button } from "@shared/ui/button";
 import { Sheet } from "@shared/ui/sheet";
 import { Text } from "@shared/ui/text";
 
-import { useDeleteAccount } from "../model/use-delete-account";
-
 import { styles } from "./delete-account-styles";
-import NicknameConfirmForm from "./nickname-confirm-form";
+import PasswordConfirmForm from "./password-confirm-form";
 
 interface IDeleteAccountSheet {
   isOpen: boolean;
-  nickname: string;
   summary: ReactNode;
-  onScheduled: () => void;
+  onDeleted: (purgeAfter: string) => void;
   onError: (messageKey: ErrorMessageKey) => void;
   onClose: () => void;
 }
 
 const DeleteAccountSheet = ({
   isOpen,
-  nickname,
   summary,
-  onScheduled,
+  onDeleted,
   onError,
   onClose,
 }: IDeleteAccountSheet) => {
   const { t } = useTranslation();
   const [isConfirming, setIsConfirming] = useState(false);
-  const account = useDeleteAccount(() => {
-    setIsConfirming(false);
-    onScheduled();
-  }, onError);
   const handleClose = () => {
     setIsConfirming(false);
     onClose();
@@ -44,10 +36,12 @@ const DeleteAccountSheet = ({
   return (
     <Sheet isOpen={isOpen} onDismiss={handleClose}>
       {isConfirming ? (
-        <NicknameConfirmForm
-          nickname={nickname}
-          isPending={account.isPending}
-          onConfirm={account.remove}
+        <PasswordConfirmForm
+          onDeleted={(purgeAfter) => {
+            setIsConfirming(false);
+            onDeleted(purgeAfter);
+          }}
+          onError={onError}
         />
       ) : (
         <View style={styles.sheet}>

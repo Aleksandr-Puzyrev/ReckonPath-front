@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
+import { useAccountStore } from "@entities/session";
 import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
@@ -24,8 +25,14 @@ jest.mock("@shared/ui/sheet", () => ({
 jest.mock("@widgets/board", () => ({ BoardTryout: () => null }));
 
 const renderProfile = async () => {
+  useAccountStore.getState().markSignedIn();
   await render(<ProfileScreen />, { wrapper: createQueryWrapper() });
   await screen.findByText("Player4821");
+};
+
+const renderGuest = async () => {
+  await render(<ProfileScreen />, { wrapper: createQueryWrapper() });
+  await screen.findByText("Гость");
 };
 
 const buyReef = async () => {
@@ -42,18 +49,21 @@ describe("ProfileScreen", () => {
   afterEach(async () => {
     await cleanup();
     mockServer.reset();
+    useAccountStore.getState().reset();
     await act(async () => onlineManager.setOnline(true));
   });
 
-  test("shows a guest's level and experience", async () => {
-    await renderProfile();
+  test("shows a guest without server data or a collection (decision 0051 #6)", async () => {
+    await renderGuest();
 
-    expect(screen.getByText("Уровень 1 · гость")).toBeOnTheScreen();
-    expect(screen.getByText("XP 0 / 50")).toBeOnTheScreen();
+    expect(screen.getByText("Гость")).toBeOnTheScreen();
+    expect(screen.getByText("Сохрани прогресс")).toBeOnTheScreen();
+    expect(screen.queryByText("Коллекция")).toBeNull();
+    expect(screen.queryByText(/XP/)).toBeNull();
   });
 
   test("leads a guest to the sign-up and sign-in forms (decision 0024 #4)", async () => {
-    await renderProfile();
+    await renderGuest();
 
     await fireEvent.press(screen.getByTestId("guest-sign-up"));
     await fireEvent.press(screen.getByTestId("guest-sign-in"));
@@ -70,7 +80,8 @@ describe("ProfileScreen", () => {
     expect(mockRouter.push).toHaveBeenCalledWith("/settings");
   });
 
-  test("shows no guest card for an account with a login", async () => {
+  test("shows no guest card for an account with a login (decision 0050 #9)", async () => {
+    useAccountStore.getState().markSignedIn();
     mockServer.use(
       http.get(mockUrl("/me"), () =>
         HttpResponse.json({
@@ -141,6 +152,7 @@ describe("ProfileScreen", () => {
   });
 
   test("shows a skeleton while the player's data loads", async () => {
+    useAccountStore.getState().markSignedIn();
     let release = () => {};
     const isReleased = new Promise<void>((resolve) => {
       release = resolve;

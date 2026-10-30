@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 
+import { useAccountStore } from "@entities/session";
 import { createTicketMutationOptions } from "@entities/support";
 import { useMeQuery } from "@entities/wallet";
 import { errorMessageKey } from "@shared/api";
@@ -20,6 +21,7 @@ const deviceOf = () =>
 
 export const useContactSupport = (topic: SupportTopic, { onSent, onError }: SupportCallbacks) => {
   const { data: me } = useMeQuery();
+  const hasLogin = useAccountStore((state) => state.hasLogin);
   const { mutate, isPending } = useMutation({
     ...createTicketMutationOptions(),
     onSuccess: onSent,
@@ -32,7 +34,11 @@ export const useContactSupport = (topic: SupportTopic, { onSent, onError }: Supp
       mutate({
         topic,
         message,
-        diagnostics: { appVersion: APP_VERSION, device: deviceOf(), userId: me?.id ?? "" },
+        diagnostics: {
+          appVersion: APP_VERSION,
+          device: deviceOf(),
+          ...(hasLogin && me !== undefined ? { userId: me.id } : {}),
+        },
       }),
   };
 };

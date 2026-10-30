@@ -3,16 +3,26 @@ import { http, HttpResponse } from "msw/http";
 
 import { useSystemNoticeStore } from "@entities/app-config";
 import { i18n } from "@shared/i18n";
-import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import { maintenanceMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import MaintenanceScreen from "./maintenance-screen";
 
 const until = new Date(2026, 8, 26, 15, 30).toISOString();
 
-const serveBootstrap = (maintenance: { until?: string; message?: string } | null) =>
+const serveMaintenance = (message = "") =>
   mockServer.use(
-    http.get(mockUrl("/bootstrap"), () => HttpResponse.json({ ...bootstrapMock(), maintenance })),
+    http.get(mockUrl("/maintenance"), () =>
+      HttpResponse.json(maintenanceMock({ active: false, message })),
+    ),
+  );
+
+// A 503 from any request can carry the end time (503 на любой запрос может принести время окончания).
+const serveMaintenanceError = (details: { until?: string; message?: string }) =>
+  mockServer.use(
+    http.get(mockUrl("/version"), () =>
+      HttpResponse.json({ error: { code: "maintenance", details } }, { status: 503 }),
+    ),
   );
 
 const renderScreen = () => render(<MaintenanceScreen />, { wrapper: createQueryWrapper() });
@@ -26,7 +36,7 @@ describe("MaintenanceScreen", () => {
   afterEach(() => mockServer.reset());
 
   test("shows the server message and the end time (NET-04)", async () => {
-    serveBootstrap({ until, message: "Обновляем сервер арены." });
+    serveMaintenanceError({ until, message: "Обновляем сервер арены." });
 
     await renderScreen();
 
@@ -35,8 +45,16 @@ describe("MaintenanceScreen", () => {
     ).toBeOnTheScreen();
   });
 
+  test("shows the backend's maintenance message (decision 0049 #4)", async () => {
+    serveMaintenance("Обновляем сервер арены.");
+
+    await renderScreen();
+
+    expect(await screen.findByText("Обновляем сервер арены.")).toBeOnTheScreen();
+  });
+
   test("lets the player go offline", async () => {
-    serveBootstrap({ until });
+    serveMaintenanceError({ until });
     await renderScreen();
 
     await fireEvent.press(await screen.findByRole("button", { name: "Играть офлайн" }));
@@ -45,7 +63,7 @@ describe("MaintenanceScreen", () => {
   });
 
   test("checks again and says when the works are still going on", async () => {
-    serveBootstrap({ until });
+    serveMaintenanceError({ until });
     await renderScreen();
     await screen.findByText("Завершим примерно в 15:30");
 
@@ -55,10 +73,10 @@ describe("MaintenanceScreen", () => {
   });
 
   test("tells about a missing connection when the check fails", async () => {
-    serveBootstrap({ until });
+    serveMaintenance("Обновляем сервер арены.");
     await renderScreen();
-    await screen.findByText("Завершим примерно в 15:30");
-    mockServer.use(http.get(mockUrl("/bootstrap"), () => HttpResponse.error()));
+    await screen.findByText("Обновляем сервер арены.");
+    mockServer.use(http.get(mockUrl("/maintenance"), () => HttpResponse.error()));
 
     await fireEvent.press(screen.getByRole("button", { name: "Проверить снова" }));
 

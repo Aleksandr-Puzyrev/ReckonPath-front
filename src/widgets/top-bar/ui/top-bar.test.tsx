@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
+import { useAccountStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
@@ -24,7 +25,20 @@ const renderBar = async (onWalletPress: () => void) => {
 describe("TopBar", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
 
-  afterEach(() => mockServer.reset());
+  beforeEach(() => useAccountStore.getState().markSignedIn());
+
+  afterEach(() => {
+    mockServer.reset();
+    useAccountStore.getState().reset();
+  });
+
+  test("hides a guest's wallet even with an account's balance cached (decision 0051 #2)", async () => {
+    useAccountStore.getState().reset();
+    await renderBar(jest.fn());
+
+    expect(screen.queryByTestId("wallet-emeralds")).toBeNull();
+    expect(screen.queryByTestId("wallet-coins")).toBeNull();
+  });
 
   test("shows the brand", async () => {
     await renderBar(jest.fn());

@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 
 import { createBoard } from "@reckon-path/engine";
 
+import { useAccountStore } from "@entities/session";
 import { CAMPAIGN_LEVELS, useGameSessionStore } from "@entities/level";
 import { useProgressStore } from "@entities/progress";
 import { useRulesStore } from "@entities/rules";
@@ -42,6 +43,7 @@ const passLevels = (count: number) =>
   });
 
 const renderHome = async () => {
+  useAccountStore.getState().markSignedIn();
   await render(<HomeScreen />, { wrapper: createQueryWrapper() });
   // The top bar shows the balance once the player's data arrives (верхняя панель показывает баланс, когда приходят данные игрока).
   await screen.findByTestId("wallet-emeralds");
@@ -56,6 +58,7 @@ describe("HomeScreen", () => {
   });
 
   afterEach(async () => {
+    useAccountStore.getState().reset();
     await cleanup();
     useProgressStore.getState().reset();
     useGameSessionStore.getState().reset();
@@ -178,6 +181,7 @@ describe("HomeScreen", () => {
   });
 
   test("shows the league and trophies once the arena is open (decision 0041 #1, #7)", async () => {
+    useAccountStore.getState().markSignedIn();
     useRulesStore.getState().skipTutorial();
     useRulesStore.getState().markHomeTourSeen();
     passLevels(12);
@@ -190,7 +194,28 @@ describe("HomeScreen", () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith("/arena");
   });
 
+  test("shows a guest only what the device knows (decision 0051 #2)", async () => {
+    useRulesStore.getState().skipTutorial();
+    useRulesStore.getState().markHomeTourSeen();
+    passLevels(12);
+    await render(<HomeScreen />, { wrapper: createQueryWrapper() });
+
+    expect(await screen.findByTestId("today-stars")).toBeOnTheScreen();
+    expect(screen.getByTestId("today-levels")).toBeOnTheScreen();
+    expect(screen.queryByTestId("today-streak")).toBeNull();
+    expect(screen.queryByTestId("today-trophies")).toBeNull();
+  });
+
+  test("shows a guest no showroom drop (decision 0051 #2)", async () => {
+    useRulesStore.getState().skipTutorial();
+    await render(<HomeScreen />, { wrapper: createQueryWrapper() });
+
+    expect(await screen.findByTestId("home-shop")).toBeOnTheScreen();
+    expect(screen.queryByTestId("home-drop")).toBeNull();
+  });
+
   test("shows the drop timer on the shop link", async () => {
+    useAccountStore.getState().markSignedIn();
     useRulesStore.getState().skipTutorial();
     await renderHome();
 
@@ -233,6 +258,7 @@ describe("HomeScreen", () => {
   });
 
   test("shows the blocks offline without a cache instead of endless skeletons (decision 0041 #8)", async () => {
+    useAccountStore.getState().markSignedIn();
     useRulesStore.getState().skipTutorial();
     await act(async () => onlineManager.setOnline(false));
 

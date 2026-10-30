@@ -12,14 +12,13 @@ const UpdateScreen = () => {
   const { t } = useTranslation();
   const { state } = useSystemState();
   const storeUrl = state.kind === "forcedUpdate" ? state.storeUrl : null;
-  const message = state.kind === "forcedUpdate" ? state.message : null;
 
   return (
     <SystemMessage
       tone="accent"
       Icon={UpdateIcon}
       title={t("system.update.title")}
-      body={message ?? t("system.update.body")}
+      body={t("system.update.body")}
     >
       {storeUrl === null ? null : (
         <Button

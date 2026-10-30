@@ -5,7 +5,7 @@ import { useDailyRecordStore } from "@entities/daily";
 import { useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
-import { endSession, ensureSession } from "@entities/session";
+import { endSession } from "@entities/session";
 import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 
@@ -14,7 +14,7 @@ interface SignOutCallbacks {
   onError: (messageKey: ErrorMessageKey) => void;
 }
 
-// The account's data is dropped before the new guest signs in, so the attempts sync does not hand it to the guest (данные аккаунта удаляются до входа нового гостя, чтобы синхронизация попыток не передала их гостю).
+// The account's data leaves the device with it; the new guest starts empty (данные аккаунта уходят с устройства вместе с ним; новый гость начинает с нуля).
 const signOut = async () => {
   await endSession();
   useGameSessionStore.getState().reset();
@@ -22,7 +22,6 @@ const signOut = async () => {
   useProgressStore.getState().reset();
   useDailyRecordStore.getState().reset();
   useEditorStore.getState().reset();
-  await ensureSession();
 };
 
 export const useSignOut = ({ onSignedOut, onError }: SignOutCallbacks) => {

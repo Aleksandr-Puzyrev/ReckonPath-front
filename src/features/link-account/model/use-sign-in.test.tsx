@@ -1,194 +1,88 @@
-import { onlineManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { getItemAsync } from "expo-secure-store";
 import { http, HttpResponse } from "msw/http";
-import type { ReactNode } from "react";
 
-import { useDailyRecordStore } from "@entities/daily";
-import { useOutboxStore } from "@entities/outbox";
 import { useProgressStore } from "@entities/progress";
 import { useAccountStore, useSessionStore } from "@entities/session";
+import { MOCK_WRONG_PASSWORD } from "@shared/api/mocks/auth-handlers";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
-import { attemptFixture } from "@shared/test-utils/attempt-fixture";
+import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import { useSignIn } from "./use-sign-in";
 
 const secureStore = jest.requireMock<{ __reset: () => void }>("expo-secure-store");
 
-const CREDENTIALS = { login: "Nova_58", password: "Signal2026" };
+const CREDENTIALS = { email: "nova@mail.ru", password: "Signal2026" };
 
 const callbacks = () => ({
   onSignedIn: jest.fn(),
   onWrongCredentials: jest.fn(),
+  onNeedsCode: jest.fn(),
   onError: jest.fn(),
 });
 
-let queryClient = new QueryClient();
+const renderSignIn = (handlers: ReturnType<typeof callbacks>) =>
+  renderHook(() => useSignIn(handlers), { wrapper: createQueryWrapper() });
 
-const renderSignIn = (handlers: ReturnType<typeof callbacks>) => {
-  queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, gcTime: Infinity },
-      mutations: { gcTime: Infinity },
-    },
-  });
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-  return renderHook(() => useSignIn(handlers), { wrapper });
-};
-
-const nextMacrotask = () => new Promise((resolve) => setTimeout(resolve, 0));
-
-// Waits inside act until no mutation runs, so their late updates are wrapped too (ждёт внутри act, пока не останется мутаций, чтобы их поздние обновления тоже были обёрнуты).
-const settle = () =>
-  act(async () => {
-    while (queryClient.isMutating() > 0) await nextMacrotask();
-    await nextMacrotask();
-  });
-
-const playAsGuest = () => {
-  useProgressStore.getState().replaceBest({ "c-a": { stars: 3, moves: 1 } });
-  useOutboxStore.getState().enqueue(attemptFixture());
-};
-
-const watchLogouts = () => {
-  const tokens: string[] = [];
-  mockServer.use(
-    http.post(mockUrl("/auth/logout"), async ({ request }) => {
-      const body: unknown = await request.clone().json();
-      if (typeof body === "object" && body !== null && "refreshToken" in body)
-        tokens.push(String(body.refreshToken));
-      return undefined;
-    }),
-  );
-  return tokens;
-};
-
-// Before each test, not after: the mounted hook listens to the stores (до каждого теста, а не после: смонтированный хук слушает сторы).
-beforeEach(() => {
-  useAccountStore.getState().reset();
-  useProgressStore.getState().reset();
-  useOutboxStore.getState().reset();
-  useDailyRecordStore.getState().reset();
-  useSessionStore.getState().setAccessToken("a_guest");
-});
-
-afterEach(async () => {
-  await act(async () => onlineManager.setOnline(true));
-  await settle();
+afterEach(() => {
   mockServer.reset();
   secureStore.__reset();
+  useSessionStore.getState().reset();
+  useAccountStore.getState().reset();
+  useProgressStore.getState().reset();
 });
 
 describe("useSignIn", () => {
-  test("puts a wrong login or password under the password field", async () => {
-    const handlers = callbacks();
-    const { result } = await renderSignIn(handlers);
-
-    await act(async () => result.current.submit({ ...CREDENTIALS, password: "000000" }));
-
-    await waitFor(() =>
-      expect(handlers.onWrongCredentials).toHaveBeenCalledWith("errors.invalid_credentials"),
-    );
-    expect(useSessionStore.getState().accessToken).toBe("a_guest");
-  });
-
-  test("fails offline at once and keeps no paused request with the password", async () => {
-    mockServer.use(http.post(mockUrl("/auth/login"), () => HttpResponse.error()));
-    await act(async () => onlineManager.setOnline(false));
-    const handlers = callbacks();
-    const { result } = await renderSignIn(handlers);
-
-    await act(async () => result.current.submit(CREDENTIALS));
-
-    await waitFor(() => expect(handlers.onError).toHaveBeenCalledWith("errors.NETWORK"));
-    expect(
-      queryClient
-        .getMutationCache()
-        .getAll()
-        .some(({ state }) => state.isPaused),
-    ).toBe(false);
-    expect(result.current.isPending).toBe(false);
-  });
-
-  test("signs in at once when the guest has no progress", async () => {
+  test("opens the account's session and keeps the guest's progress (decision 0050 #4)", async () => {
+    useProgressStore.getState().recordWin("c-1", { stars: 3, moves: 4 });
     const handlers = callbacks();
     const { result } = await renderSignIn(handlers);
 
     await act(async () => result.current.submit(CREDENTIALS));
 
     await waitFor(() => expect(handlers.onSignedIn).toHaveBeenCalled());
-    expect(result.current.conflict).toBeNull();
-    expect(useSessionStore.getState().accessToken).toBe("a_1");
+    expect(useAccountStore.getState().hasLogin).toBe(true);
     expect(await getItemAsync("reckon-path.refresh-token")).toBe("r_1");
-    expect(useAccountStore.getState().hasLogin).toBe(true);
+    expect(useProgressStore.getState().best["c-1"]).toBeDefined();
   });
 
-  test("asks which progress to keep when the guest has played (ACC-06)", async () => {
-    playAsGuest();
+  test("puts wrong credentials under the password field", async () => {
     const handlers = callbacks();
     const { result } = await renderSignIn(handlers);
 
-    await act(async () => result.current.submit(CREDENTIALS));
+    await act(async () => result.current.submit({ ...CREDENTIALS, password: MOCK_WRONG_PASSWORD }));
 
-    await waitFor(() => expect(result.current.conflict?.summary.level).toBe(58));
-    expect(handlers.onSignedIn).not.toHaveBeenCalled();
-    expect(useSessionStore.getState().accessToken).toBe("a_guest");
-  });
-
-  test("loads the saved account and drops the guest's data (ACC-06)", async () => {
-    playAsGuest();
-    useDailyRecordStore.getState().recordCounted("2026-09-28", {
-      attemptId: "daily-1",
-      result: "won",
-      movesUsed: 1,
-      stars: 3,
-      durationMs: 1,
-    });
-    const handlers = callbacks();
-    const { result } = await renderSignIn(handlers);
-    await act(async () => result.current.submit(CREDENTIALS));
-    await waitFor(() => expect(result.current.conflict).not.toBeNull());
-
-    await act(async () => result.current.handleLoadSaved());
-    await settle();
-
-    expect(handlers.onSignedIn).toHaveBeenCalled();
-    expect(useProgressStore.getState().best).toEqual({});
-    expect(useOutboxStore.getState().attempts).toEqual([]);
-    expect(useDailyRecordStore.getState().days).toEqual({});
-    expect(useSessionStore.getState().accessToken).toBe("a_1");
-    expect(useAccountStore.getState().hasLogin).toBe(true);
-  });
-
-  test("keeps the guest and revokes the unused session on cancel (ACC-06)", async () => {
-    playAsGuest();
-    const logouts = watchLogouts();
-    const handlers = callbacks();
-    const { result } = await renderSignIn(handlers);
-    await act(async () => result.current.submit(CREDENTIALS));
-    await waitFor(() => expect(result.current.conflict).not.toBeNull());
-
-    await act(async () => result.current.handleCancelConflict());
-
-    await waitFor(() => expect(logouts).toEqual(["r_1"]));
-    expect(result.current.conflict).toBeNull();
-    expect(useProgressStore.getState().best).toEqual({ "c-a": { stars: 3, moves: 1 } });
-    expect(useSessionStore.getState().accessToken).toBe("a_guest");
+    await waitFor(() =>
+      expect(handlers.onWrongCredentials).toHaveBeenCalledWith("errors.invalid_credentials"),
+    );
     expect(useAccountStore.getState().hasLogin).toBe(false);
   });
 
-  test("revokes the unused session when the screen closes during the choice", async () => {
-    playAsGuest();
-    const logouts = watchLogouts();
-    const { result, unmount } = await renderSignIn(callbacks());
+  test("sends a new code for an unconfirmed e-mail (decision 0050 #2)", async () => {
+    const handlers = callbacks();
+    mockServer.use(
+      http.post(mockUrl("/auth/login"), () =>
+        HttpResponse.json({ error: { code: "email_not_verified" } }, { status: 403 }),
+      ),
+    );
+    const { result } = await renderSignIn(handlers);
+
     await act(async () => result.current.submit(CREDENTIALS));
-    await waitFor(() => expect(result.current.conflict).not.toBeNull());
 
-    await act(async () => unmount());
+    await waitFor(() => expect(handlers.onNeedsCode).toHaveBeenCalledWith(CREDENTIALS.email, 60));
+  });
 
-    await waitFor(() => expect(logouts).toEqual(["r_1"]));
-    expect(useSessionStore.getState().accessToken).toBe("a_guest");
+  test("shows other failures as a toast", async () => {
+    const handlers = callbacks();
+    mockServer.use(
+      http.post(mockUrl("/auth/login"), () =>
+        HttpResponse.json({ error: { code: "too_many_requests" } }, { status: 429 }),
+      ),
+    );
+    const { result } = await renderSignIn(handlers);
+
+    await act(async () => result.current.submit(CREDENTIALS));
+
+    await waitFor(() => expect(handlers.onError).toHaveBeenCalledWith("errors.too_many_requests"));
   });
 });

@@ -1,7 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import type { QueryClient } from "@tanstack/react-query";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 import type { components } from "@shared/api";
 
 export type Wallet = components["schemas"]["Wallet"];
@@ -19,10 +19,10 @@ export const meQueryOptions = () =>
     staleTime: ME_STALE_MS,
   });
 
-export const useMeQuery = () => useQuery(meQueryOptions());
+export const useMeQuery = () => useQuery({ ...meQueryOptions(), enabled: useHasAccount() });
 
 export const useWalletQuery = () =>
-  useQuery({ ...meQueryOptions(), select: ({ wallet }) => wallet });
+  useQuery({ ...meQueryOptions(), select: ({ wallet }) => wallet, enabled: useHasAccount() });
 
 // Every answer that changes a balance carries the new wallet, which replaces the cached one (каждый ответ, меняющий баланс, несёт новый кошелёк, и он заменяет сохранённый).
 export const applyWallet = (queryClient: QueryClient, wallet: Wallet) =>

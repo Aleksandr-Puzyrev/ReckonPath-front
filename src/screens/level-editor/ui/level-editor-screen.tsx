@@ -5,6 +5,7 @@ import { BackHandler, ScrollView, View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { LinkSheet } from "@features/link-account";
 import { levelOfDraft, NEW_LEVEL_ID } from "@entities/custom-level";
 import { Button } from "@shared/ui/button";
 import { Dialog } from "@shared/ui/dialog";
@@ -145,6 +146,12 @@ const LevelEditorScreen = () => {
         level={editor.shareLevel}
         onToast={showToast}
         onClose={editor.handleDialogClose}
+      />
+      <LinkSheet
+        isOpen={editor.dialog === "link"}
+        onSignUp={() => editor.handleAccountForm("/account/sign-up")}
+        onSignIn={() => editor.handleAccountForm("/account/sign-in")}
+        onLater={editor.handleDialogClose}
       />
       <Toast message={toast} onHide={() => setToast(null)} />
     </Screen>

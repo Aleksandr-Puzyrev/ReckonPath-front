@@ -5,6 +5,7 @@ const VALID = {
   email: "seeker@reckon.app",
   password: "Signal2026",
   isConsentGiven: true,
+  isMarketingAllowed: false,
 };
 
 const errorOf = (input: Partial<typeof VALID>) =>

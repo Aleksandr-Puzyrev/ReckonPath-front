@@ -9,6 +9,10 @@ import { mockUrl } from "./mock-url";
 const DELETION_DAYS = 30;
 const DAY_MS = 86_400_000;
 const HTTP_NO_CONTENT = 204;
+const HTTP_ACCEPTED = 202;
+const HTTP_UNPROCESSABLE = 422;
+// The wrong password of the account tests, as on sign-in (неверный пароль аккаунта в тестах, как при входе).
+const WRONG_PASSWORD = "000000";
 const HTTP_BAD_REQUEST = 400;
 
 const ME = {
@@ -21,7 +25,7 @@ const ME = {
 };
 
 const patchSchema = z.object({ locale: z.enum(["ru", "en"]).optional() });
-const deleteSchema = z.object({ confirmNickname: z.string() });
+const deleteSchema = z.object({ password: z.string() });
 
 let locale: string | null = null;
 let deletionScheduledAt: string | null = null;
@@ -54,9 +58,15 @@ export const meHandlers = [
   }),
   http.delete(mockUrl("/me"), async ({ request }) => {
     const body = deleteSchema.safeParse(await request.json().catch(() => null));
-    if (!body.success || body.data.confirmNickname.trim() !== ME.nickname) return validation();
+    if (!body.success) return validation();
+    if (body.data.password === WRONG_PASSWORD) {
+      return HttpResponse.json(
+        { error: { code: "wrong_password" } },
+        { status: HTTP_UNPROCESSABLE },
+      );
+    }
     deletionScheduledAt = new Date(Date.now() + DELETION_DAYS * DAY_MS).toISOString();
-    return HttpResponse.json({ deletionScheduledAt });
+    return HttpResponse.json({ purgeAfter: deletionScheduledAt }, { status: HTTP_ACCEPTED });
   }),
   http.post(mockUrl("/me/restore"), () => {
     deletionScheduledAt = null;

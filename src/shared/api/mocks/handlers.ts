@@ -19,6 +19,8 @@ import { supportHandlers } from "./support-handlers";
 import { walletHandlers } from "./wallet-handlers";
 
 type Bootstrap = components["schemas"]["Bootstrap"];
+type VersionInfo = components["schemas"]["VersionInfo"];
+type MaintenanceStatus = components["schemas"]["MaintenanceStatus"];
 
 const DAY_MS = 86_400_000;
 const DATE_LENGTH = 10;
@@ -40,8 +42,27 @@ export const bootstrapMock = (now = new Date()): Bootstrap => ({
   nextDayAt: startOfNextUtcDay(now).toISOString(),
 });
 
+export const versionMock = (overrides: Partial<VersionInfo> = {}): VersionInfo => ({
+  showModal: false,
+  forceUpdate: false,
+  minVersion: APP_VERSION,
+  currentVersion: APP_VERSION,
+  ruStore: "",
+  playMarket: "",
+  appStore: "",
+  ...overrides,
+});
+
+export const maintenanceMock = (overrides: Partial<MaintenanceStatus> = {}): MaintenanceStatus => ({
+  active: true,
+  message: "",
+  ...overrides,
+});
+
 export const handlers = [
   http.get(mockUrl("/bootstrap"), () => HttpResponse.json(bootstrapMock())),
+  http.get(mockUrl("/version"), () => HttpResponse.json(versionMock())),
+  http.get(mockUrl("/maintenance"), () => HttpResponse.json(maintenanceMock())),
   ...authHandlers,
   ...attemptsHandlers,
   ...dailyHandlers,

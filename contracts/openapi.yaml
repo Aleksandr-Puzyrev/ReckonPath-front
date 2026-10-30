@@ -31,57 +31,90 @@ paths:
               schema: { $ref: "#/components/schemas/Bootstrap" }
         default: { $ref: "#/components/responses/Error" }
 
-  /auth/guest:
-    post:
-      operationId: authGuest
+  /version:
+    get:
+      operationId: getVersion
+      description: >
+        The backend compares the X-App-Version header with its minimum and current versions
+        (decision 0049).
       security: [{}]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [deviceId, platform]
-              properties:
-                deviceId: { type: string }
-                platform: { $ref: "#/components/schemas/Platform" }
-                integrityToken: { type: string }
       responses:
-        "201":
-          description: Guest session
+        "200":
+          description: Update flags and store links
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Session" }
+              schema: { $ref: "#/components/schemas/VersionInfo" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /maintenance:
+    get:
+      operationId: getMaintenance
+      security: [{}]
+      responses:
+        "200":
+          description: Whether the app works; active is false during maintenance (decision 0049)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MaintenanceStatus" }
         default: { $ref: "#/components/responses/Error" }
 
   /auth/register:
     post:
       operationId: authRegister
-      description: Turns the current guest into a permanent account (decision 0019 #14).
+      description: Creates an unconfirmed account and e-mails a 6-digit code (decision 0050 #2).
+      security: [{}]
       requestBody:
         required: true
         content:
           application/json:
             schema: { $ref: "#/components/schemas/RegisterRequest" }
       responses:
-        "200":
-          description: The guest is now a permanent account
+        "202":
+          description: The code is sent
           content:
             application/json:
-              schema:
-                type: object
-                required: [user]
-                properties:
-                  user: { $ref: "#/components/schemas/SessionUser" }
+              schema: { $ref: "#/components/schemas/CodeSent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/register/resend:
+    post:
+      operationId: authRegisterResend
+      security: [{}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmailRequest" }
+      responses:
+        "202":
+          description: The code is sent again
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CodeSent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/register/verify:
+    post:
+      operationId: authRegisterVerify
+      description: Confirms the e-mail with the code and opens the account's session.
+      security: [{}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VerifyRequest" }
+      responses:
+        "200":
+          description: Session of the new account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenPair" }
         default: { $ref: "#/components/responses/Error" }
 
   /auth/login:
     post:
       operationId: authLogin
-      description: >
-        Signs in to an existing account; the caller decides whether to keep the new session
-        (decision 0019 #14).
-      security: [{}, { bearer: [] }]
+      security: [{}]
       requestBody:
         required: true
         content:
@@ -89,10 +122,10 @@ paths:
             schema: { $ref: "#/components/schemas/LoginRequest" }
       responses:
         "200":
-          description: Session of the account and a summary of its progress
+          description: Session of the account
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/LoginResult" }
+              schema: { $ref: "#/components/schemas/TokenPair" }
         default: { $ref: "#/components/responses/Error" }
 
   /auth/refresh:
@@ -115,11 +148,7 @@ paths:
   /auth/logout:
     post:
       operationId: authLogout
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/RefreshRequest" }
+      description: Ends the session of the bearer token.
       responses:
         "204": { description: Signed out }
         default: { $ref: "#/components/responses/Error" }
@@ -154,26 +183,28 @@ paths:
         default: { $ref: "#/components/responses/Error" }
     delete:
       operationId: deleteMe
-      description: Schedules the deletion in 30 days (Part 1 §7.6).
+      description: >
+        Schedules the deletion, confirmed by the password, and ends every session of the account
+        (decision 0052 #2).
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [confirmNickname]
+              required: [password]
               properties:
-                confirmNickname: { type: string }
+                password: { type: string }
       responses:
-        "200":
-          description: The deletion date
+        "202":
+          description: When the data is erased for good
           content:
             application/json:
               schema:
                 type: object
-                required: [deletionScheduledAt]
+                required: [purgeAfter]
                 properties:
-                  deletionScheduledAt: { type: string, format: date-time }
+                  purgeAfter: { type: string, format: date-time }
         default: { $ref: "#/components/responses/Error" }
 
   /me/restore:
@@ -992,6 +1023,26 @@ components:
         - body_too_large
         - method_not_allowed
 
+    VersionInfo:
+      type: object
+      required: [showModal, forceUpdate, minVersion, currentVersion, ruStore, playMarket, appStore]
+      properties:
+        showModal: { type: boolean, description: Soft update is offered }
+        forceUpdate: { type: boolean, description: The app must be updated }
+        minVersion: { type: string }
+        currentVersion: { type: string }
+        title: { type: string, description: Not shown; the client uses its own texts }
+        description: { type: string, description: Not shown; the client uses its own texts }
+        buttonText: { type: string, description: Not shown; the client uses its own texts }
+        ruStore: { type: string, description: Store link; empty when not set }
+        playMarket: { type: string, description: Store link; empty when not set }
+        appStore: { type: string, description: Store link; empty when not set }
+    MaintenanceStatus:
+      type: object
+      required: [active, message]
+      properties:
+        active: { type: boolean, description: true while the app works }
+        message: { type: string }
     Bootstrap:
       type: object
       required:
@@ -1030,53 +1081,53 @@ components:
         refreshToken: { type: string }
         expiresIn: { type: integer }
 
-    Session:
-      allOf:
-        - $ref: "#/components/schemas/TokenPair"
-        - type: object
-          required: [user]
-          properties:
-            user: { $ref: "#/components/schemas/SessionUser" }
-
-    SessionUser:
+    DeviceInfo:
       type: object
-      required: [id, nickname, isGuest]
+      required: [deviceId, platform]
       properties:
-        id: { type: string }
-        nickname: { type: string }
-        isGuest: { type: boolean }
-
-    LoginResult:
-      allOf:
-        - $ref: "#/components/schemas/Session"
-        - type: object
-          required: [summary]
-          properties:
-            summary: { $ref: "#/components/schemas/AccountSummary" }
-
-    AccountSummary:
-      description: Shown on the account conflict cards (Part 7 §3 `details.other`)
-      type: object
-      required: [level, league, stars]
-      properties:
-        level: { type: integer }
-        league: { type: [string, "null"], description: null without the arena }
-        stars: { type: integer }
-
-    RegisterRequest:
-      type: object
-      required: [nickname, email, password]
-      properties:
-        nickname: { type: string, minLength: 3, maxLength: 16 }
-        email: { type: string, format: email }
-        password: { type: string, minLength: 8 }
+        deviceId: { type: string, description: Persistent install id }
+        platform: { $ref: "#/components/schemas/Platform" }
+        name: { type: string, description: Device model }
+        appVersion: { type: string }
 
     LoginRequest:
       type: object
-      required: [login, password]
+      required: [email, password, device]
       properties:
-        login: { type: string, description: Nickname or e-mail }
+        email: { type: string, format: email }
         password: { type: string }
+        device: { $ref: "#/components/schemas/DeviceInfo" }
+
+    RegisterRequest:
+      type: object
+      required: [email, password, nickname, acceptTerms, acceptPrivacy, acceptMarketing]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        nickname: { type: string, minLength: 3, maxLength: 16 }
+        acceptTerms: { type: boolean }
+        acceptPrivacy: { type: boolean }
+        acceptMarketing: { type: boolean }
+
+    EmailRequest:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email }
+
+    VerifyRequest:
+      type: object
+      required: [email, code, device]
+      properties:
+        email: { type: string, format: email }
+        code: { type: string, description: 6 digits from the e-mail }
+        device: { $ref: "#/components/schemas/DeviceInfo" }
+
+    CodeSent:
+      type: object
+      required: [resendAfter]
+      properties:
+        resendAfter: { type: integer, description: Seconds until the code can be sent again }
 
     RefreshRequest:
       type: object
@@ -1672,11 +1723,11 @@ components:
         message: { type: string, maxLength: 1000 }
         diagnostics:
           type: object
-          required: [appVersion, device, userId]
+          required: [appVersion, device]
           properties:
             appVersion: { type: string }
             device: { type: string }
-            userId: { type: string }
+            userId: { type: string, description: "Absent for a guest (decision 0051 #10)" }
 
     BanDetails:
       description: The banned error details (Part 7 §2)

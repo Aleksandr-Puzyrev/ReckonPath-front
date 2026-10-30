@@ -38,7 +38,7 @@ export const useAttemptsSync = () => {
     const appState = AppState.addEventListener("change", (state) => {
       if (state === "background") sync();
     });
-    // The first guest sign-in releases attempts played before it (первый вход гостя отпускает попытки, сыгранные до него).
+    // Signing in or signing up releases the attempts the guest played before (вход или регистрация отпускает попытки, сыгранные гостем до этого).
     const unsubscribeSession = useSessionStore.subscribe((session, previous) => {
       if (previous.accessToken === null && session.accessToken !== null) sync();
     });

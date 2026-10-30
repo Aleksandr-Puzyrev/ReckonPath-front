@@ -20,21 +20,27 @@ import { styles } from "./sign-up-styles";
 
 interface ISignUp {
   onBack: () => void;
-  onLinked: () => void;
+  onCodeSent: (email: string, resendAfter: number) => void;
   onSignIn: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
 }
 
-const DEFAULTS: SignUpSchema = { nickname: "", email: "", password: "", isConsentGiven: false };
+const DEFAULTS: SignUpSchema = {
+  nickname: "",
+  email: "",
+  password: "",
+  isConsentGiven: false,
+  isMarketingAllowed: false,
+};
 
-const SignUp = ({ onBack, onLinked, onSignIn, onError }: ISignUp) => {
+const SignUp = ({ onBack, onCodeSent, onSignIn, onError }: ISignUp) => {
   const { t } = useTranslation();
   const { control, handleSubmit, setError } = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
     defaultValues: DEFAULTS,
   });
   const signUp = useSignUp({
-    onLinked,
+    onCodeSent,
     onFieldError: (field, messageKey) => setError(field, { message: messageKey }),
     onError,
   });
@@ -112,6 +118,18 @@ const SignUp = ({ onBack, onLinked, onSignIn, onError }: ISignUp) => {
             isChecked={field.value}
             onToggle={() => field.onChange(!field.value)}
             error={errorText(fieldState.error?.message)}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="isMarketingAllowed"
+        render={({ field }) => (
+          <Checkbox
+            testID="sign-up-marketing"
+            label={t("account.signUp.marketing")}
+            isChecked={field.value}
+            onToggle={() => field.onChange(!field.value)}
           />
         )}
       />

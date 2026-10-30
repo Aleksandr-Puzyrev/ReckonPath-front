@@ -1,17 +1,19 @@
 const FIELD_ERROR_KEYS = [
-  "account.errors.loginRequired",
   "account.errors.passwordShort",
   "account.errors.nicknameLength",
   "account.errors.nicknameChars",
   "account.errors.email",
   "account.errors.passwordWeak",
   "account.errors.consent",
+  "account.errors.passwordRejected",
   "errors.nick_taken",
   "errors.email_taken",
   "errors.invalid_credentials",
+  "errors.invalid_code",
+  "errors.too_many_attempts",
 ] as const;
 
-type FieldErrorKey = (typeof FIELD_ERROR_KEYS)[number] | "errors.generic";
+export type FieldErrorKey = (typeof FIELD_ERROR_KEYS)[number] | "errors.generic";
 
 // The form keeps messages as plain strings; one it does not know falls back to the generic text (форма хранит сообщения строками; незнакомое заменяется общим текстом).
 export const fieldErrorKey = (message: string | undefined): FieldErrorKey | undefined => {

@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native";
 import { delay, http, HttpResponse } from "msw";
 
-import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import { bootstrapMock, mockServer, mockUrl, versionMock } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import { SPLASH_MAX_MS, useSplashState } from "./use-splash-state";
@@ -14,7 +14,7 @@ describe("useSplashState", () => {
     jest.useRealTimers();
   });
 
-  test("hides the splash once the bootstrap answers (Part 4 §2.1)", async () => {
+  test("hides the splash once the start-up data answers (Part 4 §2.1)", async () => {
     const { result } = await renderHook(() => useSplashState(), { wrapper: createQueryWrapper() });
     expect(result.current.isVisible).toBe(true);
 
@@ -38,5 +38,20 @@ describe("useSplashState", () => {
     await act(() => jest.advanceTimersByTimeAsync(SPLASH_MAX_MS));
 
     expect(result.current).toEqual({ isVisible: false, isUpdating: true });
+  });
+
+  test("waits for the backend's version as well (decision 0049 #1)", async () => {
+    jest.useFakeTimers();
+    mockServer.use(
+      http.get(mockUrl("/version"), async () => {
+        await delay(SLOW_MS);
+        return HttpResponse.json(versionMock());
+      }),
+    );
+    const { result } = await renderHook(() => useSplashState(), { wrapper: createQueryWrapper() });
+
+    await act(() => jest.advanceTimersByTimeAsync(SPLASH_MAX_MS / 2));
+
+    expect(result.current.isVisible).toBe(true);
   });
 });

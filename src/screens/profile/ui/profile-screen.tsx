@@ -5,6 +5,7 @@ import { ScrollView, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { PREVIEW_LEVEL } from "@entities/level";
+import { AccountGate } from "@features/link-account";
 import { Button } from "@shared/ui/button";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
@@ -17,7 +18,6 @@ import { TopBar } from "@widgets/top-bar";
 
 import { useProfileScreen } from "../model/use-profile-screen";
 
-import GuestCard from "./guest-card";
 import ProfileHeader from "./profile-header";
 import ProfileStatus from "./profile-status";
 import { styles } from "./profile-screen-styles";
@@ -35,27 +35,27 @@ const ProfileScreen = () => {
         <TopBar onWalletPress={profile.handleWalletPress} />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
-        {profile.me === undefined ? (
+        {profile.isGuest ? (
+          <>
+            <ProfileHeader nickname={t("settings.account.guest")} progress={null} />
+            <AccountGate
+              title={t("profile.saveProgress")}
+              body={t("profile.guestNote")}
+              onSignUp={() => router.push("/account/sign-up")}
+              onSignIn={() => router.push("/account/sign-in")}
+            />
+          </>
+        ) : null}
+        {!profile.isGuest && profile.me === undefined ? (
           <ProfileStatus
             isPending={profile.isPending}
             isOnline={profile.isOnline}
             onRetry={profile.handleRetry}
           />
-        ) : (
+        ) : null}
+        {profile.isGuest || profile.me === undefined ? null : (
           <>
-            <ProfileHeader
-              nickname={profile.me.nickname}
-              level={profile.me.level}
-              xp={profile.me.xp}
-              xpToNext={profile.me.xpToNext}
-              isGuest={profile.me.isGuest}
-            />
-            {profile.me.isGuest ? (
-              <GuestCard
-                onSignUp={() => router.push("/account/sign-up")}
-                onSignIn={() => router.push("/account/sign-in")}
-              />
-            ) : null}
+            <ProfileHeader nickname={profile.me.nickname} progress={profile.me} />
             <Text variant="eyebrow" style={styles.section}>
               {t("profile.collection")}
             </Text>

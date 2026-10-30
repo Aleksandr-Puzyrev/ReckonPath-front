@@ -21,6 +21,7 @@ import {
   useLevelEditorStore,
 } from "@entities/custom-level";
 import type { CustomMap, CustomParams } from "@entities/custom-level";
+import { useAccountStore } from "@entities/session";
 import { useIsOnline } from "@shared/api";
 import { useBoardFx } from "@widgets/board";
 
@@ -28,7 +29,7 @@ import { applyCellEdit } from "./apply-edit";
 import type { LevelEditResult, LevelRefusal } from "./apply-edit";
 import type { LevelEditorTool } from "./editor-tool";
 
-export type LevelEditorDialog = "unsaved" | "share" | null;
+export type LevelEditorDialog = "unsaved" | "share" | "link" | null;
 
 export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
   const { t } = useTranslation();
@@ -160,7 +161,18 @@ export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
       useLevelEditorStore.getState().setParams(params),
     handleMoveLimit: (limit: number) =>
       useLevelEditorStore.getState().setParams({ moveLimit: limit }),
-    handleSave: () => saving.save(savedId, levelOfDraft(draft, savedId, norm)),
+    // My levels live on the server, so a guest is offered an account instead (мои уровни хранятся на сервере, поэтому гостю предлагается аккаунт).
+    handleSave: () => {
+      if (!useAccountStore.getState().hasLogin) {
+        setDialog("link");
+        return;
+      }
+      saving.save(savedId, levelOfDraft(draft, savedId, norm));
+    },
+    handleAccountForm: (form: "/account/sign-up" | "/account/sign-in") => {
+      setDialog(null);
+      router.push(form);
+    },
     handleTryout: () => router.push("/editor/tryout"),
     handleBack: () => {
       if (isDraftDirty(session)) setDialog("unsaved");

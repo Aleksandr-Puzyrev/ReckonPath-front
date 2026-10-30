@@ -5,6 +5,8 @@ const CODES_WITH_TEXT = [
   "nick_taken",
   "email_taken",
   "invalid_credentials",
+  "invalid_code",
+  "too_many_attempts",
   "insufficient_funds",
   "already_owned",
   "offer_ended",

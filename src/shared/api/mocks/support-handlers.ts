@@ -9,7 +9,11 @@ const HTTP_BAD_REQUEST = 400;
 const ticketSchema = z.object({
   topic: z.string().min(1),
   message: z.string().min(1).max(MESSAGE_MAX),
-  diagnostics: z.object({ appVersion: z.string(), device: z.string(), userId: z.string() }),
+  diagnostics: z.object({
+    appVersion: z.string(),
+    device: z.string(),
+    userId: z.string().optional(),
+  }),
 });
 
 let count = 0;

@@ -15,9 +15,6 @@ export const styles = StyleSheet.create((theme) => ({
   title: {
     flex: 1,
   },
-  message: {
-    color: theme.colors.text.secondary,
-  },
   actions: {
     flexDirection: "row",
     gap: theme.space[3],

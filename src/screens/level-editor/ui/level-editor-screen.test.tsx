@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import type { ReactNode } from "react";
 import { Share } from "react-native";
 
+import { useAccountStore } from "@entities/session";
 import { emptyDraft, useLevelEditorStore, useTryoutBestStore } from "@entities/custom-level";
 import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
@@ -78,6 +79,7 @@ describe("LevelEditorScreen", () => {
   beforeEach(() => Object.values(mockRouter).forEach((mock) => mock.mockClear()));
 
   afterEach(async () => {
+    useAccountStore.getState().reset();
     await cleanup();
     useLevelEditorStore.getState().reset();
     mockServer.reset();
@@ -127,6 +129,7 @@ describe("LevelEditorScreen", () => {
   });
 
   test("saves the level and shows it in «Мои уровни»", async () => {
+    useAccountStore.getState().markSignedIn();
     await renderEditor();
     await tap(24);
     await fireEvent.changeText(screen.getByTestId("editor-title"), "Бухта");
@@ -139,7 +142,19 @@ describe("LevelEditorScreen", () => {
     expect(data?.items).toMatchObject([{ level: { title: { ru: "Бухта" } } }]);
   });
 
+  test("offers a guest an account instead of saving to «Мои уровни» (decision 0051 #5)", async () => {
+    await renderEditor();
+    await tap(24);
+
+    await fireEvent.press(screen.getByTestId("editor-save"));
+
+    expect(screen.getByTestId("link-sign-in")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("link-sign-in"));
+    expect(mockRouter.push).toHaveBeenCalledWith("/account/sign-in");
+  });
+
   test("keeps the saved draft while the route still says «new» (regression)", async () => {
+    useAccountStore.getState().markSignedIn();
     await renderEditor();
     await tap(24);
 
@@ -174,6 +189,7 @@ describe("LevelEditorScreen", () => {
   });
 
   test("shares a saved level with its code, link and the author's challenge (design 27.5)", async () => {
+    useAccountStore.getState().markSignedIn();
     const draft = {
       ...emptyDraft("Бухта", 5, 5, "distance"),
       map: { rows: 5, cols: 5, targets: [[4, 4]] as [number, number][] },
@@ -202,6 +218,7 @@ describe("LevelEditorScreen", () => {
   });
 
   test("offers the challenge once the author has a result (decision 0044 #1)", async () => {
+    useAccountStore.getState().markSignedIn();
     const draft = {
       ...emptyDraft("Бухта", 5, 5, "distance"),
       map: { rows: 5, cols: 5, targets: [[4, 4]] as [number, number][] },

@@ -1,16 +1,35 @@
-import { APP_VERSION } from "@shared/config";
+import type { components } from "@shared/api";
+import { INSTALL_STORE } from "@shared/config";
 
-import { useBootstrapQuery } from "../api/bootstrap-queries";
+import { useMaintenanceQuery, useVersionQuery } from "../api/system-queries";
 
 import { systemStateOf } from "./system-state";
 
+type VersionInfo = components["schemas"]["VersionInfo"];
+type MaintenanceStatus = components["schemas"]["MaintenanceStatus"];
+
+const stateOf = (
+  version: VersionInfo | undefined,
+  maintenance: MaintenanceStatus | undefined,
+  error: unknown,
+) => systemStateOf({ version, maintenance, error, store: INSTALL_STORE });
+
 export const useSystemState = () => {
-  const { data, error, isFetching, refetch } = useBootstrapQuery();
+  const version = useVersionQuery();
+  const maintenance = useMaintenanceQuery();
 
   const check = async () => {
-    const result = await refetch();
-    return { state: systemStateOf(result.data, result.error, APP_VERSION), error: result.error };
+    const [nextVersion, nextMaintenance] = await Promise.all([
+      version.refetch(),
+      maintenance.refetch(),
+    ]);
+    const error = nextVersion.error ?? nextMaintenance.error;
+    return { state: stateOf(nextVersion.data, nextMaintenance.data, error), error };
   };
 
-  return { state: systemStateOf(data, error, APP_VERSION), isChecking: isFetching, check };
+  return {
+    state: stateOf(version.data, maintenance.data, version.error ?? maintenance.error),
+    isChecking: version.isFetching || maintenance.isFetching,
+    check,
+  };
 };

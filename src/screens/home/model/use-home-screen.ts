@@ -17,6 +17,7 @@ import { useRulesStore } from "@entities/rules";
 import { useSettingsStore } from "@entities/settings";
 import { streakForecastOf, useStreakQuery } from "@entities/streak";
 import { useMeQuery } from "@entities/wallet";
+import { useAccountStore } from "@entities/session";
 import { useIsOnline } from "@shared/api";
 import { isSystemLanguageSupported } from "@shared/i18n";
 import { formatClockTime, formatNumber } from "@shared/lib";
@@ -31,6 +32,7 @@ export const useHomeScreen = () => {
   const { t, i18n } = useTranslation();
   const best = useProgressStore((state) => state.best);
   const me = useMeQuery();
+  const hasLogin = useAccountStore((state) => state.hasLogin);
   const { data: streakData } = useStreakQuery();
   const { data: shop } = useShopQuery();
   const { todayKey, yesterdayKey } = useDailyToday();
@@ -47,13 +49,13 @@ export const useHomeScreen = () => {
   const tutorial = useRulesStore((state) => state.tutorial);
   const hasSeenHomeTour = useRulesStore((state) => state.hasSeenHomeTour);
   const tourLevelId = CAMPAIGN_LEVELS[TOUR_AFTER_LEVEL - 1]?.level.id;
-  const arena = me.data?.arena;
+  const arena = hasLogin ? me.data?.arena : undefined;
   const streak = streakForecastOf(streakData, {
     todayKey,
     yesterdayKey,
     hasCountedToday: record !== undefined,
   });
-  const featured = shop?.featured ?? null;
+  const featured = hasLogin ? (shop?.featured ?? null) : null;
   const dropMs = featured === null ? 0 : Date.parse(featured.endsAt) - now;
 
   // A new player starts with the level 1 tutorial, after the language step when the system language is not supported (новый игрок начинает с обучения на уровне 1, а при неподдерживаемом языке системы — после выбора языка).
@@ -79,10 +81,11 @@ export const useHomeScreen = () => {
       }
     : { isUnlocked: false, unlockLevel: ARENA_UNLOCK_LEVEL };
 
-  const stats: TodayStat[] = [
-    { key: "streak", label: t("home.stats.streak"), value: format(streak.current) },
-  ];
-  if (!isArenaOpen) {
+  // The streak and the trophies live on the server, so a guest sees only what the device knows (серия и кубки хранятся на сервере, поэтому гость видит только то, что знает устройство).
+  const stats: TodayStat[] = hasLogin
+    ? [{ key: "streak", label: t("home.stats.streak"), value: format(streak.current) }]
+    : [];
+  if (!isArenaOpen || !hasLogin) {
     stats.push(
       {
         key: "stars",
@@ -114,7 +117,9 @@ export const useHomeScreen = () => {
             time: formatClockTime(new Date(me.dataUpdatedAt).toISOString(), i18n.language),
           }),
     restoreOffer:
-      restoredDays === null ? restoreOfferOf(streakData, dayKeyAfter(todayKey, -2)) : null,
+      hasLogin && restoredDays === null
+        ? restoreOfferOf(streakData, dayKeyAfter(todayKey, -2))
+        : null,
     earnShortBy,
     isEarnOpen,
     toast,

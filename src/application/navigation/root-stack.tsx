@@ -13,14 +13,15 @@ import {
 import LinkOfferHost from "../account/link-offer-host";
 import AdsConsentHost from "../ads/ads-consent-host";
 import { useSystemSignalRefetch } from "../query/use-system-signal-refetch";
-import { useGuestSession } from "../session/use-guest-session";
+import "../session/register-api-session";
+import { useGuestCacheCleanup } from "../session/use-guest-cache-cleanup";
 import SplashGate from "../splash/splash-gate";
 import { useAttemptsSync } from "../sync/use-attempts-sync";
 import { useDailyWeekPrefetch } from "../sync/use-daily-week-prefetch";
 
 const RootStack = () => {
   useSystemSignalRefetch();
-  useGuestSession();
+  useGuestCacheCleanup();
   useAttemptsSync();
   useDailyWeekPrefetch();
   const { state } = useSystemState();
@@ -86,6 +87,7 @@ const RootStack = () => {
           />
           <Stack.Screen name="account/sign-in" options={{ presentation: "modal" }} />
           <Stack.Screen name="account/sign-up" options={{ presentation: "modal" }} />
+          <Stack.Screen name="account/code" options={{ presentation: "modal" }} />
         </Stack.Protected>
         <Stack.Protected guard={isUpdateRequired}>
           <Stack.Screen name="system/update" options={{ gestureEnabled: false }} />
@@ -102,7 +104,6 @@ const RootStack = () => {
           isOpen={isSoftUpdateOpen}
           version={state.version}
           storeUrl={state.storeUrl}
-          message={state.message}
           onDismiss={useSystemNoticeStore.getState().dismissSoftUpdate}
         />
       ) : null}

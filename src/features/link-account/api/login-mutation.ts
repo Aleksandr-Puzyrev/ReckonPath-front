@@ -1,16 +1,21 @@
 import { mutationOptions } from "@tanstack/react-query";
 
+import { deviceInfo, startSession, useAccountStore } from "@entities/session";
 import { apiClient, readData } from "@shared/api";
-import type { components } from "@shared/api";
 
-type LoginBody = components["schemas"]["LoginRequest"];
-
-export type LoginResult = components["schemas"]["LoginResult"];
+interface LoginInput {
+  email: string;
+  password: string;
+}
 
 export const loginMutationOptions = () =>
   mutationOptions({
     mutationKey: ["account", "login"],
     // Offline it fails at once instead of pausing: a paused mutation would be persisted with the password (без сети сразу ошибка, а не пауза: приостановленная мутация сохранилась бы вместе с паролем).
     networkMode: "always",
-    mutationFn: async (body: LoginBody) => readData(await apiClient.POST("/auth/login", { body })),
+    mutationFn: async ({ email, password }: LoginInput) => {
+      const body = { email, password, device: await deviceInfo() };
+      await startSession(readData(await apiClient.POST("/auth/login", { body })));
+      useAccountStore.getState().markSignedIn();
+    },
   });

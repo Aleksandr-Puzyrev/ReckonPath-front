@@ -1,1 +1,1 @@
-export { useChangeLanguage } from "./model/use-change-language";
+export { changeLanguage } from "./model/change-language";

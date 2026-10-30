@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import { dailyDayQueryOptions, dayKeyAfter } from "@entities/daily";
 import { useDailyToday } from "@features/daily-today";
+import { useHasAccount } from "@shared/api";
 
 const DAYS_AHEAD = 7;
 
@@ -10,10 +11,12 @@ const DAYS_AHEAD = 7;
 export const useDailyWeekPrefetch = () => {
   const queryClient = useQueryClient();
   const { todayKey } = useDailyToday();
+  const hasAccount = useHasAccount();
 
   useEffect(() => {
+    if (!hasAccount) return;
     Array.from({ length: DAYS_AHEAD }, (_, index) => dayKeyAfter(todayKey, index)).forEach(
       (dayKey) => queryClient.prefetchQuery(dailyDayQueryOptions(dayKey)),
     );
-  }, [queryClient, todayKey]);
+  }, [queryClient, todayKey, hasAccount]);
 };

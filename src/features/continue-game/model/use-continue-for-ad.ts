@@ -2,11 +2,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { uuidv7 } from "uuidv7";
 
-import { adKeys, useAdLimitsQuery, watchRewardedAd } from "@entities/ad";
+import { adKeys, useAdLimitsQuery, watchGuestRewardedAd, watchRewardedAd } from "@entities/ad";
 import type { AdMessageKey } from "@entities/ad";
+import { dayKeyOf } from "@entities/daily";
 import { useGameSessionStore } from "@entities/level";
+import { useAccountStore } from "@entities/session";
 import { apiClient, errorMessageKey, isApiError, readData, useIsOnline } from "@shared/api";
+import { CONTINUE_ADS_PER_DAY, GUEST_REWARDED_UNIT_ID } from "@shared/config";
 import { haptic } from "@shared/haptics";
+
+import { useGuestAdContinueStore } from "./guest-ad-continue-store";
 
 export type AdButtonState = "ready" | "loading" | "unavailable" | "offline" | "limit";
 
@@ -28,16 +33,25 @@ const continueForAd = async (attemptId: string) => {
   return true;
 };
 
+const continueForGuestAd = async () => {
+  const isWatched = await watchGuestRewardedAd(GUEST_REWARDED_UNIT_ID);
+  if (isWatched) useGuestAdContinueStore.getState().countUse(dayKeyOf(Date.now()));
+  return isWatched;
+};
+
 export const useContinueForAd = ({ onContinued, onMessage }: ContinueForAdCallbacks) => {
   const queryClient = useQueryClient();
   const isOnline = useIsOnline();
   const { data: limits } = useAdLimitsQuery();
+  const hasLogin = useAccountStore((state) => state.hasLogin);
+  const guestUsed = useGuestAdContinueStore((state) => state.usedOn(dayKeyOf(Date.now())));
   const [isUnavailable, setIsUnavailable] = useState(false);
-  const left = limits === undefined ? null : limits.continue.max - limits.continue.used;
+  const serverLeft = limits === undefined ? null : limits.continue.max - limits.continue.used;
+  const left = hasLogin ? serverLeft : CONTINUE_ADS_PER_DAY - guestUsed;
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["continue", "ad"],
-    mutationFn: continueForAd,
+    mutationFn: (attemptId: string) => (hasLogin ? continueForAd(attemptId) : continueForGuestAd()),
     networkMode: "always",
     onSuccess: (isContinued) => {
       void queryClient.invalidateQueries({ queryKey: adKeys.limits() });

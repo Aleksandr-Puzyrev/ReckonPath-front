@@ -1,3 +1,3 @@
-import { ArenaHomeScreen } from "@screens/arena-home";
+import { ArenaTab } from "@screens/arena-home";
 
-export default ArenaHomeScreen;
+export default ArenaTab;

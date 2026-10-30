@@ -3,7 +3,10 @@ import { z } from "zod";
 const MIN_PASSWORD_LENGTH = 6;
 
 export const signInSchema = z.object({
-  login: z.string().trim().min(1, "account.errors.loginRequired"),
+  email: z
+    .string()
+    .trim()
+    .regex(/^\S+@\S+\.\S+$/, "account.errors.email"),
   password: z.string().min(MIN_PASSWORD_LENGTH, "account.errors.passwordShort"),
 });
 

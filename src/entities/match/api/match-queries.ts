@@ -5,7 +5,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 
 import type { MatchDetails } from "../model/match-type";
 
@@ -44,6 +44,8 @@ export const matchDetailsQueryOptions = (id: string) =>
     staleTime: DETAILS_STALE_MS,
   });
 
-export const useMatchHistoryQuery = () => useInfiniteQuery(matchHistoryQueryOptions());
+export const useMatchHistoryQuery = () =>
+  useInfiniteQuery({ ...matchHistoryQueryOptions(), enabled: useHasAccount() });
 
-export const useMatchDetailsQuery = (id: string) => useQuery(matchDetailsQueryOptions(id));
+export const useMatchDetailsQuery = (id: string) =>
+  useQuery({ ...matchDetailsQueryOptions(id), enabled: useHasAccount() });

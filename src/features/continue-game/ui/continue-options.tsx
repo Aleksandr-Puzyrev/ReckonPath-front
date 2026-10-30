@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { useAccountStore } from "@entities/session";
 import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
 
@@ -20,6 +21,7 @@ const ContinueOptions = ({ onContinued, onShortOfEmeralds, onError }: ContinueCa
   const iconSize = theme.sizes.icon.l;
   const emeralds = useContinueForEmeralds({ onContinued, onShortOfEmeralds, onError });
   const ad = useContinueForAd({ onContinued, onMessage: onError });
+  const hasLogin = useAccountStore((state) => state.hasLogin);
 
   return (
     <View style={styles.container}>
@@ -32,17 +34,19 @@ const ContinueOptions = ({ onContinued, onShortOfEmeralds, onError }: ContinueCa
             <AdContinueButton state={ad.state} left={ad.left} onPress={ad.handlePress} />
           </View>
         )}
-        <View style={styles.option}>
-          <Button
-            testID="continue-emeralds"
-            label={String(emeralds.price)}
-            accessibilityLabel={t("result.continue.gems")}
-            icon={<EmeraldIcon width={iconSize} height={iconSize} />}
-            isLabelDanger={!emeralds.canAfford}
-            isDisabled={emeralds.isPending}
-            onPress={emeralds.handlePress}
-          />
-        </View>
+        {hasLogin ? (
+          <View style={styles.option}>
+            <Button
+              testID="continue-emeralds"
+              label={String(emeralds.price)}
+              accessibilityLabel={t("result.continue.gems")}
+              icon={<EmeraldIcon width={iconSize} height={iconSize} />}
+              isLabelDanger={!emeralds.canAfford}
+              isDisabled={emeralds.isPending}
+              onPress={emeralds.handlePress}
+            />
+          </View>
+        ) : null}
       </View>
       <Text variant="caption" style={styles.note}>
         {t("result.continue.note")}

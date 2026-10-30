@@ -26,7 +26,12 @@ const SignUpScreen = () => {
       >
         <SignUp
           onBack={() => router.back()}
-          onLinked={() => router.back()}
+          onCodeSent={(email, resendAfter) =>
+            router.push({
+              pathname: "/account/code",
+              params: { email, resendAfter: String(resendAfter) },
+            })
+          }
           onSignIn={() => router.replace("/account/sign-in")}
           onError={showError}
         />

@@ -68,19 +68,23 @@ const AccountGroup = ({
           onPress={onLink}
         />
       )}
-      <SettingsRow
-        testID="settings-delete"
-        Icon={DeleteIcon}
-        iconColor={colors.status.danger}
-        label={t("settings.account.delete")}
-        subtitle={
-          deletionAt === null
-            ? undefined
-            : t("settings.account.deletionAt", { date: formatDayMonth(deletionAt, i18n.language) })
-        }
-        isDestructive
-        onPress={deletionAt === null ? onDelete : onDeletion}
-      />
+      {hasLogin ? (
+        <SettingsRow
+          testID="settings-delete"
+          Icon={DeleteIcon}
+          iconColor={colors.status.danger}
+          label={t("settings.account.delete")}
+          subtitle={
+            deletionAt === null
+              ? undefined
+              : t("settings.account.deletionAt", {
+                  date: formatDayMonth(deletionAt, i18n.language),
+                })
+          }
+          isDestructive
+          onPress={deletionAt === null ? onDelete : onDeletion}
+        />
+      ) : null}
     </SettingsGroup>
   );
 };

@@ -7,18 +7,22 @@ import { Text } from "@shared/ui/text";
 
 import { styles } from "./profile-header-styles";
 
-interface IProfileHeader {
-  nickname: string;
+interface ProfileLevel {
   level: number;
   xp: number;
   xpToNext: number;
-  isGuest: boolean;
 }
 
-const ProfileHeader = ({ nickname, level, xp, xpToNext, isGuest }: IProfileHeader) => {
+interface IProfileHeader {
+  nickname: string;
+  progress: ProfileLevel | null;
+}
+
+const ProfileHeader = ({ nickname, progress }: IProfileHeader) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
-  const progress = xpToNext > 0 ? Math.min(1, xp / xpToNext) : 0;
+  const fillShare =
+    progress === null || progress.xpToNext <= 0 ? 0 : Math.min(1, progress.xp / progress.xpToNext);
 
   return (
     <View style={styles.header}>
@@ -32,19 +36,23 @@ const ProfileHeader = ({ nickname, level, xp, xpToNext, isGuest }: IProfileHeade
         <Text variant="title.l" numberOfLines={1} accessibilityRole="header">
           {nickname}
         </Text>
-        <Text variant="body.s" style={styles.secondary}>
-          {isGuest ? t("profile.levelGuest", { level }) : t("profile.level", { level })}
-        </Text>
-        <View
-          style={styles.track}
-          accessibilityRole="progressbar"
-          accessibilityValue={{ min: 0, max: xpToNext, now: xp }}
-        >
-          <View style={[styles.fill, { width: `${progress * 100}%` }]} />
-        </View>
-        <Text variant="caption" style={styles.secondary}>
-          {t("profile.xp", { xp, max: xpToNext })}
-        </Text>
+        {progress === null ? null : (
+          <>
+            <Text variant="body.s" style={styles.secondary}>
+              {t("profile.level", { level: progress.level })}
+            </Text>
+            <View
+              style={styles.track}
+              accessibilityRole="progressbar"
+              accessibilityValue={{ min: 0, max: progress.xpToNext, now: progress.xp }}
+            >
+              <View style={[styles.fill, { width: `${fillShare * 100}%` }]} />
+            </View>
+            <Text variant="caption" style={styles.secondary}>
+              {t("profile.xp", { xp: progress.xp, max: progress.xpToNext })}
+            </Text>
+          </>
+        )}
       </View>
     </View>
   );

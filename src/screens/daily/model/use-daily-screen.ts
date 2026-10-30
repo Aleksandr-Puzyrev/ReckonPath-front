@@ -15,6 +15,7 @@ import { streakForecastOf, useStreakQuery } from "@entities/streak";
 import { useDailyToday } from "@features/daily-today";
 import { restoreOfferOf } from "@features/restore-streak";
 import type { AdMessageKey } from "@entities/ad";
+import { useAccountStore } from "@entities/session";
 import type { ToastMessage } from "@shared/ui/toast";
 import type { CalendarDayResult } from "@widgets/daily-calendar";
 
@@ -28,6 +29,7 @@ export const useDailyScreen = () => {
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const day = useDailyDayQuery(todayKey);
   const history = useDailyHistoryQuery();
+  const hasLogin = useAccountStore((state) => state.hasLogin);
   const { data: streak } = useStreakQuery();
   const records = useDailyRecordStore((state) => state.days);
   const levelId = dailyLevelId(todayKey);
@@ -44,6 +46,7 @@ export const useDailyScreen = () => {
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
 
   return {
+    hasLogin,
     todayKey,
     level,
     record,

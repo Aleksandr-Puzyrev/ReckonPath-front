@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 
 import type { AdPlacement } from "../model/ad-type";
 
@@ -18,7 +18,8 @@ export const adLimitsQueryOptions = () =>
     staleTime: LIMITS_STALE_MS,
   });
 
-export const useAdLimitsQuery = () => useQuery(adLimitsQueryOptions());
+export const useAdLimitsQuery = () =>
+  useQuery({ ...adLimitsQueryOptions(), enabled: useHasAccount() });
 
 export const requestAdIntent = async (placement: AdPlacement, ref?: string) =>
   readData(

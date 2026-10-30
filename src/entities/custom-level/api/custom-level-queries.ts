@@ -3,7 +3,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { levelSchema } from "@reckon-path/engine";
 import type { LevelInput } from "@reckon-path/engine";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 
 const LEVELS_STALE_MS = 60_000;
 
@@ -31,4 +31,5 @@ export const customLevelsQueryOptions = () =>
     staleTime: LEVELS_STALE_MS,
   });
 
-export const useCustomLevelsQuery = () => useQuery(customLevelsQueryOptions());
+export const useCustomLevelsQuery = () =>
+  useQuery({ ...customLevelsQueryOptions(), enabled: useHasAccount() });

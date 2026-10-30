@@ -1,6 +1,6 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-import { apiClient, readData } from "@shared/api";
+import { apiClient, readData, useHasAccount } from "@shared/api";
 
 import type { ArenaMap } from "../model/arena-map-type";
 
@@ -20,4 +20,5 @@ export const arenaMapsQueryOptions = () =>
     staleTime: MAPS_STALE_MS,
   });
 
-export const useArenaMapsQuery = () => useQuery(arenaMapsQueryOptions());
+export const useArenaMapsQuery = () =>
+  useQuery({ ...arenaMapsQueryOptions(), enabled: useHasAccount() });

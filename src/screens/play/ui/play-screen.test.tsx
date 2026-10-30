@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
+import { useAccountStore } from "@entities/session";
 import { offerLinkAfterLevel } from "@features/link-account";
 import { useInterstitialStore } from "@entities/ad";
 import { useGameSessionStore } from "@entities/level";
@@ -87,6 +88,7 @@ describe("PlayScreen", () => {
   });
 
   afterEach(() => {
+    useAccountStore.getState().reset();
     mockServer.reset();
     jest.restoreAllMocks();
     jest.useRealTimers();
@@ -150,6 +152,7 @@ describe("PlayScreen", () => {
   });
 
   test("continues once with three moves, then offers only a restart (LVL-13, LVL-15)", async () => {
+    useAccountStore.getState().markSignedIn();
     await renderScreen();
     await tap(0, 1, 2, 4);
     await settle();
@@ -190,6 +193,7 @@ describe("PlayScreen", () => {
   });
 
   test("hides the ad continue after today's limit, keeping the ◆ one (LVL-16)", async () => {
+    useAccountStore.getState().markSignedIn();
     mockServer.use(
       http.get(mockUrl("/ads/limits"), () =>
         HttpResponse.json({
@@ -278,6 +282,7 @@ describe("PlayScreen", () => {
   });
 
   test("gives at most one star after a continue (LVL-13)", async () => {
+    useAccountStore.getState().markSignedIn();
     await renderScreen();
     await tap(0, 1, 2, 4);
     await settle();

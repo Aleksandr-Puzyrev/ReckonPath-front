@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { useAccountStore } from "@entities/session";
 import { useWalletQuery } from "@entities/wallet";
 import { formatNumber } from "@shared/lib";
 import { Text } from "@shared/ui/text";
@@ -14,13 +15,14 @@ import emblem from "@assets/images/reckon-emblem.png";
 import { styles } from "./top-bar-styles";
 
 interface ITopBar {
-  onWalletPress: () => void;
+  onWalletPress?: () => void;
 }
 
 const TopBar = ({ onWalletPress }: ITopBar) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
   const { data: wallet } = useWalletQuery();
+  const hasLogin = useAccountStore((state) => state.hasLogin);
   const iconSize = theme.sizes.icon.m;
 
   return (
@@ -37,7 +39,7 @@ const TopBar = ({ onWalletPress }: ITopBar) => {
           {t("brand.tagline")}
         </Text>
       </View>
-      {wallet === undefined ? null : (
+      {wallet === undefined || !hasLogin ? null : (
         <>
           <Pressable
             testID="wallet-emeralds"

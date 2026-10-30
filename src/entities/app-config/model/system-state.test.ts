@@ -1,85 +1,91 @@
 import { ApiError } from "@shared/api";
-import { bootstrapMock } from "@shared/test-utils/api-mock";
+import { maintenanceMock, versionMock } from "@shared/test-utils/api-mock";
 
 import { systemStateOf } from "./system-state";
 
-const APP_VERSION = "1.2.0";
-const STORE_URL = "https://apps.apple.com/app/id000";
+const LINKS = {
+  ruStore: "https://www.rustore.ru/catalog/app/reckon",
+  playMarket: "https://play.google.com/store/apps/details?id=reckon",
+  appStore: "",
+};
 
-const bootstrapWith = (overrides: Partial<ReturnType<typeof bootstrapMock>>) => ({
-  ...bootstrapMock(),
-  ...overrides,
-});
-
-const versions = (min: string, recommended: string) => ({
-  version: { min, recommended, storeUrl: STORE_URL, message: "New skins" },
-});
+const stateOf = (overrides: Partial<Parameters<typeof systemStateOf>[0]> = {}) =>
+  systemStateOf({
+    version: versionMock(LINKS),
+    maintenance: maintenanceMock(),
+    error: null,
+    store: "playMarket",
+    ...overrides,
+  });
 
 describe("systemStateOf", () => {
-  test("requires an update when the app is below the minimum version", () => {
-    expect(systemStateOf(bootstrapWith(versions("1.3.0", "1.3.0")), null, APP_VERSION)).toEqual({
+  test("is ready when the backend asks for nothing", () => {
+    expect(stateOf()).toEqual({ kind: "ready" });
+  });
+
+  test("forces the update by the backend flag with the link of the install store", () => {
+    expect(
+      stateOf({ version: versionMock({ ...LINKS, forceUpdate: true }), store: "ruStore" }),
+    ).toEqual({ kind: "forcedUpdate", storeUrl: LINKS.ruStore });
+  });
+
+  test("forces the update on a 426 from any request with the link from its data", () => {
+    const error = new ApiError(426, "app_update_required", { playMarket: LINKS.playMarket });
+
+    expect(stateOf({ error })).toEqual({
       kind: "forcedUpdate",
-      storeUrl: STORE_URL,
-      message: "New skins",
-    });
-  });
-
-  test("requires an update when a request answered 426", () => {
-    const state = systemStateOf(undefined, new ApiError(426, "app_update_required"), APP_VERSION);
-
-    expect(state).toEqual({ kind: "forcedUpdate", storeUrl: null, message: null });
-  });
-
-  test("offers an update when the app is below the recommended version", () => {
-    expect(systemStateOf(bootstrapWith(versions("1.1.0", "1.3.0")), null, APP_VERSION)).toEqual({
-      kind: "softUpdate",
-      version: "1.3.0",
-      storeUrl: STORE_URL,
-      message: "New skins",
-    });
-  });
-
-  test("shows maintenance from the bootstrap", () => {
-    const bootstrap = bootstrapWith({
-      ...versions("1.0.0", "1.2.0"),
-      maintenance: { until: "2026-09-26T12:30:00Z", message: "Arena servers" },
-    });
-
-    expect(systemStateOf(bootstrap, null, APP_VERSION)).toEqual({
-      kind: "maintenance",
-      until: "2026-09-26T12:30:00Z",
-      message: "Arena servers",
-    });
-  });
-
-  test("shows maintenance from a 503 with its details", () => {
-    const error = new ApiError(503, "maintenance", { until: "2026-09-26T12:30:00Z" });
-
-    expect(systemStateOf(undefined, error, APP_VERSION)).toEqual({
-      kind: "maintenance",
-      until: "2026-09-26T12:30:00Z",
-      message: null,
+      storeUrl: LINKS.playMarket,
     });
   });
 
   test("puts the forced update before maintenance", () => {
-    const bootstrap = bootstrapWith({
-      ...versions("1.3.0", "1.3.0"),
-      maintenance: { message: "Arena servers" },
+    const state = stateOf({
+      version: versionMock({ forceUpdate: true }),
+      maintenance: maintenanceMock({ active: false }),
     });
 
-    expect(systemStateOf(bootstrap, null, APP_VERSION).kind).toBe("forcedUpdate");
+    expect(state.kind).toBe("forcedUpdate");
   });
 
-  test("lets the app start when the bootstrap failed without a cache", () => {
-    expect(systemStateOf(undefined, new TypeError("Network request failed"), APP_VERSION)).toEqual({
-      kind: "ready",
+  test("shows maintenance with the backend's message when the app does not work", () => {
+    expect(
+      stateOf({ maintenance: maintenanceMock({ active: false, message: "До 18:00" }) }),
+    ).toEqual({ kind: "maintenance", until: null, message: "До 18:00" });
+  });
+
+  test("falls back to the client text for an empty maintenance message", () => {
+    expect(stateOf({ maintenance: maintenanceMock({ active: false }) })).toEqual({
+      kind: "maintenance",
+      until: null,
+      message: null,
     });
   });
 
-  test("is ready on the current version without maintenance", () => {
-    expect(systemStateOf(bootstrapWith(versions("1.0.0", "1.2.0")), null, APP_VERSION)).toEqual({
-      kind: "ready",
+  test("shows maintenance on a 503 from any request", () => {
+    const error = new ApiError(503, "maintenance", { message: "Скоро вернёмся" });
+
+    expect(stateOf({ error })).toEqual({
+      kind: "maintenance",
+      until: null,
+      message: "Скоро вернёмся",
     });
+  });
+
+  test("offers the soft update with the current version", () => {
+    const version = versionMock({ ...LINKS, showModal: true, currentVersion: "1.5.0" });
+
+    expect(stateOf({ version })).toEqual({
+      kind: "softUpdate",
+      version: "1.5.0",
+      storeUrl: LINKS.playMarket,
+    });
+  });
+
+  test("gives no link when the backend has none for the install store", () => {
+    const version = versionMock({ ...LINKS, showModal: true });
+
+    expect(stateOf({ version, store: "appStore" })).toEqual(
+      expect.objectContaining({ kind: "softUpdate", storeUrl: null }),
+    );
   });
 });

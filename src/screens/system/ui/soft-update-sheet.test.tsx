@@ -13,25 +13,23 @@ jest.mock("@shared/ui/sheet", () => ({
 
 const STORE_URL = "https://apps.apple.com/app/id000";
 
-const renderSheet = (onDismiss = jest.fn()) =>
-  render(
-    <SoftUpdateSheet
-      isOpen
-      version="1.5.0"
-      storeUrl={STORE_URL}
-      message="Новый мир «Туман»"
-      onDismiss={onDismiss}
-    />,
-  );
+const renderSheet = (onDismiss = jest.fn(), storeUrl: string | null = STORE_URL) =>
+  render(<SoftUpdateSheet isOpen version="1.5.0" storeUrl={storeUrl} onDismiss={onDismiss} />);
 
 describe("SoftUpdateSheet", () => {
   beforeEach(() => i18n.changeLanguage("ru"));
 
-  test("shows the new version and the text from the admin panel", async () => {
+  test("shows the new version (decision 0049 #2)", async () => {
     await renderSheet();
 
     expect(await screen.findByText("Вышла версия 1.5.0")).toBeOnTheScreen();
-    expect(screen.getByText("Новый мир «Туман»")).toBeOnTheScreen();
+  });
+
+  test("hides «Обновить» when the backend has no link for this store (decision 0049 #6)", async () => {
+    await renderSheet(jest.fn(), null);
+
+    expect(await screen.findByRole("button", { name: "Позже" })).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: "Обновить" })).toBeNull();
   });
 
   test("«Позже» closes the sheet", async () => {
