@@ -3,9 +3,8 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
-import { shopQueryOptions } from "@entities/item";
+import { inventoryQueryOptions, shopQueryOptions } from "@entities/item";
 import { apiClient } from "@shared/api";
-import { meQueryOptions } from "@entities/wallet";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
 import { useEquipItem } from "./use-equip-item";
@@ -22,7 +21,7 @@ const renderEquip = async (handlers: ReturnType<typeof callbacks>) => {
     },
   });
   await queryClient.fetchQuery(shopQueryOptions());
-  await queryClient.fetchQuery(meQueryOptions());
+  await queryClient.fetchQuery(inventoryQueryOptions());
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -35,8 +34,15 @@ const isEquipped = (id: string) =>
     ?.tabs.flatMap(({ items }) => items)
     .find((item) => item.id === id)?.equipped;
 
-const buy = (itemId: string, emeralds: number) =>
-  apiClient.POST("/shop/purchase", { body: { itemId, expectedPrice: { emeralds } } });
+const loadout = () => queryClient.getQueryData(inventoryQueryOptions().queryKey)?.loadout;
+
+const buy = (key: string, gems: number) =>
+  apiClient.POST("/shop/items/{key}/buy", {
+    params: { path: { key } },
+    body: { price: gems, currency: "gems" },
+  });
+
+const equippedOnServer = async () => (await apiClient.GET("/me/items")).data?.equipped;
 
 describe("useEquipItem", () => {
   afterEach(async () => {
@@ -49,63 +55,41 @@ describe("useEquipItem", () => {
     const handlers = callbacks();
     const { result } = await renderEquip(handlers);
 
-    await act(async () => result.current.equip([{ id: "reef", slot: "field" }], "Коралловый риф"));
+    await act(async () => result.current.equip({ id: "reef", slot: "field" }, "Коралловый риф"));
 
     expect(isEquipped("reef")).toBe(true);
-    expect(queryClient.getQueryData(meQueryOptions().queryKey)?.loadout.field).toBe("reef");
+    expect(loadout()?.field).toBe("reef");
     await waitFor(() => expect(handlers.onEquipped).toHaveBeenCalledWith("Коралловый риф"));
-  });
-
-  test("equips every part of a bundle at once", async () => {
-    await apiClient.POST("/shop/purchase", {
-      body: { bundleId: "set_garden", expectedPrice: { emeralds: 560 } },
-    });
-    const handlers = callbacks();
-    const { result } = await renderEquip(handlers);
-
-    await act(async () =>
-      result.current.equip(
-        [
-          { id: "garden", slot: "field" },
-          { id: "marker_gold", slot: "target" },
-        ],
-        "Набор «Сад»",
-      ),
-    );
-
-    await waitFor(() => expect(handlers.onEquipped).toHaveBeenCalled());
-    expect((await apiClient.GET("/me")).data?.loadout).toMatchObject({
-      field: "garden",
-      target: "marker_gold",
-    });
+    expect(await equippedOnServer()).toMatchObject({ board: "reef" });
   });
 
   test("rolls back and reports a refused equip", async () => {
     mockServer.use(
-      http.put(mockUrl("/loadout"), () =>
-        HttpResponse.json({ error: { code: "not_owned" } }, { status: 422 }),
+      http.put(mockUrl("/me/equipment"), () =>
+        HttpResponse.json({ error: { code: "validation_failed" } }, { status: 422 }),
       ),
     );
     const handlers = callbacks();
     const { result } = await renderEquip(handlers);
 
-    await act(async () => result.current.equip([{ id: "reef", slot: "field" }], "Коралловый риф"));
+    await act(async () => result.current.equip({ id: "reef", slot: "field" }, "Коралловый риф"));
 
     await waitFor(() => expect(handlers.onError).toHaveBeenCalledWith("errors.generic"));
     expect(isEquipped("reef")).toBe(false);
-    expect(queryClient.getQueryData(meQueryOptions().queryKey)?.loadout.field).toBeUndefined();
+    expect(loadout()?.field).toBeUndefined();
   });
 
-  test("puts the default item back with null", async () => {
+  test("puts the default item back", async () => {
     await buy("reef", 480);
-    await apiClient.PUT("/loadout", { body: { field: "reef" } });
+    await apiClient.PUT("/me/equipment", { body: { slot: "board", item: "reef" } });
     const handlers = callbacks();
     const { result } = await renderEquip(handlers);
 
     await act(async () => result.current.reset("field", "По умолчанию"));
 
     expect(isEquipped("reef")).toBe(false);
+    expect(loadout()?.field).toBeUndefined();
     await waitFor(() => expect(handlers.onEquipped).toHaveBeenCalledWith("По умолчанию"));
-    expect((await apiClient.GET("/me")).data?.loadout.field).toBeNull();
+    expect(await equippedOnServer()).toMatchObject({ board: "" });
   });
 });

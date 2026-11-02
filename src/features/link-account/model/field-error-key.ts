@@ -10,6 +10,8 @@ const FIELD_ERROR_KEYS = [
   "errors.email_taken",
   "errors.invalid_credentials",
   "errors.invalid_code",
+  "errors.wrong_password",
+  "errors.same_email",
   "errors.too_many_attempts",
 ] as const;
 

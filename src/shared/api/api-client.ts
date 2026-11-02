@@ -38,6 +38,10 @@ export const apiClient = createClient<paths>({
 
 apiClient.use(apiMiddleware);
 
+// The backend gives item images as paths from the API address (бэкенд отдаёт картинки товаров путями от адреса API).
+export const apiAssetUrl = (path: string) =>
+  path === "" ? "" : `${backend.origin}${API_PATH}${path}`;
+
 // Assets come from the CDN, outside the API, but through the same transport, so dev builds get them from the mocks (ассеты идут с CDN, мимо API, но тем же транспортом, поэтому dev-сборки получают их из моков).
 export const fetchAssetJson = async (url: string): Promise<unknown> => {
   const response = await backend.transport(new Request(url));

@@ -1,11 +1,7 @@
-import type { components } from "../generated/schema";
-
 import { MOCK_ITEMS } from "./mock-catalog";
-import type { MockBundle, MockItem } from "./mock-catalog";
+import type { MockBundle } from "./mock-catalog";
 import { clearMockState, loadMockState, saveMockState } from "./mock-state";
 import type { MockPrice } from "./mock-wallet";
-
-type Loadout = components["schemas"]["Loadout"];
 
 interface Ownership {
   acquiredAt: string;
@@ -15,8 +11,7 @@ interface Ownership {
 interface ShopState {
   openedAt: number;
   owned: Record<string, Ownership>;
-  loadout: Loadout;
-  sold: Record<string, number>;
+  loadout: Record<string, string>;
 }
 
 const STATE_NAME = "shop";
@@ -25,7 +20,7 @@ const DAY_MS = 86_400_000;
 const GRACE_MS = 10_000;
 const MIN_BUNDLE_SHARE = 0.3;
 
-const initialState = (): ShopState => ({ openedAt: Date.now(), owned: {}, loadout: {}, sold: {} });
+const initialState = (): ShopState => ({ openedAt: Date.now(), owned: {}, loadout: {} });
 
 let state = loadMockState<ShopState>(STATE_NAME, initialState());
 
@@ -49,10 +44,9 @@ export const isOnSale = (offer: { dropDays: number | null }, now: number, grace 
 export const isPurchasable = (offer: { dropDays: number | null }, now: number) =>
   isOnSale(offer, now, GRACE_MS);
 
-export const stockLeftOf = ({ id, stock }: MockItem) =>
-  stock === null ? null : stock - (state.sold[id] ?? 0);
-
-export const isOwned = (itemId: string) => state.owned[itemId] !== undefined;
+export const isOwned = (itemId: string) =>
+  state.owned[itemId] !== undefined ||
+  MOCK_ITEMS.some(({ id, isDefault }) => id === itemId && isDefault);
 
 const amountOf = (price: MockPrice) => ("emeralds" in price ? price.emeralds : price.coins);
 
@@ -80,13 +74,11 @@ export const isSamePrice = (left: MockPrice, right: MockPrice) =>
 export const grantItems = (itemIds: readonly string[], source: string, now: number) => {
   itemIds.forEach((itemId) => {
     state.owned[itemId] ??= { acquiredAt: new Date(now).toISOString(), source };
-    state.sold[itemId] = (state.sold[itemId] ?? 0) + 1;
   });
   save();
 };
 
-export const equip = (change: Loadout) => {
-  state.loadout = { ...state.loadout, ...change };
+export const equip = (kind: string, itemId: string) => {
+  state.loadout = { ...state.loadout, [kind]: itemId };
   save();
-  return state.loadout;
 };

@@ -1,18 +1,16 @@
 import type { Bundle, ShopItem } from "./item-type";
-import { offerViewOf } from "./shop-offer";
+import { bundleOfferOf, offerViewOf } from "./shop-offer";
 
 const ITEM: ShopItem = {
   id: "reef",
-  type: "FIELD",
   slot: "field",
   rarity: "rare",
   name: "Coral reef",
   description: "",
   preview: "",
-  package: { url: "", sha256: "", version: 1 },
+  skinUrl: "",
   price: { emeralds: 480 },
   availableTo: null,
-  stockLeft: null,
   owned: false,
   equipped: false,
   visibleInMatch: true,
@@ -53,5 +51,9 @@ describe("offerViewOf", () => {
       isVisibleInMatch: false,
       availableTo: "2026-10-16T12:00:00Z",
     });
+  });
+
+  test("does not call a bundle without parts complete", () => {
+    expect(bundleOfferOf({ ...BUNDLE, items: [] })).toMatchObject({ isComplete: false });
   });
 });

@@ -7,7 +7,7 @@ import { useEquipItem } from "@features/equip-item";
 import type { EquipTarget } from "@features/equip-item";
 import { usePurchaseItem } from "@features/purchase-item";
 import type { EndedReason } from "@features/purchase-item";
-import { amountOf, currencyOf, offerViewOf } from "@entities/item";
+import { amountOf, currencyOf, offerKeyOf, offerViewOf } from "@entities/item";
 import type { Currency, ShopItem, ShopOffer } from "@entities/item";
 import { useWalletQuery } from "@entities/wallet";
 import { Dialog } from "@shared/ui/dialog";
@@ -31,10 +31,12 @@ interface IPreviewContent {
   onToast: (text: string) => void;
 }
 
-const equipTargetsOf = (offer: ShopOffer, items: readonly ShopItem[]): EquipTarget[] =>
-  offer.kind === "item"
-    ? [offer.item]
-    : items.filter((item) => offer.bundle.items.includes(item.id));
+// A bundle equips only its first part (decision 0054 #3) (набор надевает только свою первую часть).
+const equipTargetOf = (offer: ShopOffer, items: readonly ShopItem[]): EquipTarget | null => {
+  if (offer.kind === "item") return offer.item;
+  const [first] = offer.bundle.items;
+  return items.find(({ id }) => id === first) ?? null;
+};
 
 const PreviewContent = ({
   offer,
@@ -51,8 +53,7 @@ const PreviewContent = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [ended, setEnded] = useState<EndedReason | null>(null);
   const view = offerViewOf(offer);
-  const target = offer.kind === "item" ? { itemId: offer.item.id } : { bundleId: offer.bundle.id };
-  const purchase = usePurchaseItem(target, view.price, {
+  const purchase = usePurchaseItem(offerKeyOf(offer), view.price, {
     onShortOf,
     onPurchased: () => setIsSuccess(true),
     onOwned: () => onToast(t("errors.already_owned")),
@@ -68,7 +69,12 @@ const PreviewContent = ({
 
   const handleEquip = () => {
     setIsSuccess(false);
-    equip(equipTargetsOf(offer, items), view.name);
+    const target = equipTargetOf(offer, items);
+    if (target === null) {
+      onToast(t("errors.generic"));
+      return;
+    }
+    equip(target, view.name);
   };
 
   const handleEndedClose = () => {

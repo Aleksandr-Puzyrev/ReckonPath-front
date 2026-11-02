@@ -365,7 +365,9 @@
     "email_taken": "This e-mail is already taken",
     "invalid_credentials": "Wrong login or password",
     "invalid_code": "Wrong code",
-    "too_many_attempts": "Too many attempts. Request a new code"
+    "too_many_attempts": "Too many attempts. Request a new code",
+    "wrong_password": "Wrong password",
+    "same_email": "This is already your e-mail"
   },
   "system": {
     "update": {
@@ -508,6 +510,9 @@
       "bridge": "Bridge",
       "bomb": "Bomb",
       "target": "Target",
+      "buoy": "Buoy",
+      "beacon": "Beacon",
+      "number": "Numbers",
       "avatar": "Avatar",
       "frame": "Frame",
       "title": "Title"
@@ -575,6 +580,28 @@
       "arenaBody": "Sign in or sign up to fight other players",
       "shopTitle": "The showroom needs an account",
       "shopBody": "Sign in or sign up to buy items and build your collection"
+    },
+    "forgot": {
+      "link": "Forgot password?",
+      "eyebrow": "Recovery",
+      "title": "New password",
+      "emailBody": "We'll send a code to your account e-mail",
+      "send": "Send the code",
+      "codeBody": "If there is an account with {{email}}, we sent a code to it.",
+      "newPassword": "New password",
+      "save": "Save the password",
+      "done": "Password changed — sign in with the new one"
+    },
+    "change": {
+      "eyebrow": "Security",
+      "passwordTitle": "Change password",
+      "emailTitle": "Change e-mail",
+      "currentPassword": "Current password",
+      "newEmail": "New e-mail",
+      "emailBody": "We'll send a code to the new address",
+      "codeBody": "We sent a code to {{email}}",
+      "passwordDone": "Password changed",
+      "emailDone": "E-mail changed"
     }
   },
   "shop": {
@@ -614,9 +641,11 @@
       "bridge": "Bridge",
       "bomb": "Bomb",
       "target": "Target marker",
+      "buoy": "Buoy",
+      "beacon": "Beacon",
+      "number": "Numbers",
       "avatar": "Avatar",
       "frame": "Frame",
-      "badges": "Badge",
       "title": "Title",
       "fxClick": "Tap FX",
       "fxReveal": "Target FX",
@@ -627,7 +656,8 @@
       "common": "Common",
       "rare": "Rare",
       "epic": "Epic",
-      "legendary": "Legendary"
+      "legendary": "Legendary",
+      "exclusive": "Exclusive"
     },
     "preview": {
       "left": "Ends in {{time}}",
@@ -692,7 +722,10 @@
       "signOut": "Sign out",
       "signedOut": "You signed out",
       "delete": "Delete account",
-      "deletionAt": "Deletion {{date}}"
+      "deletionAt": "Deletion {{date}}",
+      "changePassword": "Change password",
+      "changeEmail": "Change e-mail",
+      "devices": "Devices"
     },
     "rules": "Game rules",
     "support": "Contact support",
@@ -1110,5 +1143,15 @@
       "missed": "Challenge not beaten — try again",
       "toLevels": "To levels"
     }
+  },
+  "devices": {
+    "title": "Devices",
+    "current": "This device",
+    "details": "Version {{version}} · Last seen {{date}}",
+    "signedOut": "Device signed out",
+    "signOutAll": "Sign out on all devices",
+    "signOutAllTitle": "Sign out on all devices?",
+    "signOutAllBody": "Every session ends, this one too. You can sign in again with your password.",
+    "signedOutAll": "You signed out on all devices"
   }
 }

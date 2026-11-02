@@ -20,6 +20,9 @@ interface IAccountGroup {
   isSigningOut: boolean;
   onLink: () => void;
   onSignOut: () => void;
+  onChangePassword: () => void;
+  onChangeEmail: () => void;
+  onDevices: () => void;
   onDelete: () => void;
   onDeletion: () => void;
 }
@@ -31,6 +34,9 @@ const AccountGroup = ({
   isSigningOut,
   onLink,
   onSignOut,
+  onChangePassword,
+  onChangeEmail,
+  onDevices,
   onDelete,
   onDeletion,
 }: IAccountGroup) => {
@@ -52,13 +58,36 @@ const AccountGroup = ({
         }
       />
       {hasLogin ? (
-        <SettingsRow
-          testID="settings-sign-out"
-          Icon={SignOutIcon}
-          iconColor={colors.rarity.common}
-          label={t("settings.account.signOut")}
-          onPress={isSigningOut ? undefined : onSignOut}
-        />
+        <>
+          <SettingsRow
+            testID="settings-change-password"
+            Icon={AccountIcon}
+            iconColor={colors.accent.blue}
+            label={t("settings.account.changePassword")}
+            onPress={onChangePassword}
+          />
+          <SettingsRow
+            testID="settings-change-email"
+            Icon={AccountIcon}
+            iconColor={colors.accent.blue}
+            label={t("settings.account.changeEmail")}
+            onPress={onChangeEmail}
+          />
+          <SettingsRow
+            testID="settings-devices"
+            Icon={AccountIcon}
+            iconColor={colors.accent.blue}
+            label={t("settings.account.devices")}
+            onPress={onDevices}
+          />
+          <SettingsRow
+            testID="settings-sign-out"
+            Icon={SignOutIcon}
+            iconColor={colors.rarity.common}
+            label={t("settings.account.signOut")}
+            onPress={isSigningOut ? undefined : onSignOut}
+          />
+        </>
       ) : (
         <SettingsRow
           testID="settings-link"

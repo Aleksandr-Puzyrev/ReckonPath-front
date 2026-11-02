@@ -54,6 +54,7 @@ const RootStack = () => {
           />
           <Stack.Screen name="settings/index" />
           <Stack.Screen name="settings/deletion" />
+          <Stack.Screen name="settings/devices" />
           <Stack.Screen name="arena/history/[id]" />
           <Stack.Screen name="arena/map/[id]" options={{ gestureEnabled: false }} />
           <Stack.Screen
@@ -88,6 +89,9 @@ const RootStack = () => {
           <Stack.Screen name="account/sign-in" options={{ presentation: "modal" }} />
           <Stack.Screen name="account/sign-up" options={{ presentation: "modal" }} />
           <Stack.Screen name="account/code" options={{ presentation: "modal" }} />
+          <Stack.Screen name="account/forgot" options={{ presentation: "modal" }} />
+          <Stack.Screen name="account/password" options={{ presentation: "modal" }} />
+          <Stack.Screen name="account/email" options={{ presentation: "modal" }} />
         </Stack.Protected>
         <Stack.Protected guard={isUpdateRequired}>
           <Stack.Screen name="system/update" options={{ gestureEnabled: false }} />

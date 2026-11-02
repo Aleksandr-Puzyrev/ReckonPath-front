@@ -1,12 +1,11 @@
 import { z } from "zod";
 
+import { emailField } from "./email-field";
+
 const MIN_PASSWORD_LENGTH = 6;
 
 export const signInSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .regex(/^\S+@\S+\.\S+$/, "account.errors.email"),
+  email: emailField,
   password: z.string().min(MIN_PASSWORD_LENGTH, "account.errors.passwordShort"),
 });
 

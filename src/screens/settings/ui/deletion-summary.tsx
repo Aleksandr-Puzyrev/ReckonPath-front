@@ -6,7 +6,7 @@ import { useArenaQuery } from "@entities/arena";
 import { useInventoryQuery } from "@entities/item";
 import { CAMPAIGN_WORLDS } from "@entities/level";
 import { campaignStars, useProgressStore } from "@entities/progress";
-import { useMeQuery } from "@entities/wallet";
+import { useWalletQuery } from "@entities/wallet";
 import { formatNumber } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 import { leagueLabelOf } from "@widgets/arena-hero";
@@ -23,7 +23,7 @@ interface Line {
 const DeletionSummary = () => {
   const { t, i18n } = useTranslation();
   const best = useProgressStore((state) => state.best);
-  const { data: me } = useMeQuery();
+  const { data: wallet } = useWalletQuery();
   const { data: inventory } = useInventoryQuery();
   const { data: arena } = useArenaQuery();
   const format = (value: number) => formatNumber(value, i18n.language);
@@ -37,11 +37,11 @@ const DeletionSummary = () => {
       }),
     },
   ];
-  if (me !== undefined) {
+  if (wallet !== undefined) {
     lines.push({
       key: "currency",
       label: t("settings.delete.currency"),
-      value: <CurrencyAmounts wallet={me.wallet} />,
+      value: <CurrencyAmounts wallet={wallet} />,
     });
   }
   if (inventory !== undefined) {

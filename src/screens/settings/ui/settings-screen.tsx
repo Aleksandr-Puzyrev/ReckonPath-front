@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
@@ -22,13 +22,40 @@ import LookGroup from "./look-group";
 import SettingsSheets from "./settings-sheets";
 import { styles } from "./settings-styles";
 
+const CHANGE_NOTICES = {
+  password: "account.change.passwordDone",
+  email: "account.change.emailDone",
+  devices: "devices.signedOutAll",
+} as const;
+
+const isChangeNotice = (changed: string): changed is keyof typeof CHANGE_NOTICES =>
+  changed in CHANGE_NOTICES;
+
 // The brand name is not translated (название бренда не переводится).
 const BRAND = "RECKON PATH";
 
 const SettingsScreen = () => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
+  const { changed, at } = useLocalSearchParams<{
+    changed?: keyof typeof CHANGE_NOTICES;
+    at?: string;
+  }>();
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  const [notice, setNotice] = useState<ToastMessage | null>(null);
+  const [noticedAt, setNoticedAt] = useState<string | undefined>(undefined);
+  // A finished password or e-mail change comes back with its moment, which raises the notice once (завершённая смена пароля или e-mail возвращается со своим моментом, и он один раз поднимает сообщение).
+  if (at !== noticedAt) {
+    setNoticedAt(at);
+    setNotice(
+      at === undefined || changed === undefined || !isChangeNotice(changed)
+        ? null
+        : {
+            id: Number(at),
+            text: t(CHANGE_NOTICES[changed]),
+          },
+    );
+  }
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
   const screen = useSettingsScreen(showToast);
   const iconSize = theme.sizes.iconButton.icon;
@@ -61,6 +88,9 @@ const SettingsScreen = () => {
           isSigningOut={screen.isSigningOut}
           onLink={() => screen.handleSheet("link")}
           onSignOut={screen.handleSignOut}
+          onChangePassword={() => router.push("/account/password")}
+          onChangeEmail={() => router.push("/account/email")}
+          onDevices={() => router.push("/settings/devices")}
           onDelete={() => screen.handleSheet("delete")}
           onDeletion={screen.handleDeletion}
         />
@@ -82,7 +112,10 @@ const SettingsScreen = () => {
         </View>
       </ScrollView>
       <SettingsSheets screen={screen} onToast={showToast} />
-      <Toast message={toast} onHide={() => setToast(null)} />
+      <Toast
+        message={toast ?? notice}
+        onHide={() => (toast === null ? setNotice(null) : setToast(null))}
+      />
     </Screen>
   );
 };

@@ -2,8 +2,10 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { apiClient, readData, useHasAccount } from "@shared/api";
 
-const MS_PER_SECOND = 1000;
-const SHOP_STALE_FALLBACK_SEC = 300;
+import { inventoryOf } from "../model/inventory-of";
+import { shopOf } from "../model/shop-of";
+
+const SHOP_STALE_MS = 300_000;
 const INVENTORY_STALE_MS = 60_000;
 
 export const itemKeys = {
@@ -17,15 +19,14 @@ export const itemKeys = {
 export const shopQueryOptions = () =>
   queryOptions({
     queryKey: itemKeys.shop(),
-    queryFn: async () => readData(await apiClient.GET("/shop")),
-    // The server says how long the catalog stays fresh (сервер сам сообщает, сколько каталог остаётся свежим).
-    staleTime: ({ state }) => (state.data?.cacheTtlSec ?? SHOP_STALE_FALLBACK_SEC) * MS_PER_SECOND,
+    queryFn: async () => shopOf(readData(await apiClient.GET("/shop"))),
+    staleTime: SHOP_STALE_MS,
   });
 
 export const inventoryQueryOptions = () =>
   queryOptions({
     queryKey: itemKeys.inventory(),
-    queryFn: async () => readData(await apiClient.GET("/inventory")),
+    queryFn: async () => inventoryOf(readData(await apiClient.GET("/me/items"))),
     staleTime: INVENTORY_STALE_MS,
   });
 

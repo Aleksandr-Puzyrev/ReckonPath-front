@@ -4,16 +4,14 @@ import { shopCardsOf, visibleTabsOf } from "./shop-cards";
 
 const shopItem = (overrides: Partial<ShopItem>): ShopItem => ({
   id: "item",
-  type: "FIELD",
   slot: "field",
   rarity: "common",
   name: "Item",
   description: "",
   preview: "",
-  package: { url: "", sha256: "", version: 1 },
+  skinUrl: "",
   price: { emeralds: 100 },
   availableTo: null,
-  stockLeft: null,
   owned: false,
   equipped: false,
   visibleInMatch: true,
@@ -38,7 +36,6 @@ const shopOf = (overrides: Partial<Shop>): Shop => ({
   featured: null,
   tabs: [],
   bundles: [],
-  cacheTtlSec: 300,
   ...overrides,
 });
 

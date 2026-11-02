@@ -10,18 +10,25 @@ const HTTP_ACCEPTED = 202;
 const HTTP_UNAUTHORIZED = 401;
 const HTTP_FORBIDDEN = 403;
 const HTTP_UNPROCESSABLE = 422;
+const HTTP_CONFLICT = 409;
 const HTTP_TOO_MANY = 429;
 const HTTP_NO_CONTENT = 204;
 // Test values: every code is «123456», «000000» is the wrong password, «qwerty123» is too easy for the server (тестовые значения: код всегда «123456», «000000» — неверный пароль, «qwerty123» сервер считает слишком простым).
 export const MOCK_CODE = "123456";
 export const MOCK_WRONG_PASSWORD = "000000";
 export const MOCK_REJECTED_PASSWORD = "qwerty123";
+export const MOCK_TAKEN_EMAIL = "taken@mock.local";
+export const MOCK_CURRENT_EMAIL = "player@mock.local";
 
 const emailBodySchema = z.object({ email: z.string() });
 const registerBodySchema = z.object({ email: z.string(), password: z.string() });
 const verifyBodySchema = z.object({ email: z.string(), code: z.string() });
 const loginBodySchema = z.object({ email: z.string(), password: z.string() });
 const refreshBodySchema = z.object({ refreshToken: z.string() });
+const resetBodySchema = z.object({ code: z.string(), password: z.string() });
+const changePasswordBodySchema = z.object({ currentPassword: z.string(), newPassword: z.string() });
+const changeEmailBodySchema = z.object({ email: z.string(), password: z.string() });
+const codeBodySchema = z.object({ code: z.string() });
 
 const errorResponse = (code: string, status: number, details?: Record<string, unknown>) =>
   HttpResponse.json({ error: { code, details } }, { status });
@@ -72,6 +79,42 @@ export const authHandlers = [
     }
     unverified.delete(email);
     return HttpResponse.json(issueTokenPair());
+  }),
+  http.post(mockUrl("/auth/password/forgot"), () => codeSent()),
+  http.post(mockUrl("/auth/password/reset"), async ({ request }) => {
+    const { code, password } = resetBodySchema.parse(await request.json());
+    if (code !== MOCK_CODE) return errorResponse("invalid_code", HTTP_UNPROCESSABLE);
+    if (password === MOCK_REJECTED_PASSWORD) {
+      return errorResponse("validation_failed", HTTP_UNPROCESSABLE, {
+        fields: { password: "Слишком простой пароль." },
+      });
+    }
+    return new HttpResponse(null, { status: HTTP_NO_CONTENT });
+  }),
+  http.put(mockUrl("/me/password"), async ({ request }) => {
+    const { currentPassword, newPassword } = changePasswordBodySchema.parse(await request.json());
+    if (currentPassword === MOCK_WRONG_PASSWORD) {
+      return errorResponse("wrong_password", HTTP_UNPROCESSABLE);
+    }
+    if (newPassword === MOCK_REJECTED_PASSWORD) {
+      return errorResponse("validation_failed", HTTP_UNPROCESSABLE, {
+        fields: { newPassword: "Слишком простой пароль." },
+      });
+    }
+    return new HttpResponse(null, { status: HTTP_NO_CONTENT });
+  }),
+  http.post(mockUrl("/me/email"), async ({ request }) => {
+    const { email, password } = changeEmailBodySchema.parse(await request.json());
+    if (password === MOCK_WRONG_PASSWORD)
+      return errorResponse("wrong_password", HTTP_UNPROCESSABLE);
+    if (email === MOCK_CURRENT_EMAIL) return errorResponse("same_email", HTTP_UNPROCESSABLE);
+    if (email === MOCK_TAKEN_EMAIL) return errorResponse("email_taken", HTTP_CONFLICT);
+    return codeSent();
+  }),
+  http.post(mockUrl("/me/email/confirm"), async ({ request }) => {
+    const { code } = codeBodySchema.parse(await request.json());
+    if (code !== MOCK_CODE) return errorResponse("invalid_code", HTTP_UNPROCESSABLE);
+    return HttpResponse.json({});
   }),
   http.post(mockUrl("/auth/login"), async ({ request }) => {
     const { email, password } = loginBodySchema.parse(await request.json());

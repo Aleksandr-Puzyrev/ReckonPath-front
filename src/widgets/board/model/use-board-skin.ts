@@ -2,7 +2,6 @@ import { useQueries } from "@tanstack/react-query";
 import { useUnistyles } from "react-native-unistyles";
 
 import { BOARD_SLOTS, skinQueryOptions, useInventoryQuery } from "@entities/item";
-import { useMeQuery } from "@entities/wallet";
 
 import { boardSkinFor } from "./board-skin";
 import type { BoardTheme } from "./board-skin";
@@ -13,11 +12,10 @@ export interface BoardLook {
 }
 
 const useEquippedSkinUrls = () => {
-  const { data: me } = useMeQuery();
   const { data: inventory } = useInventoryQuery();
   return BOARD_SLOTS.flatMap((slot) => {
-    const id = me?.loadout[slot];
-    const url = inventory?.items.find(({ itemId }) => itemId === id)?.item.package.url;
+    const id = inventory?.loadout[slot];
+    const url = inventory?.items.find(({ itemId }) => itemId === id)?.item.skinUrl;
     return url === undefined || url === "" ? [] : [url];
   });
 };

@@ -103,6 +103,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/auth/password/forgot": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description E-mails a code for a new password (decision 0053 */
+    post: operations["authPasswordForgot"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/password/reset": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Sets the new password by the code and ends every session of the account. */
+    post: operations["authPasswordReset"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/auth/login": {
     parameters: {
       query?: never;
@@ -113,6 +147,23 @@ export interface paths {
     get?: never;
     put?: never;
     post: operations["authLogin"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/logout-all": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Ends every session of the account, this one too (decision 0053 */
+    post: operations["authLogoutAll"];
     delete?: never;
     options?: never;
     head?: never;
@@ -167,6 +218,89 @@ export interface paths {
     options?: never;
     head?: never;
     patch: operations["patchMe"];
+    trace?: never;
+  };
+  "/me/password": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** @description Changes the password and ends the other sessions of the account (decision 0053 */
+    put: operations["changePassword"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/email": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description E-mails a code to the new address, confirmed by the current password. */
+    post: operations["changeEmail"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/email/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["confirmEmail"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/devices": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["listDevices"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/devices/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** @description Ends the session of that device and removes it. */
+    delete: operations["removeDevice"];
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   "/me/restore": {
@@ -306,6 +440,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @description The backend showroom (decision 0055); the client groups the flat list itself. */
     get: operations["getShop"];
     put?: never;
     post?: never;
@@ -315,7 +450,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/shop/purchase": {
+  "/shop/items/{key}/buy": {
     parameters: {
       query?: never;
       header?: never;
@@ -324,21 +459,22 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations["postShopPurchase"];
+    /** @description Buys an item or a bundle at the price the player saw. */
+    post: operations["buyShopItem"];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/inventory": {
+  "/me/items": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations["getInventory"];
+    get: operations["getMyItems"];
     put?: never;
     post?: never;
     delete?: never;
@@ -347,7 +483,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/loadout": {
+  "/me/equipment": {
     parameters: {
       query?: never;
       header?: never;
@@ -355,7 +491,24 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    put: operations["putLoadout"];
+    /** @description Equips one slot; an empty item returns the default one. */
+    put: operations["putEquipment"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/wallet": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getWallet"];
+    put?: never;
     post?: never;
     delete?: never;
     options?: never;
@@ -752,6 +905,9 @@ export interface components {
       | "not_linked"
       | "server_busy"
       | "not_enough_gems"
+      | "not_enough_coins"
+      | "item_not_found"
+      | "app_update_needed"
       | "cannot_continue"
       | "account_exists"
       | "already_linked"
@@ -877,6 +1033,35 @@ export interface components {
       code: string;
       device: components["schemas"]["DeviceInfo"];
     };
+    Device: {
+      id: string;
+      /** @description Persistent install id */
+      deviceId: string;
+      /** @description ios, android or web */
+      platform: string;
+      /** @description Device model */
+      name?: string;
+      appVersion?: string;
+      isCurrent: boolean;
+      /** Format: date-time */
+      lastSeenAt: string;
+    };
+    ChangePasswordRequest: {
+      currentPassword: string;
+      newPassword: string;
+    };
+    ChangeEmailRequest: {
+      /** Format: email */
+      email: string;
+      password: string;
+    };
+    ResetPasswordRequest: {
+      /** Format: email */
+      email: string;
+      /** @description 6 digits from the e-mail */
+      code: string;
+      password: string;
+    };
     CodeSent: {
       /** @description Seconds until the code can be sent again */
       resendAfter: number;
@@ -905,7 +1090,6 @@ export interface components {
         rp: number;
         seasonId: number;
       };
-      loadout: components["schemas"]["Loadout"];
       flags: {
         nickChangeFreeAvailable?: boolean;
         /** Format: date-time */
@@ -991,118 +1175,72 @@ export interface components {
           coins: number;
         };
     /** @enum {string} */
-    Rarity: "common" | "rare" | "epic" | "legendary";
-    /**
-     * @description Loadout slot keys (decision 0021
-     * @enum {string}
-     */
-    Slot:
-      | "field"
+    ShopRarity: "common" | "rare" | "epic" | "legendary" | "exclusive";
+    /** @enum {string} */
+    ShopKind:
+      | "board"
       | "fence"
       | "stream"
-      | "rock"
-      | "x2"
       | "bridge"
+      | "heavy"
+      | "rock"
       | "bomb"
-      | "target"
-      | "avatar"
+      | "buoy"
+      | "beacon"
+      | "marker"
+      | "number"
+      | "tap"
+      | "reveal"
+      | "win"
       | "frame"
-      | "badges"
       | "title"
-      | "fxClick"
-      | "fxReveal"
-      | "fxVictory";
-    ItemPackage: {
-      url: string;
-      sha256: string;
-      version: number;
+      | "avatar"
+      | "bundle";
+    /** @enum {string} */
+    ShopTabKey: "exclusive" | "holiday" | "elements" | "boards" | "bundles" | "profile" | "effects";
+    /** @enum {string} */
+    ShopCurrency: "coins" | "gems";
+    BackendWallet: {
+      coins: number;
+      gems: number;
     };
-    /** @description Name and description in the X-Locale language (decision 0021 */
-    ItemDescription: {
-      type: string;
-      rarity: components["schemas"]["Rarity"];
-      name: string;
+    ShopItemView: {
+      key: string;
+      tab: components["schemas"]["ShopTabKey"];
+      kind: components["schemas"]["ShopKind"];
+      title: string;
       description: string;
-      preview: string;
-      package: components["schemas"]["ItemPackage"];
-    };
-    ShopItem: components["schemas"]["ItemDescription"] & {
-      id: string;
-      slot: components["schemas"]["Slot"];
-      /** @description Decision 0022 #2 */
-      visibleInMatch: boolean;
-      price: components["schemas"]["Price"];
-      /** Format: date-time */
-      availableTo: string | null;
-      stockLeft: number | null;
+      rarity: components["schemas"]["ShopRarity"];
+      currency: components["schemas"]["ShopCurrency"];
+      price: number;
+      fullPrice?: number;
       owned: boolean;
       equipped: boolean;
-    };
-    ShopTab: {
-      /** @enum {string} */
-      id: "exclusive" | "holiday" | "elements" | "fields" | "profile" | "effects";
-      items: components["schemas"]["ShopItem"][];
-    };
-    /** @description Name, description, rarity and preview are added for the bundle card, as for items (decision 0021 #11). */
-    Bundle: {
-      id: string;
-      name: string;
-      description: string;
-      rarity: components["schemas"]["Rarity"];
-      preview: string;
-      items: string[];
-      basePrice: components["schemas"]["Price"];
-      price: components["schemas"]["Price"];
-      ownedItems: string[];
+      default?: boolean;
       /** Format: date-time */
-      availableTo: string | null;
+      endsAt?: string;
+      image?: string;
+      parts?: string[];
+      partsOwned?: string[];
     };
-    Featured: {
-      id: string;
-      image: string;
-      title: string;
-      subtitle: string;
+    ShopCatalog: {
       /** Format: date-time */
-      endsAt: string;
-      target:
-        | {
-            bundle: string;
-          }
-        | {
-            item: string;
-          };
+      serverTime: string;
+      wallet: components["schemas"]["BackendWallet"];
+      featured?: components["schemas"]["ShopItemView"];
+      tabs: {
+        key: components["schemas"]["ShopTabKey"];
+        title: string;
+        count: number;
+      }[];
+      items: components["schemas"]["ShopItemView"][];
     };
-    Shop: {
-      featured: null | components["schemas"]["Featured"];
-      tabs: components["schemas"]["ShopTab"][];
-      bundles: components["schemas"]["Bundle"][];
-      cacheTtlSec: number;
-    };
-    InventoryEntry: {
-      itemId: string;
-      slot: components["schemas"]["Slot"];
-      /** Format: date-time */
-      acquiredAt: string;
-      source: string;
-      item: components["schemas"]["ItemDescription"];
-    };
-    /** @description Every slot is optional, so PUT sends only the changed ones; null is the default item */
-    Loadout: {
-      field?: string | null;
-      fence?: string | null;
-      stream?: string | null;
-      rock?: string | null;
-      x2?: string | null;
-      bridge?: string | null;
-      bomb?: string | null;
-      target?: string | null;
-      avatar?: string | null;
-      frame?: string | null;
-      badges?: string[];
-      title?: string | null;
-      fxClick?: string | null;
-      fxReveal?: string | null;
-      fxVictory?: string | null;
+    Inventory: {
+      items: components["schemas"]["ShopItemView"][];
+      /** @description Kind → key of the equipped item; an empty key is the default */
+      equipped: {
+        [key: string]: string;
+      };
     };
     /** @enum {string} */
     AdPlacement: "gems" | "continue" | "double" | "streak" | "event";
@@ -1525,6 +1663,54 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  authPasswordForgot: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EmailRequest"];
+      };
+    };
+    responses: {
+      /** @description The code is sent when the account exists */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CodeSent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  authPasswordReset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetPasswordRequest"];
+      };
+    };
+    responses: {
+      /** @description The password is changed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
   authLogin: {
     parameters: {
       query?: never;
@@ -1546,6 +1732,25 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["TokenPair"];
         };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  authLogoutAll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Signed out everywhere */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       default: components["responses"]["Error"];
     };
@@ -1670,6 +1875,126 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["Me"];
         };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  changePassword: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangePasswordRequest"];
+      };
+    };
+    responses: {
+      /** @description The password is changed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  changeEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ChangeEmailRequest"];
+      };
+    };
+    responses: {
+      /** @description The code is sent to the new address */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CodeSent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  confirmEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          /** @description 6 digits from the e-mail */
+          code: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The e-mail is changed; the backend answers with its profile, which the client does not read */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": Record<string, never>;
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  listDevices: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The devices the account is signed in on */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            devices: components["schemas"]["Device"][];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  removeDevice: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The device is signed out */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       default: components["responses"]["Error"];
     };
@@ -1939,30 +2264,27 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Shop"];
+          "application/json": components["schemas"]["ShopCatalog"];
         };
       };
       default: components["responses"]["Error"];
     };
   };
-  postShopPurchase: {
+  buyShopItem: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        key: string;
+      };
       cookie?: never;
     };
     requestBody: {
       content: {
-        "application/json":
-          | {
-              itemId: string;
-              expectedPrice: components["schemas"]["Price"];
-            }
-          | {
-              bundleId: string;
-              expectedPrice: components["schemas"]["Price"];
-            };
+        "application/json": {
+          price: number;
+          currency: components["schemas"]["ShopCurrency"];
+        };
       };
     };
     responses: {
@@ -1973,16 +2295,16 @@ export interface operations {
         };
         content: {
           "application/json": {
-            purchaseId: string;
+            item: components["schemas"]["ShopItemView"];
             granted: string[];
-            wallet: components["schemas"]["Wallet"];
+            wallet: components["schemas"]["BackendWallet"];
           };
         };
       };
       default: components["responses"]["Error"];
     };
   };
-  getInventory: {
+  getMyItems: {
     parameters: {
       query?: never;
       header?: never;
@@ -1991,21 +2313,19 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Owned items with their descriptions (decision 0021 */
+      /** @description Owned items, default ones included, and what is equipped */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            items: components["schemas"]["InventoryEntry"][];
-          };
+          "application/json": components["schemas"]["Inventory"];
         };
       };
       default: components["responses"]["Error"];
     };
   };
-  putLoadout: {
+  putEquipment: {
     parameters: {
       query?: never;
       header?: never;
@@ -2014,17 +2334,41 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["Loadout"];
+        "application/json": {
+          slot: components["schemas"]["ShopKind"];
+          item?: string;
+        };
       };
     };
     responses: {
-      /** @description The whole loadout after the change */
+      /** @description The inventory after the change */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Loadout"];
+          "application/json": components["schemas"]["Inventory"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getWallet: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Coins and emeralds (gems) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BackendWallet"];
         };
       };
       default: components["responses"]["Error"];
@@ -2689,6 +3033,9 @@ export const errorCodeValues: ReadonlyArray<
   "not_linked",
   "server_busy",
   "not_enough_gems",
+  "not_enough_coins",
+  "item_not_found",
+  "app_update_needed",
   "cannot_continue",
   "account_exists",
   "already_linked",
@@ -2738,32 +3085,37 @@ export const attemptResultStatusValues: ReadonlyArray<
 export const streakStateRestoreMethodsValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["StreakState"]["restoreMethods"]
 > = ["ad", "emeralds"];
-export const rarityValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["Rarity"]> = [
-  "common",
-  "rare",
-  "epic",
-  "legendary",
-];
-export const slotValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["Slot"]> = [
-  "field",
+export const shopRarityValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ShopRarity"]
+> = ["common", "rare", "epic", "legendary", "exclusive"];
+export const shopKindValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ShopKind"]
+> = [
+  "board",
   "fence",
   "stream",
-  "rock",
-  "x2",
   "bridge",
+  "heavy",
+  "rock",
   "bomb",
-  "target",
-  "avatar",
+  "buoy",
+  "beacon",
+  "marker",
+  "number",
+  "tap",
+  "reveal",
+  "win",
   "frame",
-  "badges",
   "title",
-  "fxClick",
-  "fxReveal",
-  "fxVictory",
+  "avatar",
+  "bundle",
 ];
-export const shopTabIdValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["ShopTab"]["id"]
-> = ["exclusive", "holiday", "elements", "fields", "profile", "effects"];
+export const shopTabKeyValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ShopTabKey"]
+> = ["exclusive", "holiday", "elements", "boards", "bundles", "profile", "effects"];
+export const shopCurrencyValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ShopCurrency"]
+> = ["coins", "gems"];
 export const adPlacementValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["AdPlacement"]
 > = ["gems", "continue", "double", "streak", "event"];

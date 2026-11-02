@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
-import { meQueryOptions } from "@entities/wallet";
+import { walletQueryOptions } from "@entities/wallet";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
 import { useRestoreStreak } from "./use-restore-streak";
@@ -27,7 +27,9 @@ const renderRestore = async (handlers: ReturnType<typeof callbacks>) => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
   const view = await renderHook(() => useRestoreStreak(PRICE, handlers), { wrapper });
-  await waitFor(() => expect(queryClient.getQueryData(meQueryOptions().queryKey)).toBeDefined());
+  await waitFor(() =>
+    expect(queryClient.getQueryData(walletQueryOptions().queryKey)).toBeDefined(),
+  );
   // Query updates reach the hook on the next macrotask (обновления запроса доходят до хука на следующей макрозадаче).
   await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   return { ...view, queryClient };
@@ -43,13 +45,11 @@ describe("useRestoreStreak", () => {
     await act(async () => result.current.handleRestore());
 
     await waitFor(() => expect(handlers.onRestored).toHaveBeenCalled());
-    expect(queryClient.getQueryData(meQueryOptions().queryKey)?.wallet.emeralds).toBe(2610);
+    expect(queryClient.getQueryData(walletQueryOptions().queryKey)?.emeralds).toBe(2610);
   });
 
   test("opens the ways to earn when emeralds are short, sending nothing", async () => {
-    mockServer.use(
-      http.get(mockUrl("/me"), () => HttpResponse.json({ wallet: { emeralds: 10, coins: 0 } })),
-    );
+    mockServer.use(http.get(mockUrl("/wallet"), () => HttpResponse.json({ gems: 10, coins: 0 })));
     const handlers = callbacks();
     const { result } = await renderRestore(handlers);
 
@@ -86,6 +86,6 @@ describe("useRestoreStreak", () => {
     await act(async () => result.current.handleRestore());
 
     await waitFor(() => expect(handlers.onError).toHaveBeenCalledWith("errors.NETWORK"));
-    expect(queryClient.getQueryData(meQueryOptions().queryKey)?.wallet.emeralds).toBe(2640);
+    expect(queryClient.getQueryData(walletQueryOptions().queryKey)?.emeralds).toBe(2640);
   });
 });

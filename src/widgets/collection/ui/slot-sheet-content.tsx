@@ -53,7 +53,7 @@ const SlotSheetContent = ({
         {t(`profile.slots.${slot}`)}
       </Text>
       {isBoardSlot(slot) ? (
-        <View style={styles.visual}>{renderBoard(equipped?.item.package.url ?? null)}</View>
+        <View style={styles.visual}>{renderBoard(equipped?.item.skinUrl ?? null)}</View>
       ) : null}
       <Pressable
         testID="slot-default"
@@ -79,7 +79,7 @@ const SlotSheetContent = ({
           accessibilityRole="radio"
           accessibilityState={{ selected: isEquipped, disabled: !isOnline }}
           disabled={!isOnline || isEquipped}
-          onPress={() => equip([{ id: entry.itemId, slot }], entry.item.name)}
+          onPress={() => equip({ id: entry.itemId, slot }, entry.item.name)}
           style={[styles.option, isEquipped ? styles.selected : null]}
         >
           <View style={styles.thumb}>

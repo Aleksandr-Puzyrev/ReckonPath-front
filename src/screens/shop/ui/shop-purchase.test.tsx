@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { useAccountStore } from "@entities/session";
 import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
+import { buyMockItem } from "@shared/test-utils/buy-mock-item";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
@@ -29,7 +30,7 @@ const openCard = (name: string) => fireEvent.press(screen.getByLabelText(new Reg
 
 const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
 
-const emeralds = async () => (await apiClient.GET("/me")).data?.wallet.emeralds;
+const emeralds = async () => (await apiClient.GET("/wallet")).data?.gems;
 
 describe("Shop purchase", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
@@ -81,6 +82,56 @@ describe("Shop purchase", () => {
     );
   });
 
+  test("shows an error when the first bundle part is not in the shop (decision 0055 #10)", async () => {
+    mockServer.use(
+      http.get(mockUrl("/shop"), () =>
+        HttpResponse.json({
+          serverTime: new Date().toISOString(),
+          wallet: { coins: 18420, gems: 2640 },
+          tabs: [],
+          items: [
+            {
+              key: "night",
+              tab: "exclusive",
+              kind: "board",
+              title: "Ночной сигнал",
+              description: "",
+              rarity: "legendary",
+              currency: "gems",
+              price: 1680,
+              owned: false,
+              equipped: false,
+            },
+            {
+              key: "set_garden",
+              tab: "bundles",
+              kind: "bundle",
+              title: "Набор «Сад»",
+              description: "",
+              rarity: "rare",
+              currency: "gems",
+              price: 560,
+              owned: false,
+              equipped: false,
+              parts: ["garden"],
+              partsOwned: [],
+            },
+          ],
+        }),
+      ),
+    );
+    await renderShop();
+    await openTab("Наборы");
+    await openCard("Набор «Сад»");
+    await fireEvent.press(screen.getByTestId("preview-buy"));
+    await act(async () => fireEvent.press(screen.getByText("Купить")));
+    await screen.findByText("Покупка прошла");
+
+    await act(async () => fireEvent.press(screen.getByTestId("success-equip")));
+
+    expect(await screen.findByText("Что-то пошло не так. Попробуй ещё раз")).toBeOnTheScreen();
+  });
+
   test("makes one purchase on a double tap (SHP-04)", async () => {
     await renderShop();
     await openTab("Поля");
@@ -95,9 +146,7 @@ describe("Shop purchase", () => {
   });
 
   test("opens the ways to earn when emeralds are short (SHP-02)", async () => {
-    mockServer.use(
-      http.get(mockUrl("/me"), () => HttpResponse.json({ wallet: { emeralds: 100, coins: 0 } })),
-    );
+    mockServer.use(http.get(mockUrl("/wallet"), () => HttpResponse.json({ gems: 100, coins: 0 })));
     await renderShop();
     await openTab("Поля");
     await openCard("Коралловый риф");
@@ -120,9 +169,7 @@ describe("Shop purchase", () => {
   });
 
   test("lists the bundle parts with the owned ones and the struck base price (SHP-08)", async () => {
-    await apiClient.POST("/shop/purchase", {
-      body: { itemId: "garden", expectedPrice: { emeralds: 520 } },
-    });
+    await buyMockItem("garden", { emeralds: 520 });
     await renderShop();
     await openTab("Наборы");
 
@@ -135,9 +182,7 @@ describe("Shop purchase", () => {
   });
 
   test("shows a complete bundle without a purchase (SHP-09)", async () => {
-    await apiClient.POST("/shop/purchase", {
-      body: { bundleId: "set_garden", expectedPrice: { emeralds: 560 } },
-    });
+    await buyMockItem("set_garden", { emeralds: 560 });
     await renderShop();
     await openTab("Наборы");
 
@@ -149,8 +194,8 @@ describe("Shop purchase", () => {
 
   test("explains an ended offer and closes the preview (SHP-06)", async () => {
     mockServer.use(
-      http.post(mockUrl("/shop/purchase"), () =>
-        HttpResponse.json({ error: { code: "offer_ended" } }, { status: 422 }),
+      http.post(mockUrl("/shop/items/:key/buy"), () =>
+        HttpResponse.json({ error: { code: "offer_ended" } }, { status: 410 }),
       ),
     );
     await renderShop();
@@ -166,7 +211,7 @@ describe("Shop purchase", () => {
 
   test("says the last copy is gone and closes the preview (SHP-07)", async () => {
     mockServer.use(
-      http.post(mockUrl("/shop/purchase"), () =>
+      http.post(mockUrl("/shop/items/:key/buy"), () =>
         HttpResponse.json({ error: { code: "sold_out" } }, { status: 422 }),
       ),
     );
@@ -182,9 +227,7 @@ describe("Shop purchase", () => {
   });
 
   test("disables equip offline (decision 0023 #20)", async () => {
-    await apiClient.POST("/shop/purchase", {
-      body: { itemId: "reef", expectedPrice: { emeralds: 480 } },
-    });
+    await buyMockItem("reef", { emeralds: 480 });
     await renderShop();
     await act(async () => onlineManager.setOnline(false));
     await openTab("Поля");

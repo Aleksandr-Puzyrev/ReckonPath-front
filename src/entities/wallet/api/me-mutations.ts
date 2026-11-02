@@ -5,6 +5,8 @@ import { apiClient, readData, readEmpty } from "@shared/api";
 export const deleteMeMutationOptions = () =>
   mutationOptions({
     mutationKey: ["me", "delete"],
+    // A finished mutation keeps its variables in the cache; the password must not stay there (завершённая мутация хранит переменные в кэше; пароль не должен там оставаться).
+    gcTime: 0,
     mutationFn: async (password: string) =>
       readData(await apiClient.DELETE("/me", { body: { password } })),
   });

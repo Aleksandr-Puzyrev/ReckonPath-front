@@ -15,12 +15,12 @@ const TAB_ORDER: readonly ShopTabId[] = [
   "effects",
 ];
 const EFFECT_SLOTS: ReadonlySet<ShopItem["slot"]> = new Set(["fxClick", "fxReveal", "fxVictory"]);
-const RARITY_ORDER: readonly Rarity[] = ["legendary", "epic", "rare", "common"];
+const RARITY_ORDER: readonly Rarity[] = ["exclusive", "legendary", "epic", "rare", "common"];
 
 const bundleOfferOf = (bundle: Bundle): ShopOffer => ({
   kind: "bundle",
   bundle,
-  isComplete: bundle.items.every((id) => bundle.ownedItems.includes(id)),
+  isComplete: bundle.items.length > 0 && bundle.items.every((id) => bundle.ownedItems.includes(id)),
 });
 
 const cardsOfTab = (shop: Shop, tabId: ShopTabId): ShopOffer[] => {

@@ -2,7 +2,6 @@ import { http, HttpResponse } from "msw/http";
 import { z } from "zod";
 
 import { mockPlayerLevel } from "./mock-player";
-import { mockShopState } from "./mock-shop";
 import { mockWallet } from "./mock-wallet";
 import { mockUrl } from "./mock-url";
 
@@ -42,7 +41,6 @@ const meOf = () => ({
   ...mockPlayerLevel(),
   flags: { nickChangeFreeAvailable: true, nickChangeAvailableAt: null, deletionScheduledAt },
   wallet: mockWallet(),
-  loadout: mockShopState().loadout,
 });
 
 const validation = () =>

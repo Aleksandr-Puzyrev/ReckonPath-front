@@ -4,16 +4,14 @@ import { featuredKeyOf, findOffer } from "./find-offer";
 
 const ITEM: ShopItem = {
   id: "reef",
-  type: "FIELD",
   slot: "field",
   rarity: "rare",
   name: "Coral reef",
   description: "",
   preview: "",
-  package: { url: "", sha256: "", version: 1 },
+  skinUrl: "",
   price: { emeralds: 480 },
   availableTo: null,
-  stockLeft: null,
   owned: false,
   equipped: false,
   visibleInMatch: true,
@@ -36,7 +34,6 @@ const SHOP: Shop = {
       availableTo: null,
     },
   ],
-  cacheTtlSec: 300,
 };
 
 describe("findOffer", () => {

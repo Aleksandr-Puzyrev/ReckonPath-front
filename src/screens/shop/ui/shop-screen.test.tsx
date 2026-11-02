@@ -3,8 +3,8 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
-import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
+import { buyMockItem, equipMockItem } from "@shared/test-utils/buy-mock-item";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
@@ -58,13 +58,9 @@ describe("ShopScreen", () => {
   });
 
   test("marks owned and equipped items and puts them last", async () => {
-    await apiClient.POST("/shop/purchase", {
-      body: { itemId: "reef", expectedPrice: { emeralds: 480 } },
-    });
-    await apiClient.POST("/shop/purchase", {
-      body: { itemId: "garden", expectedPrice: { emeralds: 520 } },
-    });
-    await apiClient.PUT("/loadout", { body: { field: "garden" } });
+    await buyMockItem("reef", { emeralds: 480 });
+    await buyMockItem("garden", { emeralds: 520 });
+    await equipMockItem("board", "garden");
     await renderShop();
 
     await openTab("Поля");
@@ -82,9 +78,7 @@ describe("ShopScreen", () => {
   });
 
   test("hides owned items with the chip", async () => {
-    await apiClient.POST("/shop/purchase", {
-      body: { itemId: "reef", expectedPrice: { emeralds: 480 } },
-    });
+    await buyMockItem("reef", { emeralds: 480 });
     await renderShop();
     await openTab("Поля");
 

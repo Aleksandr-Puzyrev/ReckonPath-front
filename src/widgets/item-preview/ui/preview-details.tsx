@@ -4,7 +4,14 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { OfferPreview, amountOf, formatCardLeft, isBoardSlot, offerViewOf } from "@entities/item";
+import {
+  OfferPreview,
+  amountOf,
+  formatCardLeft,
+  isBoardSlot,
+  offerViewOf,
+  rarityLookOf,
+} from "@entities/item";
 import type { ShopItem, ShopOffer } from "@entities/item";
 import { formatNumber } from "@shared/lib";
 import { RarityTag } from "@shared/ui/rarity-tag";
@@ -38,7 +45,7 @@ const PreviewDetails = ({ offer, items, renderBoard, now }: IPreviewDetails) => 
         <Text variant="eyebrow" style={styles.type}>
           {t(`shop.types.${view.slot}`)}
         </Text>
-        <RarityTag rarity={view.rarity} label={t(`shop.rarity.${view.rarity}`)} />
+        <RarityTag rarity={rarityLookOf(view.rarity)} label={t(`shop.rarity.${view.rarity}`)} />
       </View>
       <Text variant="title.l" accessibilityRole="header">
         {view.name}
@@ -54,7 +61,7 @@ const PreviewDetails = ({ offer, items, renderBoard, now }: IPreviewDetails) => 
       <View style={styles.visual}>
         {isBoardSlot(view.slot) && offer.kind === "item" ? (
           <>
-            {renderBoard({ packageUrl: offer.item.package.url, theme })}
+            {renderBoard({ packageUrl: offer.item.skinUrl, theme })}
             <ThemeSwitch theme={theme} onChange={setTheme} />
           </>
         ) : (

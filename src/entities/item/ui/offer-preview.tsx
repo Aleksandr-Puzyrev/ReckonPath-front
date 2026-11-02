@@ -10,6 +10,7 @@ import ProfileIcon from "@assets/icons/tabs/profile.svg";
 import ShopIcon from "@assets/icons/tabs/shop.svg";
 
 import type { Rarity, Slot } from "../model/item-type";
+import { rarityLookOf } from "../model/rarity-look";
 
 import { styles } from "./offer-preview-styles";
 
@@ -27,10 +28,12 @@ const ICONS = {
   x2: FlagIcon,
   bridge: FlagIcon,
   target: FlagIcon,
+  buoy: FlagIcon,
+  beacon: FlagIcon,
+  number: FlagIcon,
   bomb: MineIcon,
   avatar: ProfileIcon,
   frame: ProfileIcon,
-  badges: ProfileIcon,
   title: ProfileIcon,
   fxClick: StarIcon,
   fxReveal: StarIcon,
@@ -40,7 +43,8 @@ const ICONS = {
 
 const OfferPreview = ({ preview, rarity, slot }: IOfferPreview) => {
   const { theme } = useUnistyles();
-  styles.useVariants({ rarity });
+  const look = rarityLookOf(rarity);
+  styles.useVariants({ rarity: look });
   const Icon = ICONS[slot];
   const iconSize = theme.sizes.icon.xl;
 
@@ -50,7 +54,7 @@ const OfferPreview = ({ preview, rarity, slot }: IOfferPreview) => {
 
   return (
     <View style={[styles.preview, styles.placeholder]}>
-      <Icon width={iconSize} height={iconSize} color={theme.colors.rarity[rarity]} />
+      <Icon width={iconSize} height={iconSize} color={theme.colors.rarity[look]} />
     </View>
   );
 };

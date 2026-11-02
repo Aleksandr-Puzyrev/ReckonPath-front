@@ -20,6 +20,7 @@ export const useProfileScreen = () => {
     isPending: me.isPending,
     isOnline,
     inventory: inventory?.items ?? [],
+    loadout: inventory?.loadout ?? {},
     slot,
     isEarnOpen,
     handleRetry: () => void me.refetch(),

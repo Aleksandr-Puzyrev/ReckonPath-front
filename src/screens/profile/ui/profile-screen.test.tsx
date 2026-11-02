@@ -4,8 +4,8 @@ import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
 import { useAccountStore } from "@entities/session";
-import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
+import { buyMockItem, equipMockItem } from "@shared/test-utils/buy-mock-item";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
@@ -36,9 +36,7 @@ const renderGuest = async () => {
 };
 
 const buyReef = async () => {
-  await apiClient.POST("/shop/purchase", {
-    body: { itemId: "reef", expectedPrice: { emeralds: 480 } },
-  });
+  await buyMockItem("reef", { emeralds: 480 });
 };
 
 describe("ProfileScreen", () => {
@@ -91,7 +89,6 @@ describe("ProfileScreen", () => {
           xp: 340,
           xpToNext: 475,
           wallet: { emeralds: 0, coins: 0 },
-          loadout: {},
         }),
       ),
     );
@@ -101,10 +98,11 @@ describe("ProfileScreen", () => {
     expect(screen.queryByTestId("guest-sign-up")).toBeNull();
   });
 
-  test("shows eleven collection slots with the default items (decision 0024 #6)", async () => {
+  test("shows fourteen collection slots with the default items (decisions 0024 #6, 0055 #2)", async () => {
     await renderProfile();
 
-    expect(screen.getAllByRole("button", { name: /: По умолчанию$/ })).toHaveLength(11);
+    expect(screen.getAllByRole("button", { name: /: По умолчанию$/ })).toHaveLength(14);
+    expect(screen.getByLabelText("Буй: По умолчанию")).toBeOnTheScreen();
     expect(screen.queryByText("FX")).toBeNull();
   });
 
@@ -121,7 +119,7 @@ describe("ProfileScreen", () => {
 
   test("puts the default item back", async () => {
     await buyReef();
-    await apiClient.PUT("/loadout", { body: { field: "reef" } });
+    await equipMockItem("board", "reef");
     await renderProfile();
     await screen.findByLabelText("Поле: Коралловый риф");
 

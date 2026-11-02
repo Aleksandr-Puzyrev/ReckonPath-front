@@ -146,9 +146,7 @@ describe("DailyScreen", () => {
   test("opens the ways to earn when emeralds are short for the restore", async () => {
     unlockDaily();
     serveStreak({ restorable: true, price: 30 });
-    mockServer.use(
-      http.get(mockUrl("/me"), () => HttpResponse.json({ wallet: { emeralds: 10, coins: 0 } })),
-    );
+    mockServer.use(http.get(mockUrl("/wallet"), () => HttpResponse.json({ gems: 10, coins: 0 })));
     await renderScreen(createQueryWrapper());
     await screen.findByText("Серия 12 дней прервалась");
     await act(() => jest.advanceTimersByTimeAsync(0));

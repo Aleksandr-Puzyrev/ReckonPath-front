@@ -2,9 +2,9 @@ import type { components } from "../generated/schema";
 
 import type { MockPrice } from "./mock-wallet";
 
-type Slot = components["schemas"]["Slot"];
-type Rarity = components["schemas"]["Rarity"];
-type TabId = components["schemas"]["ShopTab"]["id"];
+type Kind = Exclude<components["schemas"]["ShopKind"], "bundle">;
+type Rarity = components["schemas"]["ShopRarity"];
+type TabKey = components["schemas"]["ShopTabKey"];
 
 interface LocalText {
   ru: string;
@@ -13,16 +13,14 @@ interface LocalText {
 
 export interface MockItem {
   id: string;
-  tab: TabId;
-  type: string;
-  slot: Slot;
+  tab: TabKey;
+  kind: Kind;
   rarity: Rarity;
   name: LocalText;
   description: LocalText;
   price: MockPrice;
   dropDays: number | null;
-  stock: number | null;
-  visibleInMatch: boolean;
+  isDefault: boolean;
 }
 
 export interface MockBundle {
@@ -38,22 +36,28 @@ export interface MockBundle {
 
 const DROP_DAYS = 6;
 
-const item = (
-  fields: Omit<MockItem, "dropDays" | "stock" | "visibleInMatch"> & Partial<MockItem>,
-): MockItem => ({
+const item = (fields: Omit<MockItem, "dropDays" | "isDefault"> & Partial<MockItem>): MockItem => ({
   dropDays: null,
-  stock: null,
-  visibleInMatch: true,
+  isDefault: false,
   ...fields,
 });
 
 // The catalog of design 22.x (каталог из дизайна 22.x).
 export const MOCK_ITEMS: readonly MockItem[] = [
   item({
+    id: "base_board",
+    tab: "boards",
+    kind: "board",
+    rarity: "common",
+    name: { ru: "Стандартное поле", en: "Standard board" },
+    description: { ru: "", en: "" },
+    price: { coins: 0 },
+    isDefault: true,
+  }),
+  item({
     id: "night",
     tab: "exclusive",
-    type: "FIELD",
-    slot: "field",
+    kind: "board",
     rarity: "legendary",
     name: { ru: "Ночной сигнал", en: "Night signal" },
     description: {
@@ -66,8 +70,7 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "sparks",
     tab: "exclusive",
-    type: "REVEAL_FX",
-    slot: "fxReveal",
+    kind: "reveal",
     rarity: "epic",
     name: { ru: "Искры", en: "Sparks" },
     description: {
@@ -80,8 +83,7 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "pumpkin",
     tab: "holiday",
-    type: "FIELD",
-    slot: "field",
+    kind: "board",
     rarity: "epic",
     name: { ru: "Тыквенное поле", en: "Pumpkin field" },
     description: {
@@ -94,20 +96,17 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "salute",
     tab: "holiday",
-    type: "VICTORY_FX",
-    slot: "fxVictory",
+    kind: "win",
     rarity: "epic",
     name: { ru: "Салют", en: "Fireworks" },
     description: { ru: "Залп над найденным сигналом.", en: "A salvo over the found signal." },
     price: { emeralds: 980 },
     dropDays: DROP_DAYS,
-    visibleInMatch: false,
   }),
   item({
     id: "fence_neon",
     tab: "elements",
-    type: "ELEMENT",
-    slot: "fence",
+    kind: "fence",
     rarity: "rare",
     name: { ru: "Неоновый забор", en: "Neon fence" },
     description: { ru: "Бирюзовая планка с пульсом.", en: "A turquoise bar with a pulse." },
@@ -116,18 +115,25 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "stream_ice",
     tab: "elements",
-    type: "ELEMENT",
-    slot: "stream",
+    kind: "stream",
     rarity: "rare",
     name: { ru: "Ледяной ручей", en: "Ice stream" },
     description: { ru: "Бледно-голубая вода с инеем.", en: "Pale blue water with frost." },
     price: { coins: 3800 },
   }),
   item({
+    id: "buoy_glow",
+    tab: "elements",
+    kind: "buoy",
+    rarity: "exclusive",
+    name: { ru: "Светящийся буй", en: "Glowing buoy" },
+    description: { ru: "Буй с огоньком.", en: "A buoy with a light." },
+    price: { emeralds: 600 },
+  }),
+  item({
     id: "bomb_star",
     tab: "elements",
-    type: "ELEMENT",
-    slot: "bomb",
+    kind: "bomb",
     rarity: "common",
     name: { ru: "Морская звезда", en: "Sea star" },
     description: { ru: "Так выглядит бомба после взрыва.", en: "How a bomb looks after it blows." },
@@ -136,8 +142,7 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "marker_gold",
     tab: "elements",
-    type: "ELEMENT",
-    slot: "target",
+    kind: "marker",
     rarity: "common",
     name: { ru: "Золотой маркер", en: "Gold marker" },
     description: { ru: "Маркер найденной цели.", en: "Marker for a found target." },
@@ -145,9 +150,8 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   }),
   item({
     id: "reef",
-    tab: "fields",
-    type: "FIELD",
-    slot: "field",
+    tab: "boards",
+    kind: "board",
     rarity: "rare",
     name: { ru: "Коралловый риф", en: "Coral reef" },
     description: {
@@ -158,9 +162,8 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   }),
   item({
     id: "creek",
-    tab: "fields",
-    type: "FIELD",
-    slot: "field",
+    tab: "boards",
+    kind: "board",
     rarity: "epic",
     name: { ru: "Изумрудный ручей", en: "Emerald creek" },
     description: {
@@ -171,9 +174,8 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   }),
   item({
     id: "aurora",
-    tab: "fields",
-    type: "FIELD",
-    slot: "field",
+    tab: "boards",
+    kind: "board",
     rarity: "legendary",
     name: { ru: "Северное сияние", en: "Northern lights" },
     description: { ru: "Холодный лёд и фиолетовое небо.", en: "Cold ice and a violet sky." },
@@ -181,9 +183,8 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   }),
   item({
     id: "garden",
-    tab: "fields",
-    type: "FIELD",
-    slot: "field",
+    tab: "boards",
+    kind: "board",
     rarity: "rare",
     name: { ru: "Сад на закате", en: "Sunset garden" },
     description: {
@@ -194,9 +195,8 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   }),
   item({
     id: "fog",
-    tab: "fields",
-    type: "FIELD",
-    slot: "field",
+    tab: "boards",
+    kind: "board",
     rarity: "common",
     name: { ru: "Туманный маяк", en: "Foggy beacon" },
     description: { ru: "Серый рассвет и голубые огни.", en: "Grey dawn and blue lights." },
@@ -205,8 +205,7 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "neon",
     tab: "profile",
-    type: "FRAME",
-    slot: "frame",
+    kind: "frame",
     rarity: "rare",
     name: { ru: "Неоновая рамка", en: "Neon frame" },
     description: {
@@ -218,8 +217,7 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "prism",
     tab: "profile",
-    type: "FRAME",
-    slot: "frame",
+    kind: "frame",
     rarity: "legendary",
     name: { ru: "Призматическая рамка", en: "Prismatic frame" },
     description: { ru: "Переливается в дуэлях.", en: "Shimmers in duels." },
@@ -228,8 +226,7 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "navigator",
     tab: "profile",
-    type: "TITLE",
-    slot: "title",
+    kind: "title",
     rarity: "common",
     name: { ru: "Титул «Штурман»", en: "Title “Navigator”" },
     description: { ru: "Над ником в дуэлях.", en: "Above your name in duels." },
@@ -238,8 +235,7 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "sonar",
     tab: "effects",
-    type: "CLICK_FX",
-    slot: "fxClick",
+    kind: "tap",
     rarity: "common",
     name: { ru: "Сонар", en: "Sonar" },
     description: { ru: "Кольца расходятся от тапа.", en: "Rings spread from each tap." },
@@ -248,13 +244,11 @@ export const MOCK_ITEMS: readonly MockItem[] = [
   item({
     id: "beacon_w",
     tab: "effects",
-    type: "VICTORY_FX",
-    slot: "fxVictory",
+    kind: "win",
     rarity: "common",
     name: { ru: "Маяк", en: "Beacon" },
     description: { ru: "Луч над сигналом.", en: "A beam over the signal." },
     price: { emeralds: 200 },
-    visibleInMatch: false,
   }),
 ];
 

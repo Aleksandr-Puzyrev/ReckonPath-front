@@ -12,6 +12,7 @@ import { attemptsHandlers } from "./attempts-handlers";
 import { authHandlers } from "./auth-handlers";
 import { customLevelHandlers } from "./custom-level-handlers";
 import { dailyHandlers } from "./daily-handlers";
+import { deviceHandlers } from "./device-handlers";
 import { meHandlers } from "./me-handlers";
 import { mockUrl } from "./mock-url";
 import { shopHandlers } from "./shop-handlers";
@@ -64,6 +65,7 @@ export const handlers = [
   http.get(mockUrl("/version"), () => HttpResponse.json(versionMock())),
   http.get(mockUrl("/maintenance"), () => HttpResponse.json(maintenanceMock())),
   ...authHandlers,
+  ...deviceHandlers,
   ...attemptsHandlers,
   ...dailyHandlers,
   ...meHandlers,

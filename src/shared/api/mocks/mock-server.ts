@@ -12,6 +12,7 @@ import { resetMockAuth } from "./auth-handlers";
 import { serveBackendStyle } from "./backend-style";
 import { resetMockCustomLevels } from "./custom-level-handlers";
 import { resetMockDaily } from "./daily-handlers";
+import { resetMockDevices } from "./device-handlers";
 import { fakeGameServer } from "./fake-game/fake-game-server";
 import { resetMockArenaProfile } from "./mock-arena-profile";
 import { resetMockPlayer } from "./mock-player";
@@ -48,6 +49,7 @@ export const mockServer = {
     resetMockAuth();
     resetMockAttempts();
     resetMockDaily();
+    resetMockDevices();
     resetMockWallet();
     resetMockShop();
     resetMockMe();

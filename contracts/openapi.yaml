@@ -111,6 +111,38 @@ paths:
               schema: { $ref: "#/components/schemas/TokenPair" }
         default: { $ref: "#/components/responses/Error" }
 
+  /auth/password/forgot:
+    post:
+      operationId: authPasswordForgot
+      description: E-mails a code for a new password (decision 0053 #9).
+      security: [{}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EmailRequest" }
+      responses:
+        "202":
+          description: The code is sent when the account exists
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CodeSent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/password/reset:
+    post:
+      operationId: authPasswordReset
+      description: Sets the new password by the code and ends every session of the account.
+      security: [{}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ResetPasswordRequest" }
+      responses:
+        "204": { description: The password is changed }
+        default: { $ref: "#/components/responses/Error" }
+
   /auth/login:
     post:
       operationId: authLogin
@@ -126,6 +158,14 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/TokenPair" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/logout-all:
+    post:
+      operationId: authLogoutAll
+      description: Ends every session of the account, this one too (decision 0053 #14).
+      responses:
+        "204": { description: Signed out everywhere }
         default: { $ref: "#/components/responses/Error" }
 
   /auth/refresh:
@@ -205,6 +245,83 @@ paths:
                 required: [purgeAfter]
                 properties:
                   purgeAfter: { type: string, format: date-time }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/password:
+    put:
+      operationId: changePassword
+      description: Changes the password and ends the other sessions of the account (decision 0053 #11).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChangePasswordRequest" }
+      responses:
+        "204": { description: The password is changed }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/email:
+    post:
+      operationId: changeEmail
+      description: E-mails a code to the new address, confirmed by the current password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChangeEmailRequest" }
+      responses:
+        "202":
+          description: The code is sent to the new address
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CodeSent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/email/confirm:
+    post:
+      operationId: confirmEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, description: 6 digits from the e-mail }
+      responses:
+        "200":
+          description: The e-mail is changed; the backend answers with its profile, which the client does not read
+          content:
+            application/json:
+              schema: { type: object }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/devices:
+    get:
+      operationId: listDevices
+      responses:
+        "200":
+          description: The devices the account is signed in on
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [devices]
+                properties:
+                  devices:
+                    type: array
+                    items: { $ref: "#/components/schemas/Device" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/devices/{id}:
+    delete:
+      operationId: removeDevice
+      description: Ends the session of that device and removes it.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: The device is signed out }
         default: { $ref: "#/components/responses/Error" }
 
   /me/restore:
@@ -430,33 +547,31 @@ paths:
   /shop:
     get:
       operationId: getShop
+      description: The backend showroom (decision 0055); the client groups the flat list itself.
       responses:
         "200":
           description: Catalog for the player
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Shop" }
+              schema: { $ref: "#/components/schemas/ShopCatalog" }
         default: { $ref: "#/components/responses/Error" }
 
-  /shop/purchase:
+  /shop/items/{key}/buy:
     post:
-      operationId: postShopPurchase
+      operationId: buyShopItem
+      description: Buys an item or a bundle at the price the player saw.
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string } }
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              oneOf:
-                - type: object
-                  required: [itemId, expectedPrice]
-                  properties:
-                    itemId: { type: string }
-                    expectedPrice: { $ref: "#/components/schemas/Price" }
-                - type: object
-                  required: [bundleId, expectedPrice]
-                  properties:
-                    bundleId: { type: string }
-                    expectedPrice: { $ref: "#/components/schemas/Price" }
+              type: object
+              required: [price, currency]
+              properties:
+                price: { type: integer }
+                currency: { $ref: "#/components/schemas/ShopCurrency" }
       responses:
         "200":
           description: Purchase granted
@@ -464,46 +579,57 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [purchaseId, granted, wallet]
+                required: [item, granted, wallet]
                 properties:
-                  purchaseId: { type: string }
+                  item: { $ref: "#/components/schemas/ShopItemView" }
                   granted:
                     type: array
                     items: { type: string }
-                  wallet: { $ref: "#/components/schemas/Wallet" }
+                  wallet: { $ref: "#/components/schemas/BackendWallet" }
         default: { $ref: "#/components/responses/Error" }
 
-  /inventory:
+  /me/items:
     get:
-      operationId: getInventory
+      operationId: getMyItems
       responses:
         "200":
-          description: Owned items with their descriptions (decision 0021 #2)
+          description: Owned items, default ones included, and what is equipped
           content:
             application/json:
-              schema:
-                type: object
-                required: [items]
-                properties:
-                  items:
-                    type: array
-                    items: { $ref: "#/components/schemas/InventoryEntry" }
+              schema: { $ref: "#/components/schemas/Inventory" }
         default: { $ref: "#/components/responses/Error" }
 
-  /loadout:
+  /me/equipment:
     put:
-      operationId: putLoadout
+      operationId: putEquipment
+      description: Equips one slot; an empty item returns the default one.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/Loadout" }
+            schema:
+              type: object
+              required: [slot]
+              properties:
+                slot: { $ref: "#/components/schemas/ShopKind" }
+                item: { type: string }
       responses:
         "200":
-          description: The whole loadout after the change
+          description: The inventory after the change
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Loadout" }
+              schema: { $ref: "#/components/schemas/Inventory" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /wallet:
+    get:
+      operationId: getWallet
+      responses:
+        "200":
+          description: Coins and emeralds (gems)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BackendWallet" }
         default: { $ref: "#/components/responses/Error" }
 
   /ads/limits:
@@ -986,6 +1112,9 @@ components:
         - not_linked
         - server_busy
         - not_enough_gems
+        - not_enough_coins
+        - item_not_found
+        - app_update_needed
         - cannot_continue
         - account_exists
         - already_linked
@@ -1123,6 +1252,40 @@ components:
         code: { type: string, description: 6 digits from the e-mail }
         device: { $ref: "#/components/schemas/DeviceInfo" }
 
+    Device:
+      type: object
+      required: [id, deviceId, platform, isCurrent, lastSeenAt]
+      properties:
+        id: { type: string }
+        deviceId: { type: string, description: Persistent install id }
+        platform: { type: string, description: "ios, android or web" }
+        name: { type: string, description: Device model }
+        appVersion: { type: string }
+        isCurrent: { type: boolean }
+        lastSeenAt: { type: string, format: date-time }
+
+    ChangePasswordRequest:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword: { type: string }
+        newPassword: { type: string, minLength: 8 }
+
+    ChangeEmailRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    ResetPasswordRequest:
+      type: object
+      required: [email, code, password]
+      properties:
+        email: { type: string, format: email }
+        code: { type: string, description: 6 digits from the e-mail }
+        password: { type: string, minLength: 8 }
+
     CodeSent:
       type: object
       required: [resendAfter]
@@ -1145,20 +1308,7 @@ components:
     Me:
       type: object
       required:
-        [
-          id,
-          nickname,
-          isGuest,
-          providers,
-          level,
-          xp,
-          xpToNext,
-          wallet,
-          arena,
-          loadout,
-          flags,
-          friendCode,
-        ]
+        [id, nickname, isGuest, providers, level, xp, xpToNext, wallet, arena, flags, friendCode]
       properties:
         id: { type: string }
         nickname: { type: string }
@@ -1180,7 +1330,6 @@ components:
             peak: { type: integer }
             rp: { type: integer }
             seasonId: { type: integer }
-        loadout: { $ref: "#/components/schemas/Loadout" }
         flags:
           type: object
           properties:
@@ -1295,169 +1444,105 @@ components:
           properties:
             coins: { type: integer }
 
-    Rarity:
+    ShopRarity:
       type: string
-      enum: [common, rare, epic, legendary]
+      enum: [common, rare, epic, legendary, exclusive]
 
-    Slot:
-      description: Loadout slot keys (decision 0021 #3)
+    ShopKind:
       type: string
       enum:
         [
-          field,
+          board,
           fence,
           stream,
-          rock,
-          x2,
           bridge,
+          heavy,
+          rock,
           bomb,
-          target,
-          avatar,
+          buoy,
+          beacon,
+          marker,
+          number,
+          tap,
+          reveal,
+          win,
           frame,
-          badges,
           title,
-          fxClick,
-          fxReveal,
-          fxVictory,
+          avatar,
+          bundle,
         ]
 
-    ItemPackage:
-      type: object
-      required: [url, sha256, version]
-      properties:
-        url: { type: string }
-        sha256: { type: string }
-        version: { type: integer }
+    ShopTabKey:
+      type: string
+      enum: [exclusive, holiday, elements, boards, bundles, profile, effects]
 
-    ItemDescription:
-      description: Name and description in the X-Locale language (decision 0021 #5)
-      type: object
-      required: [type, rarity, name, description, preview, package]
-      properties:
-        type: { type: string }
-        rarity: { $ref: "#/components/schemas/Rarity" }
-        name: { type: string }
-        description: { type: string }
-        preview: { type: string }
-        package: { $ref: "#/components/schemas/ItemPackage" }
+    ShopCurrency:
+      type: string
+      enum: [coins, gems]
 
-    ShopItem:
-      allOf:
-        - $ref: "#/components/schemas/ItemDescription"
-        - type: object
-          required: [id, slot, price, availableTo, stockLeft, owned, equipped, visibleInMatch]
-          properties:
-            id: { type: string }
-            slot: { $ref: "#/components/schemas/Slot" }
-            visibleInMatch: { type: boolean, description: "Decision 0022 #2" }
-            price: { $ref: "#/components/schemas/Price" }
-            availableTo: { type: [string, "null"], format: date-time }
-            stockLeft: { type: [integer, "null"] }
-            owned: { type: boolean }
-            equipped: { type: boolean }
-
-    ShopTab:
+    BackendWallet:
       type: object
-      required: [id, items]
+      required: [coins, gems]
       properties:
-        id:
-          type: string
-          enum: [exclusive, holiday, elements, fields, profile, effects]
-        items:
-          type: array
-          items: { $ref: "#/components/schemas/ShopItem" }
+        coins: { type: integer }
+        gems: { type: integer }
 
-    Bundle:
-      description: >
-        Name, description, rarity and preview are added for the bundle card, as for items
-        (decision 0021 #11).
+    ShopItemView:
       type: object
-      required:
-        [id, name, description, rarity, preview, items, basePrice, price, ownedItems, availableTo]
+      required: [key, tab, kind, title, description, rarity, currency, price, owned, equipped]
       properties:
-        id: { type: string }
-        name: { type: string }
-        description: { type: string }
-        rarity: { $ref: "#/components/schemas/Rarity" }
-        preview: { type: string }
-        items:
-          type: array
-          items: { type: string }
-        basePrice: { $ref: "#/components/schemas/Price" }
-        price: { $ref: "#/components/schemas/Price" }
-        ownedItems:
-          type: array
-          items: { type: string }
-        availableTo: { type: [string, "null"], format: date-time }
-
-    Featured:
-      type: object
-      required: [id, image, title, subtitle, endsAt, target]
-      properties:
-        id: { type: string }
-        image: { type: string }
+        key: { type: string }
+        tab: { $ref: "#/components/schemas/ShopTabKey" }
+        kind: { $ref: "#/components/schemas/ShopKind" }
         title: { type: string }
-        subtitle: { type: string }
+        description: { type: string }
+        rarity: { $ref: "#/components/schemas/ShopRarity" }
+        currency: { $ref: "#/components/schemas/ShopCurrency" }
+        price: { type: integer }
+        fullPrice: { type: integer }
+        owned: { type: boolean }
+        equipped: { type: boolean }
+        default: { type: boolean }
         endsAt: { type: string, format: date-time }
-        target:
-          oneOf:
-            - type: object
-              required: [bundle]
-              properties:
-                bundle: { type: string }
-            - type: object
-              required: [item]
-              properties:
-                item: { type: string }
+        image: { type: string }
+        parts:
+          type: array
+          items: { type: string }
+        partsOwned:
+          type: array
+          items: { type: string }
 
-    Shop:
+    ShopCatalog:
       type: object
-      required: [featured, tabs, bundles, cacheTtlSec]
+      required: [serverTime, wallet, tabs, items]
       properties:
-        featured:
-          oneOf:
-            - type: "null"
-            - $ref: "#/components/schemas/Featured"
+        serverTime: { type: string, format: date-time }
+        wallet: { $ref: "#/components/schemas/BackendWallet" }
+        featured: { $ref: "#/components/schemas/ShopItemView" }
         tabs:
           type: array
-          items: { $ref: "#/components/schemas/ShopTab" }
-        bundles:
+          items:
+            type: object
+            required: [key, title, count]
+            properties:
+              key: { $ref: "#/components/schemas/ShopTabKey" }
+              title: { type: string }
+              count: { type: integer }
+        items:
           type: array
-          items: { $ref: "#/components/schemas/Bundle" }
-        cacheTtlSec: { type: integer }
+          items: { $ref: "#/components/schemas/ShopItemView" }
 
-    InventoryEntry:
+    Inventory:
       type: object
-      required: [itemId, slot, acquiredAt, source, item]
+      required: [items, equipped]
       properties:
-        itemId: { type: string }
-        slot: { $ref: "#/components/schemas/Slot" }
-        acquiredAt: { type: string, format: date-time }
-        source: { type: string }
-        item: { $ref: "#/components/schemas/ItemDescription" }
-
-    Loadout:
-      description: Every slot is optional, so PUT sends only the changed ones; null is the default item
-      type: object
-      properties:
-        field: { type: [string, "null"] }
-        fence: { type: [string, "null"] }
-        stream: { type: [string, "null"] }
-        rock: { type: [string, "null"] }
-        x2: { type: [string, "null"] }
-        bridge: { type: [string, "null"] }
-        bomb: { type: [string, "null"] }
-        target: { type: [string, "null"] }
-        avatar: { type: [string, "null"] }
-        frame: { type: [string, "null"] }
-        badges:
+        items:
           type: array
-          maxItems: 3
-          items: { type: string }
-        title: { type: [string, "null"] }
-        fxClick: { type: [string, "null"] }
-        fxReveal: { type: [string, "null"] }
-        fxVictory: { type: [string, "null"] }
+          items: { $ref: "#/components/schemas/ShopItemView" }
+        equipped:
+          description: Kind → key of the equipped item; an empty key is the default
+          type: object
+          additionalProperties: { type: string }
 
     AdPlacement:
       type: string

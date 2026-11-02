@@ -1,21 +1,48 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, renderHook, waitFor } from "@testing-library/react-native";
 import { http, HttpResponse } from "msw/http";
+import type { ReactNode } from "react";
 
-import { apiClient } from "@shared/api";
-import { mockServer } from "@shared/test-utils/api-mock";
-import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
+import { inventoryQueryOptions } from "@entities/item";
+import type { Inventory } from "@entities/item";
+import { MOCK_API_ORIGIN } from "@shared/api/mocks/mock-url";
 import skins from "@shared/api/mocks/mock-skins.json";
+import { mockServer } from "@shared/test-utils/api-mock";
+import { buyMockItem, equipMockItem } from "@shared/test-utils/buy-mock-item";
+import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import skin from "./default-skin.json";
 import { useBoardSkin } from "./use-board-skin";
 
-const buyAndEquip = async (
-  itemId: string,
-  price: { emeralds: number } | { coins: number },
-  slot: string,
-) => {
-  await apiClient.POST("/shop/purchase", { body: { itemId, expectedPrice: price } });
-  await apiClient.PUT("/loadout", { body: { [slot]: itemId } });
+const skinUrlOf = (id: string) => `${MOCK_API_ORIGIN}/cdn/skins/${id}.json`;
+
+const wearing = (itemId: string, slot: "field" | "fence"): Inventory => ({
+  items: [
+    {
+      itemId,
+      slot,
+      item: {
+        name: itemId,
+        description: "",
+        rarity: "rare",
+        preview: "",
+        skinUrl: skinUrlOf(itemId),
+      },
+    },
+  ],
+  loadout: { [slot]: itemId },
+});
+
+// The backend gives no skin packages yet (decision 0054 #1), so an equipped skin is put in the cache (бэкенд пока не отдаёт пакеты скинов, поэтому надетый скин кладётся в кэш).
+const renderWearing = (inventory: Inventory) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: Infinity, staleTime: Infinity } },
+  });
+  queryClient.setQueryData(inventoryQueryOptions().queryKey, inventory);
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+  return renderHook(() => useBoardSkin(), { wrapper });
 };
 
 describe("useBoardSkin", () => {
@@ -31,19 +58,24 @@ describe("useBoardSkin", () => {
     expect(result.current.frame).toEqual(skin.dark.frame);
   });
 
-  test("wears the equipped board skin (SHP-10)", async () => {
-    await buyAndEquip("reef", { emeralds: 480 }, "field");
+  test("keeps the default skin for a backend item without palettes (decision 0054 #1)", async () => {
+    await buyMockItem("reef", { emeralds: 480 });
+    await equipMockItem("board", "reef");
 
     const { result } = await renderHook(() => useBoardSkin(), { wrapper: createQueryWrapper() });
+
+    expect(result.current.frame).toEqual(skin.dark.frame);
+  });
+
+  test("wears the equipped board skin (SHP-10)", async () => {
+    const { result } = await renderWearing(wearing("reef", "field"));
 
     await waitFor(() => expect(result.current.frame).toEqual(skins.reef.dark.frame.gradient));
     expect(result.current.cell).toEqual(skins.reef.dark.cell.stops);
   });
 
   test("recolours an element by its equipped skin", async () => {
-    await buyAndEquip("fence_neon", { coins: 4200 }, "fence");
-
-    const { result } = await renderHook(() => useBoardSkin(), { wrapper: createQueryWrapper() });
+    const { result } = await renderWearing(wearing("fence_neon", "fence"));
 
     await waitFor(() =>
       expect(result.current.elements.fence).toBe(skins.fence_neon.dark.elements.fence),
@@ -51,21 +83,16 @@ describe("useBoardSkin", () => {
   });
 
   test("keeps the default skin when the skin cannot load (SHP-11)", async () => {
-    await buyAndEquip("reef", { emeralds: 480 }, "field");
     mockServer.use(http.get("*/cdn/skins/:file", () => HttpResponse.error()));
 
-    const { result } = await renderHook(() => useBoardSkin(), { wrapper: createQueryWrapper() });
+    const { result } = await renderWearing(wearing("reef", "field"));
 
     await waitFor(() => expect(result.current.frame).toEqual(skin.dark.frame));
   });
 
   test("wears a given package in a given theme for a preview", async () => {
-    const shop = await apiClient.GET("/shop");
-    const url = shop.data?.tabs.flatMap(({ items }) => items).find(({ id }) => id === "aurora")
-      ?.package.url;
-
     const { result } = await renderHook(
-      () => useBoardSkin({ packageUrl: url ?? null, theme: "light" }),
+      () => useBoardSkin({ packageUrl: skinUrlOf("aurora"), theme: "light" }),
       { wrapper: createQueryWrapper() },
     );
 

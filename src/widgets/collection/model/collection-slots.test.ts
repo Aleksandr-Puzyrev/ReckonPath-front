@@ -5,15 +5,12 @@ import { equippedEntryOf, slotOptionsOf } from "./collection-slots";
 const entry = (itemId: string, slot: InventoryEntry["slot"]): InventoryEntry => ({
   itemId,
   slot,
-  acquiredAt: "2026-10-10T12:00:00Z",
-  source: "shop",
   item: {
-    type: "FIELD",
     rarity: "rare",
     name: itemId,
     description: "",
     preview: "",
-    package: { url: "", sha256: "", version: 1 },
+    skinUrl: "",
   },
 });
 
@@ -38,6 +35,10 @@ describe("equippedEntryOf", () => {
   });
 
   test("is null for the default item", () => {
-    expect(equippedEntryOf("field", { field: null }, INVENTORY)).toBeNull();
+    expect(equippedEntryOf("field", {}, INVENTORY)).toBeNull();
+  });
+
+  test("is null when the backend names its hidden default item", () => {
+    expect(equippedEntryOf("field", { field: "base_board" }, INVENTORY)).toBeNull();
   });
 });

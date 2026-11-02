@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import type { LevelInput } from "@reckon-path/engine";
 
 import { useGameSessionStore } from "@entities/level";
-import { meQueryOptions } from "@entities/wallet";
+import { walletQueryOptions } from "@entities/wallet";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 
 import { useContinueForEmeralds } from "./use-continue-for-emeralds";
@@ -47,7 +47,9 @@ const renderContinue = async (handlers: ReturnType<typeof callbacks>) => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
   const view = await renderHook(() => useContinueForEmeralds(handlers), { wrapper });
-  await waitFor(() => expect(queryClient.getQueryData(meQueryOptions().queryKey)).toBeDefined());
+  await waitFor(() =>
+    expect(queryClient.getQueryData(walletQueryOptions().queryKey)).toBeDefined(),
+  );
   // Query updates reach the hook on the next macrotask (обновления запроса доходят до хука на следующей макрозадаче).
   await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   return { ...view, queryClient };
@@ -72,13 +74,11 @@ describe("useContinueForEmeralds", () => {
 
     await waitFor(() => expect(handlers.onContinued).toHaveBeenCalled());
     expect(useGameSessionStore.getState().game).toMatchObject({ status: "playing", bonusMoves: 3 });
-    expect(queryClient.getQueryData(meQueryOptions().queryKey)?.wallet.emeralds).toBe(2625);
+    expect(queryClient.getQueryData(walletQueryOptions().queryKey)?.emeralds).toBe(2625);
   });
 
   test("opens the ways to earn when emeralds are short, adding nothing (LVL-17)", async () => {
-    mockServer.use(
-      http.get(mockUrl("/me"), () => HttpResponse.json({ wallet: { emeralds: 10, coins: 0 } })),
-    );
+    mockServer.use(http.get(mockUrl("/wallet"), () => HttpResponse.json({ gems: 10, coins: 0 })));
     const handlers = callbacks();
     const { result } = await renderContinue(handlers);
 
@@ -141,6 +141,6 @@ describe("useContinueForEmeralds", () => {
       type: "continue",
       method: "emeralds",
     });
-    expect(queryClient.getQueryData(meQueryOptions().queryKey)?.wallet.emeralds).toBe(2640);
+    expect(queryClient.getQueryData(walletQueryOptions().queryKey)?.emeralds).toBe(2640);
   });
 });

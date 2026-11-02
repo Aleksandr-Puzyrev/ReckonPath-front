@@ -13,6 +13,8 @@ export const loginMutationOptions = () =>
     mutationKey: ["account", "login"],
     // Offline it fails at once instead of pausing: a paused mutation would be persisted with the password (без сети сразу ошибка, а не пауза: приостановленная мутация сохранилась бы вместе с паролем).
     networkMode: "always",
+    // A finished mutation keeps its variables in the cache; the password must not stay there (завершённая мутация хранит переменные в кэше; пароль не должен там оставаться).
+    gcTime: 0,
     mutationFn: async ({ email, password }: LoginInput) => {
       const body = { email, password, device: await deviceInfo() };
       await startSession(readData(await apiClient.POST("/auth/login", { body })));

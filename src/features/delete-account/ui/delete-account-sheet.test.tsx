@@ -71,7 +71,7 @@ describe("DeleteAccountSheet", () => {
 
     await confirmWith("000000");
 
-    expect(await screen.findByText("Неверный логин или пароль")).toBeOnTheScreen();
+    expect(await screen.findByText("Неверный пароль")).toBeOnTheScreen();
     expect(onDeleted).not.toHaveBeenCalled();
     expect(useAccountStore.getState().hasLogin).toBe(true);
   });

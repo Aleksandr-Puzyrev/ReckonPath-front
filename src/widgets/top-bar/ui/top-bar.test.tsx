@@ -47,15 +47,15 @@ describe("TopBar", () => {
     expect(screen.getByText("SIGNAL HUNT")).toBeOnTheScreen();
   });
 
-  test("shows the balance from the player's data (LVL-26)", async () => {
+  test("shows the balance from the wallet (LVL-26, decision 0055 #1)", async () => {
     await renderBar(jest.fn());
 
     expect(screen.getByLabelText("Изумруды: 2640")).toBeOnTheScreen();
     expect(screen.getByLabelText("Монеты: 18420")).toBeOnTheScreen();
   });
 
-  test("hides the balance until the player's data arrives", async () => {
-    mockServer.use(http.get(mockUrl("/me"), () => HttpResponse.error()));
+  test("hides the balance until it arrives", async () => {
+    mockServer.use(http.get(mockUrl("/wallet"), () => HttpResponse.error()));
     await renderBar(jest.fn());
 
     expect(screen.queryByTestId("wallet-emeralds")).toBeNull();

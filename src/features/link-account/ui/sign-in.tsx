@@ -17,20 +17,28 @@ import FormHeader from "./form-header";
 import { styles } from "./sign-in-styles";
 
 interface ISignIn {
+  initialEmail?: string;
   onBack: () => void;
   onSignedIn: () => void;
   onNeedsCode: (email: string, resendAfter: number) => void;
+  onForgot: (email: string) => void;
   onSignUp: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
 }
 
-const DEFAULTS: SignInSchema = { email: "", password: "" };
-
-const SignIn = ({ onBack, onSignedIn, onNeedsCode, onSignUp, onError }: ISignIn) => {
+const SignIn = ({
+  initialEmail = "",
+  onBack,
+  onSignedIn,
+  onNeedsCode,
+  onForgot,
+  onSignUp,
+  onError,
+}: ISignIn) => {
   const { t } = useTranslation();
-  const { control, handleSubmit, setError } = useForm<SignInSchema>({
+  const { control, handleSubmit, setError, getValues } = useForm<SignInSchema>({
     resolver: zodResolver(signInSchema),
-    defaultValues: DEFAULTS,
+    defaultValues: { email: initialEmail, password: "" },
   });
   const signIn = useSignIn({
     onSignedIn,
@@ -82,6 +90,13 @@ const SignIn = ({ onBack, onSignedIn, onNeedsCode, onSignUp, onError }: ISignIn)
             error={errorText(fieldState.error?.message)}
           />
         )}
+      />
+      <Button
+        testID="sign-in-forgot"
+        label={t("account.forgot.link")}
+        onPress={() => onForgot(getValues("email").trim())}
+        variant="ghost"
+        size="s"
       />
       <Button
         testID="sign-in-submit"

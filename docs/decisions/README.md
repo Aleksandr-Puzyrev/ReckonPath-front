@@ -58,6 +58,9 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0050 | [`0050-account-on-backend.md`](0050-account-on-backend.md) | Account on the backend (3a): local guest, email-only sign-in, sign-up with an email code screen and texts, no conflict dialog until `/progress`, marketing consent checkbox, password rejection text, sign-out to a local guest |
 | 0051 | [`0051-guest-without-account.md`](0051-guest-without-account.md) | What the local guest sees: arena and showroom gated with approved texts, no wallet or drop on Home, ad continue with a device limit, daily from the device, My levels save behind the link sheet, guest profile and settings |
 | 0052 | [`0052-profile-on-backend.md`](0052-profile-on-backend.md) | Profile: `GET /me` stays mocked until the backend adds its fields; deletion by password with a toast and no restore screen; account language on the device only |
+| 0053 | [`0053-account-features-plan.md`](0053-account-features-plan.md) | Rest of the account on the backend: screens from existing parts, `expo-auth-session` + `expo-crypto` for VK ID / Yandex ID, keys in env, task order, captcha and push tokens later |
+| 0054 | [`0054-showroom-on-backend.md`](0054-showroom-on-backend.md) | Showroom on the backend: wait for light/dark skin palettes, show `exclusive` and extra kinds (exclusive as legendary), equip the first bundle part, derive «Видно в матче», connect despite the backend gaps |
+| 0055 | [`0055-showroom-connection.md`](0055-showroom-connection.md) | Showroom connection: balance from the backend `GET /wallet` (overrides 0052 #4), buoy/beacon/number slots, loadout from `/me/items`, «Видно в матче» except effects, `exclusive` label, drop banner, default items hidden, purchase error mapping |
 
 ## Template
 

@@ -4,8 +4,8 @@ import { uuidv7 } from "uuidv7";
 
 import {
   amountOf,
+  changedPriceOf,
   currencyOf,
-  isPrice,
   itemKeys,
   purchaseItemMutationOptions,
 } from "@entities/item";
@@ -22,7 +22,6 @@ import {
 import type { ErrorMessageKey } from "@shared/api";
 import { PURCHASE_CONFIRM_FROM_EMERALDS } from "@shared/config";
 
-export type PurchaseTarget = { itemId: string } | { bundleId: string };
 export type EndedReason = "offer_ended" | "sold_out";
 
 export interface PurchaseCallbacks {
@@ -37,7 +36,7 @@ const needOf = (details: Record<string, unknown>, fallback: number) =>
   typeof details.need === "number" ? details.need : fallback;
 
 export const usePurchaseItem = (
-  target: PurchaseTarget,
+  key: string,
   price: Price,
   { onShortOf, onPurchased, onOwned, onEnded, onError }: PurchaseCallbacks,
 ) => {
@@ -81,8 +80,14 @@ export const usePurchaseItem = (
         onEnded(code);
         return;
       }
-      if (code === "price_changed" && isPrice(details.price)) {
-        setChangedPrice(details.price);
+      if (code === "item_not_found") {
+        void refreshShop();
+        onEnded("offer_ended");
+        return;
+      }
+      const repriced = code === "price_changed" ? changedPriceOf(details) : null;
+      if (repriced !== null) {
+        setChangedPrice(repriced);
         setIsRepriced(true);
         onError(errorMessageKey(error));
         return;
@@ -92,7 +97,7 @@ export const usePurchaseItem = (
   });
 
   // One key per player action: retries of this purchase reuse it (один ключ на действие игрока: повторы этой покупки используют его).
-  const purchase = () => mutate({ target, expectedPrice: currentPrice, idempotencyKey: uuidv7() });
+  const purchase = () => mutate({ key, expectedPrice: currentPrice, idempotencyKey: uuidv7() });
 
   const handleBuy = () => {
     if (shortBy > 0) {

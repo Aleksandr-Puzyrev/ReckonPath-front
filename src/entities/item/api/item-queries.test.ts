@@ -23,15 +23,18 @@ const watchShopRequests = () => {
   return counter;
 };
 
-const buy = (itemId: string, emeralds: number) =>
-  apiClient.POST("/shop/purchase", { body: { itemId, expectedPrice: { emeralds } } });
+const buy = (key: string, gems: number) =>
+  apiClient.POST("/shop/items/{key}/buy", {
+    params: { path: { key } },
+    body: { price: gems, currency: "gems" },
+  });
 
 describe("shopQueryOptions", () => {
   beforeEach(() => i18n.changeLanguage("ru"));
 
   afterEach(() => mockServer.reset());
 
-  test("loads the catalog with tabs in the shop order and the featured drop", async () => {
+  test("groups the flat catalog into the shop tabs, bundles, and the featured drop", async () => {
     const shop = await createClient().fetchQuery(shopQueryOptions());
 
     expect(shop.tabs.map(({ id }) => id)).toEqual([
@@ -63,7 +66,7 @@ describe("shopQueryOptions", () => {
     expect(reef?.owned).toBe(true);
   });
 
-  test("stays fresh for the time the server gives", async () => {
+  test("stays fresh for five minutes", async () => {
     jest.useFakeTimers({ advanceTimers: true });
     const requests = watchShopRequests();
     const client = createClient();
@@ -92,9 +95,17 @@ describe("inventoryQueryOptions", () => {
       expect.objectContaining({
         itemId: "night",
         slot: "field",
-        source: "shop",
-        item: expect.objectContaining({ type: "FIELD", rarity: "legendary" }),
+        item: expect.objectContaining({ rarity: "legendary" }),
       }),
     ]);
+  });
+
+  test("reads the equipped items by slot", async () => {
+    await buy("night", 1680);
+    await apiClient.PUT("/me/equipment", { body: { slot: "board", item: "night" } });
+
+    const { loadout } = await createClient().fetchQuery(inventoryQueryOptions());
+
+    expect(loadout).toEqual({ field: "night" });
   });
 });

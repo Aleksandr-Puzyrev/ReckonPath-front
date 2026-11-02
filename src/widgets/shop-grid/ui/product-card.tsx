@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
-import { OfferPreview, formatCardLeft, offerViewOf } from "@entities/item";
+import { OfferPreview, formatCardLeft, offerViewOf, rarityLookOf } from "@entities/item";
 import type { ShopOffer } from "@entities/item";
 import { RarityTag } from "@shared/ui/rarity-tag";
 import { Text } from "@shared/ui/text";
@@ -18,7 +18,7 @@ interface IProductCard {
 const ProductCard = ({ card, now, onPress }: IProductCard) => {
   const { t } = useTranslation();
   const view = offerViewOf(card);
-  styles.useVariants({ rarity: view.rarity });
+  styles.useVariants({ rarity: rarityLookOf(view.rarity) });
   const type = t(`shop.types.${view.slot}`);
   const typeLine = view.isVisibleInMatch ? `${type} · ${t("shop.inMatch")}` : type;
   const timer =
@@ -56,7 +56,7 @@ const ProductCard = ({ card, now, onPress }: IProductCard) => {
       <Text variant="caption" style={styles.type} numberOfLines={1}>
         {typeLine}
       </Text>
-      <RarityTag rarity={view.rarity} label={t(`shop.rarity.${view.rarity}`)} />
+      <RarityTag rarity={rarityLookOf(view.rarity)} label={t(`shop.rarity.${view.rarity}`)} />
       <ProductPrice price={view.price} mark={view.mark} />
     </Pressable>
   );

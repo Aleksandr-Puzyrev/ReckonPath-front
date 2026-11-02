@@ -1,6 +1,7 @@
 export {
   apiSession,
   deviceInfo,
+  endEverySession,
   endSession,
   hasSavedSession,
   leaveAccount,

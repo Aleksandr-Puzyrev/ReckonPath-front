@@ -2,12 +2,11 @@ import { mutationOptions } from "@tanstack/react-query";
 
 import { apiClient, readData } from "@shared/api";
 
+import { backendPriceOf } from "../model/backend-price";
 import type { Price } from "../model/item-type";
 
-type PurchaseTarget = { itemId: string } | { bundleId: string };
-
 interface PurchaseRequest {
-  target: PurchaseTarget;
+  key: string;
   expectedPrice: Price;
   idempotencyKey: string;
 }
@@ -15,11 +14,14 @@ interface PurchaseRequest {
 export const purchaseItemMutationOptions = () =>
   mutationOptions({
     mutationKey: ["item", "purchase"],
-    mutationFn: async ({ target, expectedPrice, idempotencyKey }: PurchaseRequest) =>
-      readData(
-        await apiClient.POST("/shop/purchase", {
-          body: { ...target, expectedPrice },
+    mutationFn: async ({ key, expectedPrice, idempotencyKey }: PurchaseRequest) => {
+      const { wallet } = readData(
+        await apiClient.POST("/shop/items/{key}/buy", {
+          params: { path: { key } },
+          body: backendPriceOf(expectedPrice),
           headers: { "Idempotency-Key": idempotencyKey },
         }),
-      ),
+      );
+      return { wallet: { emeralds: wallet.gems, coins: wallet.coins } };
+    },
   });

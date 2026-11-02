@@ -60,7 +60,7 @@ const ProfileScreen = () => {
               {t("profile.collection")}
             </Text>
             <CollectionGrid
-              loadout={profile.me.loadout}
+              loadout={profile.loadout}
               inventory={profile.inventory}
               onSlotPress={profile.handleSlotPress}
             />
@@ -76,7 +76,7 @@ const ProfileScreen = () => {
       </ScrollView>
       <SlotSheet
         slot={profile.slot}
-        loadout={profile.me?.loadout ?? {}}
+        loadout={profile.loadout}
         inventory={profile.inventory}
         isOnline={profile.isOnline}
         renderBoard={(packageUrl) =>

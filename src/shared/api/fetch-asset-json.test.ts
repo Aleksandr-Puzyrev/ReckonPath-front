@@ -6,7 +6,6 @@ describe("fetchAssetJson", () => {
   test("loads an asset from the CDN", async () => {
     expect(await fetchAssetJson(`${MOCK_API_ORIGIN}/cdn/skins/reef.json`)).toMatchObject({
       id: "reef",
-      type: "FIELD",
     });
   });
 

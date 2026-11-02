@@ -13,10 +13,13 @@ import SettingsScreen from "./settings-screen";
 const mockRouter = { back: jest.fn(), push: jest.fn() };
 const mockClipboard = { setStringAsync: jest.fn(async (_text: string) => true) };
 
+const mockParams: { changed?: string; at?: string } = {};
+
 jest.mock("expo-router", () => ({
   get router() {
     return mockRouter;
   },
+  useLocalSearchParams: () => mockParams,
 }));
 jest.mock("expo-clipboard", () => ({
   setStringAsync: (text: string) => mockClipboard.setStringAsync(text),
@@ -111,6 +114,38 @@ describe("SettingsScreen", () => {
 
     expect(await screen.findByText("Ты вышел из аккаунта")).toBeOnTheScreen();
     expect(useAccountStore.getState().hasLogin).toBe(false);
+  });
+
+  test("leads an account to the password, e-mail and devices (decision 0053 #11, #14)", async () => {
+    useAccountStore.getState().markSignedIn();
+    await renderSettings();
+
+    await fireEvent.press(screen.getByTestId("settings-change-password"));
+    await fireEvent.press(screen.getByTestId("settings-change-email"));
+    await fireEvent.press(screen.getByTestId("settings-devices"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/account/password");
+    expect(mockRouter.push).toHaveBeenCalledWith("/account/email");
+    expect(mockRouter.push).toHaveBeenCalledWith("/settings/devices");
+  });
+
+  test("tells about a finished e-mail change (decision 0053 #11)", async () => {
+    mockParams.changed = "email";
+    mockParams.at = "1730000000000";
+
+    await renderSettings();
+
+    expect(screen.getByText("E-mail изменён")).toBeOnTheScreen();
+    delete mockParams.changed;
+    delete mockParams.at;
+  });
+
+  test("offers a guest no password or e-mail change", async () => {
+    await renderSettings();
+
+    expect(screen.queryByTestId("settings-change-password")).toBeNull();
+    expect(screen.queryByTestId("settings-change-email")).toBeNull();
+    expect(screen.queryByTestId("settings-devices")).toBeNull();
   });
 
   test("has nothing to delete for a guest (decision 0051 #7)", async () => {

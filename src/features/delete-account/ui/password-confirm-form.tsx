@@ -20,7 +20,7 @@ interface IPasswordConfirmForm {
 }
 
 const DEFAULTS: PasswordConfirmSchema = { password: "" };
-const WRONG_PASSWORD_KEY = "errors.invalid_credentials";
+const WRONG_PASSWORD_KEY = "errors.wrong_password";
 
 const PasswordConfirmForm = ({ onDeleted, onError }: IPasswordConfirmForm) => {
   const { t } = useTranslation();

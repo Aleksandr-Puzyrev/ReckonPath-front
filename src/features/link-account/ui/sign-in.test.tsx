@@ -15,6 +15,7 @@ const callbacks = () => ({
   onBack: jest.fn(),
   onSignedIn: jest.fn(),
   onNeedsCode: jest.fn(),
+  onForgot: jest.fn(),
   onSignUp: jest.fn(),
   onError: jest.fn(),
 });
@@ -77,5 +78,15 @@ describe("SignIn", () => {
     await renderSignIn(callbacks());
 
     expect(screen.getByText("E-mail")).toBeOnTheScreen();
+  });
+
+  test("leads to the password recovery with the typed e-mail (decision 0053 #9)", async () => {
+    const handlers = callbacks();
+    await renderSignIn(handlers);
+    await fireEvent.changeText(screen.getByTestId("sign-in-email"), "nova@mail.ru");
+
+    await fireEvent.press(screen.getByText("Забыли пароль?"));
+
+    expect(handlers.onForgot).toHaveBeenCalledWith("nova@mail.ru");
   });
 });

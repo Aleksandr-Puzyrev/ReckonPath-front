@@ -15,55 +15,44 @@ import {
   isPurchasable,
   isSamePrice,
   mockShopState,
-  stockLeftOf,
 } from "./mock-shop";
 import skins from "./mock-skins.json";
-import { MOCK_API_ORIGIN, mockUrl } from "./mock-url";
+import { mockUrl } from "./mock-url";
 import { chargePrice, mockWallet, shortOf } from "./mock-wallet";
 import type { MockPrice } from "./mock-wallet";
 
-type ShopItem = components["schemas"]["ShopItem"];
-type Loadout = components["schemas"]["Loadout"];
+type ShopItemView = components["schemas"]["ShopItemView"];
 type Locale = "ru" | "en";
 
-const CACHE_TTL_SEC = 300;
 const SKIN_PATH = "/cdn/skins/";
 const HTTP_BAD_REQUEST = 400;
 const HTTP_NOT_FOUND = 404;
 const HTTP_CONFLICT = 409;
+const HTTP_GONE = 410;
 const HTTP_UNPROCESSABLE = 422;
-const TAB_ORDER = ["exclusive", "holiday", "elements", "fields", "profile", "effects"] as const;
-const SLOTS: ReadonlySet<string> = new Set([
-  "field",
-  "fence",
-  "stream",
-  "rock",
-  "x2",
-  "bridge",
-  "bomb",
-  "target",
-  "avatar",
-  "frame",
-  "badges",
-  "title",
-  "fxClick",
-  "fxReveal",
-  "fxVictory",
-] satisfies components["schemas"]["Slot"][]);
+const TABS = [
+  "exclusive",
+  "holiday",
+  "elements",
+  "boards",
+  "bundles",
+  "profile",
+  "effects",
+] as const;
 
-const priceSchema = z.union([
-  z.object({ emeralds: z.number() }).strict(),
-  z.object({ coins: z.number() }).strict(),
-]);
-const purchaseSchema = z.union([
-  z.object({ itemId: z.string(), expectedPrice: priceSchema }),
-  z.object({ bundleId: z.string(), expectedPrice: priceSchema }),
-]);
-const MAX_BADGES = 3;
-const loadoutSchema = z.record(
-  z.string(),
-  z.union([z.string(), z.null(), z.array(z.string()).max(MAX_BADGES)]),
-);
+const buySchema = z.object({ price: z.number(), currency: z.enum(["coins", "gems"]) });
+const equipSchema = z.object({ slot: z.string(), item: z.string().optional() });
+
+interface PurchaseSuccess {
+  item: ShopItemView;
+  granted: string[];
+  wallet: { coins: number; gems: number };
+}
+
+interface StoredPurchase {
+  body: string;
+  answer: PurchaseSuccess;
+}
 
 const parseJson = (text: string): unknown => {
   try {
@@ -73,23 +62,10 @@ const parseJson = (text: string): unknown => {
   }
 };
 
-interface PurchaseSuccess {
-  purchaseId: string;
-  granted: string[];
-  wallet: { emeralds: number; coins: number };
-}
-
-interface StoredPurchase {
-  body: string;
-  answer: PurchaseSuccess;
-}
-
 let purchases = new Map<string, StoredPurchase>();
-let purchaseCount = 0;
 
 export const resetMockPurchases = () => {
   purchases = new Map();
-  purchaseCount = 0;
 };
 
 const errorResponse = (code: string, status: number, details?: Record<string, unknown>) =>
@@ -98,162 +74,158 @@ const errorResponse = (code: string, status: number, details?: Record<string, un
 const localeOf = (request: Request): Locale =>
   request.headers.get("X-Locale")?.startsWith("en") ? "en" : "ru";
 
-const isoOrNull = (time: number | null) => (time === null ? null : new Date(time).toISOString());
+const backendWallet = () => ({ coins: mockWallet().coins, gems: mockWallet().emeralds });
 
-const isEquipped = ({ id, slot }: MockItem) => {
-  const equipped = mockShopState().loadout[slot];
-  return Array.isArray(equipped) ? equipped.includes(id) : equipped === id;
+const currencyOf = (price: MockPrice) => ("emeralds" in price ? "gems" : "coins");
+
+const amountOf = (price: MockPrice) => ("emeralds" in price ? price.emeralds : price.coins);
+
+const endsAtOf = (offer: { dropDays: number | null }) => {
+  const end = availableToOf(offer);
+  return end === null ? {} : { endsAt: new Date(end).toISOString() };
 };
 
-const descriptionOf = (item: MockItem, locale: Locale) => ({
-  type: item.type,
-  rarity: item.rarity,
-  name: item.name[locale],
+const itemViewOf = (item: MockItem, locale: Locale): ShopItemView => ({
+  key: item.id,
+  tab: item.tab,
+  kind: item.kind,
+  title: item.name[locale],
   description: item.description[locale],
-  preview: "",
-  package: {
-    url: Object.hasOwn(skins, item.id) ? `${MOCK_API_ORIGIN}${SKIN_PATH}${item.id}.json` : "",
-    sha256: "",
-    version: 1,
-  },
-});
-
-const shopItemOf = (item: MockItem, locale: Locale): ShopItem => ({
-  ...descriptionOf(item, locale),
-  id: item.id,
-  slot: item.slot,
-  price: item.price,
-  availableTo: isoOrNull(availableToOf(item)),
-  stockLeft: stockLeftOf(item),
+  rarity: item.rarity,
+  currency: currencyOf(item.price),
+  price: amountOf(item.price),
   owned: isOwned(item.id),
-  equipped: isEquipped(item),
-  visibleInMatch: item.visibleInMatch,
+  equipped: mockShopState().loadout[item.kind] === item.id,
+  ...(item.isDefault ? { default: true } : {}),
+  ...endsAtOf(item),
 });
 
-const bundleOf = (bundle: MockBundle, locale: Locale) => ({
-  id: bundle.id,
-  name: bundle.name[locale],
-  description: bundle.description[locale],
-  rarity: bundle.rarity,
-  preview: "",
-  items: bundle.items,
-  basePrice: bundle.basePrice,
-  price: bundlePriceOf(bundle),
-  ownedItems: bundle.items.filter(isOwned),
-  availableTo: isoOrNull(availableToOf(bundle)),
-});
-
-const shopOf = (locale: Locale, now: number) => {
-  const onSale = MOCK_ITEMS.filter((item) => isOnSale(item, now) && stockLeftOf(item) !== 0);
-  const featured = MOCK_BUNDLES.find(({ id }) => id === FEATURED_BUNDLE);
-  const featuredEnd = featured === undefined ? null : availableToOf(featured);
+const bundleViewOf = (bundle: MockBundle, locale: Locale): ShopItemView => {
+  const price = bundlePriceOf(bundle);
+  const partsOwned = bundle.items.filter(isOwned);
   return {
-    featured:
-      featured === undefined || featuredEnd === null || !isOnSale(featured, now)
-        ? null
-        : {
-            id: featured.id,
-            image: "",
-            title: featured.name[locale],
-            subtitle: featured.description[locale],
-            endsAt: new Date(featuredEnd).toISOString(),
-            target: { bundle: featured.id },
-          },
-    tabs: TAB_ORDER.map((id) => ({
-      id,
-      items: onSale.filter(({ tab }) => tab === id).map((item) => shopItemOf(item, locale)),
-    })).filter(({ items }) => items.length > 0),
-    bundles: MOCK_BUNDLES.filter((bundle) => isOnSale(bundle, now)).map((bundle) =>
-      bundleOf(bundle, locale),
-    ),
-    cacheTtlSec: CACHE_TTL_SEC,
+    key: bundle.id,
+    tab: "bundles",
+    kind: "bundle",
+    title: bundle.name[locale],
+    description: bundle.description[locale],
+    rarity: bundle.rarity,
+    currency: currencyOf(price),
+    price: amountOf(price),
+    fullPrice: amountOf(bundle.basePrice),
+    owned: partsOwned.length === bundle.items.length,
+    equipped: false,
+    parts: bundle.items,
+    partsOwned,
+    ...endsAtOf(bundle),
   };
 };
 
-const purchase = (offer: MockItem | MockBundle, expectedPrice: MockPrice, now: number) => {
-  if (!isPurchasable(offer, now)) return errorResponse("offer_ended", HTTP_UNPROCESSABLE);
-  const isItem = "slot" in offer;
-  if (isItem && stockLeftOf(offer) === 0) return errorResponse("sold_out", HTTP_UNPROCESSABLE);
-  const missing = isItem
-    ? [offer.id].filter((id) => !isOwned(id))
-    : offer.items.filter((id) => !isOwned(id));
-  if (missing.length === 0) return errorResponse("already_owned", HTTP_CONFLICT);
-  const price = isItem ? offer.price : bundlePriceOf(offer);
-  if (!isSamePrice(expectedPrice, price)) {
-    return errorResponse("price_changed", HTTP_UNPROCESSABLE, { price });
-  }
-  if (!chargePrice(price)) {
-    return errorResponse("insufficient_funds", HTTP_UNPROCESSABLE, { need: shortOf(price) });
-  }
-  grantItems(missing, "shop", now);
-  purchaseCount += 1;
-  return { purchaseId: `purchase_${purchaseCount}`, granted: missing, wallet: mockWallet() };
+const shopOf = (locale: Locale, now: number) => {
+  const items = [
+    ...MOCK_ITEMS.filter((item) => item.isDefault || isOnSale(item, now)).map((item) =>
+      itemViewOf(item, locale),
+    ),
+    ...MOCK_BUNDLES.filter((bundle) => isOnSale(bundle, now)).map((bundle) =>
+      bundleViewOf(bundle, locale),
+    ),
+  ];
+  const featured = items.find(({ key }) => key === FEATURED_BUNDLE);
+  return {
+    serverTime: new Date(now).toISOString(),
+    wallet: backendWallet(),
+    ...(featured === undefined ? {} : { featured }),
+    tabs: TABS.map((key) => ({
+      key,
+      title: key,
+      count: items.filter(({ tab }) => tab === key).length,
+    })),
+    items,
+  };
 };
 
-const isEquippable = (slot: string, value: string | null | string[]) => {
-  if (value === null) return true;
-  const ids = Array.isArray(value) ? value : [value];
-  return ids.every(
-    (id) => isOwned(id) && MOCK_ITEMS.some((item) => item.id === id && item.slot === slot),
-  );
+const inventoryOf = (locale: Locale) => ({
+  items: MOCK_ITEMS.filter(({ id }) => isOwned(id)).map((item) => itemViewOf(item, locale)),
+  equipped: mockShopState().loadout,
+});
+
+const purchase = (offer: MockItem | MockBundle, seen: MockPrice, locale: Locale, now: number) => {
+  if (!isPurchasable(offer, now)) return errorResponse("offer_ended", HTTP_GONE);
+  const isItem = "kind" in offer;
+  const missing = (isItem ? [offer.id] : offer.items).filter((id) => !isOwned(id));
+  if (missing.length === 0) return errorResponse("already_owned", HTTP_CONFLICT);
+  const price = isItem ? offer.price : bundlePriceOf(offer);
+  if (!isSamePrice(seen, price)) {
+    return errorResponse("price_changed", HTTP_CONFLICT, {
+      price: amountOf(price),
+      currency: currencyOf(price),
+    });
+  }
+  if (!chargePrice(price)) {
+    const code = "emeralds" in price ? "not_enough_gems" : "not_enough_coins";
+    return errorResponse(code, HTTP_CONFLICT, {
+      need: shortOf(price),
+      currency: currencyOf(price),
+    });
+  }
+  grantItems(missing, "shop", now);
+  return {
+    item: isItem ? itemViewOf(offer, locale) : bundleViewOf(offer, locale),
+    granted: missing,
+    wallet: backendWallet(),
+  };
 };
+
+const isEquippable = (kind: string, itemId: string) =>
+  itemId === "" ||
+  (isOwned(itemId) && MOCK_ITEMS.some((item) => item.id === itemId && item.kind === kind));
 
 export const shopHandlers = [
   http.get(`*${SKIN_PATH}:file`, ({ params }) => {
     const id = String(params.file).replace(/\.json$/, "");
-    const item = MOCK_ITEMS.find((candidate) => candidate.id === id);
     const skin = Object.entries(skins).find(([skinId]) => skinId === id)?.[1];
-    if (item === undefined || skin === undefined) return errorResponse("not_found", HTTP_NOT_FOUND);
-    return HttpResponse.json({ id, type: item.type, version: 1, themes: "both", ...skin });
+    if (skin === undefined) return errorResponse("not_found", HTTP_NOT_FOUND);
+    return HttpResponse.json({ id, version: 1, themes: "both", ...skin });
   }),
   http.get(mockUrl("/shop"), ({ request }) =>
     HttpResponse.json(shopOf(localeOf(request), Date.now())),
   ),
-  http.post(mockUrl("/shop/purchase"), async ({ request }) => {
+  http.post(mockUrl("/shop/items/:key/buy"), async ({ request, params }) => {
     const text = await request.text();
-    const key = request.headers.get("Idempotency-Key");
-    const parsed = purchaseSchema.safeParse(parseJson(text));
-    if (key === null || !parsed.success)
-      return errorResponse("validation_failed", HTTP_BAD_REQUEST);
-    const body = parsed.data;
+    const parsed = buySchema.safeParse(parseJson(text));
+    if (!parsed.success) return errorResponse("validation_failed", HTTP_BAD_REQUEST);
     // A repeat with the same key returns the stored answer and charges nothing (SHP-03) (повтор с тем же ключом возвращает сохранённый ответ и ничего не списывает).
-    const stored = purchases.get(key);
+    const idempotencyKey = request.headers.get("Idempotency-Key");
+    const body = `${String(params.key)} ${text}`;
+    const stored = idempotencyKey === null ? undefined : purchases.get(idempotencyKey);
     if (stored !== undefined) {
-      if (stored.body !== text) return errorResponse("idempotency_mismatch", HTTP_CONFLICT);
+      if (stored.body !== body) return errorResponse("idempotency_mismatch", HTTP_CONFLICT);
       return HttpResponse.json(stored.answer);
     }
     const offer =
-      "itemId" in body
-        ? MOCK_ITEMS.find(({ id }) => id === body.itemId)
-        : MOCK_BUNDLES.find(({ id }) => id === body.bundleId);
-    if (offer === undefined) return errorResponse("not_found", HTTP_NOT_FOUND);
-    const result = purchase(offer, body.expectedPrice, Date.now());
+      MOCK_ITEMS.find(({ id, isDefault }) => id === params.key && !isDefault) ??
+      MOCK_BUNDLES.find(({ id }) => id === params.key);
+    if (offer === undefined) return errorResponse("item_not_found", HTTP_NOT_FOUND);
+    const { price, currency } = parsed.data;
+    const seen = currency === "gems" ? { emeralds: price } : { coins: price };
+    const result = purchase(offer, seen, localeOf(request), Date.now());
     if (result instanceof Response) return result;
-    purchases.set(key, { body: text, answer: result });
+    if (idempotencyKey !== null) purchases.set(idempotencyKey, { body, answer: result });
     return HttpResponse.json(result);
   }),
-  http.get(mockUrl("/inventory"), ({ request }) => {
-    const locale = localeOf(request);
-    const { owned } = mockShopState();
-    return HttpResponse.json({
-      items: MOCK_ITEMS.filter(({ id }) => owned[id] !== undefined).map((item) => ({
-        itemId: item.id,
-        slot: item.slot,
-        acquiredAt: owned[item.id]?.acquiredAt,
-        source: owned[item.id]?.source,
-        item: descriptionOf(item, locale),
-      })),
-    });
-  }),
-  http.put(mockUrl("/loadout"), async ({ request }) => {
-    const parsed = loadoutSchema.safeParse(parseJson(await request.text()));
+  http.get(mockUrl("/me/items"), ({ request }) =>
+    HttpResponse.json(inventoryOf(localeOf(request))),
+  ),
+  http.put(mockUrl("/me/equipment"), async ({ request }) => {
+    const parsed = equipSchema.safeParse(parseJson(await request.text()));
     if (!parsed.success) return errorResponse("validation_failed", HTTP_BAD_REQUEST);
-    const change = parsed.data;
-    const isValid = Object.entries(change).every(
-      ([slot, value]) => SLOTS.has(slot) && isEquippable(slot, value),
-    );
-    if (!isValid) return errorResponse("not_owned", HTTP_UNPROCESSABLE);
-    // Validated above: every key is a slot and every value an owned item of it (проверено выше: каждый ключ — слот, каждое значение — купленный предмет этого слота).
-    return HttpResponse.json(equip(change as Loadout));
+    const { slot, item = "" } = parsed.data;
+    if (!isEquippable(slot, item)) {
+      return errorResponse("validation_failed", HTTP_UNPROCESSABLE, {
+        fields: { item: "Этого товара у вас нет." },
+      });
+    }
+    equip(slot, item);
+    return HttpResponse.json(inventoryOf(localeOf(request)));
   }),
 ];

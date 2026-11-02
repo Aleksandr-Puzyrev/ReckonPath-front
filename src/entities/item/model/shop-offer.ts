@@ -6,7 +6,7 @@ export type ShopOffer =
 export const bundleOfferOf = (bundle: Bundle): ShopOffer => ({
   kind: "bundle",
   bundle,
-  isComplete: bundle.items.every((id) => bundle.ownedItems.includes(id)),
+  isComplete: bundle.items.length > 0 && bundle.items.every((id) => bundle.ownedItems.includes(id)),
 });
 
 export const offerKeyOf = (offer: ShopOffer) =>

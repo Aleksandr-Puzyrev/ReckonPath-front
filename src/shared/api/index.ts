@@ -1,4 +1,4 @@
-export { apiClient, fetchAssetJson } from "./api-client";
+export { apiAssetUrl, apiClient, fetchAssetJson } from "./api-client";
 export { ApiError, isApiError, isInsufficientFunds, isSessionRevoked } from "./api-error";
 export type { ApiErrorCode, ApiErrorDetails } from "./api-error";
 export { RequestTimeoutError } from "./api-fetch";

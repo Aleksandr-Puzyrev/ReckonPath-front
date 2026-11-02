@@ -20,6 +20,9 @@ const insufficientFunds = (price: number) =>
   );
 
 export const walletHandlers = [
+  http.get(mockUrl("/wallet"), () =>
+    HttpResponse.json({ coins: mockWallet().coins, gems: mockWallet().emeralds }),
+  ),
   http.post(mockUrl("/continue"), () => {
     if (!chargeEmeralds(CONTINUE_PRICE)) return insufficientFunds(CONTINUE_PRICE);
     return HttpResponse.json({ granted: true, bonusMoves: BONUS_MOVES, wallet: mockWallet() });

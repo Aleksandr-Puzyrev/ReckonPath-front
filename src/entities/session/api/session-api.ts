@@ -69,6 +69,11 @@ export const endSession = async () => {
   await leaveAccount();
 };
 
+export const endEverySession = async () => {
+  readEmpty(await apiClient.POST("/auth/logout-all"));
+  await leaveAccount();
+};
+
 export const apiSession: ApiSession = {
   getAccessToken: () => useSessionStore.getState().accessToken,
   refreshAccessToken,
