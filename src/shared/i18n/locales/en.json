@@ -553,6 +553,7 @@
         "strong": "Strong"
       },
       "consent": "I accept the terms and privacy policy and I’m 12 or older",
+      "consentLinked": "I accept the terms and <privacy>privacy policy</privacy> and I’m 12 or older",
       "submit": "Create account",
       "submitting": "Creating…",
       "hasAccount": "Have an account?",
@@ -691,6 +692,7 @@
       "game": "Game",
       "look": "Appearance",
       "account": "Account",
+      "privacy": "Privacy",
       "help": "Help",
       "about": "About"
     },
@@ -755,7 +757,8 @@
       "restore": "Cancel deletion",
       "passwordLabel": "Account password",
       "passwordHint": "Enter your password to confirm"
-    }
+    },
+    "privacyPolicy": "Privacy policy"
   },
   "arena": {
     "eyebrow": "ARENA",
@@ -1153,5 +1156,10 @@
     "signOutAllTitle": "Sign out on all devices?",
     "signOutAllBody": "Every session ends, this one too. You can sign in again with your password.",
     "signedOutAll": "You signed out on all devices"
+  },
+  "consents": {
+    "title": "We've updated our documents",
+    "body": "Read and accept the new terms and privacy policy to continue.",
+    "accept": "Accept"
   }
 }

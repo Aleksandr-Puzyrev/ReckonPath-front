@@ -4,11 +4,13 @@ import { useUnistyles } from "react-native-unistyles";
 import { formatDayMonth } from "@shared/lib";
 import { SettingsRow } from "@shared/ui/settings-row";
 import { Text } from "@shared/ui/text";
+import { Toggle } from "@shared/ui/toggle";
 
 import AccountIcon from "@assets/icons/settings/account.svg";
 import DeleteIcon from "@assets/icons/settings/delete.svg";
 import LinkIcon from "@assets/icons/settings/link.svg";
 import SignOutIcon from "@assets/icons/settings/sign-out.svg";
+import SupportIcon from "@assets/icons/settings/support.svg";
 
 import SettingsGroup from "./settings-group";
 import { styles } from "./settings-styles";
@@ -18,6 +20,8 @@ interface IAccountGroup {
   hasLogin: boolean;
   deletionAt: string | null;
   isSigningOut: boolean;
+  isMarketingOn: boolean;
+  onMarketingToggle: () => void;
   onLink: () => void;
   onSignOut: () => void;
   onChangePassword: () => void;
@@ -32,6 +36,8 @@ const AccountGroup = ({
   hasLogin,
   deletionAt,
   isSigningOut,
+  isMarketingOn,
+  onMarketingToggle,
   onLink,
   onSignOut,
   onChangePassword,
@@ -72,6 +78,19 @@ const AccountGroup = ({
             iconColor={colors.accent.blue}
             label={t("settings.account.changeEmail")}
             onPress={onChangeEmail}
+          />
+          <SettingsRow
+            Icon={SupportIcon}
+            iconColor={colors.accent.blue}
+            label={t("account.signUp.marketing")}
+            accessory={
+              <Toggle
+                testID="settings-marketing"
+                label={t("account.signUp.marketing")}
+                isOn={isMarketingOn}
+                onToggle={onMarketingToggle}
+              />
+            }
           />
           <SettingsRow
             testID="settings-devices"

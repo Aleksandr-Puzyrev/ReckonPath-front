@@ -13,5 +13,6 @@ export { readErrorEnvelope } from "./read-error-envelope";
 export { onSystemSignal } from "./system-signals";
 export { serverClockOffset, subscribeServerClock } from "./server-clock";
 export { useIsOnline } from "./use-is-online";
+export { openPrivacyPolicy } from "./open-privacy-policy";
 export type { SystemSignal } from "./system-signals";
 export { retryDelay, shouldRetry } from "./retry-policy";

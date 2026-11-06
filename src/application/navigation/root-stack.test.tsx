@@ -7,10 +7,17 @@ import { Text } from "react-native";
 
 import { useBanStore, useSystemNoticeStore } from "@entities/app-config";
 import { useInterstitialStore } from "@entities/ad";
-import { useAccountStore } from "@entities/session";
-import { apiClient } from "@shared/api";
+import { apiSession, useAccountStore } from "@entities/session";
+import { apiClient, setApiSession } from "@shared/api";
 import { i18n } from "@shared/i18n";
-import { maintenanceMock, mockServer, mockUrl, versionMock } from "@shared/test-utils/api-mock";
+import { ACCOUNT_SESSION } from "@shared/test-utils/account-session";
+import {
+  maintenanceMock,
+  mockServer,
+  mockUrl,
+  requireMockConsent,
+  versionMock,
+} from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import RootStack from "./root-stack";
@@ -58,6 +65,7 @@ const renderApp = (options: Parameters<typeof renderRouter>[1] = {}) => {
       "system/update": () => <Text>update</Text>,
       "system/maintenance": () => <Text>maintenance</Text>,
       "system/banned": () => <Text>banned</Text>,
+      "account/consents": () => <Text>consents</Text>,
     },
     options,
   );
@@ -178,5 +186,29 @@ describe("RootStack", () => {
 
     expect(await screen.findByText("home")).toBeOnTheScreen();
     expect(screen.queryByText(/99\.0\.0/)).not.toBeOnTheScreen();
+  });
+
+  describe("new document versions", () => {
+    beforeEach(() => {
+      setApiSession(ACCOUNT_SESSION);
+      requireMockConsent("privacy");
+    });
+
+    afterEach(() => setApiSession(apiSession));
+
+    test("locks an account on the consents screen (decision 0056 #3)", async () => {
+      useAccountStore.getState().markSignedIn();
+
+      await renderApp();
+
+      expect(await screen.findByText("consents")).toBeOnTheScreen();
+      expect(screen.queryByText("home")).not.toBeOnTheScreen();
+    });
+
+    test("never asks a guest (decision 0056 #3)", async () => {
+      await renderApp();
+
+      expect(await screen.findByText("home")).toBeOnTheScreen();
+    });
   });
 });

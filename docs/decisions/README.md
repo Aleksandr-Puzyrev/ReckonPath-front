@@ -61,6 +61,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0053 | [`0053-account-features-plan.md`](0053-account-features-plan.md) | Rest of the account on the backend: screens from existing parts, `expo-auth-session` + `expo-crypto` for VK ID / Yandex ID, keys in env, task order, captcha and push tokens later |
 | 0054 | [`0054-showroom-on-backend.md`](0054-showroom-on-backend.md) | Showroom on the backend: wait for light/dark skin palettes, show `exclusive` and extra kinds (exclusive as legendary), equip the first bundle part, derive «Видно в матче», connect despite the backend gaps |
 | 0055 | [`0055-showroom-connection.md`](0055-showroom-connection.md) | Showroom connection: balance from the backend `GET /wallet` (overrides 0052 #4), buoy/beacon/number slots, loadout from `/me/items`, «Видно в матче» except effects, `exclusive` label, drop banner, default items hidden, purchase error mapping |
+| 0056 | [`0056-consents-documents-onboarding-fixes.md`](0056-consents-documents-onboarding-fixes.md) | Iteration 1: push moved to stage 5, consents in `Me` and a re-accept screen, documents from `GET /document` in the in-app browser, «Конфиденциальность» settings group, marketing switch, simplified level 1 result |
 
 ## Template
 

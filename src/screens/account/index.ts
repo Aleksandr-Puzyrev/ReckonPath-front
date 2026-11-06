@@ -4,3 +4,4 @@ export { default as EmailCodeScreen } from "./ui/email-code-screen";
 export { default as PasswordResetScreen } from "./ui/password-reset-screen";
 export { default as ChangePasswordScreen } from "./ui/change-password-screen";
 export { default as ChangeEmailScreen } from "./ui/change-email-screen";
+export { default as ConsentsScreen } from "./ui/consents-screen";

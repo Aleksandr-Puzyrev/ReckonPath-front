@@ -247,6 +247,23 @@ paths:
                   purgeAfter: { type: string, format: date-time }
         default: { $ref: "#/components/responses/Error" }
 
+  /me/consents:
+    put:
+      operationId: updateConsents
+      description: Accepts the required consents or switches marketing; terms and privacy can only be accepted (decision 0056 #2, #3, #6).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateConsentsRequest" }
+      responses:
+        "200":
+          description: The consents after the change
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConsentsState" }
+        default: { $ref: "#/components/responses/Error" }
+
   /me/password:
     put:
       operationId: changePassword
@@ -1308,7 +1325,21 @@ components:
     Me:
       type: object
       required:
-        [id, nickname, isGuest, providers, level, xp, xpToNext, wallet, arena, flags, friendCode]
+        [
+          id,
+          nickname,
+          isGuest,
+          providers,
+          level,
+          xp,
+          xpToNext,
+          wallet,
+          arena,
+          flags,
+          friendCode,
+          consents,
+          consentsRequired,
+        ]
       properties:
         id: { type: string }
         nickname: { type: string }
@@ -1337,6 +1368,50 @@ components:
             nickChangeAvailableAt: { type: [string, "null"], format: date-time }
             deletionScheduledAt: { type: [string, "null"], format: date-time }
         friendCode: { type: string }
+        consents:
+          type: array
+          items: { $ref: "#/components/schemas/Consent" }
+        consentsRequired:
+          type: array
+          items: { $ref: "#/components/schemas/ConsentType" }
+
+    ConsentType:
+      type: string
+      enum: [terms, privacy, marketing]
+
+    Consent:
+      type: object
+      required: [type, accepted, version]
+      properties:
+        type: { $ref: "#/components/schemas/ConsentType" }
+        accepted: { type: boolean }
+        version: { type: string, description: Version of the document }
+        updatedAt: { type: string, format: date-time }
+
+    UpdateConsentsRequest:
+      type: object
+      required: [consents]
+      properties:
+        consents:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [type, accepted]
+            properties:
+              type: { $ref: "#/components/schemas/ConsentType" }
+              accepted: { type: boolean }
+
+    ConsentsState:
+      type: object
+      required: [consents, consentsRequired]
+      properties:
+        consents:
+          type: array
+          items: { $ref: "#/components/schemas/Consent" }
+        consentsRequired:
+          type: array
+          items: { $ref: "#/components/schemas/ConsentType" }
 
     Cell:
       type: array

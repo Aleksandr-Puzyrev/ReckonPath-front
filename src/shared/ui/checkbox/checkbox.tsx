@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
@@ -10,13 +11,14 @@ import { styles } from "./checkbox-styles";
 
 interface ICheckbox {
   label: string;
+  children?: ReactNode;
   isChecked: boolean;
   onToggle: () => void;
   error?: string;
   testID?: string;
 }
 
-const Checkbox = ({ label, isChecked, onToggle, error, testID }: ICheckbox) => {
+const Checkbox = ({ label, children, isChecked, onToggle, error, testID }: ICheckbox) => {
   const { theme } = useUnistyles();
   const hasError = error !== undefined;
   styles.useVariants({ isChecked, hasError });
@@ -42,7 +44,7 @@ const Checkbox = ({ label, isChecked, onToggle, error, testID }: ICheckbox) => {
           ) : null}
         </View>
         <Text variant="body.m" style={styles.label}>
-          {label}
+          {children ?? label}
         </Text>
       </Pressable>
       {hasError ? (

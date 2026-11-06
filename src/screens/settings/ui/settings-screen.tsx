@@ -19,6 +19,7 @@ import AccountGroup from "./account-group";
 import GameGroup from "./game-group";
 import HelpGroup from "./help-group";
 import LookGroup from "./look-group";
+import PrivacyGroup from "./privacy-group";
 import SettingsSheets from "./settings-sheets";
 import { styles } from "./settings-styles";
 
@@ -86,6 +87,8 @@ const SettingsScreen = () => {
           hasLogin={screen.hasLogin}
           deletionAt={screen.deletionAt}
           isSigningOut={screen.isSigningOut}
+          isMarketingOn={screen.isMarketingOn}
+          onMarketingToggle={screen.handleMarketingToggle}
           onLink={() => screen.handleSheet("link")}
           onSignOut={screen.handleSignOut}
           onChangePassword={() => router.push("/account/password")}
@@ -94,6 +97,7 @@ const SettingsScreen = () => {
           onDelete={() => screen.handleSheet("delete")}
           onDeletion={screen.handleDeletion}
         />
+        <PrivacyGroup />
         <HelpGroup
           onRules={() => screen.handleSheet("rules")}
           onSupport={() => screen.handleSheet("support")}

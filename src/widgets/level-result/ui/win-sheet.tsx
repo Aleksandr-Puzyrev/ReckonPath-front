@@ -10,6 +10,7 @@ import { Sheet } from "@shared/ui/sheet";
 import { StarRating } from "@shared/ui/star-rating";
 import { Text } from "@shared/ui/text";
 
+import TutorialWinSheet from "./tutorial-win-sheet";
 import { styles } from "./win-sheet-styles";
 
 interface IWinSheet {
@@ -41,6 +42,9 @@ const WinSheet = ({
   if (game === null) return null;
 
   const earned = levelStarsOf(game);
+  if (isTutorial) {
+    return <TutorialWinSheet isOpen={isOpen} stars={earned} onNext={onNext} onExit={onExit} />;
+  }
   const limit = moveLimitOf(game);
   const bestMoves = best?.moves ?? game.movesUsed;
 
@@ -69,11 +73,6 @@ const WinSheet = ({
           ? t("result.win.movesUnlimited", { used: game.movesUsed, best: bestMoves })
           : t("result.win.moves", { used: game.movesUsed, limit, best: bestMoves })}
       </Text>
-      {isTutorial ? (
-        <Text variant="body.m" style={styles.moves}>
-          {t("onboarding.resultNote")}
-        </Text>
-      ) : null}
       {game.continued ? (
         <Text variant="caption" style={styles.moves}>
           {t("result.continue.note")}

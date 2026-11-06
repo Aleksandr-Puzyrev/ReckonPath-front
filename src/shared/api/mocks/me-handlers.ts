@@ -23,16 +23,46 @@ const ME = {
   friendCode: "PL4821",
 };
 
+const CONSENT_TYPES = ["terms", "privacy", "marketing"] as const;
+const REQUIRED_CONSENTS = ["terms", "privacy"] as const;
+const CONSENT_VERSION = "1";
+
+type ConsentType = (typeof CONSENT_TYPES)[number];
+
 const patchSchema = z.object({ locale: z.enum(["ru", "en"]).optional() });
 const deleteSchema = z.object({ password: z.string() });
+const consentsSchema = z.object({
+  consents: z.array(z.object({ type: z.enum(CONSENT_TYPES), accepted: z.boolean() })).min(1),
+});
+
+const acceptedAtSignUp = (): Record<ConsentType, boolean> => ({
+  terms: true,
+  privacy: true,
+  marketing: false,
+});
 
 let locale: string | null = null;
 let deletionScheduledAt: string | null = null;
+let consents = acceptedAtSignUp();
 
 export const resetMockMe = () => {
   locale = null;
   deletionScheduledAt = null;
+  consents = acceptedAtSignUp();
 };
+
+export const requireMockConsent = (type: ConsentType) => {
+  consents = { ...consents, [type]: false };
+};
+
+const consentsStateOf = () => ({
+  consents: CONSENT_TYPES.map((type) => ({
+    type,
+    accepted: consents[type],
+    version: CONSENT_VERSION,
+  })),
+  consentsRequired: REQUIRED_CONSENTS.filter((type) => !consents[type]),
+});
 
 export const mockLocale = () => locale;
 
@@ -41,6 +71,7 @@ const meOf = () => ({
   ...mockPlayerLevel(),
   flags: { nickChangeFreeAvailable: true, nickChangeAvailableAt: null, deletionScheduledAt },
   wallet: mockWallet(),
+  ...consentsStateOf(),
 });
 
 const validation = () =>
@@ -65,6 +96,14 @@ export const meHandlers = [
     }
     deletionScheduledAt = new Date(Date.now() + DELETION_DAYS * DAY_MS).toISOString();
     return HttpResponse.json({ purgeAfter: deletionScheduledAt }, { status: HTTP_ACCEPTED });
+  }),
+  http.put(mockUrl("/me/consents"), async ({ request }) => {
+    const body = consentsSchema.safeParse(await request.json().catch(() => null));
+    if (!body.success) return validation();
+    body.data.consents.forEach(({ type, accepted }) => {
+      consents = { ...consents, [type]: accepted };
+    });
+    return HttpResponse.json(consentsStateOf());
   }),
   http.post(mockUrl("/me/restore"), () => {
     deletionScheduledAt = null;

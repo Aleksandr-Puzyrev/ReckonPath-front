@@ -1,11 +1,13 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import * as WebBrowser from "expo-web-browser";
+import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
 import { useAccountStore } from "@entities/session";
 import { useSettingsStore } from "@entities/settings";
 import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
-import { mockServer } from "@shared/test-utils/api-mock";
+import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import SettingsScreen from "./settings-screen";
@@ -37,6 +39,7 @@ jest.mock("@shared/ui/sheet", () => ({
     isOpen ? children : null,
 }));
 jest.mock("@widgets/board", () => ({ BoardDemo: () => null }));
+jest.mock("expo-web-browser", () => ({ openBrowserAsync: jest.fn(async () => ({})) }));
 
 const PLAYER_ID = "0192a000-0000-7000-8000-000000004821";
 
@@ -199,5 +202,51 @@ describe("SettingsScreen", () => {
     await act(() => fireEvent.press(screen.getByTestId("settings-rules")));
 
     expect(screen.getAllByText("Правила игры").length).toBeGreaterThan(0);
+  });
+
+  test("opens the privacy policy from the privacy group (decision 0056 #5)", async () => {
+    await renderSettings();
+
+    expect(screen.getByText("Конфиденциальность")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("settings-privacy-policy"));
+
+    expect(WebBrowser.openBrowserAsync).toHaveBeenCalledWith(
+      expect.stringContaining("/document?type=privacy_policy"),
+    );
+  });
+
+  test("hides the news switch from a guest (decision 0056 #6)", async () => {
+    await renderSettings();
+
+    expect(screen.queryByTestId("settings-marketing")).toBeNull();
+  });
+
+  test("switches the news consent of an account on the server (decision 0056 #6)", async () => {
+    useAccountStore.getState().markSignedIn();
+    await renderSettings();
+
+    await fireEvent(screen.getByTestId("settings-marketing"), "valueChange", true);
+
+    await waitFor(() => expect(screen.getByTestId("settings-marketing")).toHaveProp("value", true));
+    const me = await apiClient.GET("/me");
+    expect(me.data?.consents).toContainEqual(
+      expect.objectContaining({ type: "marketing", accepted: true }),
+    );
+  });
+
+  test("returns the news switch when the server refuses (decision 0056 #6)", async () => {
+    useAccountStore.getState().markSignedIn();
+    mockServer.use(
+      http.put(mockUrl("/me/consents"), () =>
+        HttpResponse.json({ error: { code: "validation_failed" } }, { status: 400 }),
+      ),
+    );
+    await renderSettings();
+
+    await fireEvent(screen.getByTestId("settings-marketing"), "valueChange", true);
+
+    await waitFor(() =>
+      expect(screen.getByTestId("settings-marketing")).toHaveProp("value", false),
+    );
   });
 });

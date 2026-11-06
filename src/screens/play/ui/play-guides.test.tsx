@@ -98,6 +98,27 @@ describe("PlayScreen guides", () => {
     expect(useRulesStore.getState().tutorial).toBe("done");
   });
 
+  test("ends the tutorial with the simplified result and only «Дальше» (design 29.4, decision 0056 #7)", async () => {
+    await renderScreen("c-1");
+    await tap(FIRST_CELL);
+    await tap(CLOSER_CELL);
+    await fireEvent.press(screen.getByText("Далее"));
+    await tap(CLOSER_CELL);
+    await tap(TARGET);
+    await act(async () => jest.advanceTimersByTime(1000));
+
+    expect(screen.getByText("Сигнал найден!")).toBeOnTheScreen();
+    expect(screen.queryByText("Уровень 1 пройден")).toBeNull();
+    expect(screen.queryByText(/^Ходов:/)).toBeNull();
+    expect(screen.queryByText("Ещё раз")).toBeNull();
+    await act(async () => fireEvent.press(screen.getByText("Дальше")));
+
+    expect(mockRouter.replace).toHaveBeenCalledWith({
+      pathname: "/play/[mode]/[id]",
+      params: { mode: "campaign", id: "c-2" },
+    });
+  });
+
   test("skips the tutorial to the levels, leaving level 1 unbeaten (ACC-04)", async () => {
     await renderScreen("c-1");
     await fireEvent.press(screen.getByText("Пропустить"));

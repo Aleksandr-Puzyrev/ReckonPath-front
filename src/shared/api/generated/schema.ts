@@ -220,6 +220,23 @@ export interface paths {
     patch: operations["patchMe"];
     trace?: never;
   };
+  "/me/consents": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** @description Accepts the required consents or switches marketing; terms and privacy can only be accepted (decision 0056 */
+    put: operations["updateConsents"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me/password": {
     parameters: {
       query?: never;
@@ -1098,6 +1115,28 @@ export interface components {
         deletionScheduledAt?: string | null;
       };
       friendCode: string;
+      consents: components["schemas"]["Consent"][];
+      consentsRequired: components["schemas"]["ConsentType"][];
+    };
+    /** @enum {string} */
+    ConsentType: "terms" | "privacy" | "marketing";
+    Consent: {
+      type: components["schemas"]["ConsentType"];
+      accepted: boolean;
+      /** @description Version of the document */
+      version: string;
+      /** Format: date-time */
+      updatedAt?: string;
+    };
+    UpdateConsentsRequest: {
+      consents: {
+        type: components["schemas"]["ConsentType"];
+        accepted: boolean;
+      }[];
+    };
+    ConsentsState: {
+      consents: components["schemas"]["Consent"][];
+      consentsRequired: components["schemas"]["ConsentType"][];
     };
     Cell: [number, number];
     Attempt: {
@@ -1874,6 +1913,31 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["Me"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  updateConsents: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateConsentsRequest"];
+      };
+    };
+    responses: {
+      /** @description The consents after the change */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ConsentsState"];
         };
       };
       default: components["responses"]["Error"];
@@ -3073,6 +3137,9 @@ export const errorCodeValues: ReadonlyArray<
   "body_too_large",
   "method_not_allowed",
 ];
+export const consentTypeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ConsentType"]
+> = ["terms", "privacy", "marketing"];
 export const attemptModeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Attempt"]["mode"]
 > = ["campaign", "daily"];

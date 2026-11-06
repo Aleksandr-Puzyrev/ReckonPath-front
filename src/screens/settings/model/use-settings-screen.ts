@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { changeLanguage } from "@features/change-language";
+import { useMarketingConsent } from "@features/manage-consents";
 import { useSignOut } from "@features/sign-out";
 import { RULE_DEMOS, isRuleCardId } from "@entities/rules";
 import { useAccountStore } from "@entities/session";
@@ -31,6 +32,7 @@ export const useSettingsScreen = (onToast: (text: string) => void) => {
     onSignedOut: () => onToast(t("settings.account.signedOut")),
     onError: showError,
   });
+  const marketing = useMarketingConsent(showError);
 
   const copyId = async () => {
     if (me === undefined) return;
@@ -56,6 +58,7 @@ export const useSettingsScreen = (onToast: (text: string) => void) => {
     ruleCards: RULE_CARDS,
     ruleIndex,
     isSigningOut: signOut.isPending,
+    isMarketingOn: marketing.isOn,
     handleSheet: setSheet,
     handleRuleOpen: (index: number) => {
       setSheet(null);
@@ -67,6 +70,7 @@ export const useSettingsScreen = (onToast: (text: string) => void) => {
       onToast(i18n.getFixedT(language)("settings.language.set"));
     },
     handleSignOut: signOut.signOut,
+    handleMarketingToggle: marketing.toggle,
     handleDeletion: () => router.push("/settings/deletion"),
     handleDeleted: (purgeAfter: string) =>
       onToast(

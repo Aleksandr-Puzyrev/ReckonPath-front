@@ -14,6 +14,7 @@ export const BACKEND_ROUTES: readonly BackendRoute[] = [
   { method: "POST", path: "/auth/logout" },
   { method: "DELETE", path: "/me" },
   { method: "PUT", path: "/me/password" },
+  { method: "PUT", path: "/me/consents" },
   { method: "POST", path: "/me/email" },
   { method: "POST", path: "/me/email/confirm" },
   { method: "GET", path: "/me/devices" },

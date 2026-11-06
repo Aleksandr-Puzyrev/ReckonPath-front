@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 
 import { SoftUpdateSheet } from "@screens/system";
+import { useIsConsentRequired } from "@features/manage-consents";
 import { useInterstitialStore } from "@entities/ad";
 import {
   isSoftUpdateSnoozed,
@@ -34,6 +35,7 @@ const RootStack = () => {
     useInterstitialStore.getState().markLaunched(launchedAt);
   }, [launchedAt]);
   const isBanned = useBanStore((ban) => ban.ban !== null);
+  const isConsentRequired = useIsConsentRequired();
   const isUpdateRequired = state.kind === "forcedUpdate";
   const isMaintenance = state.kind === "maintenance" && !isMaintenanceDismissed;
   const isSoftUpdateOpen =
@@ -42,7 +44,9 @@ const RootStack = () => {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={!isUpdateRequired && !isMaintenance && !isBanned}>
+        <Stack.Protected
+          guard={!isUpdateRequired && !isMaintenance && !isBanned && !isConsentRequired}
+        >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
           <Stack.Screen name="onboarding/language" options={{ gestureEnabled: false }} />
@@ -101,6 +105,11 @@ const RootStack = () => {
         </Stack.Protected>
         <Stack.Protected guard={isBanned && !isUpdateRequired && !isMaintenance}>
           <Stack.Screen name="system/banned" options={{ gestureEnabled: false }} />
+        </Stack.Protected>
+        <Stack.Protected
+          guard={isConsentRequired && !isBanned && !isUpdateRequired && !isMaintenance}
+        >
+          <Stack.Screen name="account/consents" options={{ gestureEnabled: false }} />
         </Stack.Protected>
       </Stack>
       {state.kind === "softUpdate" ? (

@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import * as WebBrowser from "expo-web-browser";
 
 import { useAccountStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
@@ -6,6 +7,8 @@ import { mockServer } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import SignUp from "./sign-up";
+
+jest.mock("expo-web-browser", () => ({ openBrowserAsync: jest.fn(async () => ({})) }));
 
 const callbacks = () => ({
   onBack: jest.fn(),
@@ -77,5 +80,16 @@ describe("SignUp", () => {
     await renderSignUp(callbacks());
 
     expect(screen.getByText("Хочу получать новости и подарки на e-mail")).toBeOnTheScreen();
+  });
+
+  test("opens the privacy policy from the consent without ticking it (decision 0056 #5)", async () => {
+    await renderSignUp(callbacks());
+
+    await fireEvent.press(screen.getByTestId("sign-up-privacy"));
+
+    expect(WebBrowser.openBrowserAsync).toHaveBeenCalledWith(
+      expect.stringContaining("/document?type=privacy_policy"),
+    );
+    expect(screen.getByTestId("sign-up-consent")).not.toBeChecked();
   });
 });

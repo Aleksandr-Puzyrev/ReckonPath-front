@@ -1,11 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { openPrivacyPolicy } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 import { Button } from "@shared/ui/button";
 import { Checkbox } from "@shared/ui/checkbox";
+import { Text } from "@shared/ui/text";
 import { TextField } from "@shared/ui/text-field";
 
 import { NICKNAME_MAX_LENGTH, signUpSchema } from "../model/sign-up-schema";
@@ -118,7 +120,22 @@ const SignUp = ({ onBack, onCodeSent, onSignIn, onError }: ISignUp) => {
             isChecked={field.value}
             onToggle={() => field.onChange(!field.value)}
             error={errorText(fieldState.error?.message)}
-          />
+          >
+            <Trans
+              i18nKey="account.signUp.consentLinked"
+              components={{
+                privacy: (
+                  <Text
+                    testID="sign-up-privacy"
+                    variant="body.m"
+                    accessibilityRole="link"
+                    style={styles.link}
+                    onPress={openPrivacyPolicy}
+                  />
+                ),
+              }}
+            />
+          </Checkbox>
         )}
       />
       <Controller
@@ -133,7 +150,6 @@ const SignUp = ({ onBack, onCodeSent, onSignIn, onError }: ISignUp) => {
           />
         )}
       />
-      {/* TODO: link «условия» and «политика конфиденциальности» once their URLs exist */}
       <Button
         testID="sign-up-submit"
         label={signUp.isPending ? t("account.signUp.submitting") : t("account.signUp.submit")}
