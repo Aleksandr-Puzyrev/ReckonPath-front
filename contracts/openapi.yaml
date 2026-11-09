@@ -214,6 +214,10 @@ paths:
               type: object
               properties:
                 locale: { type: string, enum: [ru, en] }
+                nickname:
+                  type: string
+                  pattern: "^[A-Za-z0-9_]{3,16}$"
+                  description: The first change is free, then nicknameChange.price; nickname rules in decision 0059 #2
       responses:
         "200":
           description: The updated player
@@ -1103,6 +1107,7 @@ components:
         - in_match
         - already_queued
         - nick_taken
+        - nick_change_cooldown
         - not_owned
         - map_active
         - email_taken
@@ -1243,7 +1248,7 @@ components:
       properties:
         email: { type: string, format: email }
         password: { type: string, minLength: 8 }
-        nickname: { type: string, minLength: 3, maxLength: 16 }
+        nickname: { type: string, pattern: "^[A-Za-z0-9_]{3,16}$" }
         acceptTerms: { type: boolean }
         acceptPrivacy: { type: boolean }
         acceptMarketing: { type: boolean }

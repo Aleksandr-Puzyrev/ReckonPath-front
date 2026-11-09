@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Gradient } from "@shared/ui/gradient";
@@ -16,9 +16,10 @@ interface ProfileLevel {
 interface IProfileHeader {
   nickname: string;
   progress: ProfileLevel | null;
+  onNicknamePress?: () => void;
 }
 
-const ProfileHeader = ({ nickname, progress }: IProfileHeader) => {
+const ProfileHeader = ({ nickname, progress, onNicknamePress }: IProfileHeader) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const fillShare =
@@ -33,9 +34,23 @@ const ProfileHeader = ({ nickname, progress }: IProfileHeader) => {
         </Text>
       </View>
       <View style={styles.texts}>
-        <Text variant="title.l" numberOfLines={1} accessibilityRole="header">
-          {nickname}
-        </Text>
+        {onNicknamePress === undefined ? (
+          <Text variant="title.l" numberOfLines={1} accessibilityRole="header">
+            {nickname}
+          </Text>
+        ) : (
+          <Pressable
+            testID="profile-nickname"
+            accessibilityRole="button"
+            accessibilityLabel={nickname}
+            accessibilityHint={t("nick.title")}
+            onPress={onNicknamePress}
+          >
+            <Text variant="title.l" numberOfLines={1}>
+              {nickname}
+            </Text>
+          </Pressable>
+        )}
         {progress === null ? null : (
           <>
             <Text variant="body.s" style={styles.secondary}>

@@ -26,3 +26,12 @@ export const updateLocaleMutationOptions = () =>
     mutationFn: async (locale: AppLanguage) =>
       mapMe(readData(await apiClient.PATCH("/me", { body: { locale } }))),
   });
+
+export const updateNicknameMutationOptions = () =>
+  mutationOptions({
+    mutationKey: ["me", "nickname"],
+    // Offline the request must fail with a message instead of waiting paused (без сети запрос должен завершиться ошибкой с сообщением, а не ждать на паузе).
+    networkMode: "always",
+    mutationFn: async (nickname: string) =>
+      mapMe(readData(await apiClient.PATCH("/me", { body: { nickname } }))),
+  });

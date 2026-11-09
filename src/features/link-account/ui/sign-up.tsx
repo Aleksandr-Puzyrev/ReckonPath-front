@@ -3,6 +3,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { NICKNAME_MAX_LENGTH } from "@entities/wallet";
 import { openPrivacyPolicy } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 import { Button } from "@shared/ui/button";
@@ -10,7 +11,7 @@ import { Checkbox } from "@shared/ui/checkbox";
 import { Text } from "@shared/ui/text";
 import { TextField } from "@shared/ui/text-field";
 
-import { NICKNAME_MAX_LENGTH, signUpSchema } from "../model/sign-up-schema";
+import { signUpSchema } from "../model/sign-up-schema";
 import type { SignUpSchema } from "../model/sign-up-schema";
 import { fieldErrorKey } from "../model/field-error-key";
 import { useSignUp } from "../model/use-sign-up";

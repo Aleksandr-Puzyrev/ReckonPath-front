@@ -490,6 +490,19 @@
     "emeralds": "Emeralds: {{count}}",
     "coins": "Coins: {{count}}"
   },
+  "nick": {
+    "title": "Nickname",
+    "rules": "3–16 characters: letters, digits, _",
+    "short": "At least 3 characters",
+    "invalid": "Invalid characters",
+    "taken": "Already taken",
+    "ok": "✓ Looks good",
+    "free": "Your first change is free",
+    "paid": "{{price}}, you can’t change it again right away",
+    "nextAt": "Next change on {{date}}",
+    "save": "Save",
+    "saved": "Nickname changed"
+  },
   "profile": {
     "saveProgress": "Save your progress",
     "collection": "Collection",

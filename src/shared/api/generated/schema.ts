@@ -894,6 +894,7 @@ export interface components {
       | "in_match"
       | "already_queued"
       | "nick_taken"
+      | "nick_change_cooldown"
       | "not_owned"
       | "map_active"
       | "email_taken"
@@ -1913,6 +1914,8 @@ export interface operations {
         "application/json": {
           /** @enum {string} */
           locale?: "ru" | "en";
+          /** @description The first change is free, then nicknameChange.price; nickname rules in decision 0059 */
+          nickname?: string;
         };
       };
     };
@@ -3082,6 +3085,7 @@ export const errorCodeValues: ReadonlyArray<
   "in_match",
   "already_queued",
   "nick_taken",
+  "nick_change_cooldown",
   "not_owned",
   "map_active",
   "email_taken",

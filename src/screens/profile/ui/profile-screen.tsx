@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
@@ -16,6 +16,7 @@ import { CollectionGrid, SlotSheet } from "@widgets/collection";
 import { EarnSheet } from "@widgets/earn-sheet";
 import { TopBar } from "@widgets/top-bar";
 
+import { NICKNAME_CHANGED_NOTICE } from "../model/profile-notice";
 import { useProfileScreen } from "../model/use-profile-screen";
 
 import ProfileHeader from "./profile-header";
@@ -28,6 +29,9 @@ const ProfileScreen = () => {
   const profile = useProfileScreen();
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
+  const { notice } = useLocalSearchParams<{ notice?: string }>();
+  // The nickname screen reports its result through the route, since it has closed by then (экран ника сообщает результат через маршрут, потому что к этому моменту уже закрыт).
+  const noticeToast = notice === NICKNAME_CHANGED_NOTICE ? { id: 0, text: t("nick.saved") } : null;
 
   return (
     <Screen style={styles.screen}>
@@ -55,7 +59,11 @@ const ProfileScreen = () => {
         ) : null}
         {profile.isGuest || profile.me === undefined ? null : (
           <>
-            <ProfileHeader nickname={profile.me.nickname} progress={profile.me} />
+            <ProfileHeader
+              nickname={profile.me.nickname}
+              progress={profile.me}
+              onNicknamePress={() => router.push("/profile/nickname")}
+            />
             <Text variant="eyebrow" style={styles.section}>
               {t("profile.collection")}
             </Text>
@@ -105,7 +113,13 @@ const ProfileScreen = () => {
         onMessage={(messageKey) => showToast(t(messageKey))}
         onClose={profile.handleEarnClose}
       />
-      <Toast message={toast} onHide={() => setToast(null)} />
+      <Toast
+        message={toast ?? noticeToast}
+        onHide={() => {
+          setToast(null);
+          router.setParams({ notice: undefined });
+        }}
+      />
     </Screen>
   );
 };

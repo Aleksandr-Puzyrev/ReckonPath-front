@@ -16,8 +16,8 @@ describe("signUpSchema", () => {
     expect(signUpSchema.safeParse(VALID).success).toBe(true);
   });
 
-  test("accepts a Cyrillic nickname", () => {
-    expect(errorOf({ nickname: "Капитан_Нова" })).toBeUndefined();
+  test("rejects a Cyrillic nickname, as the server does (decision 0059 #2)", () => {
+    expect(errorOf({ nickname: "Капитан_Нова" })).toBe("account.errors.nicknameChars");
   });
 
   test.each(["ab", "a".repeat(17)])("rejects the nickname length of %s", (nickname) => {

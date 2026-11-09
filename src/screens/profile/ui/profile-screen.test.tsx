@@ -11,12 +11,14 @@ import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import ProfileScreen from "./profile-screen";
 
-const mockRouter = { push: jest.fn() };
+const mockRouter = { push: jest.fn(), setParams: jest.fn() };
+let mockParams: { notice?: string } = {};
 
 jest.mock("expo-router", () => ({
   get router() {
     return mockRouter;
   },
+  useLocalSearchParams: () => mockParams,
 }));
 jest.mock("@shared/ui/sheet", () => ({
   Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
@@ -42,13 +44,32 @@ const buyReef = async () => {
 describe("ProfileScreen", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
 
-  beforeEach(() => mockRouter.push.mockClear());
+  beforeEach(() => {
+    mockRouter.push.mockClear();
+    mockParams = {};
+  });
 
   afterEach(async () => {
     await cleanup();
     mockServer.reset();
     useAccountStore.getState().reset();
     await act(async () => onlineManager.setOnline(true));
+  });
+
+  test("opens the nickname change by a tap on the nickname (Part 4 §10.1)", async () => {
+    await renderProfile();
+
+    await fireEvent.press(screen.getByTestId("profile-nickname"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/profile/nickname");
+  });
+
+  test("confirms a changed nickname (decision 0059 #7)", async () => {
+    mockParams = { notice: "nicknameChanged" };
+
+    await renderProfile();
+
+    expect(screen.getByText("Ник изменён")).toBeOnTheScreen();
   });
 
   test("shows a guest without server data or a collection (decision 0051 #6)", async () => {
@@ -58,6 +79,7 @@ describe("ProfileScreen", () => {
     expect(screen.getByText("Сохрани прогресс")).toBeOnTheScreen();
     expect(screen.queryByText("Коллекция")).toBeNull();
     expect(screen.queryByText(/XP/)).toBeNull();
+    expect(screen.queryByTestId("profile-nickname")).toBeNull();
   });
 
   test("leads a guest to the sign-up and sign-in forms (decision 0024 #4)", async () => {
