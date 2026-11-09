@@ -1,0 +1,20 @@
+{
+  "v": 2,
+  "id": "c-89",
+  "title": {
+    "ru": "По очереди",
+    "en": "One by one"
+  },
+  "world": 8,
+  "rows": 8,
+  "cols": 8,
+  "targets": [
+    [7, 7],
+    [2, 2],
+    [0, 5]
+  ],
+  "targetOrder": true,
+  "probeMode": "distance",
+  "moveLimit": 12,
+  "stars": [9, 11]
+}

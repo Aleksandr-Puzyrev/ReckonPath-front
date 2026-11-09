@@ -1,0 +1,30 @@
+{
+  "v": 2,
+  "id": "c-96",
+  "title": {
+    "ru": "Курс в тумане",
+    "en": "Course in the fog"
+  },
+  "world": 8,
+  "rows": 8,
+  "cols": 8,
+  "targets": [
+    [1, 1],
+    [7, 6]
+  ],
+  "streams": [
+    [4, 0],
+    [4, 1],
+    [4, 2],
+    [4, 3],
+    [4, 4],
+    [4, 5],
+    [4, 6],
+    [4, 7]
+  ],
+  "buoys": [[5, 2]],
+  "fog": 3,
+  "probeMode": "direction",
+  "moveLimit": 10,
+  "stars": [8, 9]
+}

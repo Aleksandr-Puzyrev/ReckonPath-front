@@ -1,3 +1,4 @@
+import { createBoard, createSolver, directionOf, initGame } from "@reckon-path/engine";
 import type { LevelInput } from "@reckon-path/engine";
 
 import { firstNumberShare, isBombOnFirstTap } from "./first-tap";
@@ -27,6 +28,56 @@ describe("firstNumberShare", () => {
   test("takes the best first tap by directions in the «Курс» mode (decision 0045 #9)", () => {
     // A centre tap on an empty 4×4 leaves at most 6 of 16 placements behind one direction (центральный тап на пустом 4×4 оставляет за одним направлением не больше 6 из 16 вариантов).
     expect(firstNumberShare(level({ probeMode: "direction" }))).toBeCloseTo(6 / 16);
+  });
+
+  test("takes the best first pair of taps in the «Горячо-холодно» mode (decision 0057 #3)", () => {
+    // On an empty 4×4 the best pair leaves at most 5 of 16 placements in one answer, a brute force over all pairs gives the same (на пустом 4×4 лучшая пара оставляет в одном ответе не больше 5 из 16 вариантов, перебор всех пар даёт то же).
+    expect(firstNumberShare(level({ probeMode: "hotcold" }))).toBeCloseTo(5 / 16);
+  });
+
+  test("walks around rocks when comparing the first pair of taps", () => {
+    // With a rock on B2 the 15 open cells keep at most 5 placements in one answer of the best pair, as a brute force over shortest paths gives (со скалой на B2 у 15 открытых клеток лучшая пара оставляет в одном ответе не больше 5 вариантов — как даёт перебор по кратчайшим путям).
+    expect(firstNumberShare(level({ probeMode: "hotcold", rocks: [[1, 1]] }))).toBeCloseTo(5 / 15);
+  });
+
+  test("reads «Курс» answers exactly as the engine's directionOf", () => {
+    const course = level({
+      rows: 5,
+      cols: 5,
+      targets: [
+        [0, 4],
+        [4, 0],
+      ],
+      rocks: [[2, 2]],
+      fences: [
+        [
+          [1, 1],
+          [1, 2],
+        ],
+      ],
+      probeMode: "direction",
+    });
+    const { board, rules } = createBoard(course);
+    const game = initGame(board, { ...rules, moveLimit: null });
+    const { hypotheses } = createSolver(game, { levelId: course.id, penalty: 2 });
+    const shareOf = (cell: number) => {
+      const groups = new Map<string, number>();
+      hypotheses.forEach((hypothesis) => {
+        const context = {
+          ...game,
+          board: { ...board, targets: [...hypothesis] },
+          found: new Set<number>(),
+        };
+        const answer = hypothesis.includes(cell) ? "target" : directionOf(context, cell);
+        groups.set(answer, (groups.get(answer) ?? 0) + 1);
+      });
+      return Math.max(...groups.values()) / hypotheses.length;
+    };
+    const expected = Math.min(
+      ...board.kinds.flatMap((kind, cell) => (kind === "rock" ? [] : [shareOf(cell)])),
+    );
+
+    expect(firstNumberShare(course)).toBeCloseTo(expected);
   });
 
   test("measures the distance to target №1 when the order matters", () => {

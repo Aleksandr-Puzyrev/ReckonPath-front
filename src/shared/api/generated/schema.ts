@@ -213,7 +213,7 @@ export interface paths {
     get: operations["getMe"];
     put?: never;
     post?: never;
-    /** @description Schedules the deletion, confirmed by the password, and ends every session of the account (decision 0052 #2). */
+    /** @description Schedules the deletion, confirmed by the password; the session stays (decision 0058 */
     delete: operations["deleteMe"];
     options?: never;
     head?: never;
@@ -887,6 +887,9 @@ export interface components {
       | "forbidden"
       | "not_found"
       | "idempotency_mismatch"
+      | "idempotency_in_progress"
+      | "invalid_idempotency_key"
+      | "not_scheduled"
       | "already_owned"
       | "in_match"
       | "already_queued"
@@ -981,30 +984,24 @@ export interface components {
       /** @description Store link; empty when not set */
       appStore: string;
     };
-    MaintenanceStatus: {
-      /** @description true while the app works */
-      active: boolean;
+    Maintenance: {
+      /**
+       * Format: date-time
+       * @description null without an end time
+       */
+      until: string | null;
       message: string;
     };
     Bootstrap: {
       /** Format: date-time */
       serverTime: string;
-      version: {
-        min: string;
-        recommended: string;
-        storeUrl: string;
-        message?: string;
-      };
-      /** @description null when there is no maintenance; shape follows the maintenance error details */
-      maintenance: null | {
-        /** Format: date-time */
-        until?: string;
-        message?: string;
-      };
+      /** @description null when there is no maintenance */
+      maintenance: null | components["schemas"]["Maintenance"];
       config: {
         [key: string]: unknown;
       };
       contentVersion: string;
+      /** @description Empty when ads are off */
       adsNetwork: string;
       /** Format: date */
       dayKey: string;
@@ -1090,31 +1087,39 @@ export interface components {
       emeralds: number;
       coins: number;
     };
+    /** @description The backend's player (decision 0058); the wallet comes from GET /wallet */
     Me: {
       id: string;
       nickname: string;
-      isGuest: boolean;
-      providers: string[];
+      /** @enum {string} */
+      locale: "ru" | "en";
       level: number;
+      /** @description XP inside the current level */
       xp: number;
       xpToNext: number;
-      wallet: components["schemas"]["Wallet"];
-      arena: {
+      arena?: {
         trophies: number;
+        /** @description Lower case */
         league: string;
-        division: number;
-        peak: number;
-        rp: number;
-        seasonId: number;
+        /** @enum {string} */
+        division: "III" | "II" | "I";
+      };
+      nicknameChange: {
+        /** @description 0 when free */
+        price: number;
+        currency: string;
+        /** Format: date-time */
+        availableAt?: string;
       };
       flags: {
-        nickChangeFreeAvailable?: boolean;
         /** Format: date-time */
-        nickChangeAvailableAt?: string | null;
-        /** Format: date-time */
-        deletionScheduledAt?: string | null;
+        deletionScheduledAt: string | null;
+        /**
+         * Format: date-time
+         * @description Until then the deletion can be cancelled
+         */
+        purgeAfter?: string;
       };
-      friendCode: string;
       consents: components["schemas"]["Consent"][];
       consentsRequired: components["schemas"]["ConsentType"][];
     };
@@ -1615,14 +1620,21 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Whether the app works; active is false during maintenance (decision 0049) */
+      /** @description Maintenance is on (decision 0058 */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["MaintenanceStatus"];
+          "application/json": components["schemas"]["Maintenance"];
         };
+      };
+      /** @description The app works */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
       default: components["responses"]["Error"];
     };
@@ -1899,7 +1911,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          nickname?: string;
           /** @enum {string} */
           locale?: "ru" | "en";
         };
@@ -2072,12 +2083,14 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Deletion cancelled */
-      204: {
+      /** @description Deletion cancelled, with the updated player */
+      200: {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          "application/json": components["schemas"]["Me"];
+        };
       };
       default: components["responses"]["Error"];
     };
@@ -3062,6 +3075,9 @@ export const errorCodeValues: ReadonlyArray<
   "forbidden",
   "not_found",
   "idempotency_mismatch",
+  "idempotency_in_progress",
+  "invalid_idempotency_key",
+  "not_scheduled",
   "already_owned",
   "in_match",
   "already_queued",
@@ -3137,6 +3153,12 @@ export const errorCodeValues: ReadonlyArray<
   "body_too_large",
   "method_not_allowed",
 ];
+export const meLocaleValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["Me"]["locale"]
+> = ["ru", "en"];
+export const meArenaDivisionValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["Me"]["arena"]["division"]
+> = ["III", "II", "I"];
 export const consentTypeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["ConsentType"]
 > = ["terms", "privacy", "marketing"];

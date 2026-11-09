@@ -1,0 +1,19 @@
+{
+  "v": 2,
+  "id": "c-88",
+  "title": {
+    "ru": "Первая, вторая",
+    "en": "First, second"
+  },
+  "world": 8,
+  "rows": 8,
+  "cols": 8,
+  "targets": [
+    [6, 1],
+    [1, 6]
+  ],
+  "targetOrder": true,
+  "probeMode": "distance",
+  "moveLimit": 8,
+  "stars": [6, 7]
+}

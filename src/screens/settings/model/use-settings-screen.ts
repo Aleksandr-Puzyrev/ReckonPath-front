@@ -13,7 +13,6 @@ import { useAccountStore } from "@entities/session";
 import { useMeQuery } from "@entities/wallet";
 import type { ErrorMessageKey } from "@shared/api";
 import { APP_VERSION } from "@shared/config";
-import { formatDayMonth } from "@shared/lib";
 import { i18n } from "@shared/i18n";
 import type { AppLanguage } from "@shared/i18n";
 
@@ -51,7 +50,7 @@ export const useSettingsScreen = (onToast: (text: string) => void) => {
   return {
     me,
     hasLogin,
-    deletionAt: me?.flags.deletionScheduledAt ?? null,
+    deletionAt: me?.flags.purgeAfter ?? null,
     version: Application.nativeApplicationVersion ?? APP_VERSION,
     build: Application.nativeBuildVersion,
     sheet,
@@ -72,10 +71,6 @@ export const useSettingsScreen = (onToast: (text: string) => void) => {
     handleSignOut: signOut.signOut,
     handleMarketingToggle: marketing.toggle,
     handleDeletion: () => router.push("/settings/deletion"),
-    handleDeleted: (purgeAfter: string) =>
-      onToast(
-        t("settings.delete.scheduledTitle", { date: formatDayMonth(purgeAfter, i18n.language) }),
-      ),
     handleCopyId: () => void copyId(),
     handleRate: () => void rate(),
     handleError: showError,

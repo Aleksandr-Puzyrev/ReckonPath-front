@@ -5,6 +5,7 @@ import { apiClient, readData } from "@shared/api";
 import { appConfigKeys } from "./bootstrap-queries";
 
 const SYSTEM_STALE_MS = 5 * 60_000;
+const HTTP_NO_CONTENT = 204;
 
 export const versionQueryOptions = () =>
   queryOptions({
@@ -16,7 +17,10 @@ export const versionQueryOptions = () =>
 export const maintenanceQueryOptions = () =>
   queryOptions({
     queryKey: appConfigKeys.maintenance(),
-    queryFn: async () => readData(await apiClient.GET("/maintenance")),
+    queryFn: async () => {
+      const result = await apiClient.GET("/maintenance");
+      return result.response.status === HTTP_NO_CONTENT ? null : readData(result);
+    },
     staleTime: SYSTEM_STALE_MS,
   });
 

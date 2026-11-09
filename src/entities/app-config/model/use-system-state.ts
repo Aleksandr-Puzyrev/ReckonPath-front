@@ -6,11 +6,11 @@ import { useMaintenanceQuery, useVersionQuery } from "../api/system-queries";
 import { systemStateOf } from "./system-state";
 
 type VersionInfo = components["schemas"]["VersionInfo"];
-type MaintenanceStatus = components["schemas"]["MaintenanceStatus"];
+type Maintenance = components["schemas"]["Maintenance"];
 
 const stateOf = (
   version: VersionInfo | undefined,
-  maintenance: MaintenanceStatus | undefined,
+  maintenance: Maintenance | null | undefined,
   error: unknown,
 ) => systemStateOf({ version, maintenance, error, store: INSTALL_STORE });
 

@@ -30,7 +30,7 @@ const DeletionScreen = () => {
   );
   const { theme } = useUnistyles();
   const iconSize = theme.sizes.iconButton.icon;
-  const deletionAt = me?.flags.deletionScheduledAt ?? null;
+  const deletionAt = me?.flags.purgeAfter ?? null;
 
   return (
     <Screen style={styles.screen}>

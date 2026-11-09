@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 
 import { SoftUpdateSheet } from "@screens/system";
+import { useLocaleSync } from "@features/change-language";
 import { useIsConsentRequired } from "@features/manage-consents";
 import { useInterstitialStore } from "@entities/ad";
 import {
@@ -23,6 +24,7 @@ import { useDailyWeekPrefetch } from "../sync/use-daily-week-prefetch";
 const RootStack = () => {
   useSystemSignalRefetch();
   useGuestCacheCleanup();
+  useLocaleSync();
   useAttemptsSync();
   useDailyWeekPrefetch();
   const { state } = useSystemState();

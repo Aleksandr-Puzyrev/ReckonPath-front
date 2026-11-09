@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { BackHandler, View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 
-import { useConfigNumber } from "@entities/app-config";
 import { Button } from "@shared/ui/button";
 import { Dialog } from "@shared/ui/dialog";
 import { Screen } from "@shared/ui/screen";
@@ -20,8 +19,8 @@ import { styles } from "./arena-async-styles";
 import AuthorCard from "./author-card";
 import MyAsyncBar from "./my-async-bar";
 
-// Part 6 §7.4 default when remote config lacks it (значение Части 6 §7.4, если его нет в remote config).
-const DEFAULT_MAX_TURNS = 40;
+// TODO: read arena.maxTurns from bootstrap once the arena is on the backend
+const MAX_TURNS = 40;
 
 const ArenaAsyncScreen = () => {
   useKeepAwake();
@@ -30,7 +29,6 @@ const ArenaAsyncScreen = () => {
   const [boardWidth, setBoardWidth] = useState(0);
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
   const game = useArenaAsync(showToast);
-  const maxTurns = useConfigNumber("arena.maxTurns", DEFAULT_MAX_TURNS);
   const { match, handleSurrenderOpen } = game;
 
   useEffect(() => {
@@ -70,7 +68,7 @@ const ArenaAsyncScreen = () => {
         )}
       </View>
       <Text variant="caption" style={styles.turnLine}>
-        {t("match.turn", { n: game.turnsUsed + 1, max: maxTurns })}
+        {t("match.turn", { n: game.turnsUsed + 1, max: MAX_TURNS })}
       </Text>
       <MyAsyncBar
         deadline={game.deadline}

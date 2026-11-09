@@ -12,9 +12,7 @@ const until = new Date(2026, 8, 26, 15, 30).toISOString();
 
 const serveMaintenance = (message = "") =>
   mockServer.use(
-    http.get(mockUrl("/maintenance"), () =>
-      HttpResponse.json(maintenanceMock({ active: false, message })),
-    ),
+    http.get(mockUrl("/maintenance"), () => HttpResponse.json(maintenanceMock({ message }))),
   );
 
 // A 503 from any request can carry the end time (503 на любой запрос может принести время окончания).

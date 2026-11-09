@@ -62,6 +62,8 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0054 | [`0054-showroom-on-backend.md`](0054-showroom-on-backend.md) | Showroom on the backend: wait for light/dark skin palettes, show `exclusive` and extra kinds (exclusive as legendary), equip the first bundle part, derive «Видно в матче», connect despite the backend gaps |
 | 0055 | [`0055-showroom-connection.md`](0055-showroom-connection.md) | Showroom connection: balance from the backend `GET /wallet` (overrides 0052 #4), buoy/beacon/number slots, loadout from `/me/items`, «Видно в матче» except effects, `exclusive` label, drop banner, default items hidden, purchase error mapping |
 | 0056 | [`0056-consents-documents-onboarding-fixes.md`](0056-consents-documents-onboarding-fixes.md) | Iteration 1: push moved to stage 5, consents in `Me` and a re-accept screen, documents from `GET /document` in the in-app browser, «Конфиденциальность» settings group, marketing switch, simplified level 1 result |
+| 0057 | [`0057-worlds-7-8-content.md`](0057-worlds-7-8-content.md) | Worlds 7–8 cards approved, «Число» on the final level, hot-cold first pair check, 2 targets in world 7, fog 4 → 2, no screen after level 100 |
+| 0058 | [`0058-bootstrap-and-profile-on-backend.md`](0058-bootstrap-and-profile-on-backend.md) | Bootstrap, full `GET /me`, `PATCH /me {locale}`, restore on the backend; deletion keeps the session again; `arena.maxTurns` and `day_key` ignored for now; new maintenance shape; three error codes |
 
 ## Template
 

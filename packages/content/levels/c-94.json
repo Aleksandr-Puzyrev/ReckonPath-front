@@ -1,0 +1,22 @@
+{
+  "v": 2,
+  "id": "c-94",
+  "title": {
+    "ru": "Штиль",
+    "en": "Calm"
+  },
+  "world": 8,
+  "rows": 8,
+  "cols": 8,
+  "targets": [
+    [1, 6],
+    [6, 1]
+  ],
+  "beacons": [
+    [0, 0],
+    [7, 7]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 6,
+  "stars": [4, 5]
+}

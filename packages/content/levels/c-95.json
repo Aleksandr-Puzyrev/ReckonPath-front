@@ -1,0 +1,20 @@
+{
+  "v": 2,
+  "id": "c-95",
+  "title": {
+    "ru": "Туман по порядку",
+    "en": "Fog in order"
+  },
+  "world": 8,
+  "rows": 8,
+  "cols": 8,
+  "targets": [
+    [6, 6],
+    [1, 2]
+  ],
+  "targetOrder": true,
+  "fog": 3,
+  "probeMode": "hotcold",
+  "moveLimit": 14,
+  "stars": [11, 13]
+}

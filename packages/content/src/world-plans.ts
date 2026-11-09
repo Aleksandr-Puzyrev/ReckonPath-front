@@ -14,6 +14,14 @@ export const WORLD_PLANS: readonly WorldPlan[] = [
   { world: 4, firstLevel: 37, lastLevel: 48, factor: { start: 1.55, end: 1.4 }, restLevel: "c-42" },
   { world: 5, firstLevel: 49, lastLevel: 61, factor: { start: 1.5, end: 1.35 }, restLevel: "c-54" },
   { world: 6, firstLevel: 62, lastLevel: 74, factor: { start: 1.45, end: 1.3 }, restLevel: "c-67" },
+  { world: 7, firstLevel: 75, lastLevel: 87, factor: { start: 1.4, end: 1.25 }, restLevel: "c-80" },
+  {
+    world: 8,
+    firstLevel: 88,
+    lastLevel: 100,
+    factor: { start: 1.35, end: 1.2 },
+    restLevel: "c-94",
+  },
 ];
 
 export const TUTORIAL_LEVEL = "c-1";

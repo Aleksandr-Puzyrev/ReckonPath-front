@@ -114,7 +114,7 @@ describe("purchaseItemMutationOptions", () => {
 
     expect(error).toMatchObject({
       code: "price_changed",
-      details: { price: 480, currency: "gems" },
+      details: { price: { gems: 480 }, currency: "gems", amount: 480 },
     });
   });
 

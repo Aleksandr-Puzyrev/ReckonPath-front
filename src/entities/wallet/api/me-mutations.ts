@@ -1,6 +1,9 @@
 import { mutationOptions } from "@tanstack/react-query";
 
 import { apiClient, readData, readEmpty } from "@shared/api";
+import type { AppLanguage } from "@shared/i18n";
+
+import { mapMe } from "../model/map-me";
 
 export const deleteMeMutationOptions = () =>
   mutationOptions({
@@ -15,4 +18,11 @@ export const restoreMeMutationOptions = () =>
   mutationOptions({
     mutationKey: ["me", "restore"],
     mutationFn: async () => readEmpty(await apiClient.POST("/me/restore")),
+  });
+
+export const updateLocaleMutationOptions = () =>
+  mutationOptions({
+    mutationKey: ["me", "locale"],
+    mutationFn: async (locale: AppLanguage) =>
+      mapMe(readData(await apiClient.PATCH("/me", { body: { locale } }))),
   });

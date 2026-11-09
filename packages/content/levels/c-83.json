@@ -1,0 +1,29 @@
+{
+  "v": 2,
+  "id": "c-83",
+  "title": {
+    "ru": "Туман и течение",
+    "en": "Fog and current"
+  },
+  "world": 7,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [0, 4],
+    [6, 5]
+  ],
+  "streams": [
+    [3, 0],
+    [3, 1],
+    [3, 2],
+    [3, 3],
+    [3, 4],
+    [3, 5],
+    [3, 6]
+  ],
+  "bridges": [[3, 1]],
+  "fog": 3,
+  "probeMode": "hotcold",
+  "moveLimit": 12,
+  "stars": [10, 11]
+}

@@ -1,0 +1,19 @@
+{
+  "v": 2,
+  "id": "c-80",
+  "title": {
+    "ru": "Просвет",
+    "en": "Clearing"
+  },
+  "world": 7,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [0, 6],
+    [6, 0]
+  ],
+  "beacons": [[3, 3]],
+  "probeMode": "distance",
+  "moveLimit": 5,
+  "stars": [4, 4]
+}

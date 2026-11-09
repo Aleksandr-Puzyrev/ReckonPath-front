@@ -21,8 +21,9 @@ import { walletHandlers } from "./wallet-handlers";
 
 type Bootstrap = components["schemas"]["Bootstrap"];
 type VersionInfo = components["schemas"]["VersionInfo"];
-type MaintenanceStatus = components["schemas"]["MaintenanceStatus"];
+type Maintenance = components["schemas"]["Maintenance"];
 
+const HTTP_NO_CONTENT = 204;
 const DAY_MS = 86_400_000;
 const DATE_LENGTH = 10;
 
@@ -30,11 +31,6 @@ const startOfNextUtcDay = (now: Date) => new Date(Math.ceil(now.getTime() / DAY_
 
 export const bootstrapMock = (now = new Date()): Bootstrap => ({
   serverTime: now.toISOString(),
-  version: {
-    min: APP_VERSION,
-    recommended: APP_VERSION,
-    storeUrl: "https://apps.apple.com/app/id000",
-  },
   maintenance: null,
   config: { "arena.maxTurns": 40, "ads.interstitial.everyN": 3, "features.events": true },
   contentVersion: "2026.09.20-1",
@@ -54,8 +50,8 @@ export const versionMock = (overrides: Partial<VersionInfo> = {}): VersionInfo =
   ...overrides,
 });
 
-export const maintenanceMock = (overrides: Partial<MaintenanceStatus> = {}): MaintenanceStatus => ({
-  active: true,
+export const maintenanceMock = (overrides: Partial<Maintenance> = {}): Maintenance => ({
+  until: null,
   message: "",
   ...overrides,
 });
@@ -63,7 +59,7 @@ export const maintenanceMock = (overrides: Partial<MaintenanceStatus> = {}): Mai
 export const handlers = [
   http.get(mockUrl("/bootstrap"), () => HttpResponse.json(bootstrapMock())),
   http.get(mockUrl("/version"), () => HttpResponse.json(versionMock())),
-  http.get(mockUrl("/maintenance"), () => HttpResponse.json(maintenanceMock())),
+  http.get(mockUrl("/maintenance"), () => new HttpResponse(null, { status: HTTP_NO_CONTENT })),
   ...authHandlers,
   ...deviceHandlers,
   ...attemptsHandlers,

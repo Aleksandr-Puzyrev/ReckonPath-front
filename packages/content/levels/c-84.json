@@ -1,0 +1,24 @@
+{
+  "v": 2,
+  "id": "c-84",
+  "title": {
+    "ru": "Мгла",
+    "en": "Murk"
+  },
+  "world": 7,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [0, 1],
+    [6, 6]
+  ],
+  "bombs": [
+    [2, 4],
+    [5, 2]
+  ],
+  "buoys": [[4, 5]],
+  "fog": 2,
+  "probeMode": "distance",
+  "moveLimit": 6,
+  "stars": [4, 5]
+}

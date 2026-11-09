@@ -16,11 +16,11 @@ Both scripts are Jest runs of `src/content.test.ts` (the repository has no TypeS
 | --- | --- | --- |
 | validator codes | error | `validateLevel` and `validateLevelNorm` for the campaign; level 1 (tutorial) has no move limit and is exempt from `MOVE_LIMIT` |
 | `LIMITS_OUT_OF_DATE` | error | `moveLimit` / `stars` differ from the computed values — run `content:fix` |
-| `FIRST_NUMBER` | error | the first number cuts less than 40% of target placements: the beacons' numbers on beacon levels, otherwise any first tap; in «Курс» the best first tap (Part 6 §8.1 p.2, decision 0045 #9) |
+| `FIRST_NUMBER` | error | the first number cuts less than 40% of target placements: the beacons' numbers on beacon levels, otherwise any first tap; in «Курс» the best first tap (Part 6 §8.1 p.2, decision 0045 #9); in «Горячо-холодно» the best first pair of taps (decision 0057 #3) |
 | `BOMB_FIRST_TAP` | error | a bomb lies on a cell the bot opens with (Part 6 §8.1 p.3) |
 | `TUTORIAL_LIMIT` | error | level 1 must have no limit and no stars |
 | `CURVE` | warning | slack (`moveLimit / norm`) deviates from the world curve by more than 10% |
 
-With norms of 2–3 moves the rounding up of the limit alone gives 15–30% slack deviation, so `CURVE` warnings are expected in worlds 1–6.
+With norms of 2–3 moves the rounding up of the limit alone gives 15–30% slack deviation, so `CURVE` warnings are expected in every world.
 
-World cards: [`docs/world-1.md`](docs/world-1.md), [`docs/world-2.md`](docs/world-2.md), [`docs/world-3.md`](docs/world-3.md), [`docs/world-4.md`](docs/world-4.md), [`docs/world-5.md`](docs/world-5.md), [`docs/world-6.md`](docs/world-6.md).
+World cards: [`docs/world-1.md`](docs/world-1.md), [`docs/world-2.md`](docs/world-2.md), [`docs/world-3.md`](docs/world-3.md), [`docs/world-4.md`](docs/world-4.md), [`docs/world-5.md`](docs/world-5.md), [`docs/world-6.md`](docs/world-6.md), [`docs/world-7.md`](docs/world-7.md), [`docs/world-8.md`](docs/world-8.md).

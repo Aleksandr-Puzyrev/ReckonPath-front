@@ -5,7 +5,7 @@ import type { components } from "@shared/api";
 import type { InstallStore } from "@shared/config";
 
 type VersionInfo = components["schemas"]["VersionInfo"];
-type MaintenanceStatus = components["schemas"]["MaintenanceStatus"];
+type Maintenance = components["schemas"]["Maintenance"];
 
 export type SystemState =
   | { kind: "ready" }
@@ -15,7 +15,7 @@ export type SystemState =
 
 interface SystemInput {
   version: VersionInfo | undefined;
-  maintenance: MaintenanceStatus | undefined;
+  maintenance: Maintenance | null | undefined;
   error: unknown;
   store: InstallStore;
 }
@@ -50,8 +50,8 @@ export const systemStateOf = ({ version, maintenance, error, store }: SystemInpu
     const details = maintenanceDetailsSchema.catch({}).parse(apiError.details);
     return { kind: "maintenance", until: details.until ?? null, message: textOf(details.message) };
   }
-  if (maintenance?.active === false) {
-    return { kind: "maintenance", until: null, message: textOf(maintenance.message) };
+  if (maintenance) {
+    return { kind: "maintenance", until: maintenance.until, message: textOf(maintenance.message) };
   }
   if (version?.showModal === true) {
     return {

@@ -157,7 +157,7 @@ describe("SettingsScreen", () => {
     expect(screen.queryByTestId("settings-delete")).toBeNull();
   });
 
-  test("deletes the account by the password and turns into a guest (design 26.3, decision 0052 #2)", async () => {
+  test("deletes the account by the password and opens the deletion screen (design 26.3, decision 0058 #2)", async () => {
     useAccountStore.getState().markSignedIn();
     await renderSettings();
 
@@ -169,9 +169,9 @@ describe("SettingsScreen", () => {
     await waitFor(() => expect(screen.getByTestId("delete-forever")).toBeEnabled());
     await fireEvent.press(screen.getByTestId("delete-forever"));
 
-    expect(await screen.findByText(/^Аккаунт будет удалён \d+ \S+$/)).toBeOnTheScreen();
-    expect(useAccountStore.getState().hasLogin).toBe(false);
-    expect(screen.queryByTestId("settings-delete")).toBeNull();
+    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/settings/deletion"));
+    expect(useAccountStore.getState().hasLogin).toBe(true);
+    expect(await screen.findByText(/^Удаление \d+ \S+$/)).toBeOnTheScreen();
   });
 
   test("leads to the deletion screen once it is scheduled (decision 0040 #15)", async () => {

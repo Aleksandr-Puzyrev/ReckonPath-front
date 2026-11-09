@@ -143,7 +143,7 @@ describe("fake match room", () => {
   test("records a win with trophies, coins and emeralds (PVP-22, PVP-25)", async () => {
     const { match } = await startMatch({ first: "opponent" });
     await jest.advanceTimersByTimeAsync(TURN_MS);
-    const { emeralds, coins } = (await apiClient.GET("/me")).data?.wallet ?? {};
+    const { gems, coins } = (await apiClient.GET("/wallet")).data ?? {};
 
     tap(match, [2, 2]);
 
@@ -155,8 +155,8 @@ describe("fake match room", () => {
       { xp: 10 },
     ]);
     expect(end?.maps.opponent).toEqual({ targets: [[2, 2]], bombs: [[0, 0]] });
-    expect((await apiClient.GET("/me")).data?.wallet).toEqual({
-      emeralds: (emeralds ?? 0) + 3,
+    expect((await apiClient.GET("/wallet")).data).toEqual({
+      gems: (gems ?? 0) + 3,
       coins: (coins ?? 0) + 40,
     });
     expect(await arenaProfile()).toEqual(

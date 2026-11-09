@@ -12,7 +12,9 @@ describe("backend price", () => {
   });
 
   test("reads the new price of price_changed", () => {
-    expect(changedPriceOf({ price: 520, currency: "gems" })).toEqual({ emeralds: 520 });
+    expect(changedPriceOf({ price: { gems: 520 }, currency: "gems", amount: 520 })).toEqual({
+      emeralds: 520,
+    });
   });
 
   test("ignores price_changed details without a price", () => {

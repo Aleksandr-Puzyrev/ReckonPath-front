@@ -157,8 +157,9 @@ const purchase = (offer: MockItem | MockBundle, seen: MockPrice, locale: Locale,
   const price = isItem ? offer.price : bundlePriceOf(offer);
   if (!isSamePrice(seen, price)) {
     return errorResponse("price_changed", HTTP_CONFLICT, {
-      price: amountOf(price),
+      price: { [currencyOf(price)]: amountOf(price) },
       currency: currencyOf(price),
+      amount: amountOf(price),
     });
   }
   if (!chargePrice(price)) {

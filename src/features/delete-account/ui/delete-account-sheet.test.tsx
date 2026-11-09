@@ -53,16 +53,16 @@ describe("DeleteAccountSheet", () => {
     expect(screen.getByTestId("delete-forever")).toBeDisabled();
   });
 
-  test("turns the device into a guest after the deletion", async () => {
+  test("keeps the account and its progress after the deletion (decision 0058 #2)", async () => {
     useProgressStore.getState().recordWin("c-1", { stars: 3, moves: 4 });
     const onDeleted = jest.fn();
     await render(sheetWith(true, onDeleted), { wrapper: createQueryWrapper() });
 
     await confirmWith("Signal2026");
 
-    await waitFor(() => expect(onDeleted).toHaveBeenCalledWith(expect.any(String)));
-    expect(useAccountStore.getState().hasLogin).toBe(false);
-    expect(useProgressStore.getState().best).toEqual({});
+    await waitFor(() => expect(onDeleted).toHaveBeenCalled());
+    expect(useAccountStore.getState().hasLogin).toBe(true);
+    expect(useProgressStore.getState().best).not.toEqual({});
   });
 
   test("shows a wrong password under the field", async () => {

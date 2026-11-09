@@ -2,14 +2,13 @@ import { http, HttpResponse } from "msw/http";
 import { z } from "zod";
 
 import { mockPlayerLevel } from "./mock-player";
-import { mockWallet } from "./mock-wallet";
 import { mockUrl } from "./mock-url";
 
 const DELETION_DAYS = 30;
 const DAY_MS = 86_400_000;
-const HTTP_NO_CONTENT = 204;
 const HTTP_ACCEPTED = 202;
 const HTTP_UNPROCESSABLE = 422;
+const HTTP_CONFLICT = 409;
 // The wrong password of the account tests, as on sign-in (неверный пароль аккаунта в тестах, как при входе).
 const WRONG_PASSWORD = "000000";
 const HTTP_BAD_REQUEST = 400;
@@ -17,11 +16,10 @@ const HTTP_BAD_REQUEST = 400;
 const ME = {
   id: "0192a000-0000-7000-8000-000000004821",
   nickname: "Player4821",
-  isGuest: true,
-  providers: [],
-  arena: { trophies: 0, league: "BRONZE", division: 3, peak: 0, rp: 0, seasonId: 2 },
-  friendCode: "PL4821",
+  arena: { trophies: 0, league: "bronze", division: "III" },
+  nicknameChange: { price: 0, currency: "gems" },
 };
+const DEFAULT_LOCALE = "ru";
 
 const CONSENT_TYPES = ["terms", "privacy", "marketing"] as const;
 const REQUIRED_CONSENTS = ["terms", "privacy"] as const;
@@ -66,11 +64,17 @@ const consentsStateOf = () => ({
 
 export const mockLocale = () => locale;
 
+const purgeAfterOf = (scheduledAt: string) =>
+  new Date(Date.parse(scheduledAt) + DELETION_DAYS * DAY_MS).toISOString();
+
 const meOf = () => ({
   ...ME,
+  locale: locale ?? DEFAULT_LOCALE,
   ...mockPlayerLevel(),
-  flags: { nickChangeFreeAvailable: true, nickChangeAvailableAt: null, deletionScheduledAt },
-  wallet: mockWallet(),
+  flags:
+    deletionScheduledAt === null
+      ? { deletionScheduledAt }
+      : { deletionScheduledAt, purgeAfter: purgeAfterOf(deletionScheduledAt) },
   ...consentsStateOf(),
 });
 
@@ -94,8 +98,11 @@ export const meHandlers = [
         { status: HTTP_UNPROCESSABLE },
       );
     }
-    deletionScheduledAt = new Date(Date.now() + DELETION_DAYS * DAY_MS).toISOString();
-    return HttpResponse.json({ purgeAfter: deletionScheduledAt }, { status: HTTP_ACCEPTED });
+    deletionScheduledAt = deletionScheduledAt ?? new Date().toISOString();
+    return HttpResponse.json(
+      { purgeAfter: purgeAfterOf(deletionScheduledAt) },
+      { status: HTTP_ACCEPTED },
+    );
   }),
   http.put(mockUrl("/me/consents"), async ({ request }) => {
     const body = consentsSchema.safeParse(await request.json().catch(() => null));
@@ -106,7 +113,10 @@ export const meHandlers = [
     return HttpResponse.json(consentsStateOf());
   }),
   http.post(mockUrl("/me/restore"), () => {
+    if (deletionScheduledAt === null) {
+      return HttpResponse.json({ error: { code: "not_scheduled" } }, { status: HTTP_CONFLICT });
+    }
     deletionScheduledAt = null;
-    return new HttpResponse(null, { status: HTTP_NO_CONTENT });
+    return HttpResponse.json(meOf());
   }),
 ];

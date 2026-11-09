@@ -1,0 +1,18 @@
+{
+  "v": 2,
+  "id": "c-75",
+  "title": {
+    "ru": "Теплее",
+    "en": "Warmer"
+  },
+  "world": 7,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [1, 5],
+    [5, 1]
+  ],
+  "probeMode": "hotcold",
+  "moveLimit": 13,
+  "stars": [9, 11]
+}

@@ -58,7 +58,7 @@ describe("claimSeasonStepMutationOptions", () => {
 
   test("gives the reward of an available step with the new wallet", async () => {
     winMatches(WINS_FOR_ONE_STEP);
-    const coins = (await apiClient.GET("/me")).data?.wallet.coins ?? 0;
+    const coins = (await apiClient.GET("/wallet")).data?.coins ?? 0;
 
     const result = await claim(1);
 

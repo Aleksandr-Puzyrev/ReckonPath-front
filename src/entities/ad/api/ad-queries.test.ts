@@ -68,6 +68,6 @@ describe("ad queries", () => {
 
     expect(status.status).toBe("rewarded");
     expect(status.reward).toBeUndefined();
-    expect((await apiClient.GET("/me")).data?.wallet.emeralds).toBe(2640);
+    expect((await apiClient.GET("/wallet")).data?.gems).toBe(2640);
   });
 });

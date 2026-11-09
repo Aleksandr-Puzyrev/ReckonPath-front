@@ -146,7 +146,7 @@ describe("ArenaHomeScreen", () => {
     await fireEvent.press(screen.getByTestId("summary-next"));
 
     await waitFor(() => expect(screen.queryByTestId("season-summary")).toBeNull());
-    expect((await apiClient.GET("/me")).data?.wallet.coins).toBeGreaterThanOrEqual(1500);
+    expect((await apiClient.GET("/wallet")).data?.coins).toBeGreaterThanOrEqual(1500);
   });
 
   test("claims the season rewards when the summary is closed unclaimed (decision 0038 #3)", async () => {

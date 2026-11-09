@@ -1,0 +1,26 @@
+{
+  "v": 2,
+  "id": "c-86",
+  "title": {
+    "ru": "Маяк в тумане",
+    "en": "Beacon in the fog"
+  },
+  "world": 7,
+  "rows": 8,
+  "cols": 8,
+  "targets": [
+    [0, 7],
+    [7, 0]
+  ],
+  "heavy": [
+    [1, 1],
+    [1, 2],
+    [2, 1],
+    [2, 2]
+  ],
+  "beacons": [[4, 4]],
+  "fog": 2,
+  "probeMode": "distance",
+  "moveLimit": 4,
+  "stars": [3, 4]
+}

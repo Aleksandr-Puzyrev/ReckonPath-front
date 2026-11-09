@@ -35,4 +35,12 @@ describe("DeletionScreen", () => {
     await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
     expect((await apiClient.GET("/me")).data?.flags.deletionScheduledAt).toBeNull();
   });
+
+  test("leaves the screen when the deletion is already cancelled (decision 0058 #10)", async () => {
+    await render(<DeletionScreen />, { wrapper: createQueryWrapper() });
+
+    await fireEvent.press(await screen.findByTestId("deletion-restore"));
+
+    await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
+  });
 });

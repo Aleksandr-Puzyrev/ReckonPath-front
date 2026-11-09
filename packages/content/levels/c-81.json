@@ -1,0 +1,19 @@
+{
+  "v": 2,
+  "id": "c-81",
+  "title": {
+    "ru": "Первый туман",
+    "en": "First fog"
+  },
+  "world": 7,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [2, 5],
+    [5, 1]
+  ],
+  "fog": 4,
+  "probeMode": "distance",
+  "moveLimit": 8,
+  "stars": [6, 7]
+}

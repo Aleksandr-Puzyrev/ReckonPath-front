@@ -15,7 +15,7 @@ import { useDeleteAccount } from "../model/use-delete-account";
 import { styles } from "./delete-account-styles";
 
 interface IPasswordConfirmForm {
-  onDeleted: (purgeAfter: string) => void;
+  onDeleted: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
 }
 

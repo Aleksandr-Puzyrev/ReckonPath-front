@@ -52,10 +52,11 @@ paths:
       security: [{}]
       responses:
         "200":
-          description: Whether the app works; active is false during maintenance (decision 0049)
+          description: Maintenance is on (decision 0058 #11)
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MaintenanceStatus" }
+              schema: { $ref: "#/components/schemas/Maintenance" }
+        "204": { description: The app works }
         default: { $ref: "#/components/responses/Error" }
 
   /auth/register:
@@ -212,7 +213,6 @@ paths:
             schema:
               type: object
               properties:
-                nickname: { type: string }
                 locale: { type: string, enum: [ru, en] }
       responses:
         "200":
@@ -223,9 +223,7 @@ paths:
         default: { $ref: "#/components/responses/Error" }
     delete:
       operationId: deleteMe
-      description: >
-        Schedules the deletion, confirmed by the password, and ends every session of the account
-        (decision 0052 #2).
+      description: Schedules the deletion, confirmed by the password; the session stays (decision 0058 #2).
       requestBody:
         required: true
         content:
@@ -346,7 +344,11 @@ paths:
       operationId: restoreMe
       description: Cancels the scheduled deletion.
       responses:
-        "204": { description: Deletion cancelled }
+        "200":
+          description: Deletion cancelled, with the updated player
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
         default: { $ref: "#/components/responses/Error" }
 
   /attempts:batch:
@@ -1094,6 +1096,9 @@ components:
         - forbidden
         - not_found
         - idempotency_mismatch
+        - idempotency_in_progress
+        - invalid_idempotency_key
+        - not_scheduled
         - already_owned
         - in_match
         - already_queued
@@ -1183,39 +1188,27 @@ components:
         ruStore: { type: string, description: Store link; empty when not set }
         playMarket: { type: string, description: Store link; empty when not set }
         appStore: { type: string, description: Store link; empty when not set }
-    MaintenanceStatus:
+    Maintenance:
       type: object
-      required: [active, message]
+      required: [until, message]
       properties:
-        active: { type: boolean, description: true while the app works }
+        until: { type: [string, "null"], format: date-time, description: null without an end time }
         message: { type: string }
     Bootstrap:
       type: object
-      required:
-        [serverTime, version, maintenance, config, contentVersion, adsNetwork, dayKey, nextDayAt]
+      required: [serverTime, maintenance, config, contentVersion, adsNetwork, dayKey, nextDayAt]
       properties:
         serverTime: { type: string, format: date-time }
-        version:
-          type: object
-          required: [min, recommended, storeUrl]
-          properties:
-            min: { type: string }
-            recommended: { type: string }
-            storeUrl: { type: string }
-            message: { type: string }
         maintenance:
-          description: null when there is no maintenance; shape follows the maintenance error details
+          description: null when there is no maintenance
           oneOf:
             - type: "null"
-            - type: object
-              properties:
-                until: { type: string, format: date-time }
-                message: { type: string }
+            - $ref: "#/components/schemas/Maintenance"
         config:
           type: object
           additionalProperties: true
         contentVersion: { type: string }
-        adsNetwork: { type: string }
+        adsNetwork: { type: string, description: Empty when ads are off }
         dayKey: { type: string, format: date }
         nextDayAt: { type: string, format: date-time }
 
@@ -1324,50 +1317,52 @@ components:
 
     Me:
       type: object
+      description: The backend's player (decision 0058); the wallet comes from GET /wallet
       required:
         [
           id,
           nickname,
-          isGuest,
-          providers,
+          locale,
           level,
           xp,
           xpToNext,
-          wallet,
-          arena,
+          nicknameChange,
           flags,
-          friendCode,
           consents,
           consentsRequired,
         ]
       properties:
         id: { type: string }
         nickname: { type: string }
-        isGuest: { type: boolean }
-        providers:
-          type: array
-          items: { type: string }
+        locale: { type: string, enum: [ru, en] }
         level: { type: integer }
-        xp: { type: integer }
+        xp: { type: integer, description: XP inside the current level }
         xpToNext: { type: integer }
-        wallet: { $ref: "#/components/schemas/Wallet" }
         arena:
           type: object
-          required: [trophies, league, division, peak, rp, seasonId]
+          required: [trophies, league, division]
           properties:
             trophies: { type: integer }
-            league: { type: string }
-            division: { type: integer }
-            peak: { type: integer }
-            rp: { type: integer }
-            seasonId: { type: integer }
+            league: { type: string, description: Lower case, e.g. gold }
+            division: { type: string, enum: [III, II, I] }
+        nicknameChange:
+          type: object
+          required: [price, currency]
+          properties:
+            price: { type: integer, description: 0 when free }
+            currency: { type: string }
+            availableAt: { type: string, format: date-time }
         flags:
           type: object
+          required: [deletionScheduledAt]
           properties:
-            nickChangeFreeAvailable: { type: boolean }
-            nickChangeAvailableAt: { type: [string, "null"], format: date-time }
             deletionScheduledAt: { type: [string, "null"], format: date-time }
-        friendCode: { type: string }
+            purgeAfter:
+              {
+                type: string,
+                format: date-time,
+                description: Until then the deletion can be cancelled,
+              }
         consents:
           type: array
           items: { $ref: "#/components/schemas/Consent" }

@@ -1,0 +1,25 @@
+{
+  "v": 2,
+  "id": "c-90",
+  "title": {
+    "ru": "Курс по порядку",
+    "en": "Course in order"
+  },
+  "world": 8,
+  "rows": 8,
+  "cols": 8,
+  "targets": [
+    [0, 7],
+    [7, 2]
+  ],
+  "rocks": [
+    [3, 3],
+    [3, 4],
+    [4, 3],
+    [4, 4]
+  ],
+  "targetOrder": true,
+  "probeMode": "direction",
+  "moveLimit": 10,
+  "stars": [8, 9]
+}

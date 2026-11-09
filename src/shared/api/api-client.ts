@@ -11,6 +11,7 @@ import { createBackendTransport } from "./backend-transport";
 import type { paths } from "./generated/schema";
 import { API_PATH, createHybridTransport } from "./hybrid-transport";
 import type * as MockServerModule from "./mocks/mock-server";
+import { retryInProgress } from "./retry-in-progress";
 
 const realFetch: Transport = (request) => fetch(request);
 
@@ -33,7 +34,7 @@ const backend = resolveBackend();
 
 export const apiClient = createClient<paths>({
   baseUrl: `${backend.origin}${API_PATH}`,
-  fetch: createApiFetch(createBackendTransport(backend.transport)),
+  fetch: createApiFetch(retryInProgress(createBackendTransport(backend.transport))),
 });
 
 apiClient.use(apiMiddleware);

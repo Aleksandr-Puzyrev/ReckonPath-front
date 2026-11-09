@@ -14,7 +14,7 @@ import PasswordConfirmForm from "./password-confirm-form";
 interface IDeleteAccountSheet {
   isOpen: boolean;
   summary: ReactNode;
-  onDeleted: (purgeAfter: string) => void;
+  onDeleted: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
   onClose: () => void;
 }
@@ -37,9 +37,9 @@ const DeleteAccountSheet = ({
     <Sheet isOpen={isOpen} onDismiss={handleClose}>
       {isConfirming ? (
         <PasswordConfirmForm
-          onDeleted={(purgeAfter) => {
+          onDeleted={() => {
             setIsConfirming(false);
-            onDeleted(purgeAfter);
+            onDeleted();
           }}
           onError={onError}
         />

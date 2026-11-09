@@ -40,7 +40,7 @@ const serveVersion = (overrides: Parameters<typeof versionMock>[0]) =>
 const serveMaintenance = () =>
   mockServer.use(
     http.get(mockUrl("/maintenance"), () =>
-      HttpResponse.json(maintenanceMock({ active: false, message: "Arena servers" })),
+      HttpResponse.json(maintenanceMock({ message: "Arena servers" })),
     ),
   );
 

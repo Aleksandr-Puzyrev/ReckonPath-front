@@ -15,8 +15,11 @@ const hasHeavy = (number: number) => (levelAt(number).heavy ?? []).length > 0;
 const hasBombs = (number: number) => (levelAt(number).bombs ?? []).length > 0;
 const hasBuoys = (number: number) => (levelAt(number).buoys ?? []).length > 0;
 const hasRocks = (number: number) => (levelAt(number).rocks ?? []).length > 0;
-const WORLD_STARTS = [1, 13, 25, 37, 49, 62] as const;
-const COURSE_LEVELS = range(68, 74);
+const hasFog = (number: number) => (levelAt(number).fog ?? null) !== null;
+const isOrdered = (number: number) => levelAt(number).targetOrder === true;
+const WORLD_STARTS = [1, 13, 25, 37, 49, 62, 75, 88] as const;
+const COURSE_LEVELS = [...range(68, 74), 90, 93, 96, 99];
+const HOT_COLD_LEVELS = [75, 76, 77, 79, 83, 85, 87, 91, 95, 98];
 const worldOf = (number: number) => WORLD_STARTS.filter((start) => number >= start).length;
 
 describe("world 1 (Part 1 §3.1)", () => {
@@ -141,13 +144,107 @@ describe("world 6 (Part 1 §3.1)", () => {
   });
 });
 
+describe("world 7 (Part 1 §3.1, decision 0057)", () => {
+  test("uses 7×7–8×8 boards with exactly 2 targets", () => {
+    range(75, 87).forEach((number) => {
+      const level = levelAt(number);
+      expect(level.rows).toBeGreaterThanOrEqual(7);
+      expect(level.rows).toBeLessThanOrEqual(8);
+      expect(level.targets).toHaveLength(2);
+    });
+  });
+
+  test("introduces «Горячо-холодно» on levels 75–77 and the fog on levels 81–83", () => {
+    expect(range(75, 77).every((number) => levelAt(number).probeMode === "hotcold")).toBe(true);
+    expect(range(1, 80).some(hasFog)).toBe(false);
+    expect(range(81, 83).every(hasFog)).toBe(true);
+  });
+
+  test("alternates «Горячо-холодно» with «Число» and rests on level 80", () => {
+    expect(range(75, 87).map((number) => levelAt(number).probeMode)).toEqual([
+      "hotcold",
+      "hotcold",
+      "hotcold",
+      "distance",
+      "hotcold",
+      "distance",
+      "distance",
+      "distance",
+      "hotcold",
+      "distance",
+      "hotcold",
+      "distance",
+      "hotcold",
+    ]);
+    expect(hasBeacons(80)).toBe(true);
+  });
+
+  test("thickens the fog from 4 on the show level down to 2 (decision 0057 #5)", () => {
+    expect(range(81, 84).map((number) => levelAt(number).fog)).toEqual([4, 3, 3, 2]);
+  });
+
+  test("ends with a fog exam of rocks, ×2, a stream and a fence", () => {
+    expect([hasFog, hasRocks, hasHeavy, hasStreams, hasFences].every((has) => has(87))).toBe(true);
+  });
+});
+
+describe("world 8 (Part 1 §3.1, decision 0057)", () => {
+  test("uses 8×8–9×9 boards with 2–3 targets", () => {
+    range(88, 100).forEach((number) => {
+      const level = levelAt(number);
+      expect(level.rows).toBeGreaterThanOrEqual(8);
+      expect(level.rows).toBeLessThanOrEqual(9);
+      expect(level.targets.length).toBeGreaterThanOrEqual(2);
+      expect(level.targets.length).toBeLessThanOrEqual(3);
+    });
+  });
+
+  test("introduces the target order on levels 88–90", () => {
+    expect(range(1, 87).some(isOrdered)).toBe(false);
+    expect(range(88, 90).every(isOrdered)).toBe(true);
+  });
+
+  test("rests on level 94 with two beacons", () => {
+    expect(levelAt(94).beacons).toHaveLength(2);
+  });
+
+  test("ends with a final of three ordered targets and every element in the «Число» mode", () => {
+    const final = levelAt(100);
+    expect(final.probeMode).toBe("distance");
+    expect(final.targets).toHaveLength(3);
+    expect(
+      [
+        isOrdered,
+        hasFog,
+        hasRocks,
+        hasBombs,
+        hasStreams,
+        hasBridges,
+        hasFences,
+        hasHeavy,
+        hasBeacons,
+        hasBuoys,
+      ].every((has) => has(100)),
+    ).toBe(true);
+  });
+});
+
+describe("«Горячо-холодно» levels (decision 0057 #8)", () => {
+  test("carry no bombs: the bot's first tap ties on every cell", () => {
+    expect(HOT_COLD_LEVELS.some(hasBombs)).toBe(false);
+  });
+});
+
 describe("worlds", () => {
-  test("every level knows its world and uses the number mode outside «Курс» levels", () => {
+  test("every level knows its world and uses the mode of its plan", () => {
     CAMPAIGN.forEach((level, index) => {
       const number = index + 1;
       expect(level.world).toBe(worldOf(number));
-      if (COURSE_LEVELS.includes(number)) return;
-      expect(level.probeMode).toBe("distance");
+      if (COURSE_LEVELS.includes(number)) {
+        expect(level.probeMode).toBe("direction");
+        return;
+      }
+      expect(level.probeMode).toBe(HOT_COLD_LEVELS.includes(number) ? "hotcold" : "distance");
     });
   });
 });

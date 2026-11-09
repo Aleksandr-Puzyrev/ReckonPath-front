@@ -9,7 +9,7 @@ export const backendPriceOf = (price: Price) => ({
   currency: currencyOf(price) === "emeralds" ? ("gems" as const) : ("coins" as const),
 });
 
-export const changedPriceOf = ({ price, currency }: Record<string, unknown>): Price | null => {
-  if (typeof price !== "number" || (currency !== "gems" && currency !== "coins")) return null;
-  return priceOf(price, currency);
+export const changedPriceOf = ({ amount, currency }: Record<string, unknown>): Price | null => {
+  if (typeof amount !== "number" || (currency !== "gems" && currency !== "coins")) return null;
+  return priceOf(amount, currency);
 };

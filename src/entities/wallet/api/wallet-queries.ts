@@ -4,6 +4,8 @@ import type { QueryClient } from "@tanstack/react-query";
 import { apiClient, readData, useHasAccount } from "@shared/api";
 import type { components } from "@shared/api";
 
+import { mapMe } from "../model/map-me";
+
 export type Wallet = components["schemas"]["Wallet"];
 
 const ME_STALE_MS = 60_000;
@@ -18,7 +20,7 @@ export const walletKeys = {
 export const meQueryOptions = () =>
   queryOptions({
     queryKey: walletKeys.all,
-    queryFn: async () => readData(await apiClient.GET("/me")),
+    queryFn: async () => mapMe(readData(await apiClient.GET("/me"))),
     staleTime: ME_STALE_MS,
   });
 

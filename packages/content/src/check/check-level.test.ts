@@ -34,7 +34,7 @@ describe("checkLevel", () => {
   });
 
   test("rejects a level outside every world plan", () => {
-    expect(checkLevel(level({ id: "c-99" }), 99).errors).toContain("NO_WORLD_PLAN");
+    expect(checkLevel(level({ id: "c-101" }), 101).errors).toContain("NO_WORLD_PLAN");
   });
 
   test("rejects a first number that tells almost nothing", () => {

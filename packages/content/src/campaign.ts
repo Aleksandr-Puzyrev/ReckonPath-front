@@ -75,6 +75,32 @@ import level71 from "../levels/c-71.json";
 import level72 from "../levels/c-72.json";
 import level73 from "../levels/c-73.json";
 import level74 from "../levels/c-74.json";
+import level75 from "../levels/c-75.json";
+import level76 from "../levels/c-76.json";
+import level77 from "../levels/c-77.json";
+import level78 from "../levels/c-78.json";
+import level79 from "../levels/c-79.json";
+import level80 from "../levels/c-80.json";
+import level81 from "../levels/c-81.json";
+import level82 from "../levels/c-82.json";
+import level83 from "../levels/c-83.json";
+import level84 from "../levels/c-84.json";
+import level85 from "../levels/c-85.json";
+import level86 from "../levels/c-86.json";
+import level87 from "../levels/c-87.json";
+import level88 from "../levels/c-88.json";
+import level89 from "../levels/c-89.json";
+import level90 from "../levels/c-90.json";
+import level91 from "../levels/c-91.json";
+import level92 from "../levels/c-92.json";
+import level93 from "../levels/c-93.json";
+import level94 from "../levels/c-94.json";
+import level95 from "../levels/c-95.json";
+import level96 from "../levels/c-96.json";
+import level97 from "../levels/c-97.json";
+import level98 from "../levels/c-98.json";
+import level99 from "../levels/c-99.json";
+import level100 from "../levels/c-100.json";
 
 const SOURCES: readonly unknown[] = [
   level1,
@@ -151,6 +177,32 @@ const SOURCES: readonly unknown[] = [
   level72,
   level73,
   level74,
+  level75,
+  level76,
+  level77,
+  level78,
+  level79,
+  level80,
+  level81,
+  level82,
+  level83,
+  level84,
+  level85,
+  level86,
+  level87,
+  level88,
+  level89,
+  level90,
+  level91,
+  level92,
+  level93,
+  level94,
+  level95,
+  level96,
+  level97,
+  level98,
+  level99,
+  level100,
 ];
 
 // Parsed at the boundary so a broken file fails loudly instead of reaching the engine (разбор на границе: битый файл падает сразу, а не доходит до движка).

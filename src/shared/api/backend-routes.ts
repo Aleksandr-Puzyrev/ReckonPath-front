@@ -4,6 +4,7 @@ import type { BackendRoute } from "./hybrid-transport";
 export const BACKEND_ROUTES: readonly BackendRoute[] = [
   { method: "GET", path: "/version" },
   { method: "GET", path: "/maintenance" },
+  { method: "GET", path: "/bootstrap" },
   { method: "POST", path: "/auth/register" },
   { method: "POST", path: "/auth/register/resend" },
   { method: "POST", path: "/auth/register/verify" },
@@ -12,7 +13,10 @@ export const BACKEND_ROUTES: readonly BackendRoute[] = [
   { method: "POST", path: "/auth/password/reset" },
   { method: "POST", path: "/auth/refresh" },
   { method: "POST", path: "/auth/logout" },
+  { method: "GET", path: "/me" },
+  { method: "PATCH", path: "/me" },
   { method: "DELETE", path: "/me" },
+  { method: "POST", path: "/me/restore" },
   { method: "PUT", path: "/me/password" },
   { method: "PUT", path: "/me/consents" },
   { method: "POST", path: "/me/email" },

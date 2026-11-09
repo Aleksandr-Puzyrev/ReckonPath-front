@@ -1,0 +1,27 @@
+{
+  "v": 2,
+  "id": "c-78",
+  "title": {
+    "ru": "Дымка",
+    "en": "Haze"
+  },
+  "world": 7,
+  "rows": 7,
+  "cols": 7,
+  "targets": [
+    [0, 0],
+    [6, 3]
+  ],
+  "bombs": [
+    [5, 5],
+    [1, 5]
+  ],
+  "rocks": [
+    [2, 2],
+    [2, 3],
+    [4, 4]
+  ],
+  "probeMode": "distance",
+  "moveLimit": 7,
+  "stars": [5, 6]
+}

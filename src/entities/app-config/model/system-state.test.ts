@@ -12,7 +12,7 @@ const LINKS = {
 const stateOf = (overrides: Partial<Parameters<typeof systemStateOf>[0]> = {}) =>
   systemStateOf({
     version: versionMock(LINKS),
-    maintenance: maintenanceMock(),
+    maintenance: null,
     error: null,
     store: "playMarket",
     ...overrides,
@@ -41,20 +41,32 @@ describe("systemStateOf", () => {
   test("puts the forced update before maintenance", () => {
     const state = stateOf({
       version: versionMock({ forceUpdate: true }),
-      maintenance: maintenanceMock({ active: false }),
+      maintenance: maintenanceMock(),
     });
 
     expect(state.kind).toBe("forcedUpdate");
   });
 
   test("shows maintenance with the backend's message when the app does not work", () => {
-    expect(
-      stateOf({ maintenance: maintenanceMock({ active: false, message: "До 18:00" }) }),
-    ).toEqual({ kind: "maintenance", until: null, message: "До 18:00" });
+    expect(stateOf({ maintenance: maintenanceMock({ message: "До 18:00" }) })).toEqual({
+      kind: "maintenance",
+      until: null,
+      message: "До 18:00",
+    });
+  });
+
+  test("shows the end time of the maintenance", () => {
+    const until = "2026-11-09T18:00:00Z";
+
+    expect(stateOf({ maintenance: maintenanceMock({ until }) })).toEqual({
+      kind: "maintenance",
+      until,
+      message: null,
+    });
   });
 
   test("falls back to the client text for an empty maintenance message", () => {
-    expect(stateOf({ maintenance: maintenanceMock({ active: false }) })).toEqual({
+    expect(stateOf({ maintenance: maintenanceMock() })).toEqual({
       kind: "maintenance",
       until: null,
       message: null,
