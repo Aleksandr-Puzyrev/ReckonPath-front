@@ -1,14 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import type { MatchSummary } from "@entities/match";
+import type { HistoryItem } from "@entities/match";
 import { Text } from "@shared/ui/text";
 
 import { styles } from "./match-history-styles";
 import MatchRow from "./match-row";
 
 interface IMatchHistory {
-  matches: readonly MatchSummary[];
+  matches: readonly HistoryItem[];
   onOpen: (matchId: string) => void;
 }
 

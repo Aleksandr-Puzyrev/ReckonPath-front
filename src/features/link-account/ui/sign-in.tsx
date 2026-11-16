@@ -18,7 +18,7 @@ import { styles } from "./sign-in-styles";
 
 interface ISignIn {
   initialEmail?: string;
-  onBack: () => void;
+  onBack?: () => void;
   onSignedIn: () => void;
   onNeedsCode: (email: string, resendAfter: number) => void;
   onForgot: (email: string) => void;

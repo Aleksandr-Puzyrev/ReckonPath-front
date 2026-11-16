@@ -42,15 +42,12 @@ describe("LanguageScreen", () => {
     expect(useSettingsStore.getState().language).toBe("ru");
   });
 
-  test("saves the shown language and opens the level 1 tutorial (decision 0042 #4)", async () => {
+  test("saves the shown language and goes on to sign-in or the tutorial (decision 0060 #1)", async () => {
     await renderScreen();
 
     await fireEvent.press(screen.getByTestId("language-continue"));
 
     expect(useSettingsStore.getState().language).toBe("en");
-    expect(mockRouter.replace).toHaveBeenCalledWith({
-      pathname: "/play/[mode]/[id]",
-      params: { mode: "campaign", id: "c-1" },
-    });
+    expect(mockRouter.replace).toHaveBeenCalledWith("/");
   });
 });

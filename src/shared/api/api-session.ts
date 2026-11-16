@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 
 export interface ApiSession {
   getAccessToken: () => string | null;
+  isAccessTokenExpired: () => boolean;
   refreshAccessToken: () => Promise<string | null>;
   hasAccount: () => boolean;
   subscribeAccount: (listener: () => void) => () => void;
@@ -15,6 +16,8 @@ export const setApiSession = (next: ApiSession | null) => {
 };
 
 export const accessToken = () => session?.getAccessToken() ?? null;
+
+export const isAccessTokenExpired = () => session?.isAccessTokenExpired() ?? false;
 
 // Without a registered session (tests, previews) nothing is held back; the app registers one on start (без зарегистрированной сессии — тесты, превью — ничего не ограничивается; приложение регистрирует её при старте).
 export const hasAccount = () => session?.hasAccount() ?? true;

@@ -1,6 +1,4 @@
-import { moveLimitOf } from "@reckon-path/engine";
-import type { GameState } from "@reckon-path/engine";
-
+import type { PlayView } from "@entities/level";
 import type { HudCounterTone } from "@shared/ui/hud-counter";
 
 const WARNING_MOVES = 3;
@@ -13,25 +11,24 @@ export const movesToneOf = (movesLeft: number | null): HudCounterTone => {
   return "normal";
 };
 
-export const hudValuesOf = (game: GameState) => {
-  const limit = moveLimitOf(game);
-  const movesLeft = limit === null ? null : Math.max(0, limit - game.movesUsed);
-  const { board, bombsHit, found, revealed } = game;
-  const thresholds = game.rules.stars;
+export const hudValuesOf = (view: PlayView) => {
+  const limit = view.moveLimit;
+  const movesLeft = limit === null ? null : Math.max(0, limit - view.movesUsed);
+  const thresholds = view.rules.stars;
 
   return {
     limit,
     movesLeft,
-    movesUsed: game.movesUsed,
-    found: found.size,
-    targets: board.targets.length,
-    bombsLeft: board.bombs.length - bombsHit.size,
-    hasBombs: board.bombs.length > 0,
-    buoysLeft: board.buoys.filter((buoy) => !revealed.has(buoy)).length,
-    hasBuoys: board.buoys.length > 0,
+    movesUsed: view.movesUsed,
+    found: view.foundCount,
+    targets: view.targetCount,
+    bombsLeft: view.bombsLeft,
+    hasBombs: view.bombCount > 0,
+    buoysLeft: view.buoysLeft,
+    hasBuoys: view.buoyCount > 0,
     starMarks:
       // After a continue the result is at most 1★, so the star marks no longer apply (после продолжения максимум 1★, отметки звёзд больше не нужны).
-      limit === null || thresholds === null || game.continued
+      limit === null || thresholds === null || view.continued
         ? null
         : {
             three: (limit - thresholds[0]) / limit,

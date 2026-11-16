@@ -1,17 +1,18 @@
 import { onlineManager } from "@tanstack/react-query";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react-native";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { delay, http, HttpResponse } from "msw";
-import * as Localization from "expo-localization";
 import type { ReactNode } from "react";
 
-import { createBoard } from "@reckon-path/engine";
-
 import { useAccountStore } from "@entities/session";
-import { CAMPAIGN_LEVELS, useGameSessionStore } from "@entities/level";
-import { useProgressStore } from "@entities/progress";
 import { useRulesStore } from "@entities/rules";
+import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
-import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import {
+  MOCK_CAMPAIGN_LEVELS,
+  mockServer,
+  mockUrl,
+  passMockLevels,
+} from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import HomeScreen from "./home-screen";
@@ -35,12 +36,7 @@ jest.mock("@widgets/daily-card", () => ({
   },
 }));
 
-const passLevels = (count: number) =>
-  useProgressStore.setState({
-    best: Object.fromEntries(
-      CAMPAIGN_LEVELS.slice(0, count).map(({ level }) => [level.id, { stars: 3, moves: 5 }]),
-    ),
-  });
+const passLevels = (count: number, stars?: number) => passMockLevels(count, stars);
 
 const renderHome = async () => {
   useAccountStore.getState().markSignedIn();
@@ -60,31 +56,27 @@ describe("HomeScreen", () => {
   afterEach(async () => {
     useAccountStore.getState().reset();
     await cleanup();
-    useProgressStore.getState().reset();
-    useGameSessionStore.getState().reset();
     mockServer.reset();
     await act(async () => onlineManager.setOnline(true));
   });
 
-  test("opens the level 1 tutorial on the first launch (ACC-01)", async () => {
+  test("opens the server's tutorial level on the first launch (ACC-01, decision 0060 #7)", async () => {
     await renderHome();
-    expect(mockRouter.replace).toHaveBeenCalledWith({
-      pathname: "/play/[mode]/[id]",
-      params: { mode: "campaign", id: "c-1" },
-    });
+
+    await waitFor(() =>
+      expect(mockRouter.replace).toHaveBeenCalledWith({
+        pathname: "/play/[mode]/[id]",
+        params: { mode: "campaign", id: "1" },
+      }),
+    );
   });
 
-  test("asks for the language first when the system one is not supported (decision 0042 #4)", async () => {
-    // The mock locale copies the real one and changes only the code (подменная локаль копирует настоящую и меняет только код).
-    jest
-      .spyOn(Localization, "getLocales")
-      .mockReturnValue([
-        { ...Localization.getLocales()[0], languageCode: "de" } as Localization.Locale,
-      ]);
+  test("does not open the tutorial the server already knows as seen", async () => {
+    await apiClient.POST("/campaign/tutorials", { body: { key: "tut_first_level" } });
     await renderHome();
+    await screen.findByTestId("current-game");
 
-    expect(mockRouter.replace).toHaveBeenCalledWith("/onboarding/language");
-    jest.restoreAllMocks();
+    expect(mockRouter.replace).not.toHaveBeenCalled();
   });
 
   test("does not open the tutorial again once it is skipped (ACC-04)", async () => {
@@ -118,53 +110,48 @@ describe("HomeScreen", () => {
     passLevels(3);
     await renderHome();
 
-    const level = CAMPAIGN_LEVELS[3];
-    expect(screen.getByText("Уровень 4")).toBeOnTheScreen();
+    const limit = MOCK_CAMPAIGN_LEVELS[3]?.level.moveLimit ?? 0;
+    expect(await screen.findByText("Уровень 4")).toBeOnTheScreen();
     expect(screen.getByText("Мир 1 · Тихая бухта")).toBeOnTheScreen();
     expect(
-      screen.getByText(i18n.t("home.moves", { count: level?.level.moveLimit ?? 0 }).toUpperCase()),
+      await screen.findByText(i18n.t("home.moves", { count: limit }).toUpperCase()),
     ).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("current-game-play"));
 
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: "/play/[mode]/[id]",
-      params: { mode: "campaign", id: level?.level.id },
+      params: { mode: "campaign", id: "4" },
     });
   });
 
-  test("continues an unfinished attempt straight away (decision 0041 #3)", async () => {
+  test("continues the server's unfinished game straight away (decision 0041 #3, 0060 #2)", async () => {
     useRulesStore.getState().skipTutorial();
     useRulesStore.getState().markHomeTourSeen();
     passLevels(3);
-    const level = CAMPAIGN_LEVELS[3]?.level;
-    const cell = level === undefined ? -1 : createBoard(level).board.kinds.indexOf("open");
-    useGameSessionStore.setState({ levelId: level?.id ?? null, actions: [{ type: "tap", cell }] });
+    await apiClient.POST("/campaign/levels/{number}/play", { params: { path: { number: 4 } } });
     await renderHome();
 
-    expect(screen.getByText(/^найдено \d+ \/ \d+$/)).toBeOnTheScreen();
+    expect(await screen.findByText(/^найдено \d+ \/ \d+$/)).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("current-game-play"));
 
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: "/play/[mode]/[id]",
-      params: { mode: "campaign", id: level?.id, resume: "1" },
+      params: { mode: "campaign", id: "4", resume: "1" },
     });
   });
 
   test("tells the campaign is complete and leads to the first level below 3★ (design 19.5)", async () => {
     useRulesStore.getState().skipTutorial();
     useRulesStore.getState().markHomeTourSeen();
-    passLevels(CAMPAIGN_LEVELS.length);
-    useProgressStore.setState((state) => ({
-      best: { ...state.best, [CAMPAIGN_LEVELS[1]?.level.id ?? ""]: { stars: 2, moves: 9 } },
-    }));
+    passLevels(MOCK_CAMPAIGN_LEVELS.length, 2);
     await renderHome();
 
-    expect(screen.getByText("Кампания пройдена")).toBeOnTheScreen();
+    expect(await screen.findByText("Кампания пройдена")).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("campaign-collect"));
 
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: "/play/[mode]/[id]",
-      params: { mode: "campaign", id: CAMPAIGN_LEVELS[1]?.level.id },
+      params: { mode: "campaign", id: "1" },
     });
   });
 
@@ -175,7 +162,7 @@ describe("HomeScreen", () => {
     await renderHome();
 
     expect(await screen.findByText("с уровня 12")).toBeOnTheScreen();
-    expect(screen.getByTestId("today-stars")).toHaveTextContent("Звёзды9");
+    await waitFor(() => expect(screen.getByTestId("today-stars")).toHaveTextContent("Звёзды9"));
     expect(screen.getByTestId("today-levels")).toHaveTextContent("Уровни3");
     expect(screen.queryByTestId("today-trophies")).toBeNull();
   });
@@ -303,6 +290,6 @@ describe("HomeScreen", () => {
     await render(<HomeScreen />, { wrapper: createQueryWrapper() });
 
     expect(screen.getByTestId("home-skeleton", { includeHiddenElements: true })).toBeTruthy();
-    expect(screen.getByTestId("current-game")).toBeOnTheScreen();
+    expect(await screen.findByTestId("current-game")).toBeOnTheScreen();
   });
 });

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 
-import type { SeasonStep } from "@entities/arena";
+import type { TrackStepView } from "@entities/arena";
 import { formatNumber } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 
@@ -10,7 +10,7 @@ import { styles } from "./season-track-styles";
 
 interface ISeasonTrack {
   rp: number;
-  steps: readonly SeasonStep[];
+  steps: readonly TrackStepView[];
   isOnline: boolean;
   pendingStep: number | null;
   onClaim: (step: number) => void;
@@ -34,7 +34,7 @@ const SeasonTrack = ({ rp, steps, isOnline, pendingStep, onClaim }: ISeasonTrack
       >
         {steps.map((step) => (
           <SeasonStepCard
-            key={step.step}
+            key={step.id}
             step={step}
             isDisabled={!isOnline || pendingStep !== null}
             onClaim={onClaim}

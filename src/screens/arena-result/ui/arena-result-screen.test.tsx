@@ -1,25 +1,27 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
-import { matchSession, useAsyncMatchStore, useMatchStore } from "@entities/match";
-import type { MatchEnd, MatchOpponent } from "@entities/match";
-import { useAccountStore } from "@entities/session";
+import { useMatchStore } from "@entities/match";
+import type { MatchView } from "@entities/match";
 import { i18n } from "@shared/i18n";
-import { mockServer } from "@shared/test-utils/api-mock";
+import { doneMatchMock, mapMatchMock, mockServer } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import ArenaResultScreen from "./arena-result-screen";
 
 const mockRouter = { back: jest.fn(), replace: jest.fn(), push: jest.fn() };
 const mockInterstitial = { finishLevel: jest.fn(), showIfDue: jest.fn(async () => undefined) };
-
-const mockParams: { id: string; mode?: string } = { id: "m1" };
+const mockParams = { id: "match-done" };
 
 jest.mock("expo-router", () => ({
   get router() {
     return mockRouter;
   },
   useLocalSearchParams: () => mockParams,
+}));
+jest.mock("@shared/config", () => ({
+  ...jest.requireActual("@shared/config"),
+  HAS_ARENA_SERVER: true,
 }));
 jest.mock("@shared/ui/sheet", () => ({
   Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
@@ -28,200 +30,114 @@ jest.mock("@shared/ui/sheet", () => ({
 jest.mock("@widgets/board", () => ({ BoardMapPreview: () => null }));
 jest.mock("@features/show-interstitial", () => ({ useInterstitial: () => mockInterstitial }));
 
-const OPPONENT: MatchOpponent = {
-  id: "u2",
-  nickname: "Kira",
-  league: "GOLD",
-  trophies: 0,
-  isBot: false,
-  label: null,
-};
-const FORMAT = { size: 5, targets: 1, turnSec: 5, bombHint: true, maxTurns: 40 };
+const finished = (view: MatchView) => useMatchStore.getState().receive(view);
 
-const endOf = (overrides: Partial<MatchEnd> = {}): MatchEnd => ({
-  result: "win",
-  reason: "targets",
-  turns: { me: 9, opponent: 8 },
-  maps: { mine: { targets: [], bombs: [] }, opponent: { targets: [[2, 2]], bombs: [] } },
-  trophies: { before: 0, after: 30, delta: 30 },
-  league: { changed: false },
-  rp: 10,
-  rewards: [{ currency: "coin", amount: 40 }, { currency: "emerald", amount: 3 }, { xp: 10 }],
-  ...overrides,
-});
-
-const finished = (end: MatchEnd, opponent = OPPONENT) =>
-  useMatchStore.setState({
-    phase: "ended",
-    matchId: "m1",
-    opponent,
-    format: FORMAT,
-    layout: {},
-    end,
-  });
-
-const renderResult = async () => {
-  await render(<ArenaResultScreen />, { wrapper: createQueryWrapper() });
-};
+const renderResult = () => render(<ArenaResultScreen />, { wrapper: createQueryWrapper() });
 
 describe("ArenaResultScreen", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
 
   beforeEach(() => {
-    Object.values(mockRouter).forEach((mock) => mock.mockClear());
+    mockRouter.back.mockClear();
+    mockRouter.push.mockClear();
     mockInterstitial.finishLevel.mockClear();
   });
 
   afterEach(async () => {
     await cleanup();
-    jest.restoreAllMocks();
     useMatchStore.getState().reset();
-    useAccountStore.getState().reset();
     mockServer.reset();
   });
 
-  test("shows a win with trophies and rewards (PVP-22, PVP-25)", async () => {
-    finished(endOf());
+  test("shows the outcome, the reason, the trophies and the rewards of the server", async () => {
+    const done = doneMatchMock();
+    finished({ ...done, me: { ...done.me, moves: 9 } });
     await renderResult();
 
     expect(screen.getByText("Победа")).toBeOnTheScreen();
     expect(screen.getByText("Все сигналы найдены за 9 ходов")).toBeOnTheScreen();
-    expect(screen.getByTestId("result-trophies")).toHaveTextContent("+30 кубков");
+    expect(screen.getByTestId("result-trophies")).toHaveTextContent("+16 кубков");
     expect(screen.getByText("+10 RP")).toBeOnTheScreen();
-    expect(screen.getByText("+40")).toBeOnTheScreen();
-    expect(screen.getByText("+3")).toBeOnTheScreen();
     expect(screen.getByText("+10 XP")).toBeOnTheScreen();
+    expect(screen.getByText("+40")).toBeOnTheScreen();
+    expect(screen.getByText("Карта Kira")).toBeOnTheScreen();
   });
 
-  test("shows a loss with the winner's moves and no coins (decision 0035 #1)", async () => {
-    finished(
-      endOf({
-        result: "loss",
-        trophies: { before: 30, after: 15, delta: -15 },
-        rp: 3,
-        rewards: [{ xp: 5 }],
-      }),
-    );
+  test("names the new reasons of the backend", async () => {
+    const done = doneMatchMock();
+    if (done.result === undefined) throw new Error("No result");
+    finished({ ...done, result: { ...done.result, outcome: "loss", reason: "timeouts" } });
     await renderResult();
 
     expect(screen.getByText("Поражение")).toBeOnTheScreen();
-    expect(screen.getByText("Все сигналы найдены за 8 ходов")).toBeOnTheScreen();
-    expect(screen.getByTestId("result-trophies")).toHaveTextContent("−15 кубков");
-    expect(screen.queryByText("+40")).toBeNull();
+    expect(screen.getByText("Три пропуска хода")).toBeOnTheScreen();
   });
 
-  test("explains a draw by the equal-turns rule (PVP-10)", async () => {
-    finished(endOf({ result: "draw", trophies: { before: 0, after: 0, delta: 0 }, rp: 4 }));
+  test("shows the new division as its own moment with the reward", async () => {
+    const done = doneMatchMock();
+    if (done.result === undefined) throw new Error("No result");
+    finished({
+      ...done,
+      result: {
+        ...done.result,
+        promotion: {
+          league: "bronze",
+          title: "Bronze",
+          division: "II",
+          min: 200,
+          coins: 300,
+          gems: 20,
+        },
+      },
+    });
     await renderResult();
 
-    expect(screen.getByText("Ничья")).toBeOnTheScreen();
-    expect(screen.getByText("оба нашли все цели — правило равных ходов")).toBeOnTheScreen();
-  });
-
-  test("notes the halved trophies against the bot (PVP-31)", async () => {
-    finished(endOf(), { ...OPPONENT, isBot: true, label: "training" });
-    await renderResult();
-
-    expect(
-      screen.getByText("За матч с тренировочным соперником — половина кубков"),
-    ).toBeOnTheScreen();
-  });
-
-  test("celebrates a new league before the result (E4-7, decision 0035 #2)", async () => {
-    finished(
-      endOf({ trophies: { before: 790, after: 820, delta: 30 }, league: { changed: true } }),
-    );
-    await renderResult();
-
-    expect(screen.getByText("Новая лига: SILVER")).toBeOnTheScreen();
-    expect(screen.getByText("Упасть ниже SILVER в этом сезоне нельзя")).toBeOnTheScreen();
+    expect(screen.getByText("Новый дивизион: BRONZE II")).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("league-next"));
-
     expect(screen.queryByTestId("league-moment")).toBeNull();
   });
 
-  test("tells about a league drop without the floor line", async () => {
-    finished(
-      endOf({
-        result: "loss",
-        trophies: { before: 810, after: 790, delta: -20 },
-        league: { changed: true },
-      }),
-    );
+  test("compares the moves with the norm after a map match", async () => {
+    mockParams.id = "match-map";
+    const map = mapMatchMock({ status: "done", norm: 12 });
+    finished({
+      ...map,
+      me: { ...map.me, moves: 9 },
+      result: {
+        outcome: "win",
+        reason: "norm",
+        trophies: 8,
+        trophyNow: 128,
+        league: { league: "bronze", title: "Bronze", division: "III", min: 0 },
+        coins: 20,
+        gems: 0,
+        xp: 5,
+        rp: 10,
+      },
+    });
     await renderResult();
 
-    expect(screen.getByText("Ты в лиге BRONZE")).toBeOnTheScreen();
-    expect(screen.queryByText(/Упасть ниже/)).toBeNull();
+    expect(screen.getByText("Ты: 9 ходов · Норма: 12")).toBeOnTheScreen();
+    expect(screen.getByText("Карта Kira · твои тапы")).toBeOnTheScreen();
+    mockParams.id = "match-done";
   });
 
-  test("opens a map at full width on a tap", async () => {
-    finished(endOf());
+  test("reads a finished match from the server after a restart", async () => {
+    mockParams.id = "match-3";
     await renderResult();
 
-    await fireEvent.press(screen.getByTestId("result-their-map"));
-
-    expect(screen.getAllByText("Карта Kira").length).toBeGreaterThan(0);
+    expect(await screen.findByText("Победа")).toBeOnTheScreen();
+    mockParams.id = "match-done";
   });
 
-  test("goes back to the arena and counts the match for the interstitial (decision 0035 #7)", async () => {
-    const leave = jest.spyOn(matchSession, "leave").mockImplementation(() => undefined);
-    finished(endOf());
+  test("counts the match for the interstitial and goes back to the arena", async () => {
+    finished(doneMatchMock());
     await renderResult();
 
     await fireEvent.press(screen.getByTestId("result-arena"));
 
     await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
     expect(mockInterstitial.finishLevel).toHaveBeenCalled();
-    expect(leave).toHaveBeenCalled();
-  });
-
-  test("keeps the result on screen while «Ещё бой» asks for a map (decision 0035 #6)", async () => {
-    useAccountStore.getState().markSignedIn();
-    finished(endOf());
-    await renderResult();
-
-    await fireEvent.press(screen.getByTestId("result-again"));
-
-    expect(await screen.findByText("Нет карты для боя")).toBeOnTheScreen();
-    expect(screen.getByText("Победа")).toBeOnTheScreen();
-    expect(useMatchStore.getState().end).toBeNull();
-  });
-
-  test("compares an async result with the norm (decision 0036 #7)", async () => {
-    mockParams.mode = "async";
-    useAsyncMatchStore.getState().start(
-      {
-        asyncId: "a1",
-        author: { id: "u9", nickname: "Milo", league: "BRONZE" },
-        map: { rows: 5, cols: 5 },
-        bombCount: 0,
-        targetsCount: 1,
-        norm: 11,
-        turnSec: 5,
-        bombHint: true,
-      },
-      100,
-    );
-    useAsyncMatchStore.getState().receiveFinish(
-      {
-        finished: true,
-        result: "win",
-        turnsUsed: 9,
-        norm: 11,
-        trophiesDelta: 11,
-        rp: 5,
-        rewards: [{ currency: "coin", amount: 20 }, { xp: 10 }],
-        map: { targets: [[2, 2]], bombs: [] },
-      },
-      [2, 2],
-    );
-    await renderResult();
-
-    expect(screen.getByText("Ты: 9 ходов · Норма: 11")).toBeOnTheScreen();
-    expect(screen.getByText("против карты ×0,5")).toBeOnTheScreen();
-    expect(screen.getAllByText("Карта Milo · твои тапы").length).toBeGreaterThan(0);
-    expect(screen.queryByTestId("result-my-map")).toBeNull();
-    mockParams.mode = undefined;
-    useAsyncMatchStore.getState().reset();
+    expect(useMatchStore.getState().view).toBeNull();
   });
 });

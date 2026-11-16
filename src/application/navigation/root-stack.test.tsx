@@ -77,26 +77,19 @@ describe("RootStack", () => {
   beforeEach(() => {
     useSystemNoticeStore.getState().reset();
     useAccountStore.getState().reset();
+    useAccountStore.getState().markSignedIn();
     useBanStore.getState().reset();
   });
 
   afterEach(() => mockServer.reset());
 
-  test("shows a queued link offer on the tabs", async () => {
-    useAccountStore.getState().requestLevelOffer();
+  test("opens only sign-in without an account (decision 0060 #1)", async () => {
+    useAccountStore.getState().reset();
 
     await renderApp();
 
-    expect(await screen.findByText("Сохрани прогресс")).toBeOnTheScreen();
-  });
-
-  test("keeps a queued link offer away from a game", async () => {
-    useAccountStore.getState().requestLevelOffer();
-
-    await renderApp({ initialUrl: "/play/campaign/c-1" });
-
-    expect(await screen.findByText("play")).toBeOnTheScreen();
-    expect(screen.queryByText("Сохрани прогресс")).toBeNull();
+    expect(await screen.findByText("sign-in")).toBeOnTheScreen();
+    expect(screen.queryByText("home")).not.toBeOnTheScreen();
   });
 
   test("remembers the first launch for the quiet first session", async () => {
@@ -132,7 +125,6 @@ describe("RootStack", () => {
   });
 
   test("locks the app on the ban screen after a full ban from any request (decision 0038 #7)", async () => {
-    useAccountStore.getState().markSignedIn();
     mockServer.use(
       http.get(mockUrl("/me"), () =>
         HttpResponse.json(
@@ -197,18 +189,10 @@ describe("RootStack", () => {
     afterEach(() => setApiSession(apiSession));
 
     test("locks an account on the consents screen (decision 0056 #3)", async () => {
-      useAccountStore.getState().markSignedIn();
-
       await renderApp();
 
       expect(await screen.findByText("consents")).toBeOnTheScreen();
       expect(screen.queryByText("home")).not.toBeOnTheScreen();
-    });
-
-    test("never asks a guest (decision 0056 #3)", async () => {
-      await renderApp();
-
-      expect(await screen.findByText("home")).toBeOnTheScreen();
     });
   });
 });

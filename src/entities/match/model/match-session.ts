@@ -1,103 +1,66 @@
-import { AppState } from "react-native";
+import type { ArenaEvent } from "@shared/ws";
 
-import { WS_CLOSE, ws } from "@shared/ws";
-import type { ClientMessage, ServerMessage } from "@shared/ws";
-
-import type { Cell } from "./match-reducer";
 import { useMatchStore } from "./match-store";
+import type { MatchView } from "./match-type";
 
-type Emote = Extract<ClientMessage, { t: "match.emote" }>["d"]["emote"];
-
-const SERVER_TYPES: readonly ServerMessage["t"][] = [
-  "queue.status",
-  "match.found",
-  "match.state",
-  "match.turn",
-  "match.tapResult",
-  "match.opponent",
-  "match.emote",
-  "match.snapshot",
-  "match.end",
-  "error",
-];
-
-let unbind: (() => void) | null = null;
+export interface MatchEventSource {
+  open: () => void;
+  close: () => void;
+  onEvent: (listener: (event: ArenaEvent) => void) => () => void;
+  onReconnect: (listener: () => void) => () => void;
+}
 
 const store = () => useMatchStore.getState();
 
-const handleFound = (message: ServerMessage) => {
-  if (message.t !== "match.found") return;
-  ws.connectMatch(message.d.endpoint, message.d.ticket);
-};
+// The socket is open while any arena screen uses it; after every reconnect the live match is re-read, because pushes may have been missed (сокет открыт, пока его использует хоть один экран арены; после каждого переподключения живой матч перечитывается — пуши могли потеряться).
+export const createMatchSession = (
+  source: MatchEventSource,
+  loadCurrent: () => Promise<MatchView | null>,
+) => {
+  let users = 0;
+  let unbind: (() => void) | null = null;
 
-const handleBackground = (state: string) => {
-  if (state !== "background" || store().phase !== "searching") return;
-  ws.send("queue.leave");
-  store().stopSearch();
-};
-
-// The store listens to the socket outside React and changes only on server messages (стор слушает сокет вне React и меняется только по сообщениям сервера).
-const bind = () => {
-  if (unbind !== null) return;
-  const offMessages = SERVER_TYPES.map((type) =>
-    ws.on(type, (message: ServerMessage) => {
-      store().receive(message);
-      handleFound(message);
-    }),
-  );
-  const offClosed = ws.onClosed(({ scope, code }) => {
-    if (scope === "match") store().markLost();
-    else if (store().phase === "searching") {
-      store().failSearch(code === WS_CLOSE.BANNED ? "banned" : "NETWORK");
+  const refresh = async () => {
+    try {
+      const view = await loadCurrent();
+      if (view !== null) store().receive(view);
+    } catch {
+      // TODO: report failed match refreshes to Sentry once it is set up
     }
-  });
-  const offStatus = ws.onStatus(({ scope, isOpen }) => {
-    if (scope === "match") store().setReconnecting(!isOpen);
-  });
-  const appState = AppState.addEventListener("change", handleBackground);
-  unbind = () => {
-    offMessages.forEach((off) => off());
-    offClosed();
-    offStatus();
-    appState.remove();
-    unbind = null;
   };
-};
 
-export const matchSession = {
-  search: (format: number, mapId: string) => {
-    bind();
-    store().startSearch();
-    ws.connect();
-    ws.send("queue.join", { format, mapId });
-  },
-  training: (format: number) => {
-    bind();
-    store().startTraining();
-    ws.connect();
-    ws.send("queue.join", { format, mode: "training" });
-  },
-  cancelSearch: () => {
-    ws.send("queue.leave");
-    store().reset();
-  },
-  returnTo: (endpoint: string) => {
-    bind();
-    store().reset();
-    ws.connect();
-    ws.connectMatch(endpoint, null);
-  },
-  tap: (cell: Cell) => {
-    const { turn } = store();
-    store().setPendingCell(cell);
-    ws.send("match.tap", { turn, cell });
-  },
-  emote: (emote: Emote) => ws.send("match.emote", { emote }),
-  surrender: () => ws.send("match.surrender"),
-  leave: () => {
-    ws.leaveMatch();
-    ws.disconnect();
-    unbind?.();
-    store().reset();
-  },
+  const handle = ({ type, match, queue, presence }: ArenaEvent) => {
+    if (type === "match" && match !== undefined) store().receive(match);
+    if (type === "presence" && presence !== undefined) {
+      store().receivePresence(presence.matchId, presence.online);
+    }
+    if (type !== "queue" || queue === undefined) return;
+    store().receiveQueue(queue.queue ?? null);
+    if (queue.match !== undefined) void refresh();
+  };
+
+  const bind = () => {
+    const offEvent = source.onEvent(handle);
+    const offReconnect = source.onReconnect(() => void refresh());
+    source.open();
+    return () => {
+      offEvent();
+      offReconnect();
+      source.close();
+    };
+  };
+
+  return {
+    refresh,
+    retain: () => {
+      users += 1;
+      unbind ??= bind();
+      return () => {
+        users -= 1;
+        if (users > 0) return;
+        unbind?.();
+        unbind = null;
+      };
+    },
+  };
 };

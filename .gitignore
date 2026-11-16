@@ -44,3 +44,6 @@ example
 
 # jest
 coverage/
+
+# Campaign export for the backend admin (scripts/export-levels-for-backend.mjs)
+backend-levels.json

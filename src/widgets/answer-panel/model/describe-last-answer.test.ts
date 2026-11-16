@@ -1,8 +1,15 @@
 import { applyTap, createBoard, initGame, levelSchema } from "@reckon-path/engine";
 
 import { i18n } from "@shared/i18n";
+import { playViewOfGame } from "@entities/level";
 
-import { describeLastAnswer } from "./describe-last-answer";
+import { describeLastAnswer as describeView } from "./describe-last-answer";
+
+const describeLastAnswer = (
+  t: typeof i18n.t,
+  game: Parameters<typeof playViewOfGame>[0],
+  lastCell: number | null,
+) => describeView(t, playViewOfGame(game, lastCell));
 
 const makeGame = (overrides: Record<string, unknown> = {}) => {
   const level = levelSchema.parse({

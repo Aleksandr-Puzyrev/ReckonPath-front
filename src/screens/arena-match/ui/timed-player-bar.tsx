@@ -1,39 +1,27 @@
 import { useEffect } from "react";
-import { useShallow } from "zustand/react/shallow";
 
-import { useMatchStore, useTurnCountdown } from "@entities/match";
-import type { Side } from "@entities/match";
+import { msLeft, useServerNow } from "@entities/match";
 import { haptic } from "@shared/haptics";
 
 import PlayerBar from "./player-bar";
 
 interface ITimedPlayerBar {
-  side: Side;
+  side: "me" | "opponent";
   nickname: string;
   status: string;
-  isOffline: boolean;
-  bubble: string | null;
+  deadline: string | undefined;
+  totalMs: number;
 }
 
 const MS_PER_SECOND = 1000;
-// The server deadline adds 300 ms for the network to the turn time (Part 7 §8.4) (серверный дедлайн добавляет к ходу 300 мс на сеть).
-const NETWORK_ALLOWANCE_MS = 300;
 const TIMER_WARN_SECONDS = 2;
 
-// The countdown lives here, so its ticks redraw the bar and not the board (отсчёт живёт здесь, поэтому его тики перерисовывают полосу, а не поле).
-const TimedPlayerBar = ({ side, nickname, status, isOffline, bubble }: ITimedPlayerBar) => {
-  const { deadline, current, turnSec } = useMatchStore(
-    useShallow((state) => ({
-      deadline: state.deadline,
-      current: state.current,
-      turnSec: state.format?.turnSec ?? 0,
-    })),
-  );
-  const isActive = current === side;
-  const left = useTurnCountdown(isActive ? deadline : null);
-  const turnMs = turnSec * MS_PER_SECOND + NETWORK_ALLOWANCE_MS;
+// The countdown lives here, so its ticks redraw the bar and not the board; a bar without a deadline is not on turn (отсчёт живёт здесь, поэтому его тики перерисовывают полосу, а не поле; полоса без дедлайна не ходит).
+const TimedPlayerBar = ({ side, nickname, status, deadline, totalMs }: ITimedPlayerBar) => {
+  const now = useServerNow();
+  const left = msLeft(deadline, now);
   const seconds = Math.ceil(left / MS_PER_SECOND);
-  const isWarning = isActive && seconds > 0 && seconds <= TIMER_WARN_SECONDS;
+  const isWarning = deadline !== undefined && seconds > 0 && seconds <= TIMER_WARN_SECONDS;
 
   useEffect(() => {
     if (side === "me" && isWarning) haptic("light");
@@ -44,10 +32,8 @@ const TimedPlayerBar = ({ side, nickname, status, isOffline, bubble }: ITimedPla
       side={side}
       nickname={nickname}
       status={status}
-      timerShare={isActive && turnMs > 0 ? left / turnMs : 0}
+      timerShare={totalMs > 0 ? Math.min(1, left / totalMs) : 0}
       isWarning={isWarning}
-      isOffline={isOffline}
-      bubble={bubble}
     />
   );
 };

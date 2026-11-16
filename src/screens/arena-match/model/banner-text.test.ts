@@ -1,4 +1,5 @@
 import { i18n } from "@shared/i18n";
+import { mapMatchMock, playingMatchMock } from "@shared/test-utils/api-mock";
 
 import { bannerTextOf } from "./banner-text";
 
@@ -6,22 +7,32 @@ describe("bannerTextOf", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
 
   test("names whose turn it is", () => {
-    expect(bannerTextOf("myTurn", "me", [], i18n.t)).toBe("Твой ход");
-    expect(bannerTextOf("opponentTurn", "opponent", [], i18n.t)).toBe("Ход соперника");
+    expect(bannerTextOf(playingMatchMock({ turn: "me" }), i18n.t)).toBe("Твой ход");
+    expect(bannerTextOf(playingMatchMock({ turn: "rival" }), i18n.t)).toBe("Ход соперника");
   });
 
-  test("explains a bomb skip on either side (PVP-03)", () => {
-    const mine = [{ player: "me" as const, reason: "bomb" as const }];
-    const theirs = [{ player: "opponent" as const, reason: "bomb" as const }];
+  test("tells about my skipped turn after a bomb", () => {
+    const match = playingMatchMock({ turn: "rival" });
 
-    expect(bannerTextOf("opponentTurn", "opponent", mine, i18n.t)).toBe(
+    expect(bannerTextOf({ ...match, me: { ...match.me, skips: 1 } }, i18n.t)).toBe(
       "Ты пропускаешь ход — бомба",
     );
-    expect(bannerTextOf("myTurn", "me", theirs, i18n.t)).toBe("Ловушка сработала! Ходи ещё раз");
   });
 
-  test("marks the final turn for each side (PVP-09)", () => {
-    expect(bannerTextOf("finalTurn", "me", [], i18n.t)).toBe("Финальный ход!");
-    expect(bannerTextOf("finalTurn", "opponent", [], i18n.t)).toBe("Финальный ход соперника");
+  test("shows the final turn as the backend gives it", () => {
+    expect(bannerTextOf(playingMatchMock({ turn: "me", final: true }), i18n.t)).toBe(
+      "Финальный ход!",
+    );
+    expect(bannerTextOf(playingMatchMock({ turn: "rival", final: true }), i18n.t)).toBe(
+      "Финальный ход соперника",
+    );
+  });
+
+  test("shows my moves against the norm in a map match", () => {
+    const match = mapMatchMock({ norm: 6 });
+
+    expect(bannerTextOf({ ...match, me: { ...match.me, moves: 3 } }, i18n.t)).toBe(
+      "Ты: 3 хода · Норма: 6",
+    );
   });
 });

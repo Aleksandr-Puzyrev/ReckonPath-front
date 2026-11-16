@@ -391,33 +391,6 @@ paths:
                   wallet: { $ref: "#/components/schemas/Wallet" }
         default: { $ref: "#/components/responses/Error" }
 
-  /progress:
-    get:
-      operationId: getProgress
-      responses:
-        "200":
-          description: Campaign progress
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [currentLevel, levels, worldsCompleted]
-                properties:
-                  currentLevel: { type: integer }
-                  levels:
-                    type: array
-                    items:
-                      type: object
-                      required: [id, bestStars, bestMoves]
-                      properties:
-                        id: { type: string }
-                        bestStars: { type: integer }
-                        bestMoves: { type: integer }
-                  worldsCompleted:
-                    type: array
-                    items: { type: integer }
-        default: { $ref: "#/components/responses/Error" }
-
   /continue:
     post:
       operationId: postContinue
@@ -706,10 +679,10 @@ paths:
       operationId: getArena
       responses:
         "200":
-          description: Arena profile, season and format
+          description: The arena home (decision 0060 #9)
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Arena" }
+              schema: { $ref: "#/components/schemas/ArenaHome" }
         default: { $ref: "#/components/responses/Error" }
 
   /arena/maps:
@@ -717,12 +690,10 @@ paths:
       operationId: getArenaMaps
       responses:
         "200":
-          description: The player's maps
+          description: Up to three maps and the league format
           content:
             application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/ArenaMap" }
+              schema: { $ref: "#/components/schemas/ArenaMapsList" }
         default: { $ref: "#/components/responses/Error" }
     post:
       operationId: postArenaMap
@@ -733,17 +704,17 @@ paths:
             schema: { $ref: "#/components/schemas/ArenaMapInput" }
       responses:
         "200":
-          description: The saved map; the server computes valid, errors and botNorm
+          description: The saved map; an invalid one is a draft with problems
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ArenaMap" }
+              schema: { $ref: "#/components/schemas/ArenaMapView" }
         default: { $ref: "#/components/responses/Error" }
 
   /arena/maps/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
     put:
       operationId: putArenaMap
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
       requestBody:
         required: true
         content:
@@ -754,228 +725,392 @@ paths:
           description: The saved map
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ArenaMap" }
+              schema: { $ref: "#/components/schemas/ArenaMapView" }
         default: { $ref: "#/components/responses/Error" }
     delete:
       operationId: deleteArenaMap
-      description: The active map cannot be deleted (409 map_active, decision 0029).
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
       responses:
         "204": { description: Deleted }
         default: { $ref: "#/components/responses/Error" }
 
   /arena/maps/{id}/activate:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
     post:
       operationId: activateArenaMap
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
       responses:
         "200":
-          description: The new active map
+          description: The new active map; an invalid one is 422 map_invalid
           content:
             application/json:
-              schema:
-                type: object
-                required: [activeMapId]
-                properties:
-                  activeMapId: { type: string }
-        default: { $ref: "#/components/responses/Error" }
-
-  /arena/maps/validate:
-    post:
-      operationId: validateArenaMap
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [format, map]
-              properties:
-                format: { type: integer }
-                map: { $ref: "#/components/schemas/PvpMap" }
-      responses:
-        "200":
-          description: Validation without saving
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/MapValidation" }
+              schema: { $ref: "#/components/schemas/ArenaMapView" }
         default: { $ref: "#/components/responses/Error" }
 
   /arena/maps/random:
     post:
       operationId: randomArenaMap
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [format]
-              properties:
-                format: { type: integer }
       responses:
         "200":
-          description: A random valid map
+          description: A valid random map of the league format, not saved
           content:
             application/json:
               schema:
                 type: object
-                required: [map, botNorm]
+                required: [level]
                 properties:
-                  map: { $ref: "#/components/schemas/PvpMap" }
-                  botNorm: { type: integer }
-        default: { $ref: "#/components/responses/Error" }
-
-  /arena/onboarding:
-    post:
-      operationId: completeArenaOnboarding
-      description: Marks the arena onboarding as done (decision 0037 #1, to agree with the backend).
-      responses:
-        "200":
-          description: The new flag
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [onboardingDone]
-                properties:
-                  onboardingDone: { type: boolean }
-        default: { $ref: "#/components/responses/Error" }
-
-  /arena/async:
-    post:
-      operationId: startAsyncMatch
-      responses:
-        "201":
-          description: A match against another player's map
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/AsyncMatch" }
-        default: { $ref: "#/components/responses/Error" }
-
-  /arena/async/{id}/surrender:
-    post:
-      operationId: surrenderAsyncMatch
-      description: Ends the async match as a loss (decision 0036 #1, to agree with the backend).
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
-      responses:
-        "200":
-          description: The final result
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/AsyncFinish" }
-        default: { $ref: "#/components/responses/Error" }
-
-  /arena/async/{id}/tap:
-    post:
-      operationId: tapAsyncMatch
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [turn, cell]
-              properties:
-                turn: { type: integer }
-                cell: { $ref: "#/components/schemas/Cell" }
-      responses:
-        "200":
-          description: The tap result, or the final result once the match is over
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/AsyncTapResult"
-                  - $ref: "#/components/schemas/AsyncFinish"
-        default: { $ref: "#/components/responses/Error" }
-
-  /arena/matches:
-    get:
-      operationId: getArenaMatches
-      parameters:
-        - { name: cursor, in: query, required: false, schema: { type: string } }
-      responses:
-        "200":
-          description: Match history
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [items, nextCursor]
-                properties:
-                  items:
-                    type: array
-                    items: { $ref: "#/components/schemas/MatchSummary" }
-                  nextCursor: { type: [string, "null"] }
+                  level: { $ref: "#/components/schemas/GameLevel" }
         default: { $ref: "#/components/responses/Error" }
 
   /arena/matches/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
     get:
       operationId: getArenaMatch
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
       responses:
         "200":
-          description: Both maps and every tap (decision 0029 #3)
+          description: The match; a finished one has both maps with secrets
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/MatchDetails" }
+              schema: { $ref: "#/components/schemas/MatchView" }
         default: { $ref: "#/components/responses/Error" }
 
-  /arena/season/claim:
+  /campaign:
+    get:
+      operationId: getCampaign
+      responses:
+        "200":
+          description: Campaign overview, worlds and levels (decision 0060 #2)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CampaignOverview" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/levels/{number}:
+    parameters:
+      - { name: number, in: path, required: true, schema: { type: integer } }
+    get:
+      operationId: getCampaignLevel
+      responses:
+        "200":
+          description: The level sheet with its public board
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CampaignLevelDetail" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/levels/{number}/play:
+    parameters:
+      - { name: number, in: path, required: true, schema: { type: integer } }
     post:
-      operationId: claimSeasonStep
+      operationId: playCampaignLevel
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                restart: { type: boolean }
+      responses:
+        "200":
+          description: The unfinished game of the level, or a new one
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CampaignGame" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/games/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    get:
+      operationId: getCampaignGame
+      responses:
+        "200":
+          description: The whole game
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CampaignGame" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/games/{id}/tap:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: tapCampaignGame
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TapRequest" }
+      responses:
+        "200":
+          description: The opened cell and the game after it
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [cell, game]
+                properties:
+                  cell: { $ref: "#/components/schemas/CellView" }
+                  game: { $ref: "#/components/schemas/CampaignGame" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/games/{id}/continue:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: continueCampaignGame
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [step]
+              required: [seq]
               properties:
-                step: { type: integer }
+                seq: { type: integer }
       responses:
         "200":
-          description: The reward; a repeat answers duplicate without an error
+          description: The game with +3 moves
           content:
             application/json:
-              schema:
-                type: object
-                required: [duplicate]
-                properties:
-                  duplicate:
-                    { type: boolean, description: "Decision 0029, to agree with the backend" }
-                  reward: { $ref: "#/components/schemas/SeasonReward" }
-                  wallet: { $ref: "#/components/schemas/Wallet" }
-                  inventoryAdded:
-                    type: array
-                    items: { type: string }
+              schema: { $ref: "#/components/schemas/CampaignGame" }
         default: { $ref: "#/components/responses/Error" }
 
-  /arena/season/summary/claim:
+  /campaign/games/{id}/give-up:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
     post:
-      operationId: claimSeasonSummary
-      description: Claims the rewards of the finished season (decision 0038 #1, to agree with the backend); a repeat answers duplicate without an error.
+      operationId: giveUpCampaignGame
       responses:
         "200":
-          description: The credited rewards
+          description: The abandoned game with its secrets
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CampaignGame" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/tutorials:
+    post:
+      operationId: postCampaignTutorial
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key]
+              properties:
+                key: { type: string, pattern: "^[a-z0-9_]{1,40}$" }
+      responses:
+        "204": { description: Saved }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/rules-seen:
+    put:
+      operationId: putArenaRulesSeen
+      responses:
+        "204": { description: Saved }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/maps/check:
+    post:
+      operationId: checkArenaMap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [level]
+              properties:
+                level: { $ref: "#/components/schemas/GameLevel" }
+      responses:
+        "200":
+          description: Validity, problems and the bot run
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MapCheck" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/queue:
+    get:
+      operationId: getArenaQueue
+      responses:
+        "200":
+          description: The search state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QueueState" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      operationId: joinArenaQueue
+      responses:
+        "200":
+          description: In the search, or the match already found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QueueState" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: leaveArenaQueue
+      responses:
+        "204": { description: Left the search }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/map-match:
+    post:
+      operationId: startMapMatch
+      responses:
+        "200":
+          description: A «против карты» match
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/matches/current:
+    get:
+      operationId: getCurrentMatch
+      responses:
+        "200":
+          description: The live match
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/matches/{id}/map:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    put:
+      operationId: putMatchMap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [source, level]
+                  properties:
+                    source: { type: string, const: draw }
+                    level: { $ref: "#/components/schemas/GameLevel" }
+                - type: object
+                  required: [source, mapId]
+                  properties:
+                    source: { type: string, const: saved }
+                    mapId: { type: string }
+                - type: object
+                  required: [source]
+                  properties:
+                    source: { type: string, const: random }
+      responses:
+        "200":
+          description: The match with the chosen map
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/matches/{id}/ready:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: postMatchReady
+      responses:
+        "200":
+          description: The match after «Готов»
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/matches/{id}/tap:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: postMatchTap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TapRequest" }
+      responses:
+        "200":
+          description: The match after the tap
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/matches/{id}/surrender:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: postMatchSurrender
+      responses:
+        "200":
+          description: The finished match
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/history:
+    get:
+      operationId: getArenaHistory
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, maximum: 50 } }
+        - { name: before, in: query, required: false, schema: { type: string, format: date-time } }
+      responses:
+        "200":
+          description: Finished matches, newest first
           content:
             application/json:
               schema:
                 type: object
-                required: [duplicate, rewards, wallet]
+                required: [items]
                 properties:
-                  duplicate: { type: boolean }
-                  rewards:
+                  items:
                     type: array
-                    items: { $ref: "#/components/schemas/SeasonReward" }
-                  wallet: { $ref: "#/components/schemas/Wallet" }
+                    items: { $ref: "#/components/schemas/HistoryItem" }
+                  nextBefore: { type: string, format: date-time }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/season:
+    get:
+      operationId: getArenaSeason
+      responses:
+        "200":
+          description: The current season and its track
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SeasonView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/season/track/{step}/claim:
+    parameters:
+      - { name: step, in: path, required: true, schema: { type: integer } }
+    post:
+      operationId: claimSeasonTrackStep
+      responses:
+        "200":
+          description: The reward of the step
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SeasonClaim" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/season/result/claim:
+    post:
+      operationId: claimSeasonResult
+      responses:
+        "200":
+          description: The reward of the past season
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SeasonClaim" }
         default: { $ref: "#/components/responses/Error" }
 
   /support/tickets:
@@ -1178,6 +1313,23 @@ components:
         - invalid_document_type
         - body_too_large
         - method_not_allowed
+        - continue_method
+        - arena_locked
+        - arena_unavailable
+        - maps_limit
+        - map_not_found
+        - match_not_found
+        - match_in_progress
+        - match_not_preparing
+        - already_ready
+        - stale_state
+        - not_your_turn
+        - match_not_playing
+        - match_starting
+        - step_not_found
+        - step_locked
+        - step_claimed
+        - no_season_result
 
     VersionInfo:
       type: object
@@ -1368,6 +1520,10 @@ components:
                 format: date-time,
                 description: Until then the deletion can be cancelled,
               }
+            bans:
+              type: array
+              description: Active bans (decision 0060 #14)
+              items: { $ref: "#/components/schemas/BanDetails" }
         consents:
           type: array
           items: { $ref: "#/components/schemas/Consent" }
@@ -1677,183 +1833,724 @@ components:
       type: array
       items: { $ref: "#/components/schemas/Cell" }
 
-    PvpMap:
-      description: Level v2 without moveLimit (Part 7 §5, decision 0029 #5)
-      type: object
-      required: [rows, cols, targets]
-      properties:
-        rows: { type: integer }
-        cols: { type: integer }
-        targets: { $ref: "#/components/schemas/Cells" }
-        bombs: { $ref: "#/components/schemas/Cells" }
-        streams: { $ref: "#/components/schemas/Cells" }
-        bridges: { $ref: "#/components/schemas/Cells" }
-        heavy: { $ref: "#/components/schemas/Cells" }
-        rocks: { $ref: "#/components/schemas/Cells" }
-        fences:
-          type: array
-          items: { $ref: "#/components/schemas/Fence" }
-
-    MapLayout:
-      description: An opponent's map without targets and bombs
-      type: object
-      required: [rows, cols]
-      properties:
-        rows: { type: integer }
-        cols: { type: integer }
-        streams: { $ref: "#/components/schemas/Cells" }
-        bridges: { $ref: "#/components/schemas/Cells" }
-        heavy: { $ref: "#/components/schemas/Cells" }
-        rocks: { $ref: "#/components/schemas/Cells" }
-        fences:
-          type: array
-          items: { $ref: "#/components/schemas/Fence" }
-
-    MapError:
-      type: object
-      required: [code, cells]
-      properties:
-        code: { type: string, description: Validator codes of Part 6 §6.1 }
-        cells: { $ref: "#/components/schemas/Cells" }
-
-    MapValidation:
-      type: object
-      required: [valid, errors, botNorm]
-      properties:
-        valid: { type: boolean }
-        errors:
-          type: array
-          items: { $ref: "#/components/schemas/MapError" }
-        botNorm: { type: [integer, "null"] }
-
     ArenaMapInput:
       type: object
-      required: [name, format, map]
+      required: [name, level]
       properties:
         name: { type: string }
-        format: { type: integer }
-        map: { $ref: "#/components/schemas/PvpMap" }
+        level: { $ref: "#/components/schemas/GameLevel" }
 
-    ArenaMap:
-      allOf:
-        - $ref: "#/components/schemas/ArenaMapInput"
-        - type: object
-          required: [id, valid, errors, active, botNorm, plays, defended]
-          properties:
-            id: { type: string }
-            valid: { type: boolean }
-            errors:
-              type: array
-              items: { $ref: "#/components/schemas/MapError" }
-            active: { type: boolean }
-            botNorm: { type: [integer, "null"] }
-            plays: { type: integer }
-            defended: { type: integer }
+    LevelMode:
+      type: string
+      enum: [number, hot_cold, course]
 
-    FormatLimits:
+    GameLevel:
       type: object
-      required: [fence, stream, heavy, rock, bridge, bomb]
+      description: The backend level (game.Level); terrain rows of . s b h r, bridge b, cells [r, c] (decision 0060 #13)
+      required: [rows, cols, terrain, targets, mode, limit, stars]
       properties:
-        fence: { type: integer }
-        stream: { type: integer }
-        heavy: { type: integer }
-        rock: { type: integer }
-        bridge: { type: integer }
-        bomb: { type: integer }
+        rows: { type: integer }
+        cols: { type: integer }
+        terrain:
+          type: array
+          items: { type: string }
+        fences:
+          type: array
+          items: { $ref: "#/components/schemas/Fence" }
+        beacons: { $ref: "#/components/schemas/Cells" }
+        targets: { $ref: "#/components/schemas/Cells" }
+        bombs: { $ref: "#/components/schemas/Cells" }
+        buoys: { $ref: "#/components/schemas/Cells" }
+        mode: { $ref: "#/components/schemas/LevelMode" }
+        fog: { type: integer }
+        order: { type: boolean }
+        noBombHint: { type: boolean }
+        limit: { type: integer, description: 0 — no move limit }
+        stars:
+          type: array
+          items: { type: integer }
+          minItems: 2
+          maxItems: 2
 
-    ArenaFormat:
-      type: object
-      required: [size, targets, turnSec, bombHint, limits]
-      properties:
-        size: { type: integer }
-        targets: { type: integer }
-        turnSec: { type: integer }
-        bombHint: { type: boolean }
-        limits: { $ref: "#/components/schemas/FormatLimits" }
-
-    SeasonReward:
-      description: A currency amount or an item, as in the Part 7 §5 examples
-      type: object
-      properties:
-        currency: { type: string, enum: [coin, emerald] }
-        amount: { type: integer }
-        item: { type: string }
-
-    SeasonStep:
-      type: object
-      required: [step, rp, reward, state]
-      properties:
-        step: { type: integer }
-        rp: { type: integer }
-        reward: { $ref: "#/components/schemas/SeasonReward" }
-        state:
-          type: string
-          enum: [claimed, available, locked]
-
-    Arena:
-      type: object
-      required: [profile, season, format, activeMapId, unlocked, onboardingDone, lastSeason]
-      properties:
-        profile:
-          type: object
-          required:
-            [trophies, league, division, divisionMin, divisionMax, peak, rp, wins, losses, draws]
-          properties:
-            trophies: { type: integer }
-            league: { type: string }
-            division: { type: integer }
-            divisionMin: { type: integer }
-            divisionMax: { type: integer }
-            peak: { type: integer }
-            rp: { type: integer }
-            wins: { type: integer }
-            losses: { type: integer }
-            draws: { type: integer }
-        season:
-          type: object
-          required: [id, endsAt, track]
-          properties:
-            id: { type: integer }
-            endsAt: { type: string, format: date-time }
-            track:
-              type: array
-              items: { $ref: "#/components/schemas/SeasonStep" }
-        format: { $ref: "#/components/schemas/ArenaFormat" }
-        activeMapId: { type: [string, "null"] }
-        unlocked: { type: boolean }
-        onboardingDone: { type: boolean }
-        lastSeason:
-          description: The finished season until its summary is claimed (decision 0038 #1, to agree with the backend)
-          oneOf:
-            - { $ref: "#/components/schemas/SeasonSummary" }
-            - { type: "null" }
-
-    SeasonSummary:
+    PublicBoard:
       type: object
       required:
         [
-          seasonId,
-          peakLeague,
-          peakDivision,
-          rank,
-          wins,
-          rewards,
-          trophiesBefore,
-          trophiesAfter,
-          claimed,
+          rows,
+          cols,
+          terrain,
+          fences,
+          beacons,
+          mode,
+          fog,
+          order,
+          limit,
+          stars,
+          targets,
+          bombs,
+          buoys,
         ]
       properties:
-        seasonId: { type: integer }
-        peakLeague: { type: string }
-        peakDivision: { type: integer }
-        rank: { type: [integer, "null"] }
-        wins: { type: integer }
+        rows: { type: integer }
+        cols: { type: integer }
+        terrain:
+          type: array
+          items: { type: string }
+        fences:
+          type: array
+          items: { $ref: "#/components/schemas/Fence" }
+        beacons: { $ref: "#/components/schemas/Cells" }
+        mode: { $ref: "#/components/schemas/LevelMode" }
+        fog: { type: integer }
+        order: { type: boolean }
+        limit: { type: integer }
+        stars:
+          type: array
+          items: { type: integer }
+          minItems: 2
+          maxItems: 2
+        targets: { type: integer }
+        bombs: { type: integer }
+        buoys: { type: integer }
+
+    CellView:
+      type: object
+      required: [row, col, kind, epoch]
+      properties:
+        row: { type: integer }
+        col: { type: integer }
+        kind: { type: string, enum: [number, target, bomb, buoy, beacon] }
+        value: { type: integer }
+        tone: { type: string, enum: [hot, warm, cold] }
+        direction: { type: string, enum: [up, right, down, left] }
+        compare: { type: string, enum: [warmer, colder, same, none] }
+        nearBomb: { type: boolean }
+        epoch: { type: integer }
+        order: { type: integer }
+
+    Secrets:
+      type: object
+      required: [targets, bombs, buoys]
+      properties:
+        targets: { $ref: "#/components/schemas/Cells" }
+        bombs: { $ref: "#/components/schemas/Cells" }
+        buoys: { $ref: "#/components/schemas/Cells" }
+
+    TapRequest:
+      type: object
+      required: [row, col, seq]
+      properties:
+        row: { type: integer }
+        col: { type: integer }
+        seq: { type: integer }
+
+    LevelState:
+      type: string
+      enum: [locked, current, done, perfect]
+
+    CampaignLevel:
+      type: object
+      required:
+        [
+          number,
+          title,
+          description,
+          rows,
+          cols,
+          mode,
+          elements,
+          introduces,
+          state,
+          stars,
+          rewards,
+          coinsEarned,
+        ]
+      properties:
+        number: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        rows: { type: integer }
+        cols: { type: integer }
+        mode: { $ref: "#/components/schemas/LevelMode" }
+        elements:
+          type: array
+          items: { type: string }
+        introduces:
+          type: array
+          items: { type: string }
+        tutorial: { type: string }
+        state: { $ref: "#/components/schemas/LevelState" }
+        stars: { type: integer }
+        bestMoves: { type: integer }
         rewards:
           type: array
-          items: { $ref: "#/components/schemas/SeasonReward" }
+          items: { type: integer }
+          minItems: 3
+          maxItems: 3
+        coinsEarned: { type: integer }
+
+    CampaignLevelDetail:
+      allOf:
+        - $ref: "#/components/schemas/CampaignLevel"
+        - type: object
+          required: [board]
+          properties:
+            board: { $ref: "#/components/schemas/PublicBoard" }
+
+    CampaignWorld:
+      type: object
+      required:
+        [
+          number,
+          title,
+          subtitle,
+          colorFrom,
+          colorTo,
+          firstLevel,
+          lastLevel,
+          stars,
+          starsMax,
+          state,
+          levels,
+        ]
+      properties:
+        number: { type: integer }
+        title: { type: string }
+        subtitle: { type: string }
+        colorFrom: { type: string }
+        colorTo: { type: string }
+        firstLevel: { type: integer }
+        lastLevel: { type: integer }
+        stars: { type: integer }
+        starsMax: { type: integer }
+        state: { $ref: "#/components/schemas/LevelState" }
+        levels:
+          type: array
+          items: { $ref: "#/components/schemas/CampaignLevel" }
+
+    CampaignOverview:
+      type: object
+      required:
+        [
+          stars,
+          starsMax,
+          levelsDone,
+          perfect,
+          coinsEarned,
+          currentLevel,
+          completed,
+          unlocks,
+          knownElements,
+          tutorials,
+          worlds,
+          wallet,
+        ]
+      properties:
+        stars: { type: integer }
+        starsMax: { type: integer }
+        levelsDone: { type: integer }
+        perfect: { type: integer }
+        coinsEarned: { type: integer }
+        currentLevel: { type: integer, description: 0 — the campaign is completed }
+        completed: { type: boolean }
+        unlocks:
+          type: object
+          required: [dailyLevel, arenaLevel, daily, arena]
+          properties:
+            dailyLevel: { type: integer }
+            arenaLevel: { type: integer }
+            daily: { type: boolean }
+            arena: { type: boolean }
+        knownElements:
+          type: array
+          items: { type: string }
+        tutorials:
+          type: array
+          items: { type: string }
+        active:
+          type: object
+          required: [gameId, level, found, total]
+          properties:
+            gameId: { type: string }
+            level: { type: integer }
+            found: { type: integer }
+            total: { type: integer }
+        worlds:
+          type: array
+          items: { $ref: "#/components/schemas/CampaignWorld" }
+        wallet: { $ref: "#/components/schemas/BackendWallet" }
+
+    CampaignGameResult:
+      type: object
+      required: [stars, moves, newRecord, reward, xp, canContinue, continueCost]
+      properties:
+        stars: { type: integer }
+        moves: { type: integer }
+        bestMoves: { type: integer }
+        newRecord: { type: boolean }
+        reward: { type: integer }
+        xp: { type: integer }
+        worldGems: { type: integer }
+        canContinue: { type: boolean }
+        continueCost: { type: integer }
+        nextLevel: { type: integer }
+        secrets: { $ref: "#/components/schemas/Secrets" }
+        wallet: { $ref: "#/components/schemas/BackendWallet" }
+
+    CampaignGame:
+      type: object
+      required:
+        [
+          id,
+          level,
+          version,
+          seq,
+          status,
+          board,
+          moves,
+          limit,
+          found,
+          bombsLeft,
+          epoch,
+          continues,
+          cells,
+        ]
+      properties:
+        id: { type: string }
+        level: { type: integer }
+        version: { type: integer }
+        seq: { type: integer }
+        status: { type: string, enum: [play, lost, won, abandoned] }
+        board: { $ref: "#/components/schemas/PublicBoard" }
+        moves: { type: integer }
+        limit: { type: integer, description: With bonuses; 0 — no limit }
+        found: { type: integer }
+        bombsLeft: { type: integer }
+        epoch: { type: integer }
+        continues: { type: integer }
+        cells:
+          type: array
+          items: { $ref: "#/components/schemas/CellView" }
+        result: { $ref: "#/components/schemas/CampaignGameResult" }
+
+    MapProblem:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            [
+              size,
+              terrain,
+              targets,
+              bombs,
+              fences,
+              elements,
+              caps,
+              bombs_limit,
+              rocks_limit,
+              bridge,
+              cut,
+            ]
+        message: { type: string }
+        cells: { $ref: "#/components/schemas/Cells" }
+
+    MapCheck:
+      type: object
+      required: [valid]
+      properties:
+        valid: { type: boolean }
+        problems:
+          type: array
+          items: { $ref: "#/components/schemas/MapProblem" }
+        bot:
+          type: object
+          required: [moves, taps]
+          properties:
+            moves: { type: integer, description: A bomb counts as 2 moves }
+            taps: { $ref: "#/components/schemas/Cells" }
+
+    MapCaps:
+      type: object
+      required: [stream, bridge, heavy, rock, bombs, fences]
+      properties:
+        stream: { type: integer }
+        bridge: { type: integer }
+        heavy: { type: integer }
+        rock: { type: integer }
+        bombs: { type: integer }
+        fences: { type: integer }
+
+    MatchFormat:
+      type: object
+      required: [rows, cols, targets, caps, moveSeconds, league, leagueTitle]
+      properties:
+        rows: { type: integer }
+        cols: { type: integer }
+        targets: { type: integer }
+        caps: { $ref: "#/components/schemas/MapCaps" }
+        moveSeconds: { type: integer }
+        league: { type: string }
+        leagueTitle: { type: string }
+
+    LeagueStep:
+      type: object
+      required: [league, title, division, min]
+      properties:
+        league: { type: string }
+        title: { type: string }
+        division: { type: string, description: Empty — the league has one division }
+        min: { type: integer }
+
+    LeagueView:
+      allOf:
+        - $ref: "#/components/schemas/LeagueStep"
+        - type: object
+          required: [floor, format]
+          properties:
+            next: { $ref: "#/components/schemas/LeagueStep" }
+            floor: { type: integer }
+            format: { $ref: "#/components/schemas/MatchFormat" }
+
+    ArenaStats:
+      type: object
+      required: [matches, wins, losses, draws, winRate, streak, bestStreak, peak]
+      properties:
+        matches: { type: integer }
+        wins: { type: integer }
+        losses: { type: integer }
+        draws: { type: integer }
+        winRate: { type: integer }
+        streak: { type: integer }
+        bestStreak: { type: integer }
+        peak: { type: integer }
+
+    MatchRef:
+      type: object
+      required: [id, kind, status]
+      properties:
+        id: { type: string }
+        kind: { $ref: "#/components/schemas/MatchKind" }
+        status: { type: string, enum: [prepare, play] }
+
+    MatchKind:
+      type: string
+      enum: [duel, bot, map]
+
+    QueueView:
+      type: object
+      required: [joinedAt, serverTime, mapOfferAt, botAt, format]
+      properties:
+        joinedAt: { type: string, format: date-time }
+        serverTime: { type: string, format: date-time }
+        mapOfferAt: { type: string, format: date-time }
+        botAt: { type: string, format: date-time }
+        format: { $ref: "#/components/schemas/MatchFormat" }
+
+    QueueState:
+      type: object
+      properties:
+        queue: { $ref: "#/components/schemas/QueueView" }
+        match: { $ref: "#/components/schemas/MatchRef" }
+
+    ArenaMapView:
+      type: object
+      required: [id, name, level, valid, wins, plays, active, updatedAt]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        level: { $ref: "#/components/schemas/GameLevel" }
+        valid: { type: boolean }
+        problems:
+          type: array
+          items: { $ref: "#/components/schemas/MapProblem" }
+        botMoves: { type: integer }
+        wins: { type: integer }
+        plays: { type: integer }
+        active: { type: boolean }
+        updatedAt: { type: string, format: date-time }
+
+    Look:
+      type: object
+      properties:
+        avatar: { $ref: "#/components/schemas/ShopItemView" }
+        frame: { $ref: "#/components/schemas/ShopItemView" }
+        title: { $ref: "#/components/schemas/ShopItemView" }
+
+    PlayerView:
+      type: object
+      required: [name, trophies, league, look, skins, ready, found, moves, skips, timeouts]
+      properties:
+        id: { type: string, description: No id for the bot }
+        name: { type: string }
+        bot: { type: boolean }
+        trophies: { type: integer }
+        league: { $ref: "#/components/schemas/LeagueStep" }
+        look: { $ref: "#/components/schemas/Look" }
+        skins:
+          type: object
+          additionalProperties: { $ref: "#/components/schemas/ShopItemView" }
+        ready: { type: boolean }
+        found: { type: integer }
+        moves: { type: integer }
+        skips: { type: integer }
+        timeouts: { type: integer }
+
+    BoardView:
+      type: object
+      required: [rows, cols, terrain, fences, targets, bombs, revealed, taps]
+      properties:
+        rows: { type: integer }
+        cols: { type: integer }
+        terrain:
+          type: array
+          items: { type: string }
+        fences:
+          type: array
+          items: { $ref: "#/components/schemas/Fence" }
+        targets: { type: integer }
+        bombs: { type: integer }
+        revealed:
+          type: array
+          items: { $ref: "#/components/schemas/CellView" }
+        taps: { $ref: "#/components/schemas/Cells" }
+        secrets: { $ref: "#/components/schemas/Secrets" }
+
+    MoveView:
+      type: object
+      required: [turn, by, kind, at]
+      properties:
+        turn: { type: integer, description: From 1; a skip after a bomb is a turn too }
+        by: { type: string, enum: [me, rival] }
+        cell: { $ref: "#/components/schemas/Cell" }
+        kind: { type: string, enum: [number, buoy, target, bomb, timeout, skip] }
+        at: { type: string, format: date-time }
+
+    MatchResultView:
+      type: object
+      required: [outcome, reason, trophies, trophyNow, league, coins, gems, xp, rp]
+      properties:
+        outcome: { type: string, enum: [win, loss, draw] }
+        reason:
+          type: string
+          enum: [targets, final, equal, timeouts, surrender, norm, abandoned, max_turns, cancelled]
+        trophies: { type: integer }
+        trophyNow: { type: integer }
+        league: { $ref: "#/components/schemas/LeagueStep" }
+        next: { $ref: "#/components/schemas/LeagueStep" }
+        coins: { type: integer }
+        gems: { type: integer }
+        xp: { type: integer }
+        rp: { type: integer }
+        promotion:
+          allOf:
+            - $ref: "#/components/schemas/LeagueStep"
+            - type: object
+              required: [coins, gems]
+              properties:
+                coins: { type: integer }
+                gems: { type: integer }
+
+    MatchView:
+      type: object
+      required: [id, kind, status, seq, serverTime, format, me, rival, deadline, log]
+      properties:
+        id: { type: string }
+        kind: { $ref: "#/components/schemas/MatchKind" }
+        status: { type: string, enum: [prepare, play, done] }
+        seq: { type: integer }
+        serverTime: { type: string, format: date-time }
+        format: { $ref: "#/components/schemas/MatchFormat" }
+        me: { $ref: "#/components/schemas/PlayerView" }
+        rival: { $ref: "#/components/schemas/PlayerView" }
+        turn: { type: string, enum: [me, rival] }
+        first: { type: string, enum: [me, rival] }
+        final: { type: boolean }
+        deadline: { type: string, format: date-time }
+        startsAt: { type: string, format: date-time }
+        norm: { type: integer }
+        myMap: { $ref: "#/components/schemas/BoardView" }
+        rivalMap: { $ref: "#/components/schemas/BoardView" }
+        last: { $ref: "#/components/schemas/MoveView" }
+        surrenderLoss: { type: integer }
+        mapSeenByRival: { type: boolean }
+        friendly: { type: boolean, description: A friendly challenge — no trophies or rewards }
+        rivalOnline: { type: boolean, description: Duel only — the rival is connected }
+        log:
+          type: array
+          description: Every move in order
+          items: { $ref: "#/components/schemas/MoveView" }
+        result: { $ref: "#/components/schemas/MatchResultView" }
+
+    ArenaEvent:
+      type: object
+      description: A WebSocket push from /arena/ws (decision 0060 #8)
+      required: [type, time]
+      properties:
+        type: { type: string, enum: [hello, match, queue, presence, challenge] }
+        time: { type: string, format: date-time }
+        match: { $ref: "#/components/schemas/MatchView" }
+        queue: { $ref: "#/components/schemas/QueueState" }
+        presence:
+          type: object
+          required: [matchId, online]
+          properties:
+            matchId: { type: string }
+            online: { type: boolean, description: The rival is connected }
+        challenge:
+          type: object
+          required: [id, status]
+          properties:
+            id: { type: string }
+            status: { type: string, enum: [pending, accepted, declined, cancelled, expired] }
+
+    HistoryItem:
+      type: object
+      required: [matchId, kind, outcome, reason, rival, moves, rivalMoves, trophies, finishedAt]
+      properties:
+        matchId: { type: string }
+        kind: { $ref: "#/components/schemas/MatchKind" }
+        outcome: { type: string, enum: [win, loss, draw] }
+        reason: { type: string }
+        rival:
+          type: object
+          required: [name]
+          properties:
+            id: { type: string }
+            name: { type: string }
+            bot: { type: boolean }
+        moves: { type: integer }
+        rivalMoves: { type: integer }
+        trophies: { type: integer }
+        friendly: { type: boolean }
+        finishedAt: { type: string, format: date-time }
+
+    RewardItem:
+      type: object
+      required: [key, kind, title]
+      properties:
+        key: { type: string }
+        kind: { type: string }
+        title: { type: string }
+        image: { type: string }
+
+    TrackStepView:
+      type: object
+      required: [id, rp, coins, gems, state]
+      properties:
+        id: { type: integer }
+        rp: { type: integer }
+        coins: { type: integer }
+        gems: { type: integer }
+        item: { $ref: "#/components/schemas/RewardItem" }
+        state: { type: string, enum: [locked, ready, claimed] }
+
+    SeasonResult:
+      type: object
+      required: [number, peak, league, rank, wins, trophiesBefore, trophiesAfter, coins, gems]
+      properties:
+        number: { type: integer }
+        peak: { type: integer }
+        league: { $ref: "#/components/schemas/LeagueStep" }
+        rank: { type: integer }
+        wins: { type: integer }
         trophiesBefore: { type: integer }
         trophiesAfter: { type: integer }
-        claimed: { type: boolean }
+        coins: { type: integer }
+        gems: { type: integer }
+        item: { $ref: "#/components/schemas/RewardItem" }
+
+    SeasonView:
+      type: object
+      required: [number, startsAt, endsAt, rp, peak, track, ready]
+      properties:
+        number: { type: integer }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        rp: { type: integer }
+        peak: { type: integer }
+        track:
+          type: array
+          items: { $ref: "#/components/schemas/TrackStepView" }
+        ready: { type: integer }
+        result: { $ref: "#/components/schemas/SeasonResult" }
+
+    SeasonClaim:
+      type: object
+      required: [coins, gems, wallet, season]
+      properties:
+        coins: { type: integer }
+        gems: { type: integer }
+        item: { $ref: "#/components/schemas/RewardItem" }
+        wallet: { $ref: "#/components/schemas/BackendWallet" }
+        season: { $ref: "#/components/schemas/SeasonView" }
+
+    ArenaHome:
+      type: object
+      required:
+        [
+          serverTime,
+          unlocked,
+          unlockLevel,
+          rulesSeen,
+          trophies,
+          rank,
+          league,
+          stats,
+          maps,
+          maxMaps,
+          rewards,
+          history,
+          timing,
+        ]
+      properties:
+        serverTime: { type: string, format: date-time }
+        unlocked: { type: boolean }
+        unlockLevel: { type: integer }
+        rulesSeen: { type: boolean }
+        trophies: { type: integer }
+        rank: { type: integer }
+        league: { $ref: "#/components/schemas/LeagueView" }
+        stats: { $ref: "#/components/schemas/ArenaStats" }
+        activeMap: { $ref: "#/components/schemas/ArenaMapView" }
+        maps: { type: integer }
+        maxMaps: { type: integer }
+        rewards:
+          type: object
+          required: [winCoins, drawCoins, lossCoins, winGems, gemWinsLeft, botFactor]
+          properties:
+            winCoins: { type: integer }
+            drawCoins: { type: integer }
+            lossCoins: { type: integer }
+            winGems: { type: integer }
+            gemWinsLeft: { type: integer }
+            botFactor: { type: integer }
+        history:
+          type: array
+          items: { $ref: "#/components/schemas/HistoryItem" }
+        match: { $ref: "#/components/schemas/MatchRef" }
+        queue: { $ref: "#/components/schemas/QueueView" }
+        timing:
+          type: object
+          required: [prepareSeconds, vsSeconds, mapOfferAfter, botAfter, maxTimeouts]
+          properties:
+            prepareSeconds: { type: integer }
+            vsSeconds: { type: integer }
+            mapOfferAfter: { type: integer }
+            botAfter: { type: integer }
+            maxTimeouts: { type: integer }
+        season: { $ref: "#/components/schemas/SeasonView" }
+
+    ArenaMapsList:
+      type: object
+      required: [format, maps, max]
+      properties:
+        format: { $ref: "#/components/schemas/MatchFormat" }
+        maps:
+          type: array
+          items: { $ref: "#/components/schemas/ArenaMapView" }
+        max: { type: integer }
 
     CustomLevelInput:
       type: object
@@ -1897,121 +2594,3 @@ components:
         scope: { type: string, enum: [all, arena] }
         until: { type: [string, "null"], format: date-time }
         reason: { type: string }
-
-    AsyncMatch:
-      type: object
-      required: [asyncId, author, map, bombCount, targetsCount, norm, turnSec, bombHint]
-      properties:
-        asyncId: { type: string }
-        author:
-          type: object
-          required: [id, nickname, league]
-          properties:
-            id: { type: string }
-            nickname: { type: string }
-            league: { type: string }
-            avatar: { type: string }
-        map: { $ref: "#/components/schemas/MapLayout" }
-        bombCount: { type: integer }
-        targetsCount: { type: integer }
-        norm: { type: integer }
-        turnSec: { type: integer }
-        bombHint: { type: boolean }
-        deadline:
-          type: string
-          format: date-time
-          description: The first turn's deadline (decision 0036 #5, to agree with the backend)
-        skin: { type: object }
-
-    TapOutcome:
-      type: string
-      enum: [pelang, target, bomb]
-
-    AsyncTapResult:
-      type: object
-      required: [turn, outcome, turnsUsed, deadline]
-      properties:
-        turn: { type: integer }
-        outcome: { $ref: "#/components/schemas/TapOutcome" }
-        value: { type: [integer, "null"] }
-        bombNear: { type: boolean }
-        turnsUsed: { type: integer }
-        deadline: { type: string, format: date-time }
-
-    MatchResult:
-      type: string
-      enum: [win, loss, draw, annulled]
-
-    AsyncFinish:
-      type: object
-      required: [finished, result, turnsUsed, norm, trophiesDelta, rp, rewards, map]
-      properties:
-        finished: { type: boolean, const: true }
-        result: { $ref: "#/components/schemas/MatchResult" }
-        turnsUsed: { type: integer }
-        norm: { type: integer }
-        trophiesDelta: { type: integer }
-        rp: { type: integer }
-        rewards:
-          type: array
-          items: { type: object, additionalProperties: true }
-        map:
-          type: object
-          required: [targets, bombs]
-          properties:
-            targets: { $ref: "#/components/schemas/Cells" }
-            bombs: { $ref: "#/components/schemas/Cells" }
-
-    MatchSummary:
-      type: object
-      required: [matchId, mode, opponent, result, reason, turns, trophiesDelta, endedAt]
-      properties:
-        matchId: { type: string }
-        mode:
-          type: string
-          enum: [ranked, bot, async, training, friendly]
-        opponent:
-          type: object
-          required: [id, nickname, league, isBot]
-          properties:
-            id: { type: string }
-            nickname: { type: string }
-            league: { type: string }
-            isBot: { type: boolean }
-            label: { type: [string, "null"] }
-        result: { $ref: "#/components/schemas/MatchResult" }
-        reason:
-          type: string
-          enum: [targets, surrender, afk, turnLimit, annulled]
-        turns:
-          type: object
-          required: [me, opponent]
-          properties:
-            me: { type: integer }
-            opponent: { type: integer }
-        trophiesDelta: { type: integer }
-        endedAt: { type: string, format: date-time }
-
-    MatchDetails:
-      allOf:
-        - $ref: "#/components/schemas/MatchSummary"
-        - type: object
-          required: [maps, taps]
-          properties:
-            maps:
-              type: object
-              required: [mine, opponent]
-              properties:
-                mine: { $ref: "#/components/schemas/PvpMap" }
-                opponent: { $ref: "#/components/schemas/PvpMap" }
-            taps:
-              type: array
-              items:
-                type: object
-                required: [turn, player, cell, outcome]
-                properties:
-                  turn: { type: integer }
-                  player: { type: string, enum: [me, opponent] }
-                  cell: { $ref: "#/components/schemas/Cell" }
-                  outcome: { $ref: "#/components/schemas/TapOutcome" }
-                  value: { type: [integer, "null"] }

@@ -4,11 +4,11 @@ import { useTranslation } from "react-i18next";
 import { BackHandler, ScrollView, View } from "react-native";
 
 import { NEW_MAP_ID } from "@entities/arena-map";
+import { PrepareTimer } from "@entities/match";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
-import { leagueLabelOf } from "@widgets/arena-hero";
 import { EditorHeader, StatusLine } from "@widgets/editor-kit";
 
 import { useMapEditor } from "../model/use-map-editor";
@@ -23,10 +23,10 @@ import TutorialEditor from "./tutorial-editor";
 
 const ArenaMapScreen = () => {
   const { t } = useTranslation();
-  const { id = NEW_MAP_ID } = useLocalSearchParams<{ id: string }>();
+  const { id = NEW_MAP_ID, matchId } = useLocalSearchParams<{ id: string; matchId?: string }>();
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
-  const editor = useMapEditor(id, showToast);
+  const editor = useMapEditor(id, matchId ?? null, showToast);
   const onBack = editor.isReady ? editor.handleBack : null;
 
   useEffect(() => {
@@ -76,13 +76,13 @@ const ArenaMapScreen = () => {
         />
       </View>
       <ScrollView contentContainerStyle={styles.content}>
+        {editor.prepareDeadline === null ? null : (
+          <PrepareTimer deadline={editor.prepareDeadline} />
+        )}
         <Text variant="body.s" style={styles.secondary}>
           {t("arena.maps.format", {
-            size: `${format.size}×${format.size}`,
-            league:
-              editor.profile === undefined
-                ? ""
-                : leagueLabelOf(editor.profile.league, editor.profile.division),
+            size: `${format.rows}×${format.cols}`,
+            league: editor.leagueLabel,
           })}
         </Text>
         <View style={styles.hintRow}>
@@ -104,7 +104,7 @@ const ArenaMapScreen = () => {
         {check.check === null ? null : (
           <Text variant="body.s" style={styles.secondary} testID="editor-check">
             {check.isDone
-              ? t("map.checked", { found: check.check.run.found, count: check.check.run.moves })
+              ? t("map.checked", { found: check.check.found, count: check.check.moves })
               : t("map.checking", { n: check.taps.length })}
           </Text>
         )}

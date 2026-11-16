@@ -181,10 +181,12 @@
         "targets_one": "All signals found in {{count}} move",
         "targets_other": "All signals found in {{count}} moves",
         "surrender": "Opponent gave up",
-        "afk": "Opponent left",
-        "turnLimit": "Turn limit",
-        "annulled": "Match cancelled, trophies unchanged",
-        "draw": "both found all targets — equal-turns rule"
+        "draw": "both found all targets — equal-turns rule",
+        "timeouts": "Three missed turns",
+        "maxTurns": "Turn limit — more targets wins",
+        "final": "The final turn fell short",
+        "abandoned": "Time for the map ran out",
+        "cancelled": "Match cancelled, trophies unchanged"
       },
       "again": "Fight again",
       "trophies_one": "{{delta}} trophy",
@@ -193,7 +195,8 @@
       "xp": "+{{n}} XP",
       "amount": "+{{n}}",
       "myMap": "My map",
-      "theirMap": "{{name}}’s map"
+      "theirMap": "{{name}}’s map",
+      "promotion": "New division: {{league}} {{division}}"
     }
   },
   "ads": {
@@ -818,7 +821,6 @@
       "loss_other": "Loss · {{count}} moves",
       "draw_one": "Draw · {{count}} move",
       "draw_other": "Draw · {{count}} moves",
-      "annulled": "Match cancelled",
       "training": "{{text}} · training",
       "async": "{{result}} · vs map",
       "resultWin": "Win",
@@ -851,7 +853,8 @@
       "score": "{{me}} : {{opponent}}",
       "myMap": "My map · {{name}}’s taps",
       "theirMap": "{{name}}’s map · my taps"
-    }
+    },
+    "serverOnly": "The arena needs the server"
   },
   "season": {
     "ended": "Season {{n}} ended",
@@ -862,8 +865,7 @@
     "wins_one": "{{count}} win",
     "wins_other": "{{count}} wins",
     "rewards": "Season rewards",
-    "reset": "Soft trophy reset",
-    "resetRule": "above {{threshold}} → {{threshold}} + half the rest · RP reset"
+    "reset": "Soft trophy reset"
   },
   "map": {
     "valid": "Map is valid",
@@ -873,9 +875,7 @@
       "isolated": "Tiles {{cells}} are cut off by fences or rocks",
       "targets": "You need {{count}} signals",
       "limit": "Limit: {{max}}",
-      "bridge": "Bridges go on streams",
-      "trivial_one": "Too easy: the bot solves it in {{count}} move",
-      "trivial_other": "Too easy: the bot solves it in {{count}} moves"
+      "bridge": "Bridges go on streams"
     },
     "refuse": {
       "targetOnRock": "Targets can’t go on rocks",
@@ -926,7 +926,7 @@
     "redo": "Redo",
     "saved": "Map saved and active",
     "draft": "Saved as draft — fix it to make it active",
-    "mapsLimit": "Up to 3 maps per format",
+    "mapsLimit": "You can keep up to 3 maps",
     "checking": "Bot is solving… move {{n}}",
     "checked_one": "Bot found {{found}} targets in {{count}} move",
     "checked_other": "Bot found {{found}} targets in {{count}} moves",
@@ -947,28 +947,28 @@
       "streamTarget": "Target on a stream: the last step costs 3 — sneaky!"
     }
   },
+  "prepare": {
+    "title": "Get ready",
+    "timer": "{{seconds}} s to pick a map",
+    "saved": "Saved",
+    "random": "Random",
+    "draw": "Draw",
+    "ready": "Ready",
+    "waiting": "Waiting for the opponent…",
+    "rivalReady": "Opponent is ready",
+    "auto": "If time runs out, your active map goes, or a random one",
+    "seen": "The opponent has seen this map"
+  },
+  "campaign": {
+    "offline": "You need a connection to play the campaign"
+  },
   "search": {
     "title": "Finding an opponent…",
-    "stopped": "Search stopped",
     "header": "Finding a rival",
     "format": "{{size}} · {{league}} · {{count}} targets",
     "myMap": "Your map",
     "vsMap": "Play vs a map",
-    "captured": "Signal locked",
-    "capturedText": "No rival in 20 s — playing a training bot",
-    "toMatch": "To match",
-    "stoppedText": "The app was minimised — queue reset",
-    "again": "Search again",
-    "toArena": "To arena",
-    "noMap": {
-      "title": "No map for the fight",
-      "random": "Random map"
-    },
-    "inMatch": {
-      "title": "You’re already in a match",
-      "text": "You can’t search while that match is on. Rejoin it here — progress will sync.",
-      "rejoin": "Rejoin match"
-    }
+    "toArena": "To arena"
   },
   "vs": {
     "bot": "Practice opponent",
@@ -993,7 +993,6 @@
     "bombs": "× {{count}}",
     "timeout": "Time’s up — turn skipped ({{n}}/3)",
     "timeoutWarn": "One more skip and you lose",
-    "reconnecting": "Reconnecting…",
     "seconds": "{{sec}} s",
     "oppReconnecting": "Opponent is reconnecting",
     "surrender": {
@@ -1008,27 +1007,12 @@
       "finalForMe": "All the rival’s targets are found — your final move",
       "finalForOpponent": "All found! The rival gets a final move"
     },
-    "emotes": "Emotes",
     "flag": "Flag",
     "menu": "Menu",
-    "mute": "Mute rival emotes",
-    "on": "On",
-    "off": "Off",
-    "emote": {
-      "nice": "Nice!",
-      "wow": "Wow!",
-      "oops": "Oops",
-      "luck": "Good luck",
-      "echo": "GG",
-      "thanks": "Thanks"
-    },
     "over": "Match over",
     "trophies": "Trophies: {{delta}}"
   },
   "league": {
-    "up": "New league: {{league}}",
-    "down": "You’re in {{league}}",
-    "floor": "You can’t drop below {{league}} this season",
     "next": "Continue"
   },
   "async": {
@@ -1059,37 +1043,7 @@
       }
     },
     "next": "Next",
-    "toTraining": "To training",
     "skip": "I know the rules"
-  },
-  "training": {
-    "mentor": "Mentor",
-    "header": "Training",
-    "subtitle": "easy bot · trophies unchanged",
-    "noSurrender": "no giving up — it’s training",
-    "hint": {
-      "first": {
-        "title": "Tap any tile",
-        "text": "The number shows steps to the mentor’s signal"
-      },
-      "turns": {
-        "title": "Take turns",
-        "text": "The mentor hunts on your map. Tap where the number is smaller."
-      },
-      "bomb": {
-        "title": "Bomb! In a match that skips your move",
-        "text": "Your rival would move twice. The mine icon warns about a bomb next door."
-      },
-      "won": {
-        "title": "Great! That’s how duels are won",
-        "text": "Next — build your own map"
-      },
-      "lost": {
-        "title": "The mentor was quicker",
-        "text": "Next — build your own map"
-      }
-    },
-    "next": "Next"
   },
   "editor": {
     "list": {

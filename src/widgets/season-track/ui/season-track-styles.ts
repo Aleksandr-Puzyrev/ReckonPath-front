@@ -25,7 +25,7 @@ export const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.bg.surface,
     variants: {
       state: {
-        available: { borderColor: theme.colors.accent.cyan },
+        ready: { borderColor: theme.colors.accent.cyan },
         claimed: { borderColor: theme.colors.border.default },
         locked: { borderColor: theme.colors.border.default },
       },

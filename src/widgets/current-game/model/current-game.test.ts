@@ -1,46 +1,61 @@
-import type { Stars } from "@reckon-path/engine";
-
-import { CAMPAIGN_LEVELS } from "@entities/level";
+import {
+  MOCK_CAMPAIGN_LEVELS,
+  mockOverview,
+  mockServer,
+  passMockLevels,
+} from "@shared/test-utils/api-mock";
 
 import { currentGameOf } from "./current-game";
 
-const NO_ATTEMPT = { levelId: null, actions: [] };
-
-const passed = (count: number, stars: Stars = 3) =>
-  Object.fromEntries(
-    CAMPAIGN_LEVELS.slice(0, count).map(({ level }) => [level.id, { stars, moves: 5 }]),
-  );
+const overviewAfter = (count: number) => {
+  passMockLevels(count);
+  return mockOverview("ru");
+};
 
 describe("currentGameOf", () => {
-  test("offers the first level that is not passed yet (Part 4 §3.1)", () => {
-    const current = currentGameOf(passed(3), NO_ATTEMPT);
+  afterEach(() => mockServer.reset());
 
-    expect(current).toMatchObject({ kind: "level", campaignLevel: { number: 4 }, game: null });
+  test("offers the server's current level (Part 4 §3.1)", () => {
+    expect(currentGameOf(overviewAfter(3))).toMatchObject({
+      kind: "level",
+      level: { number: 4 },
+      world: { number: 1 },
+      active: null,
+    });
   });
 
-  test("replays the saved attempt of the current level (design 19.2)", () => {
-    const level = CAMPAIGN_LEVELS[0]?.level;
-    const current = currentGameOf(
-      {},
-      { levelId: level?.id ?? "", actions: [{ type: "tap", cell: 0 }] },
-    );
+  test("shows the unfinished game of the current level (design 19.2)", () => {
+    const overview = {
+      ...overviewAfter(3),
+      active: { gameId: "game-1", level: 4, found: 1, total: 2 },
+    };
 
-    expect(current.kind === "level" ? current.game?.movesUsed : null).toBe(1);
+    expect(currentGameOf(overview)).toMatchObject({ active: { found: 1, total: 2 } });
   });
 
-  test("ignores a saved attempt of another level", () => {
-    const current = currentGameOf({}, { levelId: "other", actions: [{ type: "tap", cell: 0 }] });
+  test("ignores an unfinished game of another level", () => {
+    const overview = {
+      ...overviewAfter(3),
+      active: { gameId: "game-1", level: 2, found: 1, total: 2 },
+    };
 
-    expect(current).toMatchObject({ kind: "level", game: null });
+    expect(currentGameOf(overview)).toMatchObject({ kind: "level", active: null });
   });
 
   test("tells the campaign is complete with the levels below 3★ (decision 0041 #5)", () => {
-    const best = { ...passed(CAMPAIGN_LEVELS.length), ...passed(2, 2) };
+    const passed = overviewAfter(MOCK_CAMPAIGN_LEVELS.length);
+    const overview = {
+      ...passed,
+      worlds: passed.worlds.map((world) => ({
+        ...world,
+        levels: world.levels.map((level) => (level.number <= 2 ? { ...level, stars: 2 } : level)),
+      })),
+    };
 
-    const current = currentGameOf(best, NO_ATTEMPT);
+    const current = currentGameOf(overview);
 
-    expect(current).toMatchObject({ kind: "done", total: CAMPAIGN_LEVELS.length });
-    expect(current.kind === "done" ? current.belowThree.map(({ number }) => number) : []).toEqual([
+    expect(current).toMatchObject({ kind: "done", total: MOCK_CAMPAIGN_LEVELS.length });
+    expect(current?.kind === "done" ? current.belowThree.map(({ number }) => number) : []).toEqual([
       1, 2,
     ]);
   });

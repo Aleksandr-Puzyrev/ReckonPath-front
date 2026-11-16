@@ -1,4 +1,4 @@
-import type { MatchEnd } from "@entities/match";
+import type { MatchResultView } from "@entities/match";
 
 export type RewardItem =
   | { kind: "rp"; amount: number }
@@ -6,16 +6,12 @@ export type RewardItem =
   | { kind: "emerald"; amount: number }
   | { kind: "xp"; amount: number };
 
-const amountOf = (value: unknown) => (typeof value === "number" ? value : 0);
-
-// Server rewards are open objects; known kinds are shown, others are skipped (награды сервера — открытые объекты; известные виды показываются, остальные пропускаются).
-export const rewardsOf = ({ rp, rewards }: MatchEnd): RewardItem[] => [
-  ...(rp > 0 ? [{ kind: "rp" as const, amount: rp }] : []),
-  ...rewards.flatMap((reward): RewardItem[] => {
-    if (reward.currency === "coin") return [{ kind: "coin", amount: amountOf(reward.amount) }];
-    if (reward.currency === "emerald")
-      return [{ kind: "emerald", amount: amountOf(reward.amount) }];
-    if (typeof reward.xp === "number") return [{ kind: "xp", amount: reward.xp }];
-    return [];
-  }),
-];
+export const rewardsOf = ({ rp, coins, gems, xp }: MatchResultView): RewardItem[] =>
+  (
+    [
+      { kind: "rp", amount: rp },
+      { kind: "coin", amount: coins },
+      { kind: "emerald", amount: gems },
+      { kind: "xp", amount: xp },
+    ] as const
+  ).filter(({ amount }) => amount > 0);

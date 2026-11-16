@@ -4,7 +4,6 @@ import { z } from "zod";
 import { crc8, toHex2 } from "../code/bytes";
 import { decodeLevel, encodeLevel } from "../code/level-code";
 
-import { matchVectorSchema, simulateMatch } from "./simulate-match";
 import { levelVectorSchema } from "./vector-schemas";
 import type { VectorRunner } from "./vector-schemas";
 
@@ -43,14 +42,8 @@ const runRoundTrip: VectorRunner = (raw) => {
   expect(rest).toEqual(expected);
 };
 
-const runMatch: VectorRunner = (raw) => {
-  const vector = matchVectorSchema.parse(raw);
-  expect(simulateMatch(vector)).toEqual(vector.expect);
-};
-
 export const CODE_VECTOR_RUNNERS = {
   crc8: runCrc8,
   codeDecode: runCodeDecode,
   codeRoundTrip: runRoundTrip,
-  match: runMatch,
 };

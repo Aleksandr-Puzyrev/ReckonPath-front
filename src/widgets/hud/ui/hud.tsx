@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { useGameSessionStore } from "@entities/level";
+import type { PlayView } from "@entities/level";
 import { HudCounter } from "@shared/ui/hud-counter";
 
 import MineIcon from "@assets/icons/play/mine.svg";
@@ -14,16 +14,14 @@ import ModeChip from "./mode-chip";
 import StarBar from "./star-bar";
 
 interface IHud {
+  view: PlayView;
   onModeInfo: () => void;
 }
 
-const Hud = ({ onModeInfo }: IHud) => {
+const Hud = ({ view, onModeInfo }: IHud) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
-  const game = useGameSessionStore((state) => state.game);
-  if (game === null) return null;
-
-  const values = hudValuesOf(game);
+  const values = hudValuesOf(view);
   const moves =
     values.limit === null ? String(values.movesUsed) : `${values.movesLeft} / ${values.limit}`;
   const iconSize = theme.sizes.icon.s;
@@ -59,7 +57,7 @@ const Hud = ({ onModeInfo }: IHud) => {
         ) : (
           <StarBar share={values.movesShare} marks={values.starMarks} />
         )}
-        <ModeChip mode={game.rules.probeMode} fog={game.rules.fog} onInfo={onModeInfo} />
+        <ModeChip mode={view.rules.probeMode} fog={view.rules.fog} onInfo={onModeInfo} />
       </View>
     </View>
   );

@@ -1,7 +1,11 @@
 import { gridNeighbors } from "@reckon-path/engine";
-import type { GameState, Idx } from "@reckon-path/engine";
+import type { Idx } from "@reckon-path/engine";
 
-export const bombCoachHighlight = (game: GameState | null): Idx[] | null => {
+import type { PlayView } from "@entities/level";
+
+export const bombCoachHighlight = (
+  game: Pick<PlayView, "board" | "revealed"> | null,
+): Idx[] | null => {
   if (game === null) return null;
   const marked = [...game.revealed].find(([, reveal]) => "bombNear" in reveal && reveal.bombNear);
   if (marked === undefined) return null;

@@ -36,7 +36,7 @@ const SignInScreen = () => {
         <SignIn
           key={email}
           initialEmail={email}
-          onBack={() => router.back()}
+          onBack={router.canGoBack() ? () => router.back() : undefined}
           onSignedIn={() => router.dismissTo("/")}
           onNeedsCode={(email, resendAfter) =>
             router.push({

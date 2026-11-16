@@ -1,15 +1,22 @@
+import type { MatchResultView } from "@entities/match";
+
 import { rewardsOf } from "./rewards-of";
 
-const end = (rp: number, rewards: Record<string, unknown>[]) =>
-  ({ rp, rewards }) as unknown as Parameters<typeof rewardsOf>[0];
+const RESULT: MatchResultView = {
+  outcome: "win",
+  reason: "targets",
+  trophies: 16,
+  trophyNow: 136,
+  league: { league: "bronze", title: "Bronze", division: "III", min: 0 },
+  coins: 40,
+  gems: 3,
+  xp: 10,
+  rp: 10,
+};
 
 describe("rewardsOf", () => {
   test("lists RP, coins, emeralds and experience of a win (PVP-22, PVP-25)", () => {
-    expect(
-      rewardsOf(
-        end(10, [{ currency: "coin", amount: 40 }, { currency: "emerald", amount: 3 }, { xp: 10 }]),
-      ),
-    ).toEqual([
+    expect(rewardsOf(RESULT)).toEqual([
       { kind: "rp", amount: 10 },
       { kind: "coin", amount: 40 },
       { kind: "emerald", amount: 3 },
@@ -17,7 +24,9 @@ describe("rewardsOf", () => {
     ]);
   });
 
-  test("skips rewards it does not know", () => {
-    expect(rewardsOf(end(0, [{ item: "season_frame" }]))).toEqual([]);
+  test("skips rewards the match did not give", () => {
+    expect(rewardsOf({ ...RESULT, rp: 0, coins: 0, gems: 0, xp: 5 })).toEqual([
+      { kind: "xp", amount: 5 },
+    ]);
   });
 });

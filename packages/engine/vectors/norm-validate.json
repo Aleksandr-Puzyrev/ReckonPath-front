@@ -54,7 +54,8 @@
     "context": {
       "kind": "pvp",
       "format": {
-        "size": 4,
+        "rows": 4,
+        "cols": 4,
         "targets": 1,
         "limits": {}
       }

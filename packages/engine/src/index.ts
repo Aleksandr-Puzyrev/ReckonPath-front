@@ -19,6 +19,7 @@ export type {
   TapResult,
 } from "./model/types";
 export {
+  BOMB_PENALTY_MOVES,
   DEFAULT_ENGINE_CONFIG,
   FOG_MAX,
   FOG_MIN,
@@ -29,14 +30,15 @@ export {
   MAX_ROCK_SHARE,
   MAX_TARGETS,
   MIN_BOARD_SIZE,
-  PVP_SOLVER_BOMB_PENALTY,
   TITLE_MAX_LENGTH,
 } from "./config/engine-config";
-export type { EngineConfig, RatingConfig } from "./config/engine-config";
+export type { EngineConfig } from "./config/engine-config";
 export { edgeKey, gridNeighbors, toCell, toIdx } from "./grid/grid";
 export { levelSchema } from "./level/level-schema";
 export type { LevelInput } from "./level/level-schema";
 export { createBoard } from "./level/create-board";
+export { levelFromBackend, levelToBackend } from "./level/backend-level";
+export type { BackendLevel, BackendLevelMode } from "./level/backend-level";
 export {
   applyTap,
   bombNear,
@@ -58,24 +60,8 @@ export type {
 } from "./validator/validate-level";
 export { rngFromKey } from "./random/random";
 export type { Rng } from "./random/random";
-export { divisionOf, LEAGUES, leagueOf } from "./formulas/league";
-export type { Division, League } from "./formulas/league";
-export type { MatchKind, MatchOutcome } from "./formulas/match-result";
-export {
-  rankPoints,
-  RP_PER_TRACK_STEP,
-  TRACK_STEPS,
-  trackStep,
-  xpFor,
-  xpToNext,
-} from "./formulas/rewards";
+export { xpFor, xpToNext } from "./formulas/rewards";
 export type { XpSource } from "./formulas/rewards";
-export {
-  applyTrophies,
-  SEASON_RESET_THRESHOLD,
-  seasonReset,
-  trophyDelta,
-} from "./formulas/trophies";
 export { createSolver, observeTap, chooseMove, scoreCells } from "./solver/solver";
 export type { CellScore, SolverState } from "./solver/solver";
 export { computeNorm, validateLevelNorm } from "./solver/norm";
@@ -84,5 +70,3 @@ export { DEFAULT_DAILY_EPOCH, dailyTier, generateDaily, isWeekend } from "./dail
 export type { DailyLevel } from "./daily/generate-daily";
 export { MAX_CODE_LENGTH, decodeLevel, encodeLevel } from "./code/level-code";
 export type { CodeError, DecodeResult } from "./code/level-code";
-export { generateRandomPvpMap } from "./pvp/random-pvp-map";
-export type { RandomPvpMap } from "./pvp/random-pvp-map";

@@ -3,7 +3,9 @@ import { View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 
 import { createBoard } from "@reckon-path/engine";
-import type { GameState, LevelInput } from "@reckon-path/engine";
+import type { LevelInput } from "@reckon-path/engine";
+
+import type { PlayView } from "@entities/level";
 
 import { computeBoardGeometry } from "../model/board-geometry";
 import { buildCellVisuals } from "../model/cell-visuals";
@@ -16,7 +18,7 @@ import { styles } from "./board-styles";
 interface IBoardPreview {
   level: LevelInput;
   size: number;
-  game?: GameState | null;
+  game?: PlayView | null;
 }
 
 const CLOSED_CELL: CellVisual = {
@@ -33,7 +35,7 @@ const CLOSED_CELL: CellVisual = {
 const PREVIEW_OPTIONS = { flags: [], lastCell: null, showHidden: false };
 
 // An unfinished attempt shows its opened tiles; otherwise every tile is closed (незаконченная попытка показывает открытые клетки, иначе все клетки закрыты).
-const visualsOf = (kinds: readonly unknown[], game: GameState | null) =>
+const visualsOf = (kinds: readonly unknown[], game: PlayView | null) =>
   game === null ? kinds.map(() => CLOSED_CELL) : buildCellVisuals(game, PREVIEW_OPTIONS);
 
 const BoardPreview = ({ level, size, game = null }: IBoardPreview) => {

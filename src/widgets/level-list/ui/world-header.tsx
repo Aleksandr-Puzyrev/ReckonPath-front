@@ -3,7 +3,6 @@ import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Gradient } from "@shared/ui/gradient";
-import type { GradientName } from "@shared/ui/gradient";
 import { Text } from "@shared/ui/text";
 
 import StarIcon from "@assets/icons/play/star.svg";
@@ -12,19 +11,6 @@ import type { WorldItem } from "../model/build-list-items";
 
 import { styles } from "./world-header-styles";
 
-const COVERS: readonly GradientName[] = [
-  "world1",
-  "world2",
-  "world3",
-  "world4",
-  "world5",
-  "world6",
-  "world7",
-  "world8",
-];
-
-const coverOf = (world: number) => COVERS[world - 1] ?? "world1";
-
 interface IWorldHeader {
   item: WorldItem;
 }
@@ -32,16 +18,17 @@ interface IWorldHeader {
 const WorldHeader = ({ item }: IWorldHeader) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
-  const { world, isUnlocked, isPerfect, stars, maxStars } = item;
+  const { world, isUnlocked, isPerfect } = item;
+  const { stars, starsMax: maxStars } = world;
   styles.useVariants({ isUnlocked, isPerfect });
-  const name = t(`levels.world.name.${world.number}`);
-  const subtitle = isUnlocked
-    ? t(`levels.world.subtitle.${world.number}`)
-    : t("levels.worldLocked", { n: world.number - 1 });
+  const name = world.title;
+  const subtitle = isUnlocked ? world.subtitle : t("levels.worldLocked", { n: world.number - 1 });
 
   return (
     <View style={styles.card} accessible accessibilityLabel={`${name}, ${subtitle}`}>
-      {isUnlocked ? <Gradient name={coverOf(world.number)} radius={theme.radius.xl} /> : null}
+      {isUnlocked ? (
+        <Gradient colors={[world.colorFrom, world.colorTo]} radius={theme.radius.xl} />
+      ) : null}
       <View style={styles.texts}>
         <Text variant="eyebrow" style={styles.eyebrow}>
           {t("levels.world.label", { n: world.number })}

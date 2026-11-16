@@ -9,40 +9,31 @@ import Animated, {
 } from "react-native-reanimated";
 import { useUnistyles } from "react-native-unistyles";
 
+import type { LeagueStep } from "@entities/arena";
 import { formatNumber } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 
 import { leagueToneOf } from "../model/league-tone";
-import { divisionShare, leagueLabelOf, nextDivisionOf } from "../model/league-progress";
+import { divisionShare, stepLabelOf } from "../model/league-progress";
 
 import { styles } from "./league-progress-styles";
 
 interface ILeagueProgress {
   trophies: number;
   fromTrophies: number;
-  league: string;
-  division: number;
-  min: number;
-  max: number;
+  league: LeagueStep;
+  next: LeagueStep | undefined;
   isOnHero: boolean;
 }
 
 const PERCENT = 100;
 
-const LeagueProgress = ({
-  trophies,
-  fromTrophies,
-  league,
-  division,
-  min,
-  max,
-  isOnHero,
-}: ILeagueProgress) => {
+const LeagueProgress = ({ trophies, fromTrophies, league, next, isOnHero }: ILeagueProgress) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
   const isReducedMotion = useReducedMotion();
-  const label = leagueLabelOf(league, division);
-  const next = nextDivisionOf(league, division);
+  const { min } = league;
+  const max = next?.min ?? min;
   const target = divisionShare(trophies, min, max);
   const share = useSharedValue(divisionShare(fromTrophies, min, max));
   const fillStyle = useAnimatedStyle(() => ({ width: `${share.value * PERCENT}%` }));
@@ -54,18 +45,18 @@ const LeagueProgress = ({
     );
   }, [share, target, isReducedMotion, theme.motion.duration.slower]);
 
-  if (next === null) return null;
+  if (next === undefined) return null;
   return (
     <View style={styles.progress}>
       <View style={styles.texts}>
         <Text variant="caption" style={styles.text}>
-          {label}
+          {stepLabelOf(league)}
         </Text>
         <Text variant="caption" style={styles.text}>
           {t("arena.progress", {
             trophies: formatNumber(trophies, i18n.language),
             max: formatNumber(max, i18n.language),
-            next,
+            next: stepLabelOf(next),
           })}
         </Text>
       </View>
@@ -78,7 +69,7 @@ const LeagueProgress = ({
           style={[
             styles.fill,
             fillStyle,
-            { backgroundColor: theme.colors.league[leagueToneOf(league)] },
+            { backgroundColor: theme.colors.league[leagueToneOf(league.league)] },
           ]}
         />
       </View>

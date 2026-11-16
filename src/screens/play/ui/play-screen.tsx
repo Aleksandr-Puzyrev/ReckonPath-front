@@ -1,185 +1,43 @@
-import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
-import type { LayoutChangeEvent } from "react-native";
 
-import { DAILY_UNLOCK_LEVEL } from "@features/daily-today";
-import { RESUME_PARAM } from "@entities/level";
-import { formatDayMonth } from "@shared/lib";
-import { CoachMark } from "@shared/ui/coach-mark";
-import { Dialog } from "@shared/ui/dialog";
+import { RESUME_PARAM, useCampaignQuery } from "@entities/level";
+import { dailyUnlockOf } from "@features/daily-today";
 import { Screen } from "@shared/ui/screen";
-import { Toast } from "@shared/ui/toast";
-import { AnswerPanel } from "@widgets/answer-panel";
-import { Board } from "@widgets/board";
-import { DailyResultSheet } from "@widgets/daily-result";
-import { EarnSheet } from "@widgets/earn-sheet";
-import { Hud } from "@widgets/hud";
-import { LoseSheet, WinSheet } from "@widgets/level-result";
-import { PauseSheet } from "@widgets/pause-menu";
 
-import { usePlayScreen } from "../model/use-play-screen";
-
-import BombCoach from "./bomb-coach";
-import DeclinedBar from "./declined-bar";
+import CampaignLevel from "./campaign-level";
+import DailyPlay from "./daily-play";
 import LevelUnavailable from "./level-unavailable";
-import PlayGuides from "./play-guides";
-import PlayHeader from "./play-header";
 import { styles } from "./play-screen-styles";
-import TutorialCoach from "./tutorial-coach";
 
-interface IPlayLevel {
+const CAMPAIGN_MODE = "campaign";
+const DAILY_MODE = "daily";
+const LEVEL_NUMBER = /^[1-9]\d*$/;
+const LEVELS_ROUTE = "/levels";
+
+const exit = () => {
+  if (router.canGoBack()) router.back();
+  else router.replace(LEVELS_ROUTE);
+};
+
+interface IPlayMode {
   mode: string;
   id: string;
   isResuming: boolean;
 }
 
-const PlayLevel = ({ mode, id, isResuming }: IPlayLevel) => {
-  const { t, i18n } = useTranslation();
-  const play = usePlayScreen(mode, id, isResuming);
-  const [boardSize, setBoardSize] = useState(0);
-  const target = play.play;
+const PlayMode = ({ mode, id, isResuming }: IPlayMode) => {
+  const { t } = useTranslation();
+  const { data: overview, isLoading } = useCampaignQuery();
 
-  if (target.kind === "missing") {
-    return <LevelUnavailable message={t("play.notFound")} onExit={play.handleExit} />;
+  if (mode === CAMPAIGN_MODE && LEVEL_NUMBER.test(id)) {
+    return <CampaignLevel number={Number(id)} isResuming={isResuming} />;
   }
-  if (target.kind === "locked") {
-    return (
-      <LevelUnavailable
-        message={t("levels.locked", { n: target.lockedBy })}
-        onExit={play.handleExit}
-      />
-    );
-  }
-  if (target.kind === "dailyLocked") {
-    return (
-      <LevelUnavailable
-        message={t("daily.locked", { n: DAILY_UNLOCK_LEVEL })}
-        onExit={play.handleExit}
-      />
-    );
-  }
-  const { level } = target;
-  const isDaily = target.kind === "daily";
-
-  const handleBoardLayout = ({ nativeEvent }: LayoutChangeEvent) =>
-    setBoardSize(Math.min(nativeEvent.layout.width, nativeEvent.layout.height));
-
-  return (
-    <Screen style={styles.screen}>
-      <PlayHeader
-        title={isDaily ? t("daily.title") : t("home.level", { n: target.number })}
-        eyebrow={isDaily ? formatDayMonth(target.dayKey, i18n.language) : undefined}
-        onPause={play.handlePause}
-        onRestart={play.handleRestartRequest}
-      />
-      <Hud onModeInfo={play.guides.handleModeInfo} />
-      {play.guides.isMovesHintOpen ? (
-        <CoachMark
-          text={t("onboarding.movesLimit")}
-          action={{ label: t("rules.gotIt"), onPress: play.guides.handleMovesHintClose }}
-        />
-      ) : null}
-      <View testID="board-area" style={styles.boardArea} onLayout={handleBoardLayout}>
-        {boardSize > 0 ? (
-          <Board
-            size={boardSize}
-            fx={play.fx}
-            showHidden={play.overlay === "declined"}
-            highlight={play.guides.highlight}
-            onCellPress={play.handleCellPress}
-            onCellLongPress={play.handleCellLongPress}
-          />
-        ) : null}
-      </View>
-      {play.guides.tutorialStep !== null ? (
-        <TutorialCoach
-          step={play.guides.tutorialStep}
-          canSkip={play.guides.canSkipTutorial}
-          onNext={play.guides.handleTutorialNext}
-          onSkip={play.handleTutorialSkip}
-        />
-      ) : null}
-      {play.guides.isBombCoachOpen ? (
-        <BombCoach onClose={play.guides.handleBombCoachClose} />
-      ) : null}
-      {play.overlay === "declined" ? (
-        <DeclinedBar onRestart={play.handleRestart} onExit={play.handleExit} />
-      ) : null}
-      {play.overlay === "declined" || play.guides.canSkipTutorial ? null : (
-        <AnswerPanel isFlagMode={play.isFlagMode} onToggleFlagMode={play.handleToggleFlagMode} />
-      )}
-
-      <PauseSheet
-        isOpen={play.overlay === "pause"}
-        note={isDaily ? t("daily.pauseNote") : undefined}
-        onResume={play.handleResume}
-        onRestart={isDaily ? play.handleRestartRequest : play.handleRestart}
-        onRules={play.handleRules}
-        onExit={play.handleExit}
-      />
-      {target.kind === "daily" ? (
-        <DailyResultSheet
-          isOpen={play.overlay === "win"}
-          dayKey={target.dayKey}
-          attempt={play.lastAttempt}
-          onAgain={play.handleRestart}
-          onHome={play.handleHome}
-        />
-      ) : (
-        <WinSheet
-          isOpen={play.overlay === "win"}
-          levelId={level.id}
-          levelNumber={target.number}
-          isRecord={play.isRecord}
-          isTutorial={play.guides.isTutorialLevel}
-          hasNext={play.hasNext}
-          onNext={play.handleNext}
-          onAgain={play.handleRestart}
-          onExit={play.handleExit}
-        />
-      )}
-      <LoseSheet
-        isOpen={play.overlay === "lose"}
-        isBombLoss={play.isBombLoss}
-        onContinued={play.handleContinued}
-        onShortOfEmeralds={play.handleShortOfEmeralds}
-        onError={play.handleContinueError}
-        onRestart={play.handleRestart}
-        onDecline={play.handleDecline}
-        onExit={play.handleExit}
-      />
-      <Dialog
-        isOpen={play.overlay === "restartConfirm"}
-        title={play.isCountedRestart ? t("daily.restartTitle") : t("play.restartConfirm")}
-        message={play.isCountedRestart ? t("daily.restartCounted") : undefined}
-        onCancel={play.handleResume}
-        actions={[
-          { label: t("common.cancel"), variant: "secondary", onPress: play.handleResume },
-          { label: t("play.restartAction"), variant: "danger", onPress: play.handleRestart },
-        ]}
-      />
-      <Dialog
-        isOpen={play.overlay === "resume"}
-        title={t("play.resumeTitle")}
-        onCancel={play.handleResume}
-        actions={[
-          { label: t("play.pause.restart"), variant: "secondary", onPress: play.handleRestart },
-          { label: t("home.continue"), variant: "primary", onPress: play.handleResume },
-        ]}
-      />
-      <EarnSheet
-        isOpen={play.earnShortBy !== null}
-        shortBy={play.earnShortBy}
-        onDaily={play.handleEarnDaily}
-        onMessage={play.handleContinueError}
-        onClose={play.handleEarnClose}
-      />
-      <Toast message={play.toast} onHide={play.handleToastHide} />
-      <PlayGuides level={level} guides={play.guides} />
-    </Screen>
-  );
+  if (mode !== DAILY_MODE) return <LevelUnavailable message={t("play.notFound")} onExit={exit} />;
+  // The daily opens by the server's unlock, so it waits for the first answer (дейли открывается по разрешению сервера, поэтому ждёт его первого ответа).
+  if (isLoading) return <Screen style={styles.screen} />;
+  const unlock = dailyUnlockOf(overview);
+  return <DailyPlay id={id} isUnlocked={unlock.isUnlocked} unlockLevel={unlock.unlockLevel} />;
 };
 
 // A new level gets fresh screen state even when the route is reused (новый уровень получает свежее состояние экрана, даже если маршрут переиспользуется).
@@ -190,7 +48,7 @@ const PlayScreen = () => {
     resume,
   } = useLocalSearchParams<{ mode: string; id: string; resume?: string }>();
   return (
-    <PlayLevel key={`${mode}/${id}`} mode={mode} id={id} isResuming={resume === RESUME_PARAM} />
+    <PlayMode key={`${mode}/${id}`} mode={mode} id={id} isResuming={resume === RESUME_PARAM} />
   );
 };
 

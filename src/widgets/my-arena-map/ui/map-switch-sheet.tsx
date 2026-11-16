@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { MAPS_PER_FORMAT } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
 import { Button } from "@shared/ui/button";
 import { Sheet } from "@shared/ui/sheet";
@@ -14,6 +13,7 @@ import { styles } from "./my-map-styles";
 interface IMapSwitchSheet {
   isOpen: boolean;
   maps: readonly ArenaMap[];
+  maxMaps: number;
   formatLabel: string;
   isDisabled: boolean;
   renderMap: (map: ArenaMap, size: number) => ReactNode;
@@ -26,6 +26,7 @@ interface IMapSwitchSheet {
 const MapSwitchSheet = ({
   isOpen,
   maps,
+  maxMaps,
   formatLabel,
   isDisabled,
   renderMap,
@@ -54,7 +55,7 @@ const MapSwitchSheet = ({
             onSelect={onSelect}
           />
         ))}
-        {maps.length < MAPS_PER_FORMAT ? (
+        {maps.length < maxMaps ? (
           <Button
             testID="map-new"
             label={`+ ${t("map.newMap")}`}

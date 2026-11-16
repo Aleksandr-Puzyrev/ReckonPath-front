@@ -22,6 +22,14 @@ export const closerCells = (board: Board, cell: Idx): Idx[] => {
   });
 };
 
+// The script's first cell comes from the layout the server sends, left of its centre as on the bundled level 1 (первая клетка сценария берётся из раскладки сервера — левее центра, как на встроенном уровне 1).
+export const tutorialFirstCell = (board: Board): Idx => {
+  const centre = toIdx(board.cols, [Math.floor(board.rows / 2), Math.floor((board.cols - 1) / 2)]);
+  if (board.kinds[centre] !== "rock") return centre;
+  const open = board.kinds.findIndex((kind) => kind !== "rock");
+  return open === -1 ? centre : open;
+};
+
 export const highlightOf = (step: TutorialStep, board: Board, firstCell: Idx): Idx[] | null => {
   if (step === "tapFirst" || step === "explainNumber") return [firstCell];
   if (step === "tapCloser") return closerCells(board, firstCell);

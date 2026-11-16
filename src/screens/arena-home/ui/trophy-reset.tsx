@@ -3,8 +3,6 @@ import { View } from "react-native";
 import Animated, { FadeInLeft, useReducedMotion } from "react-native-reanimated";
 import { useUnistyles } from "react-native-unistyles";
 
-import { SEASON_RESET_THRESHOLD } from "@reckon-path/engine";
-
 import { formatNumber } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 
@@ -47,9 +45,6 @@ const TrophyReset = ({ before, after }: ITrophyReset) => {
           <Text variant="number.counter">{format(after)}</Text>
         </Animated.View>
       </View>
-      <Text variant="caption" style={styles.secondary}>
-        {t("season.resetRule", { threshold: format(SEASON_RESET_THRESHOLD) })}
-      </Text>
     </View>
   );
 };

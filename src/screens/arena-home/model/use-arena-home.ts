@@ -1,25 +1,24 @@
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 import { useArenaQuery } from "@entities/arena";
-import { useArenaMapsQuery } from "@entities/arena-map";
-import { banOf, useServerMinute, useSystemState } from "@entities/app-config";
-import { useMatchHistoryQuery } from "@entities/match";
-import { useProgressStore } from "@entities/progress";
+import { arenaMapOf, useArenaMapsQuery } from "@entities/arena-map";
+import { banOf, banOfDetails, useServerMinute, useSystemState } from "@entities/app-config";
+import { useMatchEvents, useMatchStore } from "@entities/match";
+import { useMeQuery } from "@entities/wallet";
 import { useActivateArenaMap } from "@features/activate-arena-map";
-import { isArenaUnlocked, passedTowardsArena } from "@features/arena-access";
+import { useArenaUnlock } from "@features/arena-access";
 import { useClaimSeasonStep } from "@features/claim-season-step";
 import { useIsOnline } from "@shared/api";
-import { useFindMatch } from "@widgets/find-match";
 import type { ErrorMessageKey } from "@shared/api";
-
-const HISTORY_ROWS = 5;
+import { useFindMatch } from "@widgets/find-match";
 
 export const useArenaHome = (onError: (messageKey: ErrorMessageKey) => void) => {
-  const best = useProgressStore((state) => state.best);
+  useMatchEvents();
+  const unlock = useArenaUnlock();
   const arena = useArenaQuery();
   const maps = useArenaMapsQuery();
-  const history = useMatchHistoryQuery();
+  const { data: me } = useMeQuery();
   const isOnline = useIsOnline();
   const now = useServerMinute();
   const [isSwitchOpen, setIsSwitchOpen] = useState(false);
@@ -30,42 +29,60 @@ export const useArenaHome = (onError: (messageKey: ErrorMessageKey) => void) => 
     onError,
   });
   const { state: systemState } = useSystemState();
-  const find = useFindMatch({
-    arena: arena.data,
-    maps: maps.data ?? [],
-    onError,
-    isReplacing: false,
-  });
-  const format = arena.data?.format;
-  const isUnlocked = isArenaUnlocked(best);
-  const isOnboardingDue = isUnlocked && arena.data?.onboardingDone === false;
+  const find = useFindMatch({ onError, isReplacing: false });
+  const home = arena.data;
+  const isUnlocked = home?.unlocked ?? unlock.isUnlocked;
+  const meBan = me?.flags.bans?.find(({ scope }) => scope === "arena");
+  const errorBan = banOf(arena.error);
+  const ban =
+    meBan === undefined ? (errorBan?.scope === "arena" ? errorBan : null) : banOfDetails(meBan);
+  const isOpen = home !== undefined && home.unlocked && ban === null;
+  const isOnboardingDue = isOpen && !home.rulesSeen;
+  const runningId = isOpen ? (home.match?.id ?? null) : null;
+  const queue = isOpen ? (home.queue ?? null) : null;
 
   useEffect(() => {
     if (isOnboardingDue) router.push("/arena/onboarding");
   }, [isOnboardingDue]);
-  const formatMaps = (maps.data ?? []).filter(({ format: size }) => size === format?.size);
 
-  const ban = banOf(arena.error);
+  // An unfinished match or a running search reopens at once (незаконченный матч или идущий поиск открываются сразу).
+  useEffect(() => {
+    if (runningId !== null)
+      router.push({ pathname: "/arena/match/[id]", params: { id: runningId } });
+  }, [runningId]);
+
+  const openSearch = useEffectEvent(() => {
+    if (queue === null) return;
+    useMatchStore.getState().receiveQueue(queue);
+    router.push("/arena/search");
+  });
+  const joinedAt = queue?.joinedAt ?? null;
+
+  // Only a new search reopens the screen (экран открывает только новый поиск).
+  useEffect(() => {
+    if (joinedAt !== null) openSearch();
+  }, [joinedAt]);
 
   return {
     isUnlocked,
-    ban: ban?.scope === "arena" ? ban : null,
-    seasonSummary: isOnboardingDue ? null : (arena.data?.lastSeason ?? null),
-    passed: passedTowardsArena(best),
-    arena: arena.data,
+    ban,
+    seasonResult: isOpen && home.rulesSeen ? (home.season?.result ?? null) : null,
+    passed: unlock.passed,
+    unlockLevel: home?.unlockLevel ?? unlock.unlockLevel,
+    arena: home,
     isPending: arena.isPending,
     error: arena.error,
     updatedAt: arena.dataUpdatedAt,
     isOnline,
     now,
-    activeMap: formatMaps.find(({ id }) => id === arena.data?.activeMapId) ?? null,
-    formatMaps,
-    matches: history.data?.pages[0]?.items.slice(0, HISTORY_ROWS) ?? [],
+    activeMap: home?.activeMap === undefined ? null : arenaMapOf(home.activeMap),
+    maps: maps.data?.maps ?? [],
+    maxMaps: maps.data?.max ?? home?.maxMaps ?? 0,
     pendingStep,
     isSwitchOpen,
     isActivating,
     isEarnOpen,
-    canFight: isOnline && systemState.kind !== "maintenance",
+    canFight: isOnline && systemState.kind !== "maintenance" && !find.isPending,
     find,
     handleRetry: () => void arena.refetch(),
     handleClaim: claim,

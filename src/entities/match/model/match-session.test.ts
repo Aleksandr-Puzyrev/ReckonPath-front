@@ -1,183 +1,125 @@
-import { AppState } from "react-native";
-import type { AppStateStatus } from "react-native";
+import type { ArenaEvent } from "@shared/ws";
+import { matchViewMock } from "@shared/test-utils/api-mock";
 
-import { apiClient, setApiSession } from "@shared/api";
-import { fakeGameServer } from "@shared/api/mocks/fake-game/fake-game-server";
-import { ACCOUNT_SESSION } from "@shared/test-utils/account-session";
-import { mockServer } from "@shared/test-utils/api-mock";
-import { WS_CLOSE } from "@shared/ws";
-
-import { matchSession } from "./match-session";
+import { createMatchSession } from "./match-session";
+import type { MatchEventSource } from "./match-session";
 import { useMatchStore } from "./match-store";
 
-const MAP = {
-  rows: 5,
-  cols: 5,
-  targets: [[2, 2]] as [number, number][],
-  bombs: [[0, 0]] as [number, number][],
-  streams: [
-    [1, 2],
-    [2, 1],
-    [3, 2],
-  ] as [number, number][],
-};
-const OPPONENT_MAP = { rows: 5, cols: 5, targets: [[2, 2]] as [number, number][], bombs: [] };
-const SEARCH_MS = 20_000;
-const INTRO_MS = 3_000;
-
-const saveActiveMap = async () => {
-  const { data } = await apiClient.POST("/arena/maps", {
-    body: { name: "Fort", format: 5, map: MAP },
-  });
-  const id = data?.id ?? "";
-  await apiClient.POST("/arena/maps/{id}/activate", { params: { path: { id } } });
-  return id;
-};
-
-const state = () => useMatchStore.getState();
-
-const STEP_MS = 100;
-
-const untilMyTurn = async () => {
-  for (
-    let elapsed = 0;
-    elapsed < SEARCH_MS + INTRO_MS && state().phase !== "myTurn";
-    elapsed += STEP_MS
-  ) {
-    await jest.advanceTimersByTimeAsync(STEP_MS);
-  }
-};
-
-describe("matchSession", () => {
-  beforeAll(() =>
-    setApiSession({
-      ...ACCOUNT_SESSION,
-      getAccessToken: () => "access",
-      refreshAccessToken: async () => "access",
-    }),
-  );
-
-  afterEach(() => {
-    matchSession.leave();
-    jest.useRealTimers();
-    mockServer.reset();
-  });
-
-  const startSearch = async () => {
-    const mapId = await saveActiveMap();
-    jest.useFakeTimers();
-    fakeGameServer.configure({ opponentMap: OPPONENT_MAP, first: "me" });
-    matchSession.search(5, mapId);
-    return mapId;
+const createSource = () => {
+  const events = new Set<(event: ArenaEvent) => void>();
+  const reconnects = new Set<() => void>();
+  const source: MatchEventSource & { isOpen: boolean } = {
+    isOpen: false,
+    open: () => {
+      source.isOpen = true;
+    },
+    close: () => {
+      source.isOpen = false;
+    },
+    onEvent: (listener) => {
+      events.add(listener);
+      return () => events.delete(listener);
+    },
+    onReconnect: (listener) => {
+      reconnects.add(listener);
+      return () => reconnects.delete(listener);
+    },
   };
+  return {
+    source,
+    push: (event: ArenaEvent) => events.forEach((listener) => listener(event)),
+    reconnect: () => reconnects.forEach((listener) => listener()),
+  };
+};
 
-  test("searches, meets the opponent and starts on my turn (Part 8 §6.3)", async () => {
-    await startSearch();
-    expect(state().phase).toBe("searching");
+const flush = () => new Promise((resolve) => setImmediate(resolve));
 
-    await untilMyTurn();
+describe("createMatchSession", () => {
+  beforeEach(() => useMatchStore.getState().reset());
 
-    expect(state()).toEqual(
-      expect.objectContaining({ phase: "myTurn", turn: 1, current: "me", firstPlayer: "me" }),
-    );
-    expect(state().opponent?.isBot).toBe(false);
+  test("keeps the socket open while any screen holds it", () => {
+    const { source } = createSource();
+    const session = createMatchSession(source, async () => null);
+
+    const releaseHome = session.retain();
+    const releaseMatch = session.retain();
+    releaseHome();
+
+    expect(source.isOpen).toBe(true);
+
+    releaseMatch();
+
+    expect(source.isOpen).toBe(false);
   });
 
-  test("starts the training match against the mentor without a map (decision 0037 #2)", async () => {
-    jest.useFakeTimers();
-    matchSession.training(5);
-    expect(state()).toEqual(expect.objectContaining({ phase: "searching", isTraining: true }));
+  test("stores pushed matches by seq", () => {
+    const { source, push } = createSource();
+    const release = createMatchSession(source, async () => null).retain();
 
-    await untilMyTurn();
+    push({ type: "match", time: "2026-11-02T12:00:00Z", match: matchViewMock({ seq: 3 }) });
+    push({ type: "match", time: "2026-11-02T12:00:00Z", match: matchViewMock({ seq: 2 }) });
 
-    expect(state()).toEqual(
-      expect.objectContaining({
-        phase: "myTurn",
-        isTraining: true,
-        opponent: expect.objectContaining({ id: "mentor", isBot: true }),
-        format: expect.objectContaining({ turnSec: 10 }),
-      }),
-    );
+    expect(useMatchStore.getState().view?.seq).toBe(3);
+    release();
   });
 
-  test("fails the search as banned when the server closes the queue with 4003 (decision 0038 #6)", async () => {
-    await startSearch();
-    await jest.advanceTimersByTimeAsync(10);
+  test("marks the rival offline and back online by presence pushes of the current match", () => {
+    const { source, push } = createSource();
+    const release = createMatchSession(source, async () => null).retain();
+    push({ type: "match", time: "2026-11-02T12:00:00Z", match: matchViewMock({ seq: 3 }) });
 
-    fakeGameServer.closeConnections(WS_CLOSE.BANNED);
-    await jest.advanceTimersByTimeAsync(10);
-
-    expect(state()).toEqual(expect.objectContaining({ phase: "idle", searchError: "banned" }));
-  });
-
-  test("sends a tap and records the server's answer (PVP-01)", async () => {
-    await startSearch();
-    await untilMyTurn();
-
-    matchSession.tap([2, 0]);
-    expect(state().pendingCell).toEqual([2, 0]);
-    await jest.advanceTimersByTimeAsync(10);
-
-    expect(state().myTaps).toEqual([
-      expect.objectContaining({ cell: [2, 0], outcome: "pelang", value: 2 }),
-    ]);
-    expect(state()).toEqual(expect.objectContaining({ phase: "opponentTurn", pendingCell: null }));
-  });
-
-  test("ends the match on surrender (PVP-15)", async () => {
-    await startSearch();
-    await untilMyTurn();
-
-    matchSession.surrender();
-    await jest.advanceTimersByTimeAsync(10);
-
-    expect(state()).toEqual(
-      expect.objectContaining({
-        phase: "ended",
-        end: expect.objectContaining({ result: "loss", reason: "surrender" }),
-      }),
-    );
-  });
-
-  test("stops the search when the app goes to the background (decision 0033 #6)", async () => {
-    const listeners: ((status: AppStateStatus) => void)[] = [];
-    jest.spyOn(AppState, "addEventListener").mockImplementation((_type, listener) => {
-      listeners.push(listener);
-      return { remove: () => undefined };
+    push({
+      type: "presence",
+      time: "2026-11-02T12:00:01Z",
+      presence: { matchId: "match-live", online: false },
     });
-    matchSession.leave();
-    await startSearch();
+    expect(useMatchStore.getState().view?.rivalOnline).toBe(false);
 
-    listeners.forEach((listener) => listener("background"));
-
-    expect(state().phase).toBe("stopped");
-    jest.restoreAllMocks();
+    push({
+      type: "presence",
+      time: "2026-11-02T12:00:02Z",
+      presence: { matchId: "match-other", online: true },
+    });
+    expect(useMatchStore.getState().view?.rivalOnline).toBe(false);
+    release();
   });
 
-  test("offers the running match when another search is refused (decision 0033 #4)", async () => {
-    const mapId = await startSearch();
-    await untilMyTurn();
-    const { matchId } = state();
-    matchSession.leave();
+  test("re-reads the current match after a reconnect", async () => {
+    const { source, reconnect } = createSource();
+    const current = matchViewMock({ seq: 9, status: "play" });
+    const release = createMatchSession(source, async () => current).retain();
 
-    matchSession.search(5, mapId);
-    await jest.advanceTimersByTimeAsync(10);
+    reconnect();
+    await flush();
 
-    expect(state().inMatch).toEqual({ matchId, endpoint: expect.stringContaining(`/${matchId}`) });
+    expect(useMatchStore.getState().view).toEqual(current);
+    release();
   });
 
-  test("returns to the running match with a snapshot", async () => {
-    await startSearch();
-    await untilMyTurn();
-    matchSession.tap([2, 0]);
-    await jest.advanceTimersByTimeAsync(10);
-    const endpoint = `wss://game-1.mock.reckon-path.local/v1/match/${state().matchId ?? ""}`;
-    matchSession.leave();
+  test("stores the search state and loads the match the search found", async () => {
+    const { source, push } = createSource();
+    const found = matchViewMock();
+    const release = createMatchSession(source, async () => found).retain();
+    const queue = {
+      joinedAt: "2026-11-02T12:00:00Z",
+      serverTime: "2026-11-02T12:00:00Z",
+      mapOfferAt: "2026-11-02T12:00:10Z",
+      botAt: "2026-11-02T12:00:20Z",
+      format: found.format,
+    };
 
-    matchSession.returnTo(endpoint);
-    await jest.advanceTimersByTimeAsync(10);
+    push({ type: "queue", time: "2026-11-02T12:00:00Z", queue: { queue } });
 
-    expect(state().myTaps).toHaveLength(1);
-    expect(state().phase).not.toBe("idle");
+    expect(useMatchStore.getState().queue).toEqual(queue);
+
+    push({
+      type: "queue",
+      time: "2026-11-02T12:00:05Z",
+      queue: { match: { id: found.id, kind: "duel", status: "prepare" } },
+    });
+    await flush();
+
+    expect(useMatchStore.getState().view?.id).toBe(found.id);
+    release();
   });
 });

@@ -3,26 +3,25 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 
-import { NEW_MAP_ID } from "@entities/arena-map";
+import { levelOfMap, NEW_MAP_ID } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
 import { Screen } from "@shared/ui/screen";
 import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
-import { leagueLabelOf } from "@widgets/arena-hero";
+import { stepLabelOf } from "@widgets/arena-hero";
+import { BoardMapPreview } from "@widgets/board";
 import { EarnSheet } from "@widgets/earn-sheet";
-import { NoMapDialog } from "@widgets/find-match";
 import { MapSwitchSheet } from "@widgets/my-arena-map";
 import { TopBar } from "@widgets/top-bar";
 
 import { useArenaHome } from "../model/use-arena-home";
 
 import ArenaHomeBody from "./arena-home-body";
-import ArenaMapPreview from "./arena-map-preview";
 import SeasonSummary from "./season-summary";
 import { styles } from "./arena-home-styles";
 
 const renderMap = (map: ArenaMap, size: number) => (
-  <ArenaMapPreview key={map.id} map={map} size={size} />
+  <BoardMapPreview key={map.id} level={levelOfMap(map.map)} taps={[]} size={size} />
 );
 
 const ArenaHomeScreen = () => {
@@ -43,10 +42,11 @@ const ArenaHomeScreen = () => {
       {arena === undefined ? null : (
         <MapSwitchSheet
           isOpen={home.isSwitchOpen}
-          maps={home.formatMaps}
+          maps={home.maps}
+          maxMaps={home.maxMaps}
           formatLabel={t("arena.maps.format", {
-            size: `${arena.format.size}×${arena.format.size}`,
-            league: leagueLabelOf(arena.profile.league, arena.profile.division),
+            size: `${arena.league.format.rows}×${arena.league.format.cols}`,
+            league: stepLabelOf(arena.league),
           })}
           isDisabled={!home.isOnline || home.isActivating}
           renderMap={renderMap}
@@ -56,13 +56,6 @@ const ArenaHomeScreen = () => {
           onDismiss={home.handleSwitchClose}
         />
       )}
-      <NoMapDialog
-        isOpen={home.find.isNoMapOpen}
-        isPending={home.find.isRandomPending}
-        onBuild={home.find.handleBuildMap}
-        onRandom={home.find.handleRandomMap}
-        onClose={home.find.handleNoMapClose}
-      />
       <EarnSheet
         isOpen={home.isEarnOpen}
         shortBy={null}
@@ -73,10 +66,10 @@ const ArenaHomeScreen = () => {
         onMessage={(messageKey) => showToast(t(messageKey))}
         onClose={home.handleEarnClose}
       />
-      {home.seasonSummary === null || arena === undefined ? null : (
+      {home.seasonResult === null || arena?.season === undefined ? null : (
         <SeasonSummary
-          summary={home.seasonSummary}
-          nextSeasonId={arena.season.id}
+          result={home.seasonResult}
+          nextSeason={arena.season.number}
           onError={(messageKey) => showToast(t(messageKey))}
         />
       )}

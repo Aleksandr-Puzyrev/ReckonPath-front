@@ -1,4 +1,4 @@
-import { divisionShare, leagueLabelOf, nextDivisionOf, seasonDaysLeft } from "./league-progress";
+import { divisionShare, leagueLabelOf, seasonDaysLeft, stepLabelOf } from "./league-progress";
 
 describe("leagueLabelOf", () => {
   test("joins the league and the division numeral", () => {
@@ -10,21 +10,13 @@ describe("leagueLabelOf", () => {
   });
 });
 
-describe("nextDivisionOf", () => {
-  test("goes up a division inside the league", () => {
-    expect(nextDivisionOf("GOLD", 2)).toBe("GOLD I");
+describe("stepLabelOf", () => {
+  test("names the server's league step in capitals with its division", () => {
+    expect(stepLabelOf({ title: "Gold", division: "II" })).toBe("GOLD II");
   });
 
-  test("goes to the lowest division of the next league from division I (decision 0031 #10)", () => {
-    expect(nextDivisionOf("GOLD", 1)).toBe("PLATINUM III");
-  });
-
-  test("names Master after Diamond I", () => {
-    expect(nextDivisionOf("DIAMOND", 1)).toBe("MASTER");
-  });
-
-  test("has nothing after Master", () => {
-    expect(nextDivisionOf("MASTER", 1)).toBeNull();
+  test("leaves a one-division league without a numeral", () => {
+    expect(stepLabelOf({ title: "Master", division: "" })).toBe("MASTER");
   });
 });
 

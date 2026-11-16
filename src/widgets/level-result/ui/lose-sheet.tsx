@@ -1,19 +1,18 @@
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { canContinue } from "@reckon-path/engine";
-
-import { useGameSessionStore } from "@entities/level";
-import { ContinueOptions } from "@features/continue-game";
-import type { ContinueCallbacks } from "@features/continue-game";
 import { Button } from "@shared/ui/button";
 import { Sheet } from "@shared/ui/sheet";
 import { Text } from "@shared/ui/text";
 
 import { styles } from "./lose-sheet-styles";
 
-interface ILoseSheet extends ContinueCallbacks {
+interface ILoseSheet {
   isOpen: boolean;
   isBombLoss: boolean;
+  found: number;
+  total: number;
+  continueOptions: ReactNode;
   onRestart: () => void;
   onDecline: () => void;
   onExit: () => void;
@@ -22,16 +21,15 @@ interface ILoseSheet extends ContinueCallbacks {
 const LoseSheet = ({
   isOpen,
   isBombLoss,
-  onContinued,
-  onShortOfEmeralds,
-  onError,
+  found,
+  total,
+  continueOptions,
   onRestart,
   onDecline,
   onExit,
 }: ILoseSheet) => {
   const { t } = useTranslation();
-  const game = useGameSessionStore((state) => state.game);
-  if (game === null) return null;
+  const canContinue = continueOptions !== null;
 
   return (
     <Sheet isOpen={isOpen} onDismiss={onDecline} isDismissible={false}>
@@ -39,18 +37,12 @@ const LoseSheet = ({
         {t(isBombLoss ? "result.lose.bombTitle" : "result.lose.title")}
       </Text>
       <Text variant="body.m" style={styles.found}>
-        {t("result.lose.found", { found: game.found.size, total: game.board.targets.length })}
+        {t("result.lose.found", { found, total })}
       </Text>
-      {canContinue(game) ? (
-        <ContinueOptions
-          onContinued={onContinued}
-          onShortOfEmeralds={onShortOfEmeralds}
-          onError={onError}
-        />
-      ) : null}
+      {continueOptions}
       <Button label={t("play.pause.restart")} onPress={onRestart} />
       <Button label={t("play.pause.exit")} onPress={onExit} variant="ghost" />
-      {canContinue(game) ? (
+      {canContinue ? (
         <Button label={t("result.lose.decline")} onPress={onDecline} variant="ghost" />
       ) : null}
     </Sheet>

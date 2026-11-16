@@ -108,14 +108,14 @@ module.exports = defineConfig([
           policies: [
             { allow: { dependency: { relationship: { to: "internal" } } } },
             ...layerPolicies,
-            // The mocks play the server, which runs the same engine (моки играют роль сервера, который считает тем же движком).
+            // The mocks play the server, which runs the same engine on the bundled levels (моки играют роль сервера, который считает тем же движком на встроенных уровнях).
             {
               from: { element: { type: "shared" } },
               allow: { to: { element: { type: "mocks" } } },
             },
             {
               from: { element: { type: "mocks" } },
-              allow: { to: { element: { types: { anyOf: ["shared", "engine"] } } } },
+              allow: { to: { element: { types: { anyOf: ["shared", "engine", "content"] } } } },
             },
             // Own native modules are wrapped in shared, like any other platform API (свои нативные модули оборачиваются в shared, как любой другой API платформы).
             {

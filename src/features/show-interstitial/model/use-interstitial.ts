@@ -1,8 +1,8 @@
 import { isInterstitialDue, prepareAdsConsent, useInterstitialStore } from "@entities/ad";
 import type { InterstitialRules } from "@entities/ad";
 import { useConfigNumber } from "@entities/app-config";
-import { CAMPAIGN_LEVELS, CAMPAIGN_WORLDS } from "@entities/level";
-import { currentLevelId, useProgressStore } from "@entities/progress";
+import { useCampaignQuery } from "@entities/level";
+import type { CampaignOverview } from "@entities/level";
 import { adsProvider } from "@shared/ads";
 
 // Part 6 §7.4 defaults when remote config lacks them (значения Части 6 §7.4, если их нет в remote config).
@@ -25,13 +25,17 @@ const useInterstitialRules = (): InterstitialRules => ({
   minLevel: useConfigNumber("ads.interstitial.minLevel", DEFAULT_RULES.minLevel),
 });
 
-const currentLevelNumberOf = (id: string | null) =>
-  CAMPAIGN_LEVELS.find(({ level }) => level.id === id)?.number ?? CAMPAIGN_LEVELS.length + 1;
+// A finished campaign counts as the level after its last one (пройденная кампания считается уровнем после последнего).
+const currentLevelOf = (overview: CampaignOverview | undefined) => {
+  if (overview === undefined) return 0;
+  if (!overview.completed) return overview.currentLevel;
+  const last = overview.worlds.at(-1)?.lastLevel ?? 0;
+  return last + 1;
+};
 
 export const useInterstitial = () => {
   const rules = useInterstitialRules();
-  const best = useProgressStore((state) => state.best);
-  const currentLevel = currentLevelNumberOf(currentLevelId(CAMPAIGN_WORLDS, best));
+  const currentLevel = currentLevelOf(useCampaignQuery().data);
 
   // The ad is preloaded from one level before its turn on, as the counter keeps growing while a show is not allowed yet (Part 8 §10.1) (реклама предзагружается начиная с уровня до своей очереди: счётчик растёт и пока показ ещё не разрешён).
   const finishLevel = () => {

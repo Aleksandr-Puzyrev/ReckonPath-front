@@ -1,23 +1,24 @@
-export { activateArenaMapMutationOptions } from "./api/activate-arena-map-mutation";
+export {
+  activateArenaMapMutationOptions,
+  checkArenaMapMutationOptions,
+  deleteArenaMapMutationOptions,
+  randomArenaMapMutationOptions,
+  saveArenaMapMutationOptions,
+} from "./api/arena-map-mutations";
 export { arenaMapKeys, arenaMapsQueryOptions, useArenaMapsQuery } from "./api/arena-map-queries";
-export { deleteArenaMapMutationOptions } from "./api/delete-arena-map-mutation";
-export { randomArenaMapMutationOptions } from "./api/random-arena-map-mutation";
-export { saveArenaMapMutationOptions } from "./api/save-arena-map-mutation";
-export { validateArenaMapMutationOptions } from "./api/validate-arena-map-mutation";
-export { runBot } from "./model/bot-run";
-export type { BotRun } from "./model/bot-run";
 export { checkEditorMap } from "./model/check-editor-map";
 export type { MapStatus } from "./model/check-editor-map";
+export { statusOfProblem } from "./model/problem-status";
 export { HISTORY_STEPS, isSessionDirty, useEditorStore } from "./model/editor-store";
 export type { EditorSession } from "./model/editor-store";
-export { levelOfMap } from "./model/level-of-map";
+export { arenaMapOf, gameLevelOfMap, levelOfMap, mapOfLevel } from "./model/level-of-map";
 export {
   addFence,
   countElements,
+  DRAW_MAP_ID,
   emptyMap,
   isMapEmpty,
   limitsOf,
-  MAPS_PER_FORMAT,
   NEW_MAP_ID,
   paintCell,
   toggleCell,
@@ -32,11 +33,15 @@ export type {
   LimitedElement,
 } from "./model/map-edit";
 export { nextMapNumber } from "./model/next-map-name";
-export { pvpFormatOf } from "./model/pvp-format-of";
 export type {
   ArenaMap,
-  ArenaMapInput,
-  MapError,
-  MapValidation,
+  ArenaMaps,
+  ArenaMapView,
+  GameLevel,
+  MapCaps,
+  MapCheck,
+  MapFormat,
+  MapProblem,
+  MatchFormat,
   PvpMap,
 } from "./model/arena-map-type";

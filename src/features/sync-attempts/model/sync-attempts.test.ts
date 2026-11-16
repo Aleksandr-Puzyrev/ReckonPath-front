@@ -3,7 +3,6 @@ import { http, HttpResponse } from "msw/http";
 
 import { useDailyRecordStore } from "@entities/daily";
 import { useOutboxStore } from "@entities/outbox";
-import { useProgressStore } from "@entities/progress";
 import { useAccountStore } from "@entities/session";
 import { ApiError } from "@shared/api";
 import { attemptFixture } from "@shared/test-utils/attempt-fixture";
@@ -53,7 +52,6 @@ afterEach(() => {
   secureStore.__reset();
   useAccountStore.getState().reset();
   useOutboxStore.getState().reset();
-  useProgressStore.getState().reset();
   useDailyRecordStore.getState().reset();
 });
 
@@ -117,17 +115,6 @@ describe("syncAttempts", () => {
     await expect(syncAttempts()).rejects.toThrow();
 
     expect(useOutboxStore.getState().attempts).toHaveLength(2);
-  });
-
-  test("takes the stars from the server after sending", async () => {
-    await signIn();
-    useOutboxStore
-      .getState()
-      .enqueue(attemptFixture({ ref: "c-2", claimed: { result: "won", movesUsed: 4, stars: 2 } }));
-
-    await syncAttempts();
-
-    expect(useProgressStore.getState().best).toEqual({ "c-2": { stars: 2, moves: 4 } });
   });
 
   test("keeps the server's place of the counted daily attempt", async () => {

@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { Text } from "react-native";
 
 import { useAccountStore } from "@entities/session";
-import { useProgressStore } from "@entities/progress";
 import { i18n } from "@shared/i18n";
 import { mockServer } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
@@ -41,7 +40,6 @@ describe("DeleteAccountSheet", () => {
     await cleanup();
     mockServer.reset();
     useAccountStore.getState().reset();
-    useProgressStore.getState().reset();
   });
 
   test("asks for the password (decision 0052 #2)", async () => {
@@ -53,8 +51,7 @@ describe("DeleteAccountSheet", () => {
     expect(screen.getByTestId("delete-forever")).toBeDisabled();
   });
 
-  test("keeps the account and its progress after the deletion (decision 0058 #2)", async () => {
-    useProgressStore.getState().recordWin("c-1", { stars: 3, moves: 4 });
+  test("keeps the account signed in after the deletion (decision 0058 #2)", async () => {
     const onDeleted = jest.fn();
     await render(sheetWith(true, onDeleted), { wrapper: createQueryWrapper() });
 
@@ -62,7 +59,6 @@ describe("DeleteAccountSheet", () => {
 
     await waitFor(() => expect(onDeleted).toHaveBeenCalled());
     expect(useAccountStore.getState().hasLogin).toBe(true);
-    expect(useProgressStore.getState().best).not.toEqual({});
   });
 
   test("shows a wrong password under the field", async () => {

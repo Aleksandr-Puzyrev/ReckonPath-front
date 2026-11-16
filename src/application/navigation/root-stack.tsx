@@ -11,6 +11,9 @@ import {
   useSystemNoticeStore,
   useSystemState,
 } from "@entities/app-config";
+import { useAccountStore } from "@entities/session";
+import { useSettingsStore } from "@entities/settings";
+import { isSystemLanguageSupported } from "@shared/i18n";
 
 import LinkOfferHost from "../account/link-offer-host";
 import AdsConsentHost from "../ads/ads-consent-host";
@@ -37,6 +40,10 @@ const RootStack = () => {
     useInterstitialStore.getState().markLaunched(launchedAt);
   }, [launchedAt]);
   const isBanned = useBanStore((ban) => ban.ban !== null);
+  const hasLogin = useAccountStore((account) => account.hasLogin);
+  const isLanguageNeeded = useSettingsStore(
+    (settings) => settings.language === null && !isSystemLanguageSupported(),
+  );
   const isConsentRequired = useIsConsentRequired();
   const isUpdateRequired = state.kind === "forcedUpdate";
   const isMaintenance = state.kind === "maintenance" && !isMaintenanceDismissed;
@@ -47,11 +54,16 @@ const RootStack = () => {
     <>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected
-          guard={!isUpdateRequired && !isMaintenance && !isBanned && !isConsentRequired}
+          guard={isLanguageNeeded && !isUpdateRequired && !isMaintenance && !isBanned}
+        >
+          <Stack.Screen name="onboarding/language" options={{ gestureEnabled: false }} />
+        </Stack.Protected>
+        {/* No guest mode for now: without an account only the sign-in screens are open (гостевого режима пока нет: без аккаунта открыты только экраны входа). */}
+        <Stack.Protected
+          guard={hasLogin && !isUpdateRequired && !isMaintenance && !isBanned && !isConsentRequired}
         >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
-          <Stack.Screen name="onboarding/language" options={{ gestureEnabled: false }} />
           <Stack.Screen name="editor/index" />
           <Stack.Screen name="editor/[id]" options={{ gestureEnabled: false }} />
           <Stack.Screen
@@ -80,10 +92,6 @@ const RootStack = () => {
             name="arena/result/[id]"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}
           />
-          <Stack.Screen
-            name="arena/async/[id]"
-            options={{ presentation: "fullScreenModal", gestureEnabled: false }}
-          />
           <Stack.Screen name="play/index" options={{ presentation: "modal" }} />
           <Stack.Screen
             name="play/code"
@@ -93,12 +101,16 @@ const RootStack = () => {
             name="play/[mode]/[id]"
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}
           />
-          <Stack.Screen name="account/sign-in" options={{ presentation: "modal" }} />
-          <Stack.Screen name="account/sign-up" options={{ presentation: "modal" }} />
-          <Stack.Screen name="account/code" options={{ presentation: "modal" }} />
-          <Stack.Screen name="account/forgot" options={{ presentation: "modal" }} />
           <Stack.Screen name="account/password" options={{ presentation: "modal" }} />
           <Stack.Screen name="account/email" options={{ presentation: "modal" }} />
+        </Stack.Protected>
+        <Stack.Protected
+          guard={!hasLogin && !isLanguageNeeded && !isUpdateRequired && !isMaintenance}
+        >
+          <Stack.Screen name="account/sign-in" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="account/sign-up" options={{ gestureEnabled: false }} />
+          <Stack.Screen name="account/code" />
+          <Stack.Screen name="account/forgot" />
         </Stack.Protected>
         <Stack.Protected guard={isUpdateRequired}>
           <Stack.Screen name="system/update" options={{ gestureEnabled: false }} />

@@ -1,20 +1,10 @@
 import type { TFunction } from "i18next";
 
-import type { MatchPhase, Side, TurnSkip } from "@entities/match";
+import type { MatchView } from "@entities/match";
 
-const hasBombSkip = (skipped: readonly TurnSkip[], player: Side) =>
-  skipped.some((skip) => skip.player === player && skip.reason === "bomb");
-
-export const bannerTextOf = (
-  phase: MatchPhase,
-  current: Side | null,
-  skipped: readonly TurnSkip[],
-  t: TFunction,
-) => {
-  if (phase === "intro") return t("vs.coin");
-  if (phase === "ended") return t("match.over");
-  if (phase === "finalTurn") return current === "me" ? t("match.finalTurn") : t("match.theirFinal");
-  if (current === "me")
-    return hasBombSkip(skipped, "opponent") ? t("match.theySkip") : t("match.yourTurn");
-  return hasBombSkip(skipped, "me") ? t("match.youSkip") : t("match.theirTurn");
+export const bannerTextOf = ({ kind, norm, final, turn, me }: MatchView, t: TFunction) => {
+  if (kind === "map") return t("async.reason", { count: me.moves, norm: norm ?? 0 });
+  if (final === true) return t(turn === "me" ? "match.finalTurn" : "match.theirFinal");
+  if (turn === "me") return t("match.yourTurn");
+  return me.skips > 0 ? t("match.youSkip") : t("match.theirTurn");
 };

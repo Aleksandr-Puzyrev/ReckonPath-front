@@ -17,7 +17,12 @@ export const contextSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("daily") }),
   z.object({
     kind: z.literal("pvp"),
-    format: z.object({ size: z.number(), targets: z.number(), limits: pvpLimitsSchema }),
+    format: z.object({
+      rows: z.number(),
+      cols: z.number(),
+      targets: z.number(),
+      limits: pvpLimitsSchema,
+    }),
   }),
 ]);
 

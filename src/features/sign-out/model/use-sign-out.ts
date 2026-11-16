@@ -2,9 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useEditorStore } from "@entities/arena-map";
 import { useDailyRecordStore } from "@entities/daily";
-import { useGameSessionStore } from "@entities/level";
+import { useCampaignFlagsStore, useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
-import { useProgressStore } from "@entities/progress";
 import { endEverySession, endSession } from "@entities/session";
 import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
@@ -20,7 +19,7 @@ const signOut = async (isEverywhere: boolean) => {
   await (isEverywhere ? endEverySession() : endSession());
   useGameSessionStore.getState().reset();
   useOutboxStore.getState().reset();
-  useProgressStore.getState().reset();
+  useCampaignFlagsStore.getState().reset();
   useDailyRecordStore.getState().reset();
   useEditorStore.getState().reset();
 };

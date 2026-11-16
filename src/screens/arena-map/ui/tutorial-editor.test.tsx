@@ -16,6 +16,10 @@ jest.mock("expo-router", () => ({
   },
   useLocalSearchParams: () => ({ id: "tutorial" }),
 }));
+jest.mock("@shared/config", () => ({
+  ...jest.requireActual("@shared/config"),
+  HAS_ARENA_SERVER: true,
+}));
 
 jest.mock("@widgets/board", () => ({
   useBoardFx: () => ({ play: jest.fn() }),
@@ -31,7 +35,7 @@ jest.mock("@widgets/board", () => ({
     const { Pressable, View } = jest.requireActual("react-native");
     return (
       <View>
-        {Array.from({ length: 25 }, (_, cell) => (
+        {Array.from({ length: 36 }, (_, cell) => (
           <Pressable
             key={cell}
             testID={`cell-${cell}`}
@@ -47,9 +51,9 @@ jest.mock("@widgets/board", () => ({
   },
 }));
 
-const ROCK = 20;
-const STREAM = 12;
-const PLAIN = 24;
+const ROCK = 30;
+const STREAM = 14;
+const PLAIN = 35;
 const OTHER = 4;
 
 const renderTutorial = async () => {
@@ -130,7 +134,7 @@ describe("TutorialEditor", () => {
     expect(useEditorStore.getState().session?.map.bombs).toHaveLength(1);
   });
 
-  test("saves the map, finishes the onboarding and returns to the arena", async () => {
+  test("saves the map and returns to the arena", async () => {
     await renderTutorial();
     await tap(STREAM);
     await choose("bomb");
@@ -141,8 +145,7 @@ describe("TutorialEditor", () => {
 
     await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
     const arena = (await apiClient.GET("/arena")).data;
-    expect(arena?.onboardingDone).toBe(true);
-    expect(arena?.activeMapId).not.toBeNull();
+    expect(arena?.activeMap).toBeDefined();
     expect(useEditorStore.getState().session).toBeNull();
   });
 });

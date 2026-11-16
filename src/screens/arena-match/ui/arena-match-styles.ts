@@ -49,14 +49,6 @@ export const styles = StyleSheet.create((theme, runtime) => ({
   secondary: {
     color: theme.colors.text.secondary,
   },
-  bubble: {
-    paddingHorizontal: theme.space[3],
-    paddingVertical: theme.space[2],
-    borderRadius: theme.radius.l,
-    backgroundColor: theme.colors.bg.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border.default,
-  },
   banner: {
     alignItems: "center",
     paddingVertical: theme.space[2],
@@ -85,15 +77,6 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     textAlign: "center",
     color: theme.colors.text.secondary,
   },
-  hint: {
-    gap: theme.space[2],
-    padding: theme.space[4],
-    borderRadius: theme.radius.l,
-    borderWidth: 2,
-    borderColor: theme.colors.accent.cyan,
-    backgroundColor: theme.colors.bg.surface,
-    boxShadow: theme.elevation[2],
-  },
   controls: {
     flexDirection: "row",
     gap: theme.space[2],
@@ -101,25 +84,23 @@ export const styles = StyleSheet.create((theme, runtime) => ({
   control: {
     flex: 1,
   },
-  emotes: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    padding: theme.space[4],
-  },
-  emoteCell: {
-    width: "50%",
-    padding: theme.space[1],
-  },
   menu: {
     gap: theme.space[3],
     padding: theme.space[5],
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: "center",
-    justifyContent: "center",
+  prepare: {
+    flex: 1,
     gap: theme.space[4],
-    padding: theme.space[5],
-    backgroundColor: theme.colors.bg.base,
+  },
+  prepareMap: {
+    alignItems: "center",
+    gap: theme.space[2],
+  },
+  prepareSources: {
+    flexDirection: "row",
+    gap: theme.space[2],
+  },
+  centered: {
+    textAlign: "center",
   },
 }));

@@ -7,25 +7,15 @@ import { styles } from "./arena-match-styles";
 
 interface IMatchControls {
   isFlagMode: boolean;
-  onEmotes: () => void;
   onFlag: () => void;
   onMenu: () => void;
 }
 
-const MatchControls = ({ isFlagMode, onEmotes, onFlag, onMenu }: IMatchControls) => {
+const MatchControls = ({ isFlagMode, onFlag, onMenu }: IMatchControls) => {
   const { t } = useTranslation();
 
   return (
     <View style={styles.controls}>
-      <View style={styles.control}>
-        <Button
-          testID="match-emotes"
-          label={t("match.emotes")}
-          variant="secondary"
-          size="m"
-          onPress={onEmotes}
-        />
-      </View>
       <View style={styles.control}>
         <Button
           testID="match-flag"

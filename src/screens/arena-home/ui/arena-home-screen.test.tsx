@@ -3,14 +3,18 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
-import { CAMPAIGN_LEVELS } from "@entities/level";
-import { matchSession } from "@entities/match";
-import { useProgressStore } from "@entities/progress";
+import { gameLevelOfMap } from "@entities/arena-map";
+import { useMatchStore } from "@entities/match";
 import { useAccountStore } from "@entities/session";
 import { apiClient } from "@shared/api";
-import { recordMockMatch } from "@shared/api/mocks/mock-arena-profile";
 import { i18n } from "@shared/i18n";
-import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import {
+  arenaHomeMock,
+  mockServer,
+  mockUrl,
+  passMockLevels,
+  setMockArena,
+} from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import ArenaHomeScreen from "./arena-home-screen";
@@ -22,70 +26,47 @@ jest.mock("expo-router", () => ({
     return mockRouter;
   },
 }));
+jest.mock("@shared/config", () => ({
+  ...jest.requireActual("@shared/config"),
+  HAS_ARENA_SERVER: true,
+}));
+jest.mock("@shared/ws", () => ({
+  arenaSocket: {
+    open: () => undefined,
+    close: () => undefined,
+    onEvent: () => () => undefined,
+    onReconnect: () => () => undefined,
+  },
+}));
 jest.mock("@shared/ui/sheet", () => ({
   Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
     isOpen ? children : null,
 }));
 jest.mock("@widgets/board", () => ({ BoardMapPreview: () => null }));
 
-const MAP = {
-  rows: 5,
-  cols: 5,
-  targets: [[2, 2]] as [number, number][],
-  bombs: [[0, 0]] as [number, number][],
-  streams: [
-    [1, 2],
-    [2, 1],
-    [3, 2],
-  ] as [number, number][],
-};
+const MAP = { rows: 6, cols: 6, targets: [[2, 2]] as [number, number][] };
 const DRAFT = { ...MAP, targets: [] };
 
-const passLevels = (count: number) =>
-  useProgressStore.setState({
-    best: Object.fromEntries(
-      CAMPAIGN_LEVELS.slice(0, count).map(({ level }) => [level.id, { stars: 3, moves: 5 }]),
-    ),
-  });
-
 const saveMap = async (name: string, map = MAP) =>
-  (await apiClient.POST("/arena/maps", { body: { name, format: 5, map } })).data?.id ?? "";
+  (await apiClient.POST("/arena/maps", { body: { name, level: gameLevelOfMap(map) } })).data?.id ??
+  "";
 
-const activate = (id: string) =>
-  apiClient.POST("/arena/maps/{id}/activate", { params: { path: { id } } });
-
-const win = (matchId: string, isBot = false) =>
-  recordMockMatch({
-    outcome: "win",
-    kind: isBot ? "bot" : "ranked",
-    opponentTrophies: 0,
-    details: {
-      matchId,
-      mode: isBot ? "bot" : "ranked",
-      opponent: {
-        id: "u2",
-        nickname: isBot ? "Calm" : "Kira",
-        league: "BRONZE",
-        isBot,
-        label: null,
-      },
-      result: "win",
-      reason: "targets",
-      turns: { me: 5, opponent: 5 },
-      endedAt: "2026-10-18T12:00:00Z",
-      maps: { mine: MAP, opponent: MAP },
-      taps: [],
-    },
-  });
-
-const renderArena = async () => {
-  await render(<ArenaHomeScreen />, { wrapper: createQueryWrapper() });
+const QUEUE = {
+  joinedAt: "2026-11-02T12:00:00Z",
+  serverTime: "2026-11-02T12:00:03Z",
+  mapOfferAt: "2026-11-02T12:00:10Z",
+  botAt: "2026-11-02T12:00:20Z",
 };
 
+const withArena = (overrides: Partial<ReturnType<typeof arenaHomeMock>>) =>
+  mockServer.use(
+    http.get(mockUrl("/arena"), () => HttpResponse.json({ ...arenaHomeMock([]), ...overrides })),
+  );
+
+const renderArena = () => render(<ArenaHomeScreen />, { wrapper: createQueryWrapper() });
+
 const renderOpenArena = async () => {
-  passLevels(12);
-  await apiClient.POST("/arena/onboarding");
-  await apiClient.POST("/arena/season/summary/claim");
+  passMockLevels(12);
   await renderArena();
   await screen.findByText("Сигнал против сигнала.");
 };
@@ -96,80 +77,80 @@ describe("ArenaHomeScreen", () => {
   beforeEach(() => {
     mockRouter.push.mockClear();
     mockRouter.navigate.mockClear();
+    useAccountStore.getState().markSignedIn();
   });
 
   afterEach(async () => {
     await cleanup();
     mockServer.reset();
-    useProgressStore.getState().reset();
     useAccountStore.getState().reset();
-    jest.restoreAllMocks();
+    useMatchStore.getState().reset();
     await act(async () => onlineManager.setOnline(true));
   });
 
-  test("shows the lock and the progress to level 12 (ARN-01)", async () => {
-    passLevels(9);
+  test("shows the lock with the server's unlock level and no season over it", async () => {
+    passMockLevels(9);
+    setMockArena({ hasPastSeason: true });
     await renderArena();
 
-    expect(screen.getByText("Арена закрыта")).toBeOnTheScreen();
-    expect(screen.getByText("9 / 12")).toBeOnTheScreen();
+    expect(await screen.findByText("Арена закрыта")).toBeOnTheScreen();
+    expect(await screen.findByText("9 / 12")).toBeOnTheScreen();
+    expect(screen.queryByTestId("season-summary")).toBeNull();
     await fireEvent.press(screen.getByTestId("arena-to-levels"));
     expect(mockRouter.navigate).toHaveBeenCalledWith("/levels");
   });
 
-  test("opens the onboarding on the first visit of the open arena (decision 0037 #4)", async () => {
-    passLevels(12);
-    await renderArena();
-
-    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/arena/onboarding"));
-  });
-
-  test("skips the onboarding once it is done", async () => {
+  test("opens the rule cards while the server has not seen them", async () => {
+    setMockArena({ rulesSeen: false, hasPastSeason: true });
     await renderOpenArena();
-
-    expect(mockRouter.push).not.toHaveBeenCalledWith("/arena/onboarding");
-  });
-
-  test("shows the summary of the finished season once (decision 0038 #2, design 18.3)", async () => {
-    passLevels(12);
-    await apiClient.POST("/arena/onboarding");
-    await renderArena();
-
-    expect(await screen.findByText("Сезон 01 завершён")).toBeOnTheScreen();
-    expect(screen.getByText("Пик: GOLD I")).toBeOnTheScreen();
-    expect(screen.getByText("Место #312 в мире · 64 победы")).toBeOnTheScreen();
-    expect(screen.getByTestId("summary-reset")).toHaveTextContent(
-      /3[\s\u00a0\u202f]120.*2[\s\u00a0\u202f]560/,
-    );
-    await fireEvent.press(screen.getByTestId("summary-claim"));
-    expect(await screen.findByTestId("summary-claimed")).toBeOnTheScreen();
-    await fireEvent.press(screen.getByTestId("summary-next"));
-
-    await waitFor(() => expect(screen.queryByTestId("season-summary")).toBeNull());
-    expect((await apiClient.GET("/wallet")).data?.coins).toBeGreaterThanOrEqual(1500);
-  });
-
-  test("claims the season rewards when the summary is closed unclaimed (decision 0038 #3)", async () => {
-    passLevels(12);
-    await apiClient.POST("/arena/onboarding");
-    await renderArena();
-
-    await fireEvent.press(await screen.findByTestId("summary-next"));
-
-    await waitFor(() => expect(screen.queryByTestId("season-summary")).toBeNull());
-    expect((await apiClient.GET("/arena")).data?.lastSeason).toBeNull();
-  });
-
-  test("keeps the summary away while the onboarding is due", async () => {
-    passLevels(12);
-    await renderArena();
 
     await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/arena/onboarding"));
     expect(screen.queryByTestId("season-summary")).toBeNull();
   });
 
-  test("shows the arena ban with the term and leads to the campaign (ACC-14)", async () => {
-    passLevels(12);
+  test("shows the past season's result and claims it (decision 0060 #16 season)", async () => {
+    setMockArena({ hasPastSeason: true });
+    passMockLevels(12);
+    await renderArena();
+
+    expect(await screen.findByText("Сезон 01 завершён")).toBeOnTheScreen();
+    expect(screen.getByText("Пик: GOLD I")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("summary-claim"));
+
+    expect(await screen.findByTestId("summary-claimed")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("summary-next"));
+    await waitFor(() => expect(screen.queryByTestId("season-summary")).toBeNull());
+  });
+
+  test("shows the arena ban from the player's flags (decision 0060 #14)", async () => {
+    passMockLevels(12);
+    mockServer.use(
+      http.get(mockUrl("/me"), () =>
+        HttpResponse.json({
+          id: "u1",
+          nickname: "test",
+          locale: "ru",
+          level: 1,
+          xp: 0,
+          xpToNext: 50,
+          nicknameChange: { price: 0, currency: "coins" },
+          flags: {
+            deletionScheduledAt: null,
+            bans: [{ scope: "arena", until: null, reason: "читы" }],
+          },
+          consents: [],
+          consentsRequired: [],
+        }),
+      ),
+    );
+    await renderArena();
+
+    expect(await screen.findByText("Арена недоступна")).toBeOnTheScreen();
+    expect(screen.getByText(/читы/)).toBeOnTheScreen();
+  });
+
+  test("shows the arena ban from a 403 banned answer", async () => {
+    passMockLevels(12);
     mockServer.use(
       http.get(mockUrl("/arena"), () =>
         HttpResponse.json(
@@ -186,198 +167,136 @@ describe("ArenaHomeScreen", () => {
     await renderArena();
 
     expect(await screen.findByText("Арена недоступна")).toBeOnTheScreen();
-    expect(screen.getByText(/Причина: бустинг кубков\. До 12 октября/)).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("ban-campaign"));
     expect(mockRouter.navigate).toHaveBeenCalledWith("/levels");
   });
 
-  test("sends an appeal from the arena ban (decision 0038 #5)", async () => {
-    passLevels(12);
-    mockServer.use(
-      http.get(mockUrl("/arena"), () =>
-        HttpResponse.json(
-          { error: { code: "banned", details: { scope: "arena", until: null, reason: "читы" } } },
-          { status: 403 },
-        ),
-      ),
-    );
-    await renderArena();
-    await fireEvent.press(await screen.findByTestId("ban-appeal"));
-    expect(screen.getByTestId("support-send")).toBeDisabled();
-
-    await fireEvent.changeText(screen.getByTestId("support-message"), "Это не я");
-    await waitFor(() => expect(screen.getByTestId("support-send")).toBeEnabled());
-    await fireEvent.press(screen.getByTestId("support-send"));
-
-    expect(await screen.findByText("Обращение отправлено")).toBeOnTheScreen();
-  });
-
-  test("shows the league, the trophies, the season and the format", async () => {
+  test("shows the server's league, its next step, the season and the format", async () => {
     await renderOpenArena();
 
     expect(screen.getAllByText("BRONZE III").length).toBeGreaterThan(0);
-    expect(screen.getByText("5×5 · 1 цели · 5 с на ход")).toBeOnTheScreen();
-    expect(screen.getByText("0 / 267 → BRONZE II")).toBeOnTheScreen();
+    expect(screen.getByText("6×6 · 1 цели · 10 с на ход")).toBeOnTheScreen();
+    expect(screen.getByText("120 / 200 → BRONZE II")).toBeOnTheScreen();
     expect(screen.getByText(/^02 · \d+д$/)).toBeOnTheScreen();
-    expect(screen.getByTestId("arena-fight")).toBeEnabled();
   });
 
-  test("offers to build a map when there is none and hides the empty history", async () => {
-    await renderOpenArena();
-
-    expect(screen.getByText("Карты пока нет")).toBeOnTheScreen();
-    expect(screen.queryByText("История матчей")).toBeNull();
-  });
-
-  test("shows the active map with the bot estimate and defences", async () => {
-    await activate(await saveMap("Fort"));
+  test("shows the active map with the bot estimate and its defences", async () => {
+    await saveMap("Fort");
     await renderOpenArena();
 
     expect(await screen.findByText("Fort · активная")).toBeOnTheScreen();
-    expect(screen.getByText(/^Бот решает за ~\d+ ход/)).toBeOnTheScreen();
+    expect(screen.getByText("Бот решает за ~4 хода")).toBeOnTheScreen();
     expect(screen.getByText("Защита: 0")).toBeOnTheScreen();
   });
 
-  test("switches the active map and keeps a draft out of reach (decision 0031 #6)", async () => {
-    await activate(await saveMap("Fort"));
+  test("switches the active map and keeps a draft out of reach", async () => {
+    await saveMap("Fort");
     const secondId = await saveMap("Reef");
     const draftId = await saveMap("Draft", DRAFT);
     await renderOpenArena();
     await screen.findByText("Fort · активная");
 
     await fireEvent.press(screen.getByTestId("map-switch"));
-    expect(screen.getByText("черновик — карта невалидна")).toBeOnTheScreen();
     expect(screen.getByTestId(`map-option-${draftId}`)).toBeDisabled();
+    expect(screen.queryByTestId("map-new")).toBeNull();
     await fireEvent.press(screen.getByTestId(`map-option-${secondId}`));
 
     expect(await screen.findByText("Reef · активная")).toBeOnTheScreen();
-    await waitFor(() => expect(screen.queryByText("Мои карты")).toBeNull());
   });
 
-  test("opens the editor for a new map and for the active one (decision 0032 #13)", async () => {
-    await renderOpenArena();
-
-    await fireEvent.press(screen.getByTestId("map-create"));
-    expect(mockRouter.push).toHaveBeenLastCalledWith({
-      pathname: "/arena/map/[id]",
-      params: { id: "new" },
-    });
-  });
-
-  test("offers a new map in the switch sheet while there are fewer than three", async () => {
-    const id = await saveMap("Fort");
-    await activate(id);
-    await renderOpenArena();
-    await screen.findByText("Fort · активная");
-
-    await fireEvent.press(screen.getByTestId("map-switch"));
-    await fireEvent.press(screen.getByTestId("map-new"));
-    expect(mockRouter.push).toHaveBeenLastCalledWith({
-      pathname: "/arena/map/[id]",
-      params: { id: "new" },
-    });
-    await fireEvent.press(screen.getByTestId("map-edit"));
-
-    expect(mockRouter.push).toHaveBeenLastCalledWith({
-      pathname: "/arena/map/[id]",
-      params: { id },
-    });
-  });
-
-  test("offers linking to a guest before the first fight, then searches on «Позже» (ARN-02)", async () => {
-    const search = jest.spyOn(matchSession, "search").mockImplementation(() => undefined);
-    await activate(await saveMap("Fort"));
-    await renderOpenArena();
-    await screen.findByText("Fort · активная");
-
-    await fireEvent.press(screen.getByTestId("arena-fight"));
-    expect(useAccountStore.getState().offer).toBe("arena");
-    expect(search).not.toHaveBeenCalled();
-    await act(async () => useAccountStore.getState().declineOffer());
-
-    expect(search).toHaveBeenCalledWith(5, expect.any(String));
-    expect(mockRouter.push).toHaveBeenLastCalledWith("/arena/search");
-  });
-
-  test("asks to build or draw a map when there is no active one (ARN-03)", async () => {
-    useAccountStore.getState().markSignedIn();
-    const search = jest.spyOn(matchSession, "search").mockImplementation(() => undefined);
+  test("joins the queue and opens the search", async () => {
     await renderOpenArena();
 
     await fireEvent.press(screen.getByTestId("arena-fight"));
-    expect(screen.getByText("Нет карты для боя")).toBeOnTheScreen();
-    await fireEvent.press(screen.getByText("Случайная"));
 
-    await waitFor(() => expect(search).toHaveBeenCalledWith(5, expect.any(String)));
-    const { data } = await apiClient.GET("/arena");
-    expect(data?.activeMapId).toEqual(expect.any(String));
+    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/arena/search"));
+    expect(useMatchStore.getState().queue).toEqual(
+      expect.objectContaining({ joinedAt: expect.any(String) }),
+    );
   });
 
-  test("starts a match against another player's map (decision 0036 #3)", async () => {
+  test("opens the running match the server answers the search with", async () => {
+    mockServer.use(
+      http.post(mockUrl("/arena/queue"), () =>
+        HttpResponse.json(
+          { error: { code: "match_in_progress", details: { id: "m-running" } } },
+          { status: 409 },
+        ),
+      ),
+    );
+    await renderOpenArena();
+
+    await fireEvent.press(screen.getByTestId("arena-fight"));
+
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        pathname: "/arena/match/[id]",
+        params: { id: "m-running" },
+      }),
+    );
+  });
+
+  test("starts a match against a map", async () => {
     await renderOpenArena();
 
     await fireEvent.press(screen.getByTestId("arena-async"));
 
     await waitFor(() =>
       expect(mockRouter.push).toHaveBeenCalledWith({
-        pathname: "/arena/async/[id]",
-        params: { id: "async_1" },
+        pathname: "/arena/match/[id]",
+        params: { id: "match-map" },
+      }),
+    );
+    expect(useMatchStore.getState().view?.kind).toBe("map");
+  });
+
+  test("reopens an unfinished match at once", async () => {
+    withArena({ match: { id: "m7", kind: "duel", status: "play" } });
+    await renderOpenArena();
+
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        pathname: "/arena/match/[id]",
+        params: { id: "m7" },
       }),
     );
   });
 
-  test("claims an available season step and marks it claimed", async () => {
-    useAccountStore.getState().markSignedIn();
-    Array.from({ length: 5 }, (_, index) => win(`m${index}`));
+  test("reopens a running search at once", async () => {
+    withArena({ queue: { ...QUEUE, format: arenaHomeMock([]).league.format } });
     await renderOpenArena();
 
-    await fireEvent.press(await screen.findByRole("button", { name: "Забрать" }));
-
-    expect(await screen.findAllByLabelText("Получено")).toHaveLength(1);
-    await waitFor(() => expect(screen.getByLabelText("Монеты: 20320")).toBeOnTheScreen());
+    await waitFor(() => expect(mockRouter.push).toHaveBeenCalledWith("/arena/search"));
+    expect(useMatchStore.getState().queue?.joinedAt).toBe(QUEUE.joinedAt);
   });
 
-  test("lists the last matches and opens one (decision 0031 #7)", async () => {
-    win("m1");
-    win("m2", true);
+  test("claims a ready season step and applies the new wallet", async () => {
     await renderOpenArena();
 
-    expect(await screen.findByText("Победа · 5 ходов")).toBeOnTheScreen();
-    expect(screen.getByText("Победа · 5 ходов · тренировочный")).toBeOnTheScreen();
-    expect(screen.getByText("БОТ")).toBeOnTheScreen();
-    await fireEvent.press(screen.getByTestId("match-row-m1"));
+    await fireEvent.press(screen.getByRole("button", { name: "Забрать" }));
+
+    expect(await screen.findAllByLabelText("Получено")).toHaveLength(1);
+  });
+
+  test("lists the last matches and opens one", async () => {
+    await renderOpenArena();
+
+    expect(screen.getAllByText("Победа · 8 ходов").length).toBeGreaterThan(0);
+    expect(screen.getByText("Поражение · 8 ходов · тренировочный")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("match-row-match-2"));
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: "/arena/history/[id]",
-      params: { id: "m1" },
+      params: { id: "match-2" },
     });
   });
 
-  test("keeps the cached arena offline and disables the fight (decision 0031 #11)", async () => {
+  test("keeps the cached arena offline and disables the fight", async () => {
     await renderOpenArena();
 
     await act(async () => onlineManager.setOnline(false));
 
     expect(screen.getByTestId("arena-offline")).toBeOnTheScreen();
-    expect(screen.getByText("Нужен интернет")).toBeOnTheScreen();
-  });
-
-  test("shows a skeleton while the arena loads", async () => {
-    let release = () => {};
-    const isReleased = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    mockServer.use(
-      http.get(mockUrl("/arena"), async () => {
-        await isReleased;
-        return undefined;
-      }),
-    );
-    passLevels(12);
-    await renderArena();
-
-    expect(screen.getByTestId("arena-skeleton", { includeHiddenElements: true })).toBeOnTheScreen();
-    release();
-    await screen.findByText("Сигнал против сигнала.");
+    expect(screen.getByTestId("arena-fight")).toBeDisabled();
   });
 
   test("shows an error with a retry and the code", async () => {
@@ -389,7 +308,7 @@ describe("ArenaHomeScreen", () => {
           : undefined,
       ),
     );
-    passLevels(12);
+    passMockLevels(12);
     await renderArena();
 
     expect(await screen.findByText("too_many_requests")).toBeOnTheScreen();

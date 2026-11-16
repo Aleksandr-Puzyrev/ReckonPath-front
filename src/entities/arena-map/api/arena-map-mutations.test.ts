@@ -1,141 +1,100 @@
-import { MutationObserver } from "@tanstack/react-query";
-import type { QueryClient } from "@tanstack/react-query";
+import { MutationObserver, QueryClient } from "@tanstack/react-query";
 
-import { apiClient, isApiError } from "@shared/api";
 import { mockServer } from "@shared/test-utils/api-mock";
 
+import type { PvpMap } from "../model/arena-map-type";
+
 import {
-  BRONZE_FORMAT,
-  TOO_MANY_BOMBS_MAP,
-  VALID_MAP,
-  createClient,
-} from "../test-utils/map-fixtures";
-
-import { activateArenaMapMutationOptions } from "./activate-arena-map-mutation";
+  activateArenaMapMutationOptions,
+  checkArenaMapMutationOptions,
+  deleteArenaMapMutationOptions,
+  randomArenaMapMutationOptions,
+  saveArenaMapMutationOptions,
+} from "./arena-map-mutations";
 import { arenaMapsQueryOptions } from "./arena-map-queries";
-import { deleteArenaMapMutationOptions } from "./delete-arena-map-mutation";
-import { randomArenaMapMutationOptions } from "./random-arena-map-mutation";
-import { saveArenaMapMutationOptions } from "./save-arena-map-mutation";
-import { validateArenaMapMutationOptions } from "./validate-arena-map-mutation";
 
-const save = (client: QueryClient, map = VALID_MAP, id: string | null = null) =>
-  new MutationObserver(client, saveArenaMapMutationOptions()).mutate({
-    id,
-    input: { name: "Fort", format: BRONZE_FORMAT, map },
-  });
+const VALID_MAP: PvpMap = { rows: 6, cols: 6, targets: [[2, 2]], bombs: [[0, 0]] };
+const DRAFT_MAP: PvpMap = { rows: 6, cols: 6, targets: [] };
 
-const codeOf = async (promise: Promise<unknown>) => {
-  try {
-    await promise;
-    return null;
-  } catch (error) {
-    return isApiError(error) ? error.code : "unknown";
-  }
-};
+const createClient = () =>
+  new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } });
+
+const save = (client: QueryClient, map: PvpMap, id: string | null = null) =>
+  new MutationObserver(client, saveArenaMapMutationOptions()).mutate({ id, name: "Fort", map });
 
 describe("arena map mutations", () => {
   afterEach(() => mockServer.reset());
 
-  test("saves a map with the server's verdict and bot norm", async () => {
+  test("saves a map as a backend level and reads it back in the engine model", async () => {
     const client = createClient();
 
-    const map = await save(client);
+    const map = await save(client, VALID_MAP);
 
-    expect(map).toEqual(
-      expect.objectContaining({ name: "Fort", valid: true, errors: [], active: false }),
+    expect(map).toEqual(expect.objectContaining({ name: "Fort", valid: true, active: true }));
+    expect(map.map).toEqual(expect.objectContaining({ targets: [[2, 2]], bombs: [[0, 0]] }));
+    const maps = await client.fetchQuery(arenaMapsQueryOptions());
+    expect(maps).toEqual(expect.objectContaining({ max: 3, maps: [map] }));
+    expect(maps.format).toEqual(expect.objectContaining({ rows: 6, cols: 6 }));
+  });
+
+  test("keeps an invalid map as a draft with the server's problems", async () => {
+    const map = await save(createClient(), DRAFT_MAP);
+
+    expect(map).toEqual(expect.objectContaining({ valid: false, active: false }));
+    expect(map.problems.map(({ code }) => code)).toEqual(["targets"]);
+  });
+
+  test("keeps three maps in total and answers maps_limit to the fourth", async () => {
+    const client = createClient();
+    await save(client, VALID_MAP);
+    await save(client, VALID_MAP);
+    await save(client, VALID_MAP);
+
+    await expect(save(client, VALID_MAP)).rejects.toEqual(
+      expect.objectContaining({ code: "maps_limit" }),
     );
-    expect(map.botNorm).toEqual(expect.any(Number));
-    expect(await client.fetchQuery(arenaMapsQueryOptions())).toEqual([map]);
   });
 
-  test("saves an invalid map with the validator's codes and cells", async () => {
-    const map = await save(createClient(), TOO_MANY_BOMBS_MAP);
-
-    expect(map.valid).toBe(false);
-    expect(map.botNorm).toBeNull();
-    expect(map.errors.map(({ code }) => code)).toEqual(["TOO_MANY_BOMBS"]);
-  });
-
-  test("updates a saved map", async () => {
+  test("activates a valid map and refuses a draft with map_invalid", async () => {
     const client = createClient();
-    const { id } = await save(client);
+    await save(client, VALID_MAP);
+    const second = await save(client, VALID_MAP);
+    const draft = await save(client, DRAFT_MAP);
+    const activate = () => new MutationObserver(client, activateArenaMapMutationOptions());
 
-    const map = await save(client, TOO_MANY_BOMBS_MAP, id);
-
-    expect(map).toEqual(expect.objectContaining({ id, valid: false }));
+    expect(await activate().mutate(second.id)).toEqual(expect.objectContaining({ active: true }));
+    await expect(activate().mutate(draft.id)).rejects.toEqual(
+      expect.objectContaining({ code: "map_invalid" }),
+    );
   });
 
-  test("keeps at most three maps per format (Part 7 §5)", async () => {
+  test("deletes a map", async () => {
     const client = createClient();
-    await save(client);
-    await save(client);
-    await save(client);
-
-    expect(await codeOf(save(client))).toBe("limit_reached");
-  });
-
-  test("activates a valid map and reports it in the arena profile", async () => {
-    const client = createClient();
-    const { id } = await save(client);
-
-    const result = await new MutationObserver(client, activateArenaMapMutationOptions()).mutate(id);
-
-    expect(result).toEqual({ activeMapId: id });
-    expect((await apiClient.GET("/arena")).data?.activeMapId).toBe(id);
-  });
-
-  test("refuses to activate an invalid map", async () => {
-    const client = createClient();
-    const { id } = await save(client, TOO_MANY_BOMBS_MAP);
-
-    expect(
-      await codeOf(new MutationObserver(client, activateArenaMapMutationOptions()).mutate(id)),
-    ).toBe("map_invalid");
-  });
-
-  test("deletes an inactive map", async () => {
-    const client = createClient();
-    const { id } = await save(client);
+    const { id } = await save(client, VALID_MAP);
 
     await new MutationObserver(client, deleteArenaMapMutationOptions()).mutate(id);
 
-    expect(await client.fetchQuery(arenaMapsQueryOptions())).toEqual([]);
+    expect((await client.fetchQuery(arenaMapsQueryOptions())).maps).toEqual([]);
   });
 
-  test("refuses to delete the active map with 409 (Part 7 §5)", async () => {
-    const client = createClient();
-    const { id } = await save(client);
-    await new MutationObserver(client, activateArenaMapMutationOptions()).mutate(id);
-
-    expect(
-      await codeOf(new MutationObserver(client, deleteArenaMapMutationOptions()).mutate(id)),
-    ).toBe("map_active");
-  });
-
-  test("validates a map without saving it", async () => {
-    const client = createClient();
-
-    const result = await new MutationObserver(client, validateArenaMapMutationOptions()).mutate({
-      format: BRONZE_FORMAT,
-      map: TOO_MANY_BOMBS_MAP,
-    });
-
-    expect(result.valid).toBe(false);
-    expect(await client.fetchQuery(arenaMapsQueryOptions())).toEqual([]);
-  });
-
-  test("generates a random map that passes the validator", async () => {
-    const client = createClient();
-
-    const { map, botNorm } = await new MutationObserver(
-      client,
+  test("gets a random map of the format in the engine model", async () => {
+    const map = await new MutationObserver(
+      createClient(),
       randomArenaMapMutationOptions(),
-    ).mutate(BRONZE_FORMAT);
-    const check = await new MutationObserver(client, validateArenaMapMutationOptions()).mutate({
-      format: BRONZE_FORMAT,
-      map,
-    });
+    ).mutate();
 
-    expect(check).toEqual(expect.objectContaining({ valid: true, botNorm }));
+    expect(map).toEqual(expect.objectContaining({ rows: 6, cols: 6, targets: [[4, 4]] }));
+    expect(map.streams).toEqual([
+      [1, 1],
+      [1, 2],
+    ]);
+  });
+
+  test("checks a map on the server with the bot's taps", async () => {
+    const check = await new MutationObserver(createClient(), checkArenaMapMutationOptions()).mutate(
+      VALID_MAP,
+    );
+
+    expect(check).toEqual({ valid: true, problems: [], bot: { moves: 1, taps: [[2, 2]] } });
   });
 });

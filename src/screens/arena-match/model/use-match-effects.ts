@@ -1,103 +1,61 @@
 import { router } from "expo-router";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useUnistyles } from "react-native-unistyles";
 
-import { matchSession } from "@entities/match";
-import type { MatchEmote, MatchEvent, MatchPhase } from "@entities/match";
+import type { MatchView } from "@entities/match";
 import { haptic } from "@shared/haptics";
-import type { HapticKind } from "@shared/haptics";
-
-type ToastKey =
-  | "match.toast.myBomb"
-  | "match.toast.opponentBomb"
-  | "match.toast.opponentFound"
-  | "match.toast.finalForMe"
-  | "match.toast.finalForOpponent";
-
-const LAST_TIMEOUT = 2;
-
-const HAPTICS: Partial<Record<MatchEvent["kind"], HapticKind[]>> = {
-  myTurn: ["light"],
-  targetFound: ["success"],
-  myBomb: ["heavy", "error"],
-  opponentFound: ["medium"],
-  opponentBomb: ["success"],
-  timeout: ["warning"],
-};
-
-const TOASTS: Partial<Record<MatchEvent["kind"], ToastKey>> = {
-  myBomb: "match.toast.myBomb",
-  opponentBomb: "match.toast.opponentBomb",
-  opponentFound: "match.toast.opponentFound",
-  finalForMe: "match.toast.finalForMe",
-  finalForOpponent: "match.toast.finalForOpponent",
-};
 
 interface EffectsInput {
-  event: MatchEvent | null;
-  emote: MatchEmote | null;
-  emoteId: number;
-  isMuted: boolean;
-  phase: MatchPhase;
-  matchId: string | null;
-  isTraining: boolean;
+  view: MatchView;
+  maxTimeouts: number | null;
   onToast: (text: string) => void;
 }
 
-export const useMatchEffects = ({
-  event,
-  emote,
-  emoteId,
-  isMuted,
-  phase,
-  matchId,
-  isTraining,
-  onToast,
-}: EffectsInput) => {
+// The server keeps every event in the view; the screen reacts to the newest move and to the final turn once each (сервер держит всё во view; экран реагирует на новый ход и на финальный ход по одному разу).
+export const useMatchEffects = ({ view, maxTimeouts, onToast }: EffectsInput) => {
   const { t } = useTranslation();
-  const { theme } = useUnistyles();
-  const [hiddenEmoteId, setHiddenEmoteId] = useState(0);
+  const { last, final, turn, status, id } = view;
+  const moveKey = last === undefined ? null : `${last.turn}:${last.by}:${last.kind}`;
+  // The move the screen opened with is old news: only a move after mount is announced (ход, с которым открылся экран, уже не новость: объявляется только ход после монтирования).
+  const [mountMoveKey] = useState(moveKey);
 
-  // An effect event reads the latest callbacks, so a re-rendered parent does not replay the event (событие эффекта читает свежие колбэки, поэтому перерисовка родителя не повторяет событие).
-  const announce = useEffectEvent(({ kind, count }: MatchEvent) => {
-    const kinds = HAPTICS[kind];
-    if (kinds !== undefined) haptic(...kinds);
-    if (kind === "timeout") {
-      const text = t("match.timeout", { n: count });
-      onToast(count === LAST_TIMEOUT ? `${text}. ${t("match.timeoutWarn")}` : text);
+  const announceMove = useEffectEvent(() => {
+    if (last === undefined) return;
+    const isMine = last.by === "me";
+    if (last.kind === "bomb") {
+      haptic(...(isMine ? (["heavy", "error"] as const) : (["success"] as const)));
+      onToast(t(isMine ? "match.toast.myBomb" : "match.toast.opponentBomb"));
+      return;
     }
-    const toast = TOASTS[kind];
-    if (toast !== undefined) onToast(t(toast));
+    if (last.kind === "target") {
+      haptic(isMine ? "success" : "medium");
+      if (!isMine) onToast(t("match.toast.opponentFound"));
+      return;
+    }
+    if (last.kind !== "timeout" || !isMine) return;
+    haptic("warning");
+    const text = t("match.timeout", { n: view.me.timeouts });
+    const isLastChance = maxTimeouts !== null && view.me.timeouts === maxTimeouts - 1;
+    onToast(isLastChance ? `${text}. ${t("match.timeoutWarn")}` : text);
   });
 
   useEffect(() => {
-    if (event !== null) announce(event);
-  }, [event]);
+    if (moveKey !== null && moveKey !== mountMoveKey) announceMove();
+  }, [moveKey, mountMoveKey]);
+
+  const announceFinal = useEffectEvent(() =>
+    onToast(t(turn === "me" ? "match.toast.finalForMe" : "match.toast.finalForOpponent")),
+  );
 
   useEffect(() => {
-    if (emoteId === 0) return undefined;
-    const timer = setTimeout(() => setHiddenEmoteId(emoteId), theme.motion.toast.duration);
-    return () => clearTimeout(timer);
-  }, [emoteId, theme.motion.toast.duration]);
-
-  const leaveLost = useEffectEvent(() => {
-    onToast(t("errors.NETWORK"));
-    matchSession.leave();
-    if (isTraining) router.replace("/arena/onboarding");
-    else router.back();
-  });
+    if (final === true) announceFinal();
+  }, [final]);
 
   useEffect(() => {
-    if (phase === "lost") leaveLost();
-  }, [phase]);
+    if (turn === "me") haptic("light");
+  }, [turn]);
 
   useEffect(() => {
-    if (phase === "ended" && matchId !== null && !isTraining) {
-      router.replace({ pathname: "/arena/result/[id]", params: { id: matchId } });
-    }
-  }, [phase, matchId, isTraining]);
-
-  const isShown = emote !== null && emoteId !== hiddenEmoteId;
-  return { bubble: isShown && !(emote.player === "opponent" && isMuted) ? emote : null };
+    if (status === "done") router.replace({ pathname: "/arena/result/[id]", params: { id } });
+  }, [status, id]);
 };

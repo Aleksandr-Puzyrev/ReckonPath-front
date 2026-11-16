@@ -1,8 +1,4 @@
-import type { components } from "@shared/api";
-
-import type { PvpMap } from "./arena-map-type";
-
-type ArenaFormat = components["schemas"]["ArenaFormat"];
+import type { MapFormat, PvpMap } from "./arena-map-type";
 type Cell = [number, number];
 type Fence = [Cell, Cell];
 
@@ -41,35 +37,36 @@ const isSameFence = ([a, b]: Fence, [c, d]: Fence) =>
   (isSame(a, c) && isSame(b, d)) || (isSame(a, d) && isSame(b, c));
 const touches = ([a, b]: Fence, cell: Cell) => isSame(a, cell) || isSame(b, cell);
 
+// A bridge lies on a stream in the engine model, but the format counts it apart from the water (в модели движка мост лежит на ручье, но формат считает его отдельно от воды).
 export const countElements = (map: PvpMap): ElementCounts => ({
   targets: map.targets.length,
   fences: map.fences?.length ?? 0,
-  streams: map.streams?.length ?? 0,
+  streams: (map.streams ?? []).filter((cell) => !has(map.bridges, cell)).length,
   heavy: map.heavy?.length ?? 0,
   rocks: map.rocks?.length ?? 0,
   bridges: map.bridges?.length ?? 0,
   bombs: map.bombs?.length ?? 0,
 });
 
-export const limitsOf = ({ targets, limits }: ArenaFormat, map: PvpMap): ElementCounts => {
+export const limitsOf = ({ targets, caps }: MapFormat, map: PvpMap): ElementCounts => {
   const passable = map.rows * map.cols - countElements(map).rocks;
   return {
     targets,
-    fences: limits.fence,
-    streams: limits.stream,
-    heavy: limits.heavy,
-    rocks: limits.rock,
-    bridges: limits.bridge,
-    bombs: Math.min(limits.bomb, MAX_BOMBS, Math.floor(passable / PASSABLE_PER_BOMB)),
+    fences: caps.fences,
+    streams: caps.stream,
+    heavy: caps.heavy,
+    rocks: caps.rock,
+    bridges: caps.bridge,
+    bombs: Math.min(caps.bombs, MAX_BOMBS, Math.floor(passable / PASSABLE_PER_BOMB)),
   };
 };
 
 const terrainOf = (map: PvpMap, cell: Cell) => TERRAINS.find((terrain) => has(map[terrain], cell));
 
-const isFull = (map: PvpMap, format: ArenaFormat, element: LimitedElement) =>
+const isFull = (map: PvpMap, format: MapFormat, element: LimitedElement) =>
   countElements(map)[element] >= limitsOf(format, map)[element];
 
-const limitRefusal = (map: PvpMap, format: ArenaFormat, element: LimitedElement): EditResult => ({
+const limitRefusal = (map: PvpMap, format: MapFormat, element: LimitedElement): EditResult => ({
   refusal: { kind: "limit", max: limitsOf(format, map)[element] },
 });
 
@@ -81,12 +78,7 @@ const clearTerrain = (map: PvpMap, cell: Cell): PvpMap => ({
   bridges: without(map.bridges, cell),
 });
 
-const placeTerrain = (
-  map: PvpMap,
-  format: ArenaFormat,
-  terrain: Terrain,
-  cell: Cell,
-): EditResult => {
+const placeTerrain = (map: PvpMap, format: MapFormat, terrain: Terrain, cell: Cell): EditResult => {
   if (terrain === "rocks" && (has(map.targets, cell) || has(map.bombs, cell))) {
     return { refusal: { kind: "rockOnElement" } };
   }
@@ -95,21 +87,21 @@ const placeTerrain = (
   return { map: { ...cleared, [terrain]: [...(cleared[terrain] ?? []), cell] } };
 };
 
-const placeTarget = (map: PvpMap, format: ArenaFormat, cell: Cell): EditResult => {
+const placeTarget = (map: PvpMap, format: MapFormat, cell: Cell): EditResult => {
   if (has(map.rocks, cell)) return { refusal: { kind: "targetOnRock" } };
   if (has(map.bombs, cell)) return { refusal: { kind: "bombAndTarget" } };
   if (isFull(map, format, "targets")) return limitRefusal(map, format, "targets");
   return { map: { ...map, targets: [...map.targets, cell] } };
 };
 
-const placeBomb = (map: PvpMap, format: ArenaFormat, cell: Cell): EditResult => {
+const placeBomb = (map: PvpMap, format: MapFormat, cell: Cell): EditResult => {
   if (has(map.rocks, cell)) return { refusal: { kind: "bombOnRock" } };
   if (has(map.targets, cell)) return { refusal: { kind: "bombAndTarget" } };
   if (isFull(map, format, "bombs")) return limitRefusal(map, format, "bombs");
   return { map: { ...map, bombs: [...(map.bombs ?? []), cell] } };
 };
 
-const placeBridge = (map: PvpMap, format: ArenaFormat, cell: Cell): EditResult => {
+const placeBridge = (map: PvpMap, format: MapFormat, cell: Cell): EditResult => {
   if (!has(map.streams, cell)) return { refusal: { kind: "bridgeOffStream" } };
   if (isFull(map, format, "bridges")) return limitRefusal(map, format, "bridges");
   return { map: { ...map, bridges: [...(map.bridges ?? []), cell] } };
@@ -139,7 +131,7 @@ const remove = (map: PvpMap, tool: CellTool, cell: Cell): PvpMap => {
 
 export const paintCell = (
   map: PvpMap,
-  format: ArenaFormat,
+  format: MapFormat,
   tool: CellTool,
   cell: Cell,
 ): EditResult => {
@@ -154,7 +146,7 @@ export const paintCell = (
 
 export const toggleCell = (
   map: PvpMap,
-  format: ArenaFormat,
+  format: MapFormat,
   tool: CellTool,
   cell: Cell,
 ): EditResult => {
@@ -162,25 +154,25 @@ export const toggleCell = (
   return paintCell(map, format, tool, cell);
 };
 
-export const addFence = (map: PvpMap, format: ArenaFormat, fence: Fence): EditResult => {
+export const addFence = (map: PvpMap, format: MapFormat, fence: Fence): EditResult => {
   if ((map.fences ?? []).some((other) => isSameFence(other, fence))) return { map };
   if (isFull(map, format, "fences")) return limitRefusal(map, format, "fences");
   return { map: { ...map, fences: [...(map.fences ?? []), fence] } };
 };
 
-export const toggleFence = (map: PvpMap, format: ArenaFormat, fence: Fence): EditResult => {
+export const toggleFence = (map: PvpMap, format: MapFormat, fence: Fence): EditResult => {
   const fences = map.fences ?? [];
   if (!fences.some((other) => isSameFence(other, fence))) return addFence(map, format, fence);
   return { map: { ...map, fences: fences.filter((other) => !isSameFence(other, fence)) } };
 };
 
 // The editor route id of a map not saved yet (id маршрута редактора для ещё не сохранённой карты).
-export const MAPS_PER_FORMAT = 3;
-
 export const NEW_MAP_ID = "new";
 export const TUTORIAL_MAP_ID = "tutorial";
+// The editor route id of a map drawn for the current match (id маршрута редактора для карты, рисуемой для текущего матча).
+export const DRAW_MAP_ID = "draw";
 
-export const emptyMap = (size: number): PvpMap => ({ rows: size, cols: size, targets: [] });
+export const emptyMap = (rows: number, cols: number): PvpMap => ({ rows, cols, targets: [] });
 
 export const isMapEmpty = (map: PvpMap) =>
   Object.values(countElements(map)).every((count) => count === 0);

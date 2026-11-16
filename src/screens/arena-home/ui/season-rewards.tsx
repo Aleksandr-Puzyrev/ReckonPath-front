@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import type { SeasonReward } from "@entities/arena";
+import type { RewardItem } from "@entities/arena";
 import { formatNumber } from "@shared/lib";
 import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
@@ -14,13 +14,15 @@ import EmeraldIcon from "@assets/icons/play/emerald.svg";
 import { styles } from "./season-summary-styles";
 
 interface ISeasonRewards {
-  rewards: readonly SeasonReward[];
+  coins: number;
+  gems: number;
+  item: RewardItem | undefined;
   isClaimed: boolean;
   isDisabled: boolean;
   onClaim: () => void;
 }
 
-const SeasonRewards = ({ rewards, isClaimed, isDisabled, onClaim }: ISeasonRewards) => {
+const SeasonRewards = ({ coins, gems, item, isClaimed, isDisabled, onClaim }: ISeasonRewards) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
   const iconSize = theme.sizes.icon.m;
@@ -31,17 +33,23 @@ const SeasonRewards = ({ rewards, isClaimed, isDisabled, onClaim }: ISeasonRewar
         {t("season.rewards")}
       </Text>
       <View style={styles.rewards}>
-        {/* TODO: show item rewards once the catalog has season items */}
-        {rewards.map(({ currency, amount }) => {
-          if (currency === undefined || amount === undefined) return null;
-          const Icon = currency === "emerald" ? EmeraldIcon : CoinIcon;
-          return (
-            <View key={currency} style={styles.reward}>
-              <Icon width={iconSize} height={iconSize} />
-              <Text variant="title.s">{formatNumber(amount, i18n.language)}</Text>
-            </View>
-          );
-        })}
+        {coins > 0 ? (
+          <View style={styles.reward}>
+            <CoinIcon width={iconSize} height={iconSize} />
+            <Text variant="title.s">{formatNumber(coins, i18n.language)}</Text>
+          </View>
+        ) : null}
+        {gems > 0 ? (
+          <View style={styles.reward}>
+            <EmeraldIcon width={iconSize} height={iconSize} />
+            <Text variant="title.s">{formatNumber(gems, i18n.language)}</Text>
+          </View>
+        ) : null}
+        {item === undefined ? null : (
+          <View style={styles.reward}>
+            <Text variant="title.s">{item.title}</Text>
+          </View>
+        )}
       </View>
       {isClaimed ? (
         <View style={styles.claimed} testID="summary-claimed">

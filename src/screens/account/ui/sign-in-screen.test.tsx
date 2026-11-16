@@ -8,7 +8,13 @@ import SignInScreen from "./sign-in-screen";
 const mockParams: { email?: string; reset?: string } = {};
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn(), dismissTo: jest.fn(), push: jest.fn(), replace: jest.fn() },
+  router: {
+    back: jest.fn(),
+    canGoBack: () => true,
+    dismissTo: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+  },
   useLocalSearchParams: () => mockParams,
 }));
 

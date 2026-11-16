@@ -1,22 +1,28 @@
 import { onlineManager } from "@tanstack/react-query";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { http, HttpResponse } from "msw/http";
 
-import { useEditorStore } from "@entities/arena-map";
+import { gameLevelOfMap, useEditorStore } from "@entities/arena-map";
+import { useMatchStore } from "@entities/match";
 import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
-import { mockServer } from "@shared/test-utils/api-mock";
+import { matchViewMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import ArenaMapScreen from "./arena-map-screen";
 
 const mockRouter = { back: jest.fn() };
-const mockParams = { id: "new" };
+const mockParams: { id: string; matchId?: string } = { id: "new" };
 
 jest.mock("expo-router", () => ({
   get router() {
     return mockRouter;
   },
   useLocalSearchParams: () => mockParams,
+}));
+jest.mock("@shared/config", () => ({
+  ...jest.requireActual("@shared/config"),
+  HAS_ARENA_SERVER: true,
 }));
 
 type Stroke = {
@@ -37,7 +43,7 @@ jest.mock("@widgets/board", () => ({
     };
     return (
       <View>
-        {Array.from({ length: 25 }, (_, cell) => (
+        {Array.from({ length: 36 }, (_, cell) => (
           <Pressable key={cell} testID={`cell-${cell}`} onPress={stroke([cell])} />
         ))}
         <Pressable testID="drag-row" onPress={stroke([5, 6, 7])} />
@@ -55,8 +61,8 @@ jest.mock("@widgets/board", () => ({
 }));
 
 const GOOD_MAP = {
-  rows: 5,
-  cols: 5,
+  rows: 6,
+  cols: 6,
   targets: [[2, 2]] as [number, number][],
   bombs: [[0, 0]] as [number, number][],
   streams: [
@@ -67,10 +73,12 @@ const GOOD_MAP = {
 };
 
 const saveMap = async (name: string, map = GOOD_MAP) =>
-  (await apiClient.POST("/arena/maps", { body: { name, format: 5, map } })).data?.id ?? "";
+  (await apiClient.POST("/arena/maps", { body: { name, level: gameLevelOfMap(map) } })).data?.id ??
+  "";
 
-const renderEditor = async (id = "new") => {
+const renderEditor = async (id = "new", matchId?: string) => {
   mockParams.id = id;
+  mockParams.matchId = matchId;
   await render(<ArenaMapScreen />, { wrapper: createQueryWrapper() });
   await screen.findByTestId("editor-status");
   await fireEvent(screen.getByTestId("editor-board-area"), "layout", {
@@ -91,6 +99,7 @@ describe("ArenaMapScreen", () => {
     await cleanup();
     mockServer.reset();
     useEditorStore.getState().reset();
+    useMatchStore.getState().reset();
     await act(async () => onlineManager.setOnline(true));
   });
 
@@ -138,12 +147,12 @@ describe("ArenaMapScreen", () => {
     await choose("stream");
 
     await fireEvent.press(screen.getByTestId("drag-row"));
-    expect(screen.getByLabelText("Ручей, 3/3")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Ручей, 3/4")).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("editor-undo"));
-    expect(screen.getByLabelText("Ручей, 0/3")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Ручей, 0/4")).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("editor-redo"));
 
-    expect(screen.getByLabelText("Ручей, 3/3")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Ручей, 3/4")).toBeOnTheScreen();
   });
 
   test("toggles a fence on an edge", async () => {
@@ -151,13 +160,14 @@ describe("ArenaMapScreen", () => {
     await choose("fence");
 
     await fireEvent.press(screen.getByTestId("edge-0-1"));
-    expect(screen.getByLabelText("Забор, 1/3")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Забор, 1/4")).toBeOnTheScreen();
     await fireEvent.press(screen.getByTestId("edge-0-1"));
 
-    expect(screen.getByLabelText("Забор, 0/3")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Забор, 0/4")).toBeOnTheScreen();
   });
 
   test("saves a valid map and makes it active (decision 0032 #2)", async () => {
+    await saveMap("First");
     const id = await saveMap("Fort");
     await renderEditor(id);
     await choose("heavy");
@@ -166,7 +176,7 @@ describe("ArenaMapScreen", () => {
     await fireEvent.press(screen.getByTestId("editor-save-big"));
 
     expect(await screen.findByText("Карта сохранена и активна")).toBeOnTheScreen();
-    expect((await apiClient.GET("/arena")).data?.activeMapId).toBe(id);
+    expect((await apiClient.GET("/arena")).data?.activeMap?.id).toBe(id);
   });
 
   test("saves an invalid map as a draft (decision 0032 #1)", async () => {
@@ -178,7 +188,7 @@ describe("ArenaMapScreen", () => {
       await screen.findByText("Сохранено как черновик — активной станет после исправления"),
     ).toBeOnTheScreen();
     const { data } = await apiClient.GET("/arena/maps");
-    expect(data).toEqual([expect.objectContaining({ name: "Карта 1", valid: false })]);
+    expect(data?.maps).toEqual([expect.objectContaining({ name: "Карта 1", valid: false })]);
   });
 
   test("tells about the three-map limit (decision 0032 #12)", async () => {
@@ -189,7 +199,7 @@ describe("ArenaMapScreen", () => {
 
     await fireEvent.press(screen.getByTestId("editor-save-big"));
 
-    expect(await screen.findByText("Можно хранить до 3 карт формата")).toBeOnTheScreen();
+    expect(await screen.findByText("Можно хранить до 3 карт")).toBeOnTheScreen();
   });
 
   test("asks before replacing a non-empty map with a random one", async () => {
@@ -293,7 +303,7 @@ describe("ArenaMapScreen", () => {
       screen.getAllByText("Сохранить").at(-1) ?? screen.getByTestId("editor-back"),
     );
 
-    expect(await screen.findByText("Можно хранить до 3 карт формата")).toBeOnTheScreen();
+    expect(await screen.findByText("Можно хранить до 3 карт")).toBeOnTheScreen();
     expect(mockRouter.back).not.toHaveBeenCalled();
   });
 
@@ -306,16 +316,84 @@ describe("ArenaMapScreen", () => {
     expect(mockRouter.back).toHaveBeenCalled();
   });
 
-  test("lets the bot solve a valid map step by step (decision 0032 #7)", async () => {
+  test("checks the map on the server and replays the bot's taps (decision 0060 #13)", async () => {
     const id = await saveMap("Fort");
     await renderEditor(id);
     jest.useFakeTimers();
 
     await fireEvent.press(screen.getByTestId("editor-check-button"));
+    await act(async () => jest.advanceTimersByTimeAsync(10));
     expect(screen.getByTestId("editor-check")).toHaveTextContent(/^Бот решает… ход/);
-    await act(async () => jest.advanceTimersByTime(5_000));
+    await act(async () => jest.advanceTimersByTimeAsync(5_000));
 
-    expect(screen.getByTestId("editor-check")).toHaveTextContent(/^Бот нашёл 1 цели за \d+ ход/);
+    expect(screen.getByTestId("editor-check")).toHaveTextContent(/^Бот нашёл 1 цели за 1 ход/);
     jest.useRealTimers();
+  });
+
+  test("shows the server's problem after a check", async () => {
+    mockServer.use(
+      http.post(mockUrl("/arena/maps/check"), () =>
+        HttpResponse.json({
+          valid: false,
+          problems: [{ code: "cut", message: "", cells: [[0, 5]] }],
+        }),
+      ),
+    );
+    const id = await saveMap("Fort");
+    await renderEditor(id);
+
+    await fireEvent.press(screen.getByTestId("editor-check-button"));
+
+    await waitFor(() => expect(status()).toHaveTextContent(/отрезаны/));
+  });
+
+  test("draws a map for the match and sends it with source draw (decision 0060 #10)", async () => {
+    const bodies: unknown[] = [];
+    mockServer.use(
+      http.put(mockUrl("/arena/matches/:id/map"), async ({ request }) => {
+        bodies.push(await request.json());
+        return HttpResponse.json(matchViewMock({ seq: 2 }));
+      }),
+    );
+    useMatchStore.getState().receive(matchViewMock());
+    await renderEditor("draw", "match-live");
+    await tap(14);
+
+    await fireEvent.press(screen.getByTestId("editor-save-big"));
+
+    await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
+    expect(bodies).toEqual([
+      expect.objectContaining({
+        source: "draw",
+        level: expect.objectContaining({ rows: 6, cols: 6, targets: [[2, 2]] }),
+      }),
+    ]);
+    expect(useMatchStore.getState().view?.seq).toBe(2);
+  });
+
+  test("shows the prepare timer of the match while drawing", async () => {
+    useMatchStore.getState().receive(matchViewMock());
+    await renderEditor("draw", "match-live");
+
+    expect(screen.getByTestId("prepare-timer")).toHaveTextContent(/на выбор карты/);
+  });
+
+  test("leaves the drawing when the match leaves the prepare phase", async () => {
+    const view = matchViewMock();
+    useMatchStore.getState().receive(view);
+    await renderEditor("draw", "match-live");
+
+    await act(async () => useMatchStore.getState().receive({ ...view, seq: 2, status: "play" }));
+
+    expect(mockRouter.back).toHaveBeenCalledTimes(1);
+  });
+
+  test("leaves the drawing when another match takes the place of its own", async () => {
+    useMatchStore.getState().receive(matchViewMock());
+    await renderEditor("draw", "match-live");
+
+    await act(async () => useMatchStore.getState().receive(matchViewMock({ id: "match-next" })));
+
+    expect(mockRouter.back).toHaveBeenCalledTimes(1);
   });
 });

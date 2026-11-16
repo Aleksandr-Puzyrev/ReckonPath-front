@@ -1,111 +1,57 @@
-import { router } from "expo-router";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useShallow } from "zustand/react/shallow";
 
-import { toCell, toIdx } from "@reckon-path/engine";
+import { toCell } from "@reckon-path/engine";
 import type { Idx } from "@reckon-path/engine";
 
-import { useArenaQuery } from "@entities/arena";
-import { TUTORIAL_MAP_ID, useArenaMapsQuery } from "@entities/arena-map";
-import { layoutLevelOf, matchSession, useMatchStore } from "@entities/match";
-import type { MatchTap } from "@entities/match";
-import { useMeQuery } from "@entities/wallet";
+import { levelOfBoard, tapIdxOfBoard, tapsOfBoard, useMatchStore } from "@entities/match";
+import type { MatchView } from "@entities/match";
 import { useTapConfirm } from "@features/confirm-pvp-tap";
 import { useBoardFx } from "@widgets/board";
-import type { RemoteTap } from "@widgets/board";
 
-import { bannerTextOf } from "./banner-text";
-import { surrenderLoss } from "./surrender-loss";
-import { trainingHintOf } from "./training-hint";
+import type { useMatchActions } from "./use-match-actions";
 
-export type MatchSheet = "emotes" | "menu" | null;
+type MatchActions = ReturnType<typeof useMatchActions>;
 
-const remoteOf =
-  (size: number) =>
-  ({ cell, outcome, value, bombNear }: MatchTap): RemoteTap => ({
-    cell: toIdx(size, cell),
-    outcome,
-    value,
-    bombNear,
-  });
-
-export const useArenaMatch = () => {
-  const { t } = useTranslation();
-  const match = useMatchStore(useShallow((state) => state));
-  const arena = useArenaQuery();
-  const maps = useArenaMapsQuery();
-  const { data: me } = useMeQuery();
+export const useArenaMatch = (view: MatchView, actions: MatchActions) => {
+  const flagCells = useMatchStore((state) => state.flags);
   const fx = useBoardFx();
   const [isFlagMode, setIsFlagMode] = useState(false);
-  const [sheet, setSheet] = useState<MatchSheet>(null);
-  const [isSurrenderOpen, setIsSurrenderOpen] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const size = match.format?.size ?? 0;
-  const myMap = maps.data?.find(({ id }) => id === arena.data?.activeMapId) ?? null;
-  const myTrophies = arena.data?.profile.trophies ?? 0;
-  const canTap =
-    match.current === "me" &&
-    (match.phase === "myTurn" || match.phase === "finalTurn") &&
-    match.pendingCell === null;
-  const confirm = useTapConfirm(canTap && !isFlagMode ? `${match.turn}:${match.current}` : null);
-  const isRevealed = (idx: Idx) => match.myTaps.some((tap) => toIdx(size, tap.cell) === idx);
+  const { rivalMap, myMap } = view;
+  const cols = rivalMap?.cols ?? 0;
+  const taps = rivalMap === undefined ? [] : tapsOfBoard(rivalMap);
+  const isMyTurn = view.kind === "map" || view.turn === "me";
+  // Input waits for the answer of the last tap, so no double move leaves (ввод ждёт ответа на прошлый тап, чтобы не ушёл двойной ход).
+  const canTap = view.status === "play" && isMyTurn && !actions.isTapPending;
+  const confirm = useTapConfirm(canTap && !isFlagMode ? String(view.seq) : null);
+  const isRevealed = (idx: Idx) => taps.some(({ cell }) => cell === idx);
 
   const toggleFlag = (idx: Idx) => {
-    const [row, col] = toCell(size, idx);
-    match.toggleFlag([row, col]);
+    if (isRevealed(idx)) return;
+    const [row, col] = toCell(cols, idx);
+    useMatchStore.getState().toggleFlag([row, col]);
   };
 
   return {
-    match,
-    me,
-    profile: arena.data?.profile,
-    myMap,
     fx,
     isFlagMode,
-    sheet,
-    isSurrenderOpen,
-    isMuted,
-    layout: match.layout === null ? null : layoutLevelOf(match.layout, size),
-    myTaps: match.myTaps.map(remoteOf(size)),
-    opponentTaps: match.opponentTaps.map(({ cell }) => toIdx(size, cell)),
-    flags: match.flags.map((cell) => toIdx(size, cell)),
-    pendingCell: match.pendingCell === null ? confirm.selected : toIdx(size, match.pendingCell),
-    isDimmed: match.current !== "me",
-    trainingHint: match.isTraining ? trainingHintOf(match.myTaps, match.end) : null,
-    banner: bannerTextOf(match.phase, match.current, match.skipped, t),
-    surrenderLoss: match.opponent === null ? 0 : surrenderLoss(myTrophies, match.opponent),
+    isMyTurn,
+    layout: rivalMap === undefined ? null : levelOfBoard(rivalMap),
+    taps,
+    flags: flagCells.map(([row, col]) => row * cols + col),
+    pendingCell: confirm.selected,
+    isDimmed: !canTap,
+    myLevel: myMap === undefined ? null : levelOfBoard(myMap),
+    myMapTaps: myMap === undefined ? [] : tapIdxOfBoard(myMap),
     handleCellPress: (idx: Idx) => {
       if (isFlagMode) {
-        if (!isRevealed(idx)) toggleFlag(idx);
+        toggleFlag(idx);
         return;
       }
       if (!canTap || isRevealed(idx) || !confirm.shouldSend(idx)) return;
-      const [row, col] = toCell(size, idx);
-      matchSession.tap([row, col]);
+      const [row, col] = toCell(cols, idx);
+      actions.tap(view, row, col);
     },
-    handleCellLongPress: (idx: Idx) => {
-      if (!isRevealed(idx)) toggleFlag(idx);
-    },
+    handleCellLongPress: toggleFlag,
     handleFlagMode: () => setIsFlagMode((current) => !current),
-    handleSheet: setSheet,
-    handleEmote: (emote: Parameters<typeof matchSession.emote>[0]) => {
-      setSheet(null);
-      matchSession.emote(emote);
-    },
-    handleMuteToggle: () => setIsMuted((current) => !current),
-    handleSurrenderOpen: () => {
-      setSheet(null);
-      setIsSurrenderOpen(true);
-    },
-    handleSurrender: () => {
-      setIsSurrenderOpen(false);
-      matchSession.surrender();
-    },
-    handleSurrenderClose: () => setIsSurrenderOpen(false),
-    handleTrainingNext: () => {
-      matchSession.leave();
-      router.replace({ pathname: "/arena/map/[id]", params: { id: TUTORIAL_MAP_ID } });
-    },
   };
 };

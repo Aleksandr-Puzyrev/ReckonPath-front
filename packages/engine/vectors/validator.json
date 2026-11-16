@@ -36,7 +36,8 @@
     "context": {
       "kind": "pvp",
       "format": {
-        "size": 5,
+        "rows": 5,
+        "cols": 5,
         "targets": 1,
         "limits": {
           "fences": 3,
@@ -158,7 +159,8 @@
     "context": {
       "kind": "pvp",
       "format": {
-        "size": 5,
+        "rows": 5,
+        "cols": 5,
         "targets": 1,
         "limits": {
           "fences": 3,
@@ -306,6 +308,45 @@
   },
   {
     "kind": "validate",
+    "name": "validate-bridge-not-counted-as-stream-pvp",
+    "note": "Bronze allows 3 streams and 1 bridge; 4 stream cells with a bridge on one leave 3 water cells -> no ELEMENT_LIMIT (the backend counts a bridge apart from the water).",
+    "level": {
+      "v": 2,
+      "id": "u-vector",
+      "rows": 5,
+      "cols": 5,
+      "targets": [[4, 4]],
+      "probeMode": "distance",
+      "streams": [
+        [0, 0],
+        [0, 1],
+        [0, 2],
+        [0, 3]
+      ],
+      "bridges": [[0, 1]]
+    },
+    "context": {
+      "kind": "pvp",
+      "format": {
+        "rows": 5,
+        "cols": 5,
+        "targets": 1,
+        "limits": {
+          "fences": 3,
+          "streams": 3,
+          "heavy": 1,
+          "rocks": 2,
+          "bridges": 1,
+          "bombs": 2
+        }
+      }
+    },
+    "expect": {
+      "codes": []
+    }
+  },
+  {
+    "kind": "validate",
     "name": "validate-element-limit-pvp",
     "note": "Bronze allows 3 streams; 4 given -> ELEMENT_LIMIT.",
     "level": {
@@ -325,7 +366,8 @@
     "context": {
       "kind": "pvp",
       "format": {
-        "size": 5,
+        "rows": 5,
+        "cols": 5,
         "targets": 1,
         "limits": {
           "fences": 3,
@@ -507,7 +549,8 @@
     "context": {
       "kind": "pvp",
       "format": {
-        "size": 5,
+        "rows": 5,
+        "cols": 5,
         "targets": 1,
         "limits": {
           "fences": 3,

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { NEW_MAP_ID } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
+import { HAS_ARENA_SERVER } from "@shared/config";
 import { formatClockTime } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 import { ArenaHero } from "@widgets/arena-hero";
@@ -29,8 +30,21 @@ const ArenaHomeBody = ({ home, renderMap, onMessage }: IArenaHomeBody) => {
   const { t, i18n } = useTranslation();
   const { arena } = home;
 
+  if (!HAS_ARENA_SERVER) {
+    return (
+      <Text variant="body.m" style={styles.message} testID="arena-server-only">
+        {t("arena.serverOnly")}
+      </Text>
+    );
+  }
   if (!home.isUnlocked) {
-    return <ArenaLocked passed={home.passed} onToLevels={() => router.navigate("/levels")} />;
+    return (
+      <ArenaLocked
+        passed={home.passed}
+        unlockLevel={home.unlockLevel}
+        onToLevels={() => router.navigate("/levels")}
+      />
+    );
   }
   if (home.ban !== null) {
     return (
@@ -60,32 +74,34 @@ const ArenaHomeBody = ({ home, renderMap, onMessage }: IArenaHomeBody) => {
           })}
         </Text>
       )}
-      <ArenaHero profile={arena.profile} season={arena.season} now={home.now} />
+      <ArenaHero arena={arena} now={home.now} />
       <FightBlock
-        format={arena.format}
+        format={arena.league.format}
         isOnline={home.isOnline}
         canFight={home.canFight}
         onFight={home.find.handleFight}
-        onAsync={() => home.find.handleAsync()}
+        onMapMatch={home.find.handleMapMatch}
       />
       <MyMapCard
         map={home.activeMap}
-        canSwitch={home.isOnline && home.formatMaps.length > 0}
+        canSwitch={home.isOnline && home.maps.length > 0}
         renderMap={renderMap}
         onSwitch={home.handleSwitchOpen}
         onEdit={() => home.handleEditMap(home.activeMap?.id ?? NEW_MAP_ID)}
         onCreate={() => home.handleEditMap(NEW_MAP_ID)}
       />
-      <SeasonTrack
-        rp={arena.profile.rp}
-        steps={arena.season.track}
-        isOnline={home.isOnline}
-        pendingStep={home.pendingStep}
-        onClaim={home.handleClaim}
-      />
-      {home.matches.length === 0 ? null : (
+      {arena.season === undefined ? null : (
+        <SeasonTrack
+          rp={arena.season.rp}
+          steps={arena.season.track}
+          isOnline={home.isOnline}
+          pendingStep={home.pendingStep}
+          onClaim={home.handleClaim}
+        />
+      )}
+      {arena.history.length === 0 ? null : (
         <MatchHistory
-          matches={home.matches}
+          matches={arena.history}
           onOpen={(id) => router.push({ pathname: "/arena/history/[id]", params: { id } })}
         />
       )}

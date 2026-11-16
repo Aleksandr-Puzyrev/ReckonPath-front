@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { ARENA_UNLOCK_LEVEL } from "@features/arena-access";
 import { Button } from "@shared/ui/button";
 import { Gradient } from "@shared/ui/gradient";
 import { Text } from "@shared/ui/text";
@@ -13,12 +12,13 @@ import { styles } from "./arena-locked-styles";
 
 interface IArenaLocked {
   passed: number;
+  unlockLevel: number;
   onToLevels: () => void;
 }
 
 const CARDS = ["turns", "ownMap", "leagues"] as const;
 
-const ArenaLocked = ({ passed, onToLevels }: IArenaLocked) => {
+const ArenaLocked = ({ passed, unlockLevel, onToLevels }: IArenaLocked) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
 
@@ -47,15 +47,15 @@ const ArenaLocked = ({ passed, onToLevels }: IArenaLocked) => {
             {t("arena.lockedProgress")}
           </Text>
           <Text variant="caption" style={styles.light}>
-            {t("arena.lockedCount", { n: passed, total: ARENA_UNLOCK_LEVEL })}
+            {t("arena.lockedCount", { n: passed, total: unlockLevel })}
           </Text>
         </View>
         <View
           style={styles.track}
           accessibilityRole="progressbar"
-          accessibilityValue={{ min: 0, max: ARENA_UNLOCK_LEVEL, now: passed }}
+          accessibilityValue={{ min: 0, max: unlockLevel, now: passed }}
         >
-          <View style={[styles.fill, { width: `${(passed / ARENA_UNLOCK_LEVEL) * 100}%` }]} />
+          <View style={[styles.fill, { width: `${(passed / unlockLevel) * 100}%` }]} />
         </View>
         <Button testID="arena-to-levels" label={t("arena.toLevels")} onPress={onToLevels} />
       </View>

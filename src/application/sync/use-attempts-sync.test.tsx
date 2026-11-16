@@ -7,7 +7,6 @@ import { AppState } from "react-native";
 import type { AppStateStatus } from "react-native";
 
 import { useOutboxStore } from "@entities/outbox";
-import { useProgressStore } from "@entities/progress";
 import { useAccountStore, useSessionStore } from "@entities/session";
 import { attemptFixture } from "@shared/test-utils/attempt-fixture";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
@@ -49,7 +48,6 @@ afterEach(() => {
   mockServer.reset();
   secureStore.__reset();
   useOutboxStore.getState().reset();
-  useProgressStore.getState().reset();
   useSessionStore.getState().reset();
   useAccountStore.getState().reset();
   onlineManager.setOnline(true);
@@ -96,7 +94,6 @@ describe("useAttemptsSync", () => {
     });
     await signIn("r_saved");
     await renderSync();
-    await waitFor(() => expect(useProgressStore.getState().best).toEqual({}));
     const batches = countBatches();
     queueAttempt();
 

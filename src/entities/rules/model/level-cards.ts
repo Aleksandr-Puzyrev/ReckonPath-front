@@ -29,5 +29,5 @@ export const levelCardIds = (
   ...lessons,
 ];
 
-export const modeCardId = (level: LevelInput): RuleCardId =>
-  level.probeMode === "distance" ? "distance" : level.probeMode;
+export const modeCardId = ({ probeMode }: Pick<LevelInput, "probeMode">): RuleCardId =>
+  probeMode === "distance" ? "distance" : probeMode;

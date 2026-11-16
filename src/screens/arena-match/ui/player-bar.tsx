@@ -1,11 +1,8 @@
-import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@shared/ui/text";
 import { TimerRing } from "@shared/ui/timer-ring";
-
-import WifiOffIcon from "@assets/icons/arena/wifi-off.svg";
 
 import { styles } from "./arena-match-styles";
 
@@ -15,20 +12,9 @@ interface IPlayerBar {
   status: string;
   timerShare: number;
   isWarning: boolean;
-  isOffline: boolean;
-  bubble: string | null;
 }
 
-const PlayerBar = ({
-  side,
-  nickname,
-  status,
-  timerShare,
-  isWarning,
-  isOffline,
-  bubble,
-}: IPlayerBar) => {
-  const { t } = useTranslation();
+const PlayerBar = ({ side, nickname, status, timerShare, isWarning }: IPlayerBar) => {
   const { theme } = useUnistyles();
   const color = isWarning ? theme.colors.status.danger : theme.colors.player[side];
   styles.useVariants({ side });
@@ -47,24 +33,11 @@ const PlayerBar = ({
           <Text variant="title.s" numberOfLines={1}>
             {nickname}
           </Text>
-          {isOffline ? (
-            <WifiOffIcon
-              accessibilityLabel={t("match.oppReconnecting")}
-              width={theme.sizes.icon.s}
-              height={theme.sizes.icon.s}
-              color={theme.colors.status.warning}
-            />
-          ) : null}
         </View>
         <Text variant="caption" style={styles.secondary}>
           {status}
         </Text>
       </View>
-      {bubble === null ? null : (
-        <View style={styles.bubble} testID={`bubble-${side}`}>
-          <Text variant="button.s">{bubble}</Text>
-        </View>
-      )}
     </View>
   );
 };

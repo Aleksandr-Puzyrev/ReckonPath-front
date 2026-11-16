@@ -1,43 +1,35 @@
-import type { GameState } from "@reckon-path/engine";
-
-import {
-  CAMPAIGN_LEVELS,
-  CAMPAIGN_WORLDS,
-  findCampaignLevel,
-  replaySession,
-} from "@entities/level";
-import type { CampaignLevel, SessionAction } from "@entities/level";
-import { currentLevelId } from "@entities/progress";
-import type { LevelBest } from "@entities/progress";
+import type { CampaignLevel, CampaignOverview, CampaignWorld } from "@entities/level";
 
 const MAX_STARS = 3;
 
-export type CurrentGame =
-  | { kind: "level"; campaignLevel: CampaignLevel; game: GameState | null }
-  | { kind: "done"; total: number; belowThree: readonly CampaignLevel[] };
-
-interface SavedAttempt {
-  levelId: string | null;
-  actions: readonly SessionAction[];
+interface ActiveGame {
+  found: number;
+  total: number;
 }
 
-export const currentGameOf = (
-  best: Readonly<Record<string, LevelBest>>,
-  saved: SavedAttempt,
-): CurrentGame => {
-  const id = currentLevelId(CAMPAIGN_WORLDS, best);
-  const campaignLevel = id === null ? null : findCampaignLevel(id);
-  if (campaignLevel === null) {
+export type CurrentGame =
+  | { kind: "level"; level: CampaignLevel; world: CampaignWorld; active: ActiveGame | null }
+  | { kind: "done"; total: number; belowThree: readonly CampaignLevel[] };
+
+export const currentGameOf = (overview: CampaignOverview): CurrentGame | null => {
+  const levels = overview.worlds.flatMap(({ levels: worldLevels }) => worldLevels);
+  if (overview.completed) {
     return {
       kind: "done",
-      total: CAMPAIGN_LEVELS.length,
-      belowThree: CAMPAIGN_LEVELS.filter(({ level }) => (best[level.id]?.stars ?? 0) < MAX_STARS),
+      total: levels.length,
+      belowThree: levels.filter(({ stars }) => stars < MAX_STARS),
     };
   }
-  const isSaved = saved.levelId === campaignLevel.level.id && saved.actions.length > 0;
+  const world = overview.worlds.find(({ levels: worldLevels }) =>
+    worldLevels.some(({ number }) => number === overview.currentLevel),
+  );
+  const level = world?.levels.find(({ number }) => number === overview.currentLevel);
+  if (world === undefined || level === undefined) return null;
+  const { active } = overview;
   return {
     kind: "level",
-    campaignLevel,
-    game: isSaved ? replaySession(campaignLevel.level, saved.actions) : null,
+    level,
+    world,
+    active: active?.level === level.number ? { found: active.found, total: active.total } : null,
   };
 };

@@ -1,50 +1,49 @@
 import { create } from "zustand";
 
-import type { ServerMessage } from "@shared/ws";
+import type { Cell, MatchView, QueueView } from "./match-type";
 
-import { INITIAL_MATCH, receiveMatchMessage } from "./match-reducer";
-import type { Cell, MatchState, SearchError } from "./match-reducer";
-
-interface MatchStore extends MatchState {
+interface MatchStore {
+  view: MatchView | null;
+  offsetMs: number;
+  queue: QueueView | null;
   flags: Cell[];
-  isReconnecting: boolean;
-  isTraining: boolean;
-  receive: (message: ServerMessage) => void;
-  startSearch: () => void;
-  startTraining: () => void;
-  stopSearch: () => void;
-  failSearch: (error: SearchError) => void;
-  markLost: () => void;
-  setPendingCell: (cell: Cell) => void;
+  receive: (view: MatchView, receivedAt?: number) => void;
+  receiveQueue: (queue: QueueView | null, receivedAt?: number) => void;
+  receivePresence: (matchId: string, isOnline: boolean) => void;
   toggleFlag: (cell: Cell) => void;
-  setReconnecting: (isReconnecting: boolean) => void;
-  clearNotices: () => void;
   reset: () => void;
 }
 
+const INITIAL = { view: null, offsetMs: 0, queue: null, flags: [] };
+
 const sameCell = ([a, b]: Cell, [c, d]: Cell) => a === c && b === d;
 
-const INITIAL = { ...INITIAL_MATCH, flags: [], isReconnecting: false, isTraining: false };
-
+// The server sends the whole match every time; an older or equal seq is a late copy and is dropped (сервер каждый раз присылает матч целиком; меньший или равный seq — запоздавшая копия и отбрасывается).
 export const useMatchStore = create<MatchStore>()((set, get) => ({
   ...INITIAL,
 
-  receive: (message) => set(receiveMatchMessage(get(), message)),
-
-  startSearch: () => set({ ...INITIAL, phase: "searching" }),
-
-  startTraining: () => set({ ...INITIAL, phase: "searching", isTraining: true }),
-
-  stopSearch: () => set({ phase: "stopped" }),
-
-  failSearch: (searchError) => set({ phase: "idle", searchError }),
-
-  // A finished match keeps its result even if the socket closes afterwards (завершённый матч сохраняет итог, даже если сокет закрылся после него).
-  markLost: () => {
-    if (get().phase !== "ended") set({ phase: "lost", isReconnecting: false });
+  receive: (view, receivedAt = Date.now()) => {
+    const current = get().view;
+    const isSame = current?.id === view.id;
+    if (isSame && view.seq <= current.seq) return;
+    set({
+      view,
+      queue: null,
+      offsetMs: Date.parse(view.serverTime) - receivedAt,
+      ...(isSame ? {} : { flags: [] }),
+    });
   },
 
-  setPendingCell: (pendingCell) => set({ pendingCell }),
+  receiveQueue: (queue, receivedAt = Date.now()) =>
+    set(
+      queue === null ? { queue } : { queue, offsetMs: Date.parse(queue.serverTime) - receivedAt },
+    ),
+
+  // Presence comes apart from the match and does not move its seq (присутствие приходит отдельно от матча и не меняет его seq).
+  receivePresence: (matchId, isOnline) => {
+    const { view } = get();
+    if (view?.id === matchId) set({ view: { ...view, rivalOnline: isOnline } });
+  },
 
   toggleFlag: (cell) => {
     const { flags } = get();
@@ -54,10 +53,6 @@ export const useMatchStore = create<MatchStore>()((set, get) => ({
         : [...flags, cell],
     });
   },
-
-  setReconnecting: (isReconnecting) => set({ isReconnecting }),
-
-  clearNotices: () => set({ searchError: null, inMatch: null }),
 
   reset: () => set(INITIAL),
 }));

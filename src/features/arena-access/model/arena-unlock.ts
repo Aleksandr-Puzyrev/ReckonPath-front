@@ -1,16 +1,17 @@
-import { CAMPAIGN_LEVELS } from "@entities/level";
-import type { LevelBest } from "@entities/progress";
+import { useCampaignQuery } from "@entities/level";
+import type { CampaignOverview } from "@entities/level";
 
-export const ARENA_UNLOCK_LEVEL = 12;
+// The server's default until GET /campaign answers (значение сервера по умолчанию, пока GET /campaign не ответил).
+const DEFAULT_UNLOCK_LEVEL = 12;
 
-const unlockLevelIds = CAMPAIGN_LEVELS.filter(({ number }) => number <= ARENA_UNLOCK_LEVEL).map(
-  ({ level }) => level.id,
-);
+export const arenaUnlockOf = (overview: CampaignOverview | undefined) => {
+  const unlockLevel = overview?.unlocks.arenaLevel ?? DEFAULT_UNLOCK_LEVEL;
+  const passed = (overview?.worlds ?? [])
+    .flatMap(({ levels }) => levels)
+    .filter(
+      ({ number, state }) => number <= unlockLevel && (state === "done" || state === "perfect"),
+    ).length;
+  return { isUnlocked: overview?.unlocks.arena ?? false, unlockLevel, passed };
+};
 
-export const passedTowardsArena = (best: Record<string, LevelBest>) =>
-  unlockLevelIds.filter((id) => best[id] !== undefined).length;
-
-const unlockLevelId = unlockLevelIds.at(-1);
-
-export const isArenaUnlocked = (best: Record<string, LevelBest>) =>
-  unlockLevelId !== undefined && best[unlockLevelId] !== undefined;
+export const useArenaUnlock = () => arenaUnlockOf(useCampaignQuery().data);

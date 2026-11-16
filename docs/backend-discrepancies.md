@@ -112,6 +112,8 @@ Rows marked ✅ are resolved on the client side: the client adopted the backend'
 
 ## Campaign and wallet (backend bb3f885, 2026-11-09)
 
+> 2026-11-16, decision 0060: the client follows the backend — the campaign is played as server games (`/campaign/*`), offline packs are not used. Rows K1–K10, K14, K29, K33–K36 are closed on the client side; what only the backend can fix is in `backend-handoff/backend-todo.md`.
+
 Core mismatch: the client plays the campaign locally with its own engine and bundled content (`packages/content`, `c-1…c-100`), sends finished attempts to `POST /attempts:batch`, reconciles stars with `GET /progress`, and continues with `POST /continue`. The backend runs campaign games on the server (one request per tap), has none of these endpoints, and allows offline play only through encrypted level packs. Envelope, casing, and `X-Locale` are covered by G1–G4 and G18; the wallet in `GET /me` by P3.
 
 | # | Where in the backend | What the backend does | What the sources say | How it should be | Client impact | Severity |
@@ -219,6 +221,8 @@ Implemented today: email/password and VK/Yandex sign-in, profile (with wallet, X
 | Friends, leaderboards, events, support tickets, custom levels | Part 7 §5, §7 | Partly on mocks; stage 5. Arena leaderboards are on the backend since bb3f885 (arena section); the rest is missing |
 
 ## Arena, leagues, seasons and leaderboards (backend bb3f885, 2026-11-09)
+
+> 2026-11-16, decision 0060: the client follows the backend — push WebSocket + REST actions, prepare phase, formats, Elo and rewards as the server sends them. Rows R1–R10, R13–R28, R31–R33, R37–R39 are closed on the client side; R11, R12, R29, R34, R36 and the new gaps are in `backend-handoff/backend-todo.md`.
 
 | # | Where in the backend | What the backend does | What the sources say | How it should be | Client impact | Severity |
 | --- | --- | --- | --- | --- | --- | --- |

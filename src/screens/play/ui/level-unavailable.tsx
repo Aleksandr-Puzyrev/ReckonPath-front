@@ -9,9 +9,10 @@ import { styles } from "./level-unavailable-styles";
 interface ILevelUnavailable {
   message: string;
   onExit: () => void;
+  onRetry?: () => void;
 }
 
-const LevelUnavailable = ({ message, onExit }: ILevelUnavailable) => {
+const LevelUnavailable = ({ message, onExit, onRetry }: ILevelUnavailable) => {
   const { t } = useTranslation();
 
   return (
@@ -19,7 +20,14 @@ const LevelUnavailable = ({ message, onExit }: ILevelUnavailable) => {
       <Text variant="title.l" style={styles.text}>
         {message}
       </Text>
-      <Button label={t("play.pause.exit")} onPress={onExit} variant="primary" />
+      {onRetry === undefined ? null : (
+        <Button label={t("common.retry")} onPress={onRetry} variant="primary" />
+      )}
+      <Button
+        label={t("play.pause.exit")}
+        onPress={onExit}
+        variant={onRetry === undefined ? "primary" : "secondary"}
+      />
     </Screen>
   );
 };

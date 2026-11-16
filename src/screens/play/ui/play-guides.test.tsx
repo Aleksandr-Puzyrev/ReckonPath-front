@@ -1,17 +1,17 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
-import { useGameSessionStore } from "@entities/level";
-import { useProgressStore } from "@entities/progress";
+import { useCampaignFlagsStore } from "@entities/level";
 import { useRulesStore } from "@entities/rules";
 import { useSettingsStore } from "@entities/settings";
-import { unlockTapInput } from "@features/tap-cell";
+import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
+import { mockCampaignState, mockServer, passMockLevels } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import PlayScreen from "./play-screen";
 
-const mockParams = { mode: "campaign", id: "c-1" };
+const mockParams = { mode: "campaign", id: "1" };
 const mockRouter = { back: jest.fn(), replace: jest.fn(), push: jest.fn(), canGoBack: () => true };
 
 jest.mock("expo-router", () => ({
@@ -36,21 +36,31 @@ const FIRST_CELL = 9;
 const CLOSER_CELL = 10;
 const TARGET = 6;
 
-const renderScreen = async (id: string) => {
-  mockParams.id = id;
+const FLUSHES = 10;
+
+const flushRequests = () => act(() => jest.advanceTimersByTimeAsync(1));
+
+const renderScreen = async (number: number) => {
+  mockParams.id = String(number);
   await render(<PlayScreen />, { wrapper: createQueryWrapper() });
+  for (let step = 0; step < FLUSHES && screen.queryByTestId("board-area") === null; step += 1) {
+    await flushRequests();
+  }
   await fireEvent(screen.getByTestId("board-area"), "layout", BOARD_LAYOUT);
 };
 
 const tap = async (cell: number) => {
   await fireEvent.press(screen.getByTestId(`cell-${cell}`));
+  await flushRequests();
   await act(async () => jest.advanceTimersByTime(300));
 };
 
-const unlockUpTo = (...ids: string[]) =>
-  ids.forEach((id) => useProgressStore.getState().recordWin(id, { stars: 3, moves: 2 }));
+const unlockUpTo = (passed: number) => passMockLevels(passed);
 
-const movesUsed = () => useGameSessionStore.getState().game?.movesUsed;
+const movesUsed = () =>
+  mockCampaignState()
+    .games.at(-1)
+    ?.actions.filter((action) => "tap" in action).length ?? 0;
 
 describe("PlayScreen guides", () => {
   beforeAll(async () => {
@@ -60,17 +70,18 @@ describe("PlayScreen guides", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockRouter.replace.mockClear();
-    unlockTapInput();
-    useGameSessionStore.getState().reset();
-    useProgressStore.getState().reset();
+    useCampaignFlagsStore.getState().reset();
     useRulesStore.getState().reset();
     useSettingsStore.getState().reset();
   });
 
-  afterEach(() => jest.useRealTimers());
+  afterEach(() => {
+    mockServer.reset();
+    jest.useRealTimers();
+  });
 
   test("walks through the four tutorial steps and ends with three stars (Part 4 §2.2)", async () => {
-    await renderScreen("c-1");
+    await renderScreen(1);
     expect(screen.getByText("Тапни по любой клетке")).toBeOnTheScreen();
     await tap(0);
     expect(movesUsed()).toBe(0);
@@ -96,10 +107,11 @@ describe("PlayScreen guides", () => {
       screen.getByText("Первый уровень — всегда 3★. Дальше ходы будут ограничены"),
     ).toBeOnTheScreen();
     expect(useRulesStore.getState().tutorial).toBe("done");
+    expect(mockCampaignState().tutorials).toContain("tut_first_level");
   });
 
   test("ends the tutorial with the simplified result and only «Дальше» (design 29.4, decision 0056 #7)", async () => {
-    await renderScreen("c-1");
+    await renderScreen(1);
     await tap(FIRST_CELL);
     await tap(CLOSER_CELL);
     await fireEvent.press(screen.getByText("Далее"));
@@ -115,22 +127,22 @@ describe("PlayScreen guides", () => {
 
     expect(mockRouter.replace).toHaveBeenCalledWith({
       pathname: "/play/[mode]/[id]",
-      params: { mode: "campaign", id: "c-2" },
+      params: { mode: "campaign", id: "2" },
     });
   });
 
   test("skips the tutorial to the levels, leaving level 1 unbeaten (ACC-04)", async () => {
-    await renderScreen("c-1");
+    await renderScreen(1);
     await fireEvent.press(screen.getByText("Пропустить"));
     expect(useRulesStore.getState().tutorial).toBe("skipped");
     expect(mockRouter.replace).toHaveBeenCalledWith("/levels");
-    expect(useProgressStore.getState().best["c-1"]).toBeUndefined();
+    expect(mockCampaignState().progress[1]).toBeUndefined();
   });
 
   test("shows the new elements one after another before the level, then never again", async () => {
     useRulesStore.getState().skipTutorial();
-    unlockUpTo("c-1", "c-2");
-    await renderScreen("c-3");
+    unlockUpTo(2);
+    await renderScreen(3);
     expect(screen.getByText("Маяк")).toBeOnTheScreen();
     expect(screen.getByText("Маяк уже светит: число на нём показано бесплатно")).toBeOnTheScreen();
     await tap(0);
@@ -141,12 +153,23 @@ describe("PlayScreen guides", () => {
     await fireEvent.press(screen.getByTestId("rule-card-ok"));
     expect(screen.queryByTestId("rule-card-ok")).toBeNull();
     expect(useRulesStore.getState().seenCards).toEqual(["beacon", "flags"]);
+    expect(mockCampaignState().tutorials).toEqual(["beacon", "flags"]);
   });
 
-  test("explains the move limit once on level 2", async () => {
+  test("skips the element cards the server already knows as seen (decision 0060 #7)", async () => {
     useRulesStore.getState().skipTutorial();
-    unlockUpTo("c-1");
-    await renderScreen("c-2");
+    unlockUpTo(2);
+    await apiClient.POST("/campaign/tutorials", { body: { key: "beacon" } });
+    await renderScreen(3);
+
+    expect(screen.getByText("Флажки")).toBeOnTheScreen();
+    expect(screen.queryByText("Маяк")).toBeNull();
+  });
+
+  test("explains the move limit once on the server's tut_moves_limit level", async () => {
+    useRulesStore.getState().skipTutorial();
+    unlockUpTo(1);
+    await renderScreen(2);
     expect(
       screen.getByText(
         "На уровень даётся ограниченное число ходов. Чем меньше потратишь, тем больше звёзд",
@@ -154,13 +177,14 @@ describe("PlayScreen guides", () => {
     ).toBeOnTheScreen();
     await fireEvent.press(screen.getByText("Понятно"));
     expect(useRulesStore.getState().hasSeenMovesHint).toBe(true);
+    expect(mockCampaignState().tutorials).toContain("tut_moves_limit");
   });
 
   test("opens the mode card from the ⓘ on the mode chip (Part 4 §5.1)", async () => {
     useRulesStore.getState().skipTutorial();
     useRulesStore.getState().markMovesHintSeen();
-    unlockUpTo("c-1");
-    await renderScreen("c-2");
+    unlockUpTo(1);
+    await renderScreen(2);
     await fireEvent.press(screen.getByTestId("mode-info"));
     expect(
       screen.getByText("Число на клетке — сколько шагов до сигнала. Меньше число — ближе сигнал"),
@@ -171,8 +195,8 @@ describe("PlayScreen guides", () => {
     useRulesStore.getState().skipTutorial();
     useRulesStore.getState().markMovesHintSeen();
     useRulesStore.getState().markSeen(["fence"]);
-    unlockUpTo("c-1");
-    await renderScreen("c-2");
+    unlockUpTo(1);
+    await renderScreen(2);
     await fireEvent.press(screen.getByTestId("pause"));
     await fireEvent.press(screen.getByTestId("pause-rules"));
 
@@ -190,11 +214,11 @@ describe("PlayScreen guides", () => {
       useRulesStore.getState().skipTutorial();
       useRulesStore.getState().markMovesHintSeen();
       useRulesStore.getState().markSeen(["bomb"]);
-      unlockUpTo("c-1", "c-2", "c-3", "c-4");
+      unlockUpTo(4);
     });
 
     test("explains the first mine mark once and blocks taps until «Понятно» (Part 4 §2.3)", async () => {
-      await renderScreen("c-4");
+      await renderScreen(4);
       await tap(NEXT_TO_BOMB);
 
       expect(screen.getByText("Значок мины")).toBeOnTheScreen();
@@ -206,20 +230,19 @@ describe("PlayScreen guides", () => {
       expect(useRulesStore.getState().seenCards).toContain("bombNear");
     });
 
-    test("stays silent and hides the mark from the rules when the level has no mine mark (LVL-BN6)", async () => {
+    test("stays silent when the server sends no mine mark (LVL-BN6)", async () => {
       useRulesStore.getState().markSeen(["bombNear"]);
-      await renderScreen("c-5");
+      await renderScreen(5);
       await tap(NEXT_TO_BOMB);
 
       expect(screen.queryByText("Значок мины")).toBeNull();
       await fireEvent.press(screen.getByTestId("pause"));
       await fireEvent.press(screen.getByTestId("pause-rules"));
-      expect(screen.queryByTestId("rule-bombNear")).toBeNull();
       expect(screen.getByTestId("rule-bomb")).toBeOnTheScreen();
     });
 
     test("does not show the coach on a level without the mark even before it was seen", async () => {
-      await renderScreen("c-5");
+      await renderScreen(5);
       await tap(NEXT_TO_BOMB);
 
       expect(screen.queryByText("Значок мины")).toBeNull();
@@ -230,8 +253,8 @@ describe("PlayScreen guides", () => {
   test("saves the sound and music switches from the pause menu", async () => {
     useRulesStore.getState().skipTutorial();
     useRulesStore.getState().markMovesHintSeen();
-    unlockUpTo("c-1");
-    await renderScreen("c-2");
+    unlockUpTo(1);
+    await renderScreen(2);
     await fireEvent.press(screen.getByTestId("pause"));
     await fireEvent(screen.getByTestId("sound"), "valueChange", false);
     await fireEvent(screen.getByTestId("music"), "valueChange", true);

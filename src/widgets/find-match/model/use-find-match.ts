@@ -1,80 +1,69 @@
 import { useMutation } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { useEffect, useEffectEvent, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useEffect, useEffectEvent } from "react";
 
-import type { Arena } from "@entities/arena";
-import { nextMapNumber } from "@entities/arena-map";
-import type { ArenaMap } from "@entities/arena-map";
-import { matchSession, startAsyncMatchMutationOptions, useAsyncMatchStore } from "@entities/match";
+import {
+  joinQueueMutationOptions,
+  matchSession,
+  startMapMatchMutationOptions,
+  useMatchStore,
+} from "@entities/match";
+import type { MatchView } from "@entities/match";
 import { useAccountStore } from "@entities/session";
-import { useRandomArenaMap } from "@features/random-arena-map";
-import { useSaveArenaMap } from "@features/save-arena-map";
-import { errorMessageKey } from "@shared/api";
+import { errorMessageKey, isApiError } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 
 interface FindMatchOptions {
-  arena: Arena | undefined;
-  maps: readonly ArenaMap[];
   onError: (messageKey: ErrorMessageKey) => void;
   isReplacing: boolean;
 }
 
-export const useFindMatch = ({ arena, maps, onError, isReplacing }: FindMatchOptions) => {
-  const { t } = useTranslation();
-  const [isNoMapOpen, setIsNoMapOpen] = useState(false);
-  const format = arena?.format.size ?? 0;
-  const activeMapId = arena?.activeMapId ?? null;
-
-  const search = (mapId: string) => {
-    matchSession.search(format, mapId);
-    if (isReplacing) router.replace("/arena/search");
-    else router.push("/arena/search");
+export const useFindMatch = ({ onError, isReplacing }: FindMatchOptions) => {
+  const go = (route: Parameters<typeof router.push>[0]) => {
+    if (isReplacing) router.replace(route);
+    else router.push(route);
   };
+  const openMatch = (id: string) => go({ pathname: "/arena/match/[id]", params: { id } });
 
-  const begin = () => {
-    if (activeMapId === null) {
-      setIsNoMapOpen(true);
-      return;
-    }
-    search(activeMapId);
-  };
-
-  const saving = useSaveArenaMap({
-    onSaved: () => undefined,
-    // A random map starts the search once the server has made it active (случайная карта запускает поиск, когда сервер сделал её активной).
-    onActivated: (mapId) => {
-      setIsNoMapOpen(false);
-      search(mapId);
+  // A running match comes first: the server answers the search with it, and the screen opens it at once (идущий матч важнее: сервер отвечает им на поиск, и экран сразу его открывает).
+  const join = useMutation({
+    ...joinQueueMutationOptions(),
+    onSuccess: ({ queue, match }) => {
+      if (match !== undefined) {
+        void matchSession.refresh();
+        openMatch(match.id);
+        return;
+      }
+      useMatchStore.getState().receiveQueue(queue ?? null);
+      go("/arena/search");
     },
-    onDraft: () => onError("errors.map_invalid"),
-    onMapsLimit: () => onError("errors.limit_reached"),
-    onError,
+    onError: (error) => {
+      const runningId = isApiError(error) ? error.details.id : undefined;
+      if (
+        isApiError(error) &&
+        error.code === "match_in_progress" &&
+        typeof runningId === "string"
+      ) {
+        void matchSession.refresh();
+        openMatch(runningId);
+        return;
+      }
+      onError(errorMessageKey(error));
+    },
   });
-  const asyncStart = useMutation({
-    ...startAsyncMatchMutationOptions(),
-    onSuccess: (match) => {
-      useAsyncMatchStore.getState().start(match, arena?.profile.trophies ?? 0);
-      const route = { pathname: "/arena/async/[id]", params: { id: match.asyncId } } as const;
-      if (isReplacing) router.replace(route);
-      else router.push(route);
+
+  const mapMatch = useMutation({
+    ...startMapMatchMutationOptions(),
+    onSuccess: (match: MatchView) => {
+      useMatchStore.getState().receive(match);
+      openMatch(match.id);
     },
     onError: (error) => onError(errorMessageKey(error)),
   });
 
-  const random = useRandomArenaMap({
-    onMap: (map) => {
-      const nameOf = (n: number) => t("map.defaultName", { n });
-      const name = nameOf(
-        nextMapNumber(
-          maps.map((saved) => saved.name),
-          nameOf,
-        ),
-      );
-      saving.save(null, { name, format, map });
-    },
-    onError,
-  });
+  const begin = () => {
+    if (!join.isPending) join.mutate();
+  };
 
   const continueAfterOffer = useEffectEvent(begin);
 
@@ -90,21 +79,13 @@ export const useFindMatch = ({ arena, maps, onError, isReplacing }: FindMatchOpt
   );
 
   return {
-    isNoMapOpen,
-    isRandomPending: random.isPending || saving.isPending,
+    isPending: join.isPending || mapMatch.isPending,
     handleFight: () => {
       if (useAccountStore.getState().requestArenaOffer()) return;
       begin();
     },
-    handleBuildMap: () => {
-      setIsNoMapOpen(false);
-      router.push({ pathname: "/arena/map/[id]", params: { id: "new" } });
-    },
-    handleRandomMap: () => random.requestRandom(format),
-    handleNoMapClose: () => setIsNoMapOpen(false),
-    // A follow-up runs only once the async match has started (продолжение выполняется, только когда асинхронный матч стартовал).
-    handleAsync: (onStarted?: () => void) => {
-      if (!asyncStart.isPending) asyncStart.mutate(undefined, { onSuccess: onStarted });
+    handleMapMatch: () => {
+      if (!mapMatch.isPending) mapMatch.mutate();
     },
   };
 };

@@ -4,10 +4,16 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { CAMPAIGN_WORLDS } from "@entities/level";
-import type { CampaignLevel } from "@entities/level";
-import { campaignMaxStars, campaignStars, useProgressStore } from "@entities/progress";
+import {
+  campaignLevelId,
+  levelOfPublicBoard,
+  useCampaignLevelQuery,
+  useCampaignQuery,
+} from "@entities/level";
+import type { CampaignLevel, CampaignWorld } from "@entities/level";
+import { useIsOnline } from "@shared/api";
 import { Screen } from "@shared/ui/screen";
+import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
 import { BoardPreview } from "@widgets/board";
@@ -22,35 +28,47 @@ import { styles } from "./levels-screen-styles";
 
 const PREVIEW_SHARE = 0.36;
 
+interface SheetLevel {
+  level: CampaignLevel;
+  world: CampaignWorld;
+}
+
+const worldOf = (worlds: readonly CampaignWorld[], number: number) =>
+  worlds.find(({ levels }) => levels.some((level) => level.number === number));
+
 const LevelsScreen = () => {
   const { t } = useTranslation();
   const { rt } = useUnistyles();
-  const best = useProgressStore((state) => state.best);
-  const [sheetLevel, setSheetLevel] = useState<CampaignLevel | null>(null);
+  const isOnline = useIsOnline();
+  const { data: overview, isError } = useCampaignQuery();
+  const [sheet, setSheet] = useState<SheetLevel | null>(null);
+  const { data: detail } = useCampaignLevelQuery(sheet?.level.number ?? null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [isEarnOpen, setIsEarnOpen] = useState(false);
-  const items = buildListItems(CAMPAIGN_WORLDS, best);
-  const current = items.find((item) => item.type === "level" && item.state === "current");
+  const worlds = overview?.worlds ?? [];
+  const items = buildListItems(worlds);
+  const isUnavailable = overview === undefined && (isError || !isOnline);
 
-  const play = ({ level }: CampaignLevel) => {
-    setSheetLevel(null);
-    router.push({ pathname: "/play/[mode]/[id]", params: { mode: "campaign", id: level.id } });
+  const play = ({ number }: CampaignLevel) => {
+    setSheet(null);
+    router.push({
+      pathname: "/play/[mode]/[id]",
+      params: { mode: "campaign", id: String(number) },
+    });
   };
 
-  const handleLevelPress = (item: LevelItem) => {
-    if (item.state === "current") {
-      play(item.campaignLevel);
+  const handleLevelPress = ({ level, state }: LevelItem) => {
+    if (state === "current") {
+      play(level);
       return;
     }
-    if (item.state === "done") {
-      setSheetLevel(item.campaignLevel);
+    const world = worldOf(worlds, level.number);
+    if (state === "done" && world !== undefined) {
+      setSheet({ level, world });
       return;
     }
-    if (current?.type !== "level") return;
-    setToast({
-      id: Date.now(),
-      text: t("levels.locked", { n: current.campaignLevel.number }),
-    });
+    if (overview === undefined) return;
+    setToast({ id: Date.now(), text: t("levels.locked", { n: overview.currentLevel }) });
   };
 
   return (
@@ -61,25 +79,36 @@ const LevelsScreen = () => {
       <LevelList
         items={items}
         header={
-          <LevelsHeader
-            stars={campaignStars(CAMPAIGN_WORLDS, best)}
-            maxStars={campaignMaxStars(CAMPAIGN_WORLDS)}
-            onEditor={() => router.push("/editor")}
-            onPlayCode={() => router.push("/play")}
-          />
+          <>
+            <LevelsHeader
+              stars={overview?.stars ?? 0}
+              maxStars={overview?.starsMax ?? 0}
+              onEditor={() => router.push("/editor")}
+              onPlayCode={() => router.push("/play")}
+            />
+            {isUnavailable ? (
+              <Text variant="body.s" style={styles.offline} testID="campaign-offline">
+                {t("campaign.offline")}
+              </Text>
+            ) : null}
+          </>
         }
         onLevelPress={handleLevelPress}
       />
       <Toast message={toast} onHide={() => setToast(null)} />
       <LevelSheet
-        campaignLevel={sheetLevel}
+        sheet={sheet}
+        board={detail?.board ?? null}
         preview={
-          sheetLevel === null ? null : (
-            <BoardPreview level={sheetLevel.level} size={rt.screen.width * PREVIEW_SHARE} />
+          sheet === null || detail === undefined ? null : (
+            <BoardPreview
+              level={levelOfPublicBoard(detail.board, campaignLevelId(detail.number))}
+              size={rt.screen.width * PREVIEW_SHARE}
+            />
           )
         }
         onPlay={play}
-        onDismiss={() => setSheetLevel(null)}
+        onDismiss={() => setSheet(null)}
       />
       <EarnSheet
         isOpen={isEarnOpen}

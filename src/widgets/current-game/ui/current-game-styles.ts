@@ -40,4 +40,7 @@ export const styles = StyleSheet.create((theme) => ({
   actions: {
     gap: theme.space[2],
   },
+  offline: {
+    color: theme.colors.text.secondary,
+  },
 }));

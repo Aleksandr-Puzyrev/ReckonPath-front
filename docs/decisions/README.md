@@ -65,6 +65,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0057 | [`0057-worlds-7-8-content.md`](0057-worlds-7-8-content.md) | Worlds 7–8 cards approved, «Число» on the final level, hot-cold first pair check, 2 targets in world 7, fog 4 → 2, no screen after level 100 |
 | 0058 | [`0058-bootstrap-and-profile-on-backend.md`](0058-bootstrap-and-profile-on-backend.md) | Bootstrap, full `GET /me`, `PATCH /me {locale}`, restore on the backend; deletion keeps the session again; `arena.maxTurns` and `day_key` ignored for now; new maintenance shape; three error codes |
 | 0059 | [`0059-nickname-change.md`](0059-nickname-change.md) | Nickname change screen (23.4): Latin only like the backend, live check of length and characters, «занято» after save, no confirm for the paid change, cooldown date |
+| 0060 | [`0060-backend-first-campaign-and-arena.md`](0060-backend-first-campaign-and-arena.md) | The backend wins: server campaign games, no guest, no offline campaign for now, arena on the backend's push + REST protocol and rules, prepare phase, rectangular boards |
 
 ## Template
 

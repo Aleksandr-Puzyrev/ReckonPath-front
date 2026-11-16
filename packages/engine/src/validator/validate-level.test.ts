@@ -6,7 +6,7 @@ import { makeLevel as level } from "../test-utils/make-level";
 import { validateLevel } from "./validate-level";
 import type { PvpFormat } from "./validate-level";
 
-const BRONZE: PvpFormat = { size: 5, targets: 1, limits: { bombs: 1 } };
+const BRONZE: PvpFormat = { rows: 5, cols: 5, targets: 1, limits: { bombs: 1 } };
 
 describe("validateLevel", () => {
   test.each(["campaign", "custom", "daily"] as const)(

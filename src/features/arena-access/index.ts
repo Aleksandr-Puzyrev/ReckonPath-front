@@ -1,1 +1,1 @@
-export { ARENA_UNLOCK_LEVEL, isArenaUnlocked, passedTowardsArena } from "./model/arena-unlock";
+export { arenaUnlockOf, useArenaUnlock } from "./model/arena-unlock";

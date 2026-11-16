@@ -1,18 +1,14 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView } from "react-native";
+import { ScrollView, View } from "react-native";
 
-import { toIdx } from "@reckon-path/engine";
-
-import { levelOfMap } from "@entities/arena-map";
-import { layoutLevelOf } from "@entities/match";
+import { levelOfBoard, tapIdxOfBoard } from "@entities/match";
 import { Button } from "@shared/ui/button";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
-import { divisionStateOf, LeagueProgress } from "@widgets/arena-hero";
-import { NoMapDialog } from "@widgets/find-match";
+import { LeagueProgress } from "@widgets/arena-hero";
 import { formatTrophyDelta } from "@widgets/match-history";
 
 import { resultReasonOf } from "../model/result-reason";
@@ -28,46 +24,39 @@ const TITLES = {
   win: "result.pvp.win",
   loss: "result.pvp.lose",
   draw: "result.pvp.draw",
-  annulled: "arena.history.annulled",
 } as const;
-
-type Cell = [number, number];
-
-const cellsOf = (cells: readonly (readonly number[])[]) =>
-  cells.map(([row = 0, col = 0]): Cell => [row, col]);
 
 const ArenaResultScreen = () => {
   const { t } = useTranslation();
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
-  const view = useArenaResult((messageKey) => showToast(t(messageKey)));
-  const { end, layout, format, opponent, myMap } = view;
+  const view = useArenaResult(showToast);
+  const { match } = view;
 
-  if (end === null || layout === null || format === null || opponent === null) {
-    return <Screen style={styles.screen} />;
+  if (match === null || match.result === undefined || match.rivalMap === undefined) {
+    return (
+      <Screen style={styles.screen}>
+        {view.isFailed ? (
+          <View style={styles.content}>
+            <Text variant="body.m" style={styles.centered}>
+              {t("errors.generic")}
+            </Text>
+            <Button testID="result-retry" label={t("common.retry")} onPress={view.handleRetry} />
+          </View>
+        ) : null}
+      </Screen>
+    );
   }
 
-  const size = format.size;
-  const theirLevel = {
-    ...layoutLevelOf(layout, size),
-    targets: cellsOf(end.maps.opponent.targets),
-    bombs: cellsOf(end.maps.opponent.bombs),
-  };
-  const myLevel = myMap === null ? null : levelOfMap(myMap.map);
-  const theirTaps = view.myTaps.map(({ cell }) => toIdx(size, cell));
-  const myTaps = view.opponentTaps.map(({ cell }) => toIdx(size, cell));
-  const after = divisionStateOf(end.trophies.after);
-  const isAsync = view.norm !== null;
-  const reason = isAsync
-    ? t("async.reason", { count: end.turns.me, norm: view.norm })
-    : resultReasonOf(end, t);
-  const note = isAsync ? t("async.half") : t("match.botTrophies");
+  const { result, rival, myMap, rivalMap } = match;
+  const isMap = match.kind === "map";
+  const reason = resultReasonOf(match, t);
 
   return (
     <Screen style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
         <Text variant="display.l" accessibilityRole="header" style={styles.centered}>
-          {t(TITLES[end.result])}
+          {t(TITLES[result.outcome])}
         </Text>
         {reason === null ? null : (
           <Text variant="body.m" style={[styles.secondary, styles.centered]}>
@@ -75,37 +64,35 @@ const ArenaResultScreen = () => {
           </Text>
         )}
         <ResultMaps
-          myLevel={myLevel}
-          theirLevel={theirLevel}
-          myTaps={myTaps}
-          theirTaps={theirTaps}
+          myLevel={myMap === undefined ? null : levelOfBoard(myMap)}
+          theirLevel={levelOfBoard(rivalMap)}
+          myTaps={myMap === undefined ? [] : tapIdxOfBoard(myMap)}
+          theirTaps={tapIdxOfBoard(rivalMap)}
           theirLabel={
-            isAsync
-              ? t("async.mapTaps", { name: opponent.nickname })
-              : t("result.pvp.theirMap", { name: opponent.nickname })
+            isMap
+              ? t("async.mapTaps", { name: rival.name })
+              : t("result.pvp.theirMap", { name: rival.name })
           }
           zoomed={view.zoomed}
           onZoom={view.handleZoom}
         />
         <Text variant="display.m" style={styles.centered} testID="result-trophies">
           {t("result.pvp.trophies", {
-            count: Math.abs(end.trophies.delta),
-            delta: formatTrophyDelta(end.trophies.delta),
+            count: Math.abs(result.trophies),
+            delta: formatTrophyDelta(result.trophies),
           })}
         </Text>
         <LeagueProgress
-          trophies={end.trophies.after}
-          fromTrophies={end.trophies.before}
-          league={after.league}
-          division={after.division}
-          min={after.min}
-          max={after.max}
+          trophies={result.trophyNow}
+          fromTrophies={result.trophyNow - result.trophies}
+          league={result.league}
+          next={result.next}
           isOnHero={false}
         />
-        <RewardRow rewards={rewardsOf(end)} />
-        {opponent.isBot || isAsync ? (
+        <RewardRow rewards={rewardsOf(result)} />
+        {rival.bot === true || isMap ? (
           <Text variant="caption" style={[styles.secondary, styles.centered]}>
-            {note}
+            {isMap ? t("async.half") : t("match.botTrophies")}
           </Text>
         ) : null}
         <Button testID="result-again" label={t("result.pvp.again")} onPress={view.handleAgain} />
@@ -116,20 +103,9 @@ const ArenaResultScreen = () => {
           onPress={view.handleArena}
         />
       </ScrollView>
-      <NoMapDialog
-        isOpen={view.find.isNoMapOpen}
-        isPending={view.find.isRandomPending}
-        onBuild={view.find.handleBuildMap}
-        onRandom={view.find.handleRandomMap}
-        onClose={view.find.handleNoMapClose}
-      />
-      {view.isLeagueMomentOpen ? (
-        <LeagueMoment
-          trophies={end.trophies.after}
-          isUp={view.isLeagueUp}
-          onNext={view.handleLeagueMomentClose}
-        />
-      ) : null}
+      {view.promotion === null ? null : (
+        <LeagueMoment promotion={view.promotion} onNext={view.handlePromotionClose} />
+      )}
       <Toast message={toast} onHide={() => setToast(null)} />
     </Screen>
   );

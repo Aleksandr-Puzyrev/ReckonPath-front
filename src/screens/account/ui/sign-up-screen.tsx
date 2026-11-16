@@ -25,7 +25,7 @@ const SignUpScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <SignUp
-          onBack={() => router.back()}
+          onBack={router.canGoBack() ? () => router.back() : undefined}
           onCodeSent={(email, resendAfter) =>
             router.push({
               pathname: "/account/code",

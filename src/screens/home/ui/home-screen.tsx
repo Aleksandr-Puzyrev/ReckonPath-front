@@ -3,6 +3,7 @@ import { ScrollView, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { StreakRestoreCard } from "@features/restore-streak";
+import { campaignLevelId, levelOfPublicBoard } from "@entities/level";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
@@ -36,8 +37,11 @@ const HomeScreen = () => {
           </Text>
         )}
         <CurrentGame
-          renderPreview={({ level }, game) => (
-            <BoardPreview level={level} game={game} size={theme.sizes.home.heroBoard} />
+          renderPreview={(board, number) => (
+            <BoardPreview
+              level={levelOfPublicBoard(board, campaignLevelId(number))}
+              size={theme.sizes.home.heroBoard}
+            />
           )}
           onPlay={home.handlePlay}
           onDaily={home.handleDaily}

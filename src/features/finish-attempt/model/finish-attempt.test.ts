@@ -3,7 +3,6 @@ import type { LevelInput } from "@reckon-path/engine";
 import { useDailyRecordStore } from "@entities/daily";
 import { useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
-import { useProgressStore } from "@entities/progress";
 
 import { finishAttempt, isCountedDailyLevel } from "./finish-attempt";
 
@@ -34,40 +33,22 @@ const win = (level: LevelInput) => {
 beforeEach(() => {
   session().reset();
   useOutboxStore.getState().reset();
-  useProgressStore.getState().reset();
   useDailyRecordStore.getState().reset();
 });
 
 describe("finishAttempt", () => {
-  test("records a campaign win, queues it and forgets the session", () => {
+  test("forgets a game that is not a daily without queueing it", () => {
     win(CAMPAIGN);
 
-    const { attempt, isRecord } = finishAttempt();
-
-    expect(isRecord).toBe(false);
-    expect(attempt).toMatchObject({
-      mode: "campaign",
-      ref: "c-finish",
-      claimed: { result: "won" },
-    });
-    expect(useProgressStore.getState().best["c-finish"]).toEqual({ stars: 3, moves: 2 });
-    expect(useOutboxStore.getState().attempts).toHaveLength(1);
+    expect(finishAttempt()).toBeNull();
+    expect(useOutboxStore.getState().attempts).toEqual([]);
     expect(session().levelId).toBeNull();
   });
 
-  test("tells a better result of a passed level is a record", () => {
-    win(CAMPAIGN);
-    finishAttempt();
-    useProgressStore.getState().replaceBest({ "c-finish": { stars: 1, moves: 5 } });
-    win(CAMPAIGN);
-
-    expect(finishAttempt().isRecord).toBe(true);
-  });
-
-  test("counts the first daily attempt of the day and not the campaign progress", () => {
+  test("queues the first daily attempt of the day and counts it", () => {
     win(DAILY);
 
-    const { attempt } = finishAttempt();
+    const attempt = finishAttempt();
 
     expect(attempt).toMatchObject({ mode: "daily", ref: "d-2026-09-26" });
     expect(useDailyRecordStore.getState().days["2026-09-26"]).toMatchObject({
@@ -75,12 +56,12 @@ describe("finishAttempt", () => {
       result: "won",
       movesUsed: 2,
     });
-    expect(useProgressStore.getState().best).toEqual({});
+    expect(session().levelId).toBeNull();
   });
 
   test("keeps the first daily attempt as the counted one after a replay (DLY-04)", () => {
     win(DAILY);
-    const counted = finishAttempt().attempt;
+    const counted = finishAttempt();
     win(DAILY);
 
     finishAttempt();
@@ -100,7 +81,7 @@ describe("finishAttempt", () => {
   });
 
   test("does nothing without a game", () => {
-    expect(finishAttempt()).toEqual({ attempt: null, isRecord: false });
+    expect(finishAttempt()).toBeNull();
   });
 });
 

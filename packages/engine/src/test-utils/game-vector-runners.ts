@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-import { divisionOf, leagueOf } from "../formulas/league";
-import { rankPoints, trackStep, xpToNext } from "../formulas/rewards";
-import { applyTrophies, seasonReset, trophyDelta } from "../formulas/trophies";
+import { xpToNext } from "../formulas/rewards";
 import { applyTap, canContinue, continueGame, initGame } from "../game/game";
 import { toCell, toIdx } from "../grid/grid";
 import { createBoard } from "../level/create-board";
@@ -89,38 +87,9 @@ const runValidate: VectorRunner = (raw) => {
   );
 };
 
-const outcome = z.enum(["win", "loss", "draw"]);
-const matchKind = z.enum(["ranked", "bot", "async", "friendly"]);
-const trophiesInput = z.object({ trophies: z.number() });
-const trophyDeltaInput = z.object({
-  myTrophies: z.number(),
-  opponentTrophies: z.number(),
-  outcome,
-  kind: matchKind,
-});
-const applyTrophiesInput = z.object({
-  trophies: z.number(),
-  delta: z.number(),
-  seasonFloor: z.number(),
-});
-const rankPointsInput = z.object({ outcome, kind: matchKind });
-const trackStepInput = z.object({ rp: z.number() });
 const xpToNextInput = z.object({ level: z.number() });
 
 const FORMULAS: Record<string, (input: unknown) => unknown> = {
-  trophyDelta: (input) => trophyDelta(trophyDeltaInput.parse(input)),
-  applyTrophies: (input) => {
-    const { trophies, delta, seasonFloor } = applyTrophiesInput.parse(input);
-    return applyTrophies(trophies, delta, seasonFloor);
-  },
-  leagueOf: (input) => leagueOf(trophiesInput.parse(input).trophies),
-  divisionOf: (input) => divisionOf(trophiesInput.parse(input).trophies),
-  seasonReset: (input) => seasonReset(trophiesInput.parse(input).trophies),
-  rankPoints: (input) => {
-    const parsed = rankPointsInput.parse(input);
-    return rankPoints(parsed.outcome, parsed.kind);
-  },
-  trackStep: (input) => trackStep(trackStepInput.parse(input).rp),
   xpToNext: (input) => xpToNext(xpToNextInput.parse(input).level),
 };
 

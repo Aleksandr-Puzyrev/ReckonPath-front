@@ -9,4 +9,4 @@ const TONES: Record<string, LeagueTone> = {
   MASTER: "master",
 };
 
-export const leagueToneOf = (league: string): LeagueTone => TONES[league] ?? "bronze";
+export const leagueToneOf = (league: string): LeagueTone => TONES[league.toUpperCase()] ?? "bronze";

@@ -5,12 +5,7 @@ import { useUnistyles } from "react-native-unistyles";
 import { useDailyRecordStore } from "@entities/daily";
 import { streakForecastOf, useStreakQuery } from "@entities/streak";
 import { useAccountStore } from "@entities/session";
-import {
-  DAILY_UNLOCK_LEVEL,
-  NextDailyCountdown,
-  useDailyToday,
-  useIsDailyUnlocked,
-} from "@features/daily-today";
+import { NextDailyCountdown, useDailyToday, useDailyUnlock } from "@features/daily-today";
 import { formatDayMonth } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 
@@ -25,7 +20,7 @@ interface IDailyCard {
 const DailyCard = ({ onOpen }: IDailyCard) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
-  const isUnlocked = useIsDailyUnlocked();
+  const { isUnlocked, unlockLevel } = useDailyUnlock();
   const { todayKey, yesterdayKey } = useDailyToday();
   const record = useDailyRecordStore((state) => state.days[todayKey]);
   const { data } = useStreakQuery();
@@ -38,7 +33,7 @@ const DailyCard = ({ onOpen }: IDailyCard) => {
   const iconSize = theme.sizes.icon.xl;
 
   const statusText = () => {
-    if (!isUnlocked) return t("daily.locked", { n: DAILY_UNLOCK_LEVEL });
+    if (!isUnlocked) return t("daily.locked", { n: unlockLevel });
     if (record === undefined) return t("daily.notPlayed");
     const moves = t("daily.moves", { count: record.movesUsed });
     return record.rank === null

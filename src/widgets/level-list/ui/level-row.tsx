@@ -9,7 +9,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useUnistyles } from "react-native-unistyles";
 
-import { describeLevel } from "@entities/level";
 import { Gradient } from "@shared/ui/gradient";
 import { StarRating } from "@shared/ui/star-rating";
 import { Text } from "@shared/ui/text";
@@ -34,16 +33,12 @@ const LevelRow = ({ item, onPress }: ILevelRow) => {
   const isReducedMotion = useReducedMotion();
   const shake = useSharedValue(0);
   const shakeStyle = useAnimatedStyle(() => ({ transform: [{ translateX: shake.value }] }));
-  const { campaignLevel, state, best } = item;
-  const { level, number } = campaignLevel;
+  const { level, state } = item;
+  const { number, description, stars } = level;
   styles.useVariants({ state });
 
-  const description = describeLevel(t, level);
   const title =
-    state === "locked"
-      ? t("levels.lockedRow", { n: number, description })
-      : levelTitleOf(t, i18n.language, campaignLevel);
-  const stars = best?.stars ?? 0;
+    state === "locked" ? t("levels.lockedRow", { n: number, description }) : levelTitleOf(t, level);
   const accessibilityLabel = {
     done: t("levels.a11y.done", { n: number, stars }),
     current: t("levels.a11y.current", { n: number }),
@@ -69,7 +64,7 @@ const LevelRow = ({ item, onPress }: ILevelRow) => {
   return (
     <Animated.View style={shakeStyle}>
       <Pressable
-        testID={`level-${level.id}`}
+        testID={`level-${number}`}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: state === "locked" }}

@@ -2,11 +2,17 @@ export { apiAssetUrl, apiClient, fetchAssetJson } from "./api-client";
 export { ApiError, isApiError, isInsufficientFunds, isSessionRevoked } from "./api-error";
 export type { ApiErrorCode, ApiErrorDetails } from "./api-error";
 export { RequestTimeoutError } from "./api-fetch";
-export { accessToken, refreshAccessToken, setApiSession, useHasAccount } from "./api-session";
+export {
+  accessToken,
+  isAccessTokenExpired,
+  refreshAccessToken,
+  setApiSession,
+  useHasAccount,
+} from "./api-session";
 export type { ApiSession } from "./api-session";
 export { errorMessageKey } from "./error-message-key";
 export type { ErrorMessageKey } from "./error-message-key";
-export type { components } from "./generated/schema";
+export type { components, operations } from "./generated/schema";
 export { readData } from "./read-data";
 export { readEmpty } from "./read-empty";
 export { readErrorEnvelope } from "./read-error-envelope";

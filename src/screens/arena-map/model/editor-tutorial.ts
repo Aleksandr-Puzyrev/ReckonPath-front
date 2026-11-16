@@ -1,28 +1,38 @@
-import type { EditRefusal, PvpMap } from "@entities/arena-map";
+import type { EditRefusal, MatchFormat, PvpMap } from "@entities/arena-map";
 
 import type { EditorTool } from "./use-map-editor";
 
-export const TUTORIAL_MAP: PvpMap = {
-  rows: 5,
-  cols: 5,
-  targets: [],
-  bombs: [],
-  streams: [
-    [0, 2],
-    [1, 2],
-    [2, 2],
-  ],
-  bridges: [[1, 2]],
-  rocks: [
-    [4, 0],
-    [3, 4],
-  ],
-  fences: [
-    [
-      [3, 1],
-      [3, 2],
-    ],
-  ],
+type Cell = [number, number];
+
+const TUTORIAL_STREAM: Cell[] = [
+  [0, 2],
+  [1, 2],
+  [2, 2],
+];
+const TUTORIAL_BRIDGE: Cell = [1, 2];
+const TUTORIAL_FENCE: [Cell, Cell] = [
+  [3, 1],
+  [3, 2],
+];
+const WATER_UNDER_BRIDGE = TUTORIAL_STREAM.length - 1;
+
+// The template follows the league format: its size and only the elements its caps allow (шаблон следует формату лиги: его размер и только те элементы, что позволяют лимиты).
+export const tutorialMapOf = ({ rows, cols, caps }: MatchFormat): PvpMap => {
+  const hasStream = caps.stream >= WATER_UNDER_BRIDGE;
+  const rocks: Cell[] = [
+    [rows - 1, 0],
+    [rows - 2, cols - 1],
+  ];
+  return {
+    rows,
+    cols,
+    targets: [],
+    bombs: [],
+    streams: hasStream ? TUTORIAL_STREAM : [],
+    bridges: hasStream && caps.bridge > 0 ? [TUTORIAL_BRIDGE] : [],
+    rocks: rocks.slice(0, caps.rock),
+    fences: caps.fences > 0 ? [TUTORIAL_FENCE] : [],
+  };
 };
 
 export const TUTORIAL_TOOLS = ["target", "bomb"] as const satisfies readonly EditorTool[];

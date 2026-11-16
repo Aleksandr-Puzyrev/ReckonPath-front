@@ -22,7 +22,7 @@ import PasswordStrengthBar from "./password-strength-bar";
 import { styles } from "./sign-up-styles";
 
 interface ISignUp {
-  onBack: () => void;
+  onBack?: () => void;
   onCodeSent: (email: string, resendAfter: number) => void;
   onSignIn: () => void;
   onError: (messageKey: ErrorMessageKey) => void;

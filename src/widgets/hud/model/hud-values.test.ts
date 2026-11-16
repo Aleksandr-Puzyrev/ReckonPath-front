@@ -1,6 +1,11 @@
 import { applyTap, continueGame, createBoard, initGame, levelSchema } from "@reckon-path/engine";
 
-import { hudValuesOf, movesToneOf } from "./hud-values";
+import { playViewOfGame } from "@entities/level";
+
+import { hudValuesOf as valuesOfView, movesToneOf } from "./hud-values";
+
+const hudValuesOf = (game: Parameters<typeof playViewOfGame>[0]) =>
+  valuesOfView(playViewOfGame(game, null));
 
 const makeGame = () => {
   const level = levelSchema.parse({

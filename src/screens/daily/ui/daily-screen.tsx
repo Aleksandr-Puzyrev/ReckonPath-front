@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { useIsDailyUnlocked } from "@features/daily-today";
+import { useDailyUnlock } from "@features/daily-today";
 import { IconButton } from "@shared/ui/icon-button";
 import { Screen } from "@shared/ui/screen";
 import { Toast } from "@shared/ui/toast";
@@ -82,8 +82,11 @@ const DailyContent = () => {
 
 // A locked daily can still be reached by a link (закрытый дейли всё равно можно открыть по ссылке).
 const DailyScreen = () => {
-  const isUnlocked = useIsDailyUnlocked();
-  if (!isUnlocked) return <DailyLocked onBack={() => router.replace("/")} />;
+  const { isUnlocked, unlockLevel, isLoading } = useDailyUnlock();
+  if (isLoading) return null;
+  if (!isUnlocked) {
+    return <DailyLocked unlockLevel={unlockLevel} onBack={() => router.replace("/")} />;
+  }
   return <DailyContent />;
 };
 

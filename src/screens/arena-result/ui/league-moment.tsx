@@ -1,34 +1,37 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import type { MatchResultView } from "@entities/match";
 import { Button } from "@shared/ui/button";
 import { LeagueEmblem } from "@shared/ui/league-emblem";
 import { Text } from "@shared/ui/text";
-import { divisionNumeral, divisionStateOf, leagueToneOf } from "@widgets/arena-hero";
+import { leagueToneOf } from "@widgets/arena-hero";
 
 import { styles } from "./arena-result-styles";
+import RewardRow from "./reward-row";
 
 interface ILeagueMoment {
-  trophies: number;
-  isUp: boolean;
+  promotion: NonNullable<MatchResultView["promotion"]>;
   onNext: () => void;
 }
 
-const LeagueMoment = ({ trophies, isUp, onNext }: ILeagueMoment) => {
+const LeagueMoment = ({ promotion, onNext }: ILeagueMoment) => {
   const { t } = useTranslation();
-  const { league, division } = divisionStateOf(trophies);
+  const rewards = [
+    { kind: "coin" as const, amount: promotion.coins },
+    { kind: "emerald" as const, amount: promotion.gems },
+  ].filter(({ amount }) => amount > 0);
 
   return (
     <View style={styles.overlay} testID="league-moment" accessibilityViewIsModal>
-      <LeagueEmblem league={leagueToneOf(league)} numeral={divisionNumeral(division)} />
+      <LeagueEmblem league={leagueToneOf(promotion.league)} numeral={promotion.division} />
       <Text variant="display.m" accessibilityRole="header" style={styles.centered}>
-        {isUp ? t("league.up", { league }) : t("league.down", { league })}
+        {t("result.pvp.promotion", {
+          league: promotion.title.toUpperCase(),
+          division: promotion.division,
+        })}
       </Text>
-      {isUp ? (
-        <Text variant="body.m" style={[styles.secondary, styles.centered]}>
-          {t("league.floor", { league })}
-        </Text>
-      ) : null}
+      <RewardRow rewards={rewards} />
       <Button testID="league-next" label={t("league.next")} onPress={onNext} />
     </View>
   );

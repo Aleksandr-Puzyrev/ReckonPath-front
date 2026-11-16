@@ -1,21 +1,21 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import type { ArenaFormat } from "@entities/arena";
+import type { MatchFormat } from "@entities/match";
 import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
 
 import { styles } from "./arena-home-styles";
 
 interface IFightBlock {
-  format: ArenaFormat;
+  format: MatchFormat;
   isOnline: boolean;
   canFight: boolean;
   onFight: () => void;
-  onAsync: () => void;
+  onMapMatch: () => void;
 }
 
-const FightBlock = ({ format, isOnline, canFight, onFight, onAsync }: IFightBlock) => {
+const FightBlock = ({ format, isOnline, canFight, onFight, onMapMatch }: IFightBlock) => {
   const { t } = useTranslation();
 
   return (
@@ -37,14 +37,14 @@ const FightBlock = ({ format, isOnline, canFight, onFight, onAsync }: IFightBloc
           size="l"
           variant="secondary"
           isDisabled={!canFight}
-          onPress={onAsync}
+          onPress={onMapMatch}
         />
       </View>
       <Text variant="body.s" style={styles.secondary}>
         {t("arena.format", {
-          size: `${format.size}×${format.size}`,
+          size: `${format.rows}×${format.cols}`,
           count: format.targets,
-          sec: format.turnSec,
+          sec: format.moveSeconds,
         })}
       </Text>
     </View>

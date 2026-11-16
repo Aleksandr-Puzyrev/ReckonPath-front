@@ -1,6 +1,13 @@
 import { createBoard, levelSchema } from "@reckon-path/engine";
 
-import { canSkip, closerCells, highlightOf, isTapAllowed, stepAfterTap } from "./tutorial-steps";
+import {
+  canSkip,
+  closerCells,
+  highlightOf,
+  isTapAllowed,
+  stepAfterTap,
+  tutorialFirstCell,
+} from "./tutorial-steps";
 
 const { board } = createBoard(
   levelSchema.parse({
@@ -46,5 +53,27 @@ describe("tutorial steps (Part 4 §2.2)", () => {
     expect(canSkip("tapFirst")).toBe(true);
     expect(canSkip("tapCloser")).toBe(true);
     expect(canSkip("findAlone")).toBe(false);
+  });
+});
+
+describe("tutorialFirstCell", () => {
+  test("takes the cell left of the centre of the server's layout", () => {
+    expect(tutorialFirstCell(board)).toBe(FIRST);
+  });
+
+  test("moves off a rock to the first open cell", () => {
+    const rocky = createBoard(
+      levelSchema.parse({
+        v: 2,
+        id: "c-rock",
+        rows: 4,
+        cols: 4,
+        targets: [[1, 2]],
+        rocks: [[2, 1]],
+        probeMode: "distance",
+      }),
+    ).board;
+
+    expect(tutorialFirstCell(rocky)).toBe(0);
   });
 });

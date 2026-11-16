@@ -2,7 +2,7 @@ import type { PvpMap } from "./arena-map-type";
 import { HISTORY_STEPS, isSessionDirty, useEditorStore } from "./editor-store";
 import { emptyMap } from "./map-edit";
 
-const withTarget = (col: number): PvpMap => ({ ...emptyMap(5), targets: [[0, col]] });
+const withTarget = (col: number): PvpMap => ({ ...emptyMap(5, 5), targets: [[0, col]] });
 
 const session = () => {
   const current = useEditorStore.getState().session;
@@ -11,7 +11,7 @@ const session = () => {
 };
 
 const openNew = () =>
-  useEditorStore.getState().open("new", { name: "Карта 1", map: emptyMap(5) }, null);
+  useEditorStore.getState().open("new", { name: "Карта 1", map: emptyMap(5, 5) }, null);
 
 describe("useEditorStore", () => {
   afterEach(() => useEditorStore.getState().reset());
@@ -21,7 +21,7 @@ describe("useEditorStore", () => {
     useEditorStore.getState().apply(withTarget(1));
 
     useEditorStore.getState().undo();
-    expect(session().map).toEqual(emptyMap(5));
+    expect(session().map).toEqual(emptyMap(5, 5));
     useEditorStore.getState().redo();
 
     expect(session().map).toEqual(withTarget(1));
@@ -32,7 +32,7 @@ describe("useEditorStore", () => {
     Array.from({ length: HISTORY_STEPS + 5 }, (_, index) =>
       useEditorStore
         .getState()
-        .apply({ ...emptyMap(5), targets: [[index % 5, index % 4]], bombs: [[4, index]] }),
+        .apply({ ...emptyMap(5, 5), targets: [[index % 5, index % 4]], bombs: [[4, index]] }),
     );
 
     expect(session().past).toHaveLength(HISTORY_STEPS);
@@ -47,7 +47,7 @@ describe("useEditorStore", () => {
     store.strokeTo(withTarget(2));
     store.endStroke();
 
-    expect(session().past).toEqual([emptyMap(5)]);
+    expect(session().past).toEqual([emptyMap(5, 5)]);
   });
 
   test("keeps the unsaved draft when the same map is opened again (decision 0032 #9)", () => {
@@ -92,7 +92,7 @@ describe("useEditorStore", () => {
     const draft = {
       mapId: "map_1",
       name: "Fort",
-      map: emptyMap(5),
+      map: emptyMap(5, 5),
       saved: null,
       past: [],
       future: [],

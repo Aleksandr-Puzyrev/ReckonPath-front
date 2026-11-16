@@ -2,34 +2,33 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import type { Arena } from "@entities/arena";
 import { levelOfMap } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
+import type { QueueView } from "@entities/match";
 import { formatDuration } from "@shared/lib";
 import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
-import { leagueLabelOf } from "@widgets/arena-hero";
 import { BoardMapPreview } from "@widgets/board";
 
 import { styles } from "./arena-search-styles";
 import Radar from "./radar";
 
 interface ISearchingView {
-  arena: Arena | undefined;
+  queue: QueueView | null;
   activeMap: ArenaMap | null;
-  waitedSec: number;
-  isAsyncAvailable: boolean;
+  waitedMs: number;
+  canPlayMap: boolean;
+  isLeaving: boolean;
   onVsMap: () => void;
   onCancel: () => void;
 }
 
-const MS_PER_SECOND = 1000;
-
 const SearchingView = ({
-  arena,
+  queue,
   activeMap,
-  waitedSec,
-  isAsyncAvailable,
+  waitedMs,
+  canPlayMap,
+  isLeaving,
   onVsMap,
   onCancel,
 }: ISearchingView) => {
@@ -43,14 +42,14 @@ const SearchingView = ({
         {t("search.title")}
       </Text>
       <Text variant="number.counter" testID="search-timer">
-        {formatDuration(waitedSec * MS_PER_SECOND)}
+        {formatDuration(waitedMs)}
       </Text>
-      {arena === undefined ? null : (
+      {queue === null ? null : (
         <Text variant="body.s" style={styles.secondary}>
           {t("search.format", {
-            size: `${arena.format.size}×${arena.format.size}`,
-            league: leagueLabelOf(arena.profile.league, arena.profile.division),
-            count: arena.format.targets,
+            size: `${queue.format.rows}×${queue.format.cols}`,
+            league: queue.format.leagueTitle.toUpperCase(),
+            count: queue.format.targets,
           })}
         </Text>
       )}
@@ -66,22 +65,23 @@ const SearchingView = ({
               {t("search.myMap")}
             </Text>
             <Text variant="title.s">{activeMap.name}</Text>
-            {activeMap.botNorm === null ? null : (
+            {activeMap.botMoves === null ? null : (
               <Text variant="body.s" style={styles.secondary}>
-                {t("arena.botEstimate", { count: activeMap.botNorm })}
+                {t("arena.botEstimate", { count: activeMap.botMoves })}
               </Text>
             )}
           </View>
         </View>
       )}
       <View style={styles.actions}>
-        {isAsyncAvailable ? (
+        {canPlayMap ? (
           <Button testID="search-vs-map" label={t("search.vsMap")} onPress={onVsMap} />
         ) : null}
         <Button
           testID="search-cancel"
           label={t("common.cancel")}
           variant="ghost"
+          isDisabled={isLeaving}
           onPress={onCancel}
         />
       </View>

@@ -1,6 +1,7 @@
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useMutation } from "@tanstack/react-query";
 
 import { toCell, toIdx } from "@reckon-path/engine";
 import type { Idx } from "@reckon-path/engine";
@@ -10,6 +11,7 @@ import {
   addFence,
   checkEditorMap,
   countElements,
+  DRAW_MAP_ID,
   emptyMap,
   isMapEmpty,
   isSessionDirty,
@@ -17,27 +19,31 @@ import {
   NEW_MAP_ID,
   nextMapNumber,
   paintCell,
+  statusOfProblem,
   toggleCell,
   toggleFence,
+  gameLevelOfMap,
   TUTORIAL_MAP_ID,
   useArenaMapsQuery,
   useEditorStore,
 } from "@entities/arena-map";
 import type { CellTool, EditRefusal, EditResult } from "@entities/arena-map";
+import { chooseMatchMapMutationOptions, useMatchStore } from "@entities/match";
+import { useSeenGuides } from "@features/mark-guides-seen";
 import { useRandomArenaMap } from "@features/random-arena-map";
 import { useSaveArenaMap } from "@features/save-arena-map";
-import { useIsOnline } from "@shared/api";
+import { errorMessageKey, useIsOnline } from "@shared/api";
+import { stepLabelOf } from "@widgets/arena-hero";
 import { useBoardFx } from "@widgets/board";
 
 import {
   TUTORIAL_BOMBS,
-  TUTORIAL_MAP,
   tutorialHintKey,
+  tutorialMapOf,
   tutorialRefusalKey,
 } from "./editor-tutorial";
 import { statusTextOf } from "./status-text";
 import { useBotCheck } from "./use-bot-check";
-import { useFinishTutorial } from "./use-finish-tutorial";
 
 export type EditorTool = CellTool | "fence";
 export type EditorDialog = "random" | "exit" | "rename" | null;
@@ -45,12 +51,17 @@ export type ReadyMapEditor = Extract<ReturnType<typeof useMapEditor>, { isReady:
 
 const PAINT_TOOLS: ReadonlySet<EditorTool> = new Set(["stream", "rock", "erase"]);
 
-export const useMapEditor = (id: string, onToast: (text: string) => void) => {
+export const useMapEditor = (
+  id: string,
+  drawMatchId: string | null,
+  onToast: (text: string) => void,
+) => {
   const { t } = useTranslation();
   const arena = useArenaQuery();
   const maps = useArenaMapsQuery();
   const isOnline = useIsOnline();
   const fx = useBoardFx();
+  const seen = useSeenGuides();
   const session = useEditorStore((state) => state.session);
   const strokeBase = useEditorStore((state) => state.strokeBase);
   const [tool, setTool] = useState<EditorTool>("target");
@@ -60,29 +71,36 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
   const [savedNewId, setSavedNewId] = useState<string | null>(null);
   const mapId = savedNewId ?? id;
   const isTutorial = id === TUTORIAL_MAP_ID;
+  const isDraw = id === DRAW_MAP_ID;
   const [hasLeft, setHasLeft] = useState(false);
-  const check = useBotCheck();
-  const format = arena.data?.format;
-  const existing = maps.data?.find((map) => map.id === mapId);
-  const formatMaps = (maps.data ?? []).filter((map) => map.format === format?.size);
+  const check = useBotCheck((messageKey) => onToast(t(messageKey)));
+  const matchView = useMatchStore((state) => state.view);
+  const drawMatch =
+    isDraw && matchView?.id === drawMatchId && matchView.status === "prepare" ? matchView : null;
+  const isDrawOver = isDraw && drawMatch === null;
+  const hasClosedDrawRef = useRef(false);
+  const format = maps.data?.format;
+  const existing = maps.data?.maps.find((map) => map.id === mapId);
+  const savedMaps = maps.data?.maps ?? [];
   const nameOf = (n: number) => t("map.defaultName", { n });
-  const finishTutorial = useFinishTutorial((messageKey) => onToast(t(messageKey)));
 
   useEffect(() => {
-    if (format === undefined || hasLeft) return;
+    if (format === undefined || hasLeft || isDrawOver) return;
     if (mapId === TUTORIAL_MAP_ID) {
-      const tutorial = { name: t("map.tutorial.title"), map: TUTORIAL_MAP };
+      const tutorial = { name: t("map.tutorial.title"), map: tutorialMapOf(format) };
       useEditorStore.getState().open(mapId, tutorial, null);
       return;
     }
-    if (mapId === NEW_MAP_ID) {
+    if (mapId === NEW_MAP_ID || mapId === DRAW_MAP_ID) {
       const name = nameOf(
         nextMapNumber(
-          formatMaps.map((map) => map.name),
+          savedMaps.map((map) => map.name),
           nameOf,
         ),
       );
-      useEditorStore.getState().open(mapId, { name, map: emptyMap(format.size) }, null);
+      useEditorStore
+        .getState()
+        .open(mapId, { name, map: emptyMap(format.rows, format.cols) }, null);
       return;
     }
     if (existing === undefined) return;
@@ -96,6 +114,14 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
     router.back();
   };
 
+  // At the prepare deadline the server picks a map by itself, so the drawing is over with the phase (на дедлайне подготовки сервер сам выбирает карту, поэтому рисование заканчивается вместе с фазой).
+  useEffect(() => {
+    if (!isDrawOver || hasLeft || hasClosedDrawRef.current) return;
+    hasClosedDrawRef.current = true;
+    useEditorStore.getState().reset();
+    router.back();
+  }, [isDrawOver, hasLeft]);
+
   const saving = useSaveArenaMap({
     onSaved: (savedId) => {
       useEditorStore.getState().markSaved(savedId);
@@ -106,17 +132,27 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
     onMapsLimit: () => onToast(t("map.mapsLimit")),
     onError: (messageKey) => onToast(t(messageKey)),
   });
+  // A map drawn in the prepare phase goes to the match, not to the saved maps (карта, нарисованная на подготовке, уходит в матч, а не в сохранённые).
+  const drawing = useMutation({
+    ...chooseMatchMapMutationOptions(),
+    onSuccess: (view) => {
+      useMatchStore.getState().receive(view);
+      leave();
+    },
+    onError: (error) => onToast(t(errorMessageKey(error))),
+  });
   const random = useRandomArenaMap({
     onMap: (map) => useEditorStore.getState().apply(map),
     onError: (messageKey) => onToast(t(messageKey)),
   });
 
   if (format === undefined || session === null || session.mapId !== mapId) {
-    const isMissing = id !== NEW_MAP_ID && maps.data !== undefined && existing === undefined;
+    const isMissing =
+      id !== NEW_MAP_ID && !isDraw && maps.data !== undefined && existing === undefined;
     return {
       isReady: false as const,
-      isPending: arena.isPending || maps.isPending,
-      isFailed: arena.isError || maps.isError || isMissing,
+      isPending: maps.isPending,
+      isFailed: maps.isError || isMissing,
       handleRetry: () => {
         void arena.refetch();
         void maps.refetch();
@@ -126,8 +162,12 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
   }
 
   const { map } = session;
-  // The norm runs a solver, so a drag keeps the status of the map it started from (норма запускает решатель, поэтому протяжка держит статус карты, с которой началась).
-  const status = checkEditorMap(strokeBase ?? map, format);
+  // A drag keeps the status of the map it started from; a server check that found a problem wins over the live one (протяжка держит статус карты, с которой началась; проблема, найденная проверкой сервера, важнее живой проверки).
+  const problem = check.check?.problem ?? null;
+  const status =
+    problem === null
+      ? checkEditorMap(strokeBase ?? map, format)
+      : statusOfProblem(problem, map, format);
   const errorCells = "cells" in status ? status.cells.map((cell) => toIdx(map.cols, cell)) : [];
   const needInternet = () => onToast(t("arena.needInternet"));
   const isDirty = isSessionDirty(session);
@@ -166,21 +206,33 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
   const isStream = (row: number, col: number) =>
     (map.streams ?? []).some(([r, c]) => r === row && c === col);
 
-  const save = (onFinish?: () => void) =>
+  const save = (onFinish?: () => void) => {
+    if (isDraw) {
+      if (drawMatch === null) leave();
+      else
+        drawing.mutate({
+          id: drawMatch.id,
+          source: { source: "draw", level: gameLevelOfMap(map) },
+        });
+      return;
+    }
     saving.save(
       mapId === NEW_MAP_ID || mapId === TUTORIAL_MAP_ID ? null : mapId,
-      { name: session.name, format: format.size, map },
+      session.name,
+      map,
       onFinish,
     );
+  };
 
   return {
     isReady: true as const,
     session,
     format,
-    profile: arena.data?.profile,
+    leagueLabel: arena.data === undefined ? "" : stepLabelOf(arena.data.league),
     tool,
     gesture: tool === "fence" ? ("edge" as const) : ("cell" as const),
     isTutorial,
+    prepareDeadline: drawMatch?.deadline ?? null,
     tutorialHintKey: tutorialHintKey(counts, formatLimits.targets),
     counts,
     limits: isTutorial ? { ...formatLimits, bombs: TUTORIAL_BOMBS } : formatLimits,
@@ -193,7 +245,7 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
     dialog,
     isDirty,
     isOnline,
-    isSaving: saving.isPending || finishTutorial.isPending,
+    isSaving: saving.isPending || drawing.isPending,
     isRandomPending: random.isPending,
     handleToolSelect: setTool,
     handleStrokeStart: () => {
@@ -239,22 +291,30 @@ export const useMapEditor = (id: string, onToast: (text: string) => void) => {
     },
     handleClear: () => {
       check.stop();
-      useEditorStore.getState().apply(emptyMap(format.size));
+      useEditorStore.getState().apply(emptyMap(format.rows, format.cols));
     },
     handleRandom: () => {
       if (!isOnline) needInternet();
-      else if (isMapEmpty(map)) random.requestRandom(format.size);
+      else if (isMapEmpty(map)) random.requestRandom();
       else setDialog("random");
     },
     handleRandomConfirm: () => {
       setDialog(null);
       check.stop();
-      random.requestRandom(format.size);
+      random.requestRandom();
     },
-    handleCheck: () => check.start(map),
+    handleCheck: () => {
+      if (isOnline) check.start(map);
+      else needInternet();
+    },
     handleSave: () => {
       if (!isTutorial) save();
-      else if (status.kind === "valid") save(() => finishTutorial.finish(leave));
+      else if (status.kind === "valid") {
+        save(() => {
+          seen.markArenaEditorSeen();
+          leave();
+        });
+      }
     },
     handleBack: () => {
       if (isTutorial) return;

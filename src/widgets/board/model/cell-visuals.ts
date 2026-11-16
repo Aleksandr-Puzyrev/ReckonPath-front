@@ -1,5 +1,7 @@
-import { isStale } from "@reckon-path/engine";
-import type { Direction, GameState, Heat, HotColdCompare, Idx, Reveal } from "@reckon-path/engine";
+import type { Direction, Heat, HotColdCompare, Idx, Reveal } from "@reckon-path/engine";
+
+import { isStaleIn } from "@entities/level";
+import type { PlayView } from "@entities/level";
 
 export type CellContent =
   | { type: "hidden"; hasFlag: boolean; ghost: "target" | "bomb" | "buoy" | null }
@@ -8,6 +10,8 @@ export type CellContent =
   | { type: "hotcold"; cmp: HotColdCompare }
   | { type: "target"; order: number | null }
   | { type: "bomb" };
+
+type VisualGame = Pick<PlayView, "board" | "rules" | "revealed" | "epoch">;
 
 export type CellEmphasis = "none" | "dim" | "highlight" | "error";
 
@@ -43,7 +47,7 @@ const contentOf = (reveal: Reveal): CellContent => {
 };
 
 // Fog keeps the last N probe answers in tap order; beacons are never fogged (туман оставляет последние N ответов в порядке тапов; маяки не скрываются).
-const visibleUnderFog = (game: GameState) => {
+const visibleUnderFog = (game: VisualGame) => {
   const fog = game.rules.fog;
   if (fog === null) return null;
   const probes = [...game.revealed.entries()]
@@ -52,14 +56,14 @@ const visibleUnderFog = (game: GameState) => {
   return new Set(probes.slice(-fog));
 };
 
-const ghostOf = (game: GameState, idx: Idx) => {
+const ghostOf = (game: VisualGame, idx: Idx) => {
   if (game.board.targets.includes(idx)) return "target";
   if (game.board.bombs.includes(idx)) return "bomb";
   if (game.board.buoys.includes(idx)) return "buoy";
   return null;
 };
 
-const hiddenContent = (game: GameState, idx: Idx, options: VisualOptions): CellContent => ({
+const hiddenContent = (game: VisualGame, idx: Idx, options: VisualOptions): CellContent => ({
   type: "hidden",
   hasFlag: options.flags.includes(idx),
   ghost: options.showHidden ? ghostOf(game, idx) : null,
@@ -71,7 +75,7 @@ const emphasisOf = (idx: Idx, { highlight, errors }: VisualOptions): CellEmphasi
   return highlight.includes(idx) ? "highlight" : "dim";
 };
 
-export const buildCellVisuals = (game: GameState, options: VisualOptions): CellVisual[] => {
+export const buildCellVisuals = (game: VisualGame, options: VisualOptions): CellVisual[] => {
   const visible = visibleUnderFog(game);
 
   return game.board.kinds.map((_, idx) => {
@@ -94,7 +98,7 @@ export const buildCellVisuals = (game: GameState, options: VisualOptions): CellV
     return {
       content: contentOf(reveal),
       emphasis,
-      isStale: isStale(game, reveal),
+      isStale: isStaleIn(game, reveal),
       isFogged: visible !== null && isProbe(reveal) && !isBeacon && !visible.has(idx),
       isLast: idx === options.lastCell,
       hasBombNear: "bombNear" in reveal && reveal.bombNear,

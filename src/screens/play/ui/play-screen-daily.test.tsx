@@ -6,12 +6,12 @@ import type { LevelInput } from "@reckon-path/engine";
 
 import { useInterstitialStore } from "@entities/ad";
 import { dailyDayQueryOptions, useDailyRecordStore } from "@entities/daily";
-import { CAMPAIGN_LEVELS, useGameSessionStore } from "@entities/level";
+import { campaignQueryOptions, useGameSessionStore } from "@entities/level";
 import { useOutboxStore } from "@entities/outbox";
-import { useProgressStore } from "@entities/progress";
 import { RULE_DEMOS, isRuleCardId, useRulesStore } from "@entities/rules";
 import { unlockTapInput } from "@features/tap-cell";
 import { i18n } from "@shared/i18n";
+import { mockOverview, mockServer, passMockLevels } from "@shared/test-utils/api-mock";
 
 import PlayScreen from "./play-screen";
 
@@ -54,6 +54,8 @@ const renderPlay = async () => {
     leaderboardPreview: { top: [], median: 9 },
     me: { played: false },
   });
+  passMockLevels(6);
+  queryClient.setQueryData(campaignQueryOptions().queryKey, mockOverview("ru"));
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
@@ -84,19 +86,15 @@ describe("PlayScreen in the daily", () => {
     useGameSessionStore.getState().reset();
     useOutboxStore.getState().reset();
     useDailyRecordStore.getState().reset();
-    useProgressStore
-      .getState()
-      .replaceBest(
-        Object.fromEntries(
-          CAMPAIGN_LEVELS.slice(0, 6).map(({ level }) => [level.id, { stars: 3, moves: 5 }]),
-        ),
-      );
     useRulesStore.getState().reset();
     useRulesStore.getState().markSeen(Object.keys(RULE_DEMOS).filter(isRuleCardId));
     useRulesStore.getState().skipTutorial();
   });
 
-  afterEach(() => jest.useRealTimers());
+  afterEach(() => {
+    mockServer.reset();
+    jest.useRealTimers();
+  });
 
   test("titles the game with the day and notes the timer in the pause", async () => {
     await renderDaily();
@@ -125,14 +123,13 @@ describe("PlayScreen in the daily", () => {
     expect(useDailyRecordStore.getState().days[DAY]?.result).toBe("lost");
   });
 
-  test("shows the daily result after a win and keeps the campaign untouched", async () => {
+  test("shows the daily result after a win", async () => {
     await renderDaily();
     await tap(TARGET);
     await settle();
 
     expect(screen.getByText("Пеленг дня пройден")).toBeOnTheScreen();
     expect(useOutboxStore.getState().attempts[0]).toMatchObject({ mode: "daily", durationMs: 0 });
-    expect(Object.keys(useProgressStore.getState().best)).toHaveLength(6);
   });
 
   test("does not count the daily for interstitials (decision 0027 #1)", async () => {

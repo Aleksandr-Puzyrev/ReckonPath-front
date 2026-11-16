@@ -74,6 +74,23 @@ describe("useSystemSignalRefetch", () => {
     expect(useBanStore.getState().ban).toBeNull();
   });
 
+  test("re-reads the player's flags after an arena ban from an action (decision 0060 #14)", async () => {
+    const queryClient = await setup();
+    const invalidate = jest.spyOn(queryClient, "invalidateQueries");
+    mockServer.use(
+      http.post(mockUrl("/arena/queue"), () =>
+        HttpResponse.json(
+          { error: { code: "banned", details: { scope: "arena", until: null, reason: "x" } } },
+          { status: 403 },
+        ),
+      ),
+    );
+
+    await apiClient.POST("/arena/queue");
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["me"], exact: true });
+  });
+
   test("re-reads the bootstrap after a 426 from another request (NET-03)", async () => {
     const queryClient = await setup();
     const bootstrap = countBootstrapRequests();

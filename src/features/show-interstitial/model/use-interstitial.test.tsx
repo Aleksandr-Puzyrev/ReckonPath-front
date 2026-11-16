@@ -1,33 +1,29 @@
-import { act, cleanup, renderHook } from "@testing-library/react-native";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react-native";
 
 import { useInterstitialStore } from "@entities/ad";
-import { CAMPAIGN_LEVELS } from "@entities/level";
-import { useProgressStore } from "@entities/progress";
+import { useCampaignQuery } from "@entities/level";
 import { adsProvider } from "@shared/ads";
-import { mockServer } from "@shared/test-utils/api-mock";
+import { mockServer, passMockLevels } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import { useInterstitial } from "./use-interstitial";
 
 const HOUR = 3_600_000;
 
-const reachLevel = (number: number) =>
-  useProgressStore
-    .getState()
-    .replaceBest(
-      Object.fromEntries(
-        CAMPAIGN_LEVELS.slice(0, number - 1).map(({ level }) => [level.id, { stars: 3, moves: 5 }]),
-      ),
-    );
+const reachLevel = (number: number) => passMockLevels(number - 1);
 
-const renderInterstitial = () =>
-  renderHook(() => useInterstitial(), { wrapper: createQueryWrapper() });
+const renderInterstitial = async () => {
+  const hook = await renderHook(() => ({ ads: useInterstitial(), campaign: useCampaignQuery() }), {
+    wrapper: createQueryWrapper(),
+  });
+  await waitFor(() => expect(hook.result.current.campaign.data).toBeDefined());
+  return hook;
+};
 
 describe("useInterstitial", () => {
   beforeEach(() => {
     useInterstitialStore.getState().reset();
     useInterstitialStore.getState().markLaunched(Date.now() - HOUR);
-    useProgressStore.getState().reset();
   });
 
   // Unmounted first, so the remote config still loading cannot update it after the test (сначала размонтируется, чтобы ещё идущий remote config не обновил хук после теста).
@@ -43,9 +39,9 @@ describe("useInterstitial", () => {
     const { result } = await renderInterstitial();
 
     for (let level = 0; level < 3; level += 1) {
-      await act(async () => result.current.finishLevel());
+      await act(async () => result.current.ads.finishLevel());
     }
-    await act(() => result.current.showIfDue());
+    await act(() => result.current.ads.showIfDue());
 
     expect(show).toHaveBeenCalled();
     expect(useInterstitialStore.getState().finishedLevels).toBe(0);
@@ -56,9 +52,9 @@ describe("useInterstitial", () => {
     const load = jest.spyOn(adsProvider, "loadInterstitial");
     const { result } = await renderInterstitial();
 
-    await act(async () => result.current.finishLevel());
+    await act(async () => result.current.ads.finishLevel());
     expect(load).not.toHaveBeenCalled();
-    await act(async () => result.current.finishLevel());
+    await act(async () => result.current.ads.finishLevel());
 
     expect(load).toHaveBeenCalledTimes(1);
   });
@@ -69,9 +65,9 @@ describe("useInterstitial", () => {
     const { result } = await renderInterstitial();
 
     for (let level = 0; level < 3; level += 1) {
-      await act(async () => result.current.finishLevel());
+      await act(async () => result.current.ads.finishLevel());
     }
-    await act(() => result.current.showIfDue());
+    await act(() => result.current.ads.showIfDue());
 
     expect(show).not.toHaveBeenCalled();
   });
@@ -82,9 +78,9 @@ describe("useInterstitial", () => {
     const { result } = await renderInterstitial();
 
     for (let level = 0; level < 3; level += 1) {
-      await act(async () => result.current.finishLevel());
+      await act(async () => result.current.ads.finishLevel());
     }
-    await act(() => result.current.showIfDue());
+    await act(() => result.current.ads.showIfDue());
 
     expect(useInterstitialStore.getState().finishedLevels).toBe(3);
   });
@@ -96,9 +92,9 @@ describe("useInterstitial", () => {
     const { result } = await renderInterstitial();
 
     for (let level = 0; level < 3; level += 1) {
-      await act(async () => result.current.finishLevel());
+      await act(async () => result.current.ads.finishLevel());
     }
-    await act(() => result.current.showIfDue());
+    await act(() => result.current.ads.showIfDue());
 
     expect(show).not.toHaveBeenCalled();
   });
@@ -111,9 +107,9 @@ describe("useInterstitial", () => {
     const { result } = await renderInterstitial();
 
     for (let level = 0; level < 3; level += 1) {
-      await act(async () => result.current.finishLevel());
+      await act(async () => result.current.ads.finishLevel());
     }
-    await act(() => result.current.showIfDue());
+    await act(() => result.current.ads.showIfDue());
 
     expect(show).not.toHaveBeenCalled();
   });
@@ -124,7 +120,7 @@ describe("useInterstitial", () => {
     const { result } = await renderInterstitial();
 
     for (let level = 0; level < 6; level += 1) {
-      await act(async () => result.current.finishLevel());
+      await act(async () => result.current.ads.finishLevel());
     }
 
     expect(load).toHaveBeenCalledTimes(1);
@@ -138,7 +134,7 @@ describe("useInterstitial", () => {
     const { result } = await renderInterstitial();
 
     for (let level = 0; level < 3; level += 1) {
-      await act(async () => result.current.finishLevel());
+      await act(async () => result.current.ads.finishLevel());
     }
 
     expect(load).toHaveBeenCalledTimes(2);

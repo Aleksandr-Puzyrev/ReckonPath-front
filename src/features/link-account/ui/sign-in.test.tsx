@@ -1,7 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
 import { useOutboxStore } from "@entities/outbox";
-import { useProgressStore } from "@entities/progress";
 import { useAccountStore, useSessionStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
 import { mockServer } from "@shared/test-utils/api-mock";
@@ -33,11 +32,10 @@ const signIn = async (password: string) => {
 describe("SignIn", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
 
-  // Before each test, not after: the mounted form listens to the progress (до каждого теста, а не после: смонтированная форма слушает прогресс).
+  // Before each test, not after: the mounted form listens to the stores (до каждого теста, а не после: смонтированная форма слушает сторы).
   beforeEach(() => {
     useSessionStore.getState().reset();
     useAccountStore.getState().reset();
-    useProgressStore.getState().reset();
     useOutboxStore.getState().reset();
   });
 
@@ -63,15 +61,13 @@ describe("SignIn", () => {
     expect(await screen.findByText("Неверный логин или пароль")).toBeOnTheScreen();
   });
 
-  test("signs in keeping this device's progress (decision 0050 #4)", async () => {
-    useProgressStore.getState().replaceBest({ "c-1": { stars: 3, moves: 1 } });
+  test("signs in with the right password", async () => {
     const handlers = callbacks();
     await renderSignIn(handlers);
 
     await signIn("Signal2026");
 
     expect(handlers.onSignedIn).toHaveBeenCalled();
-    expect(useProgressStore.getState().best).toEqual({ "c-1": { stars: 3, moves: 1 } });
   });
 
   test("asks for an e-mail, not a nickname (decision 0050 #3)", async () => {

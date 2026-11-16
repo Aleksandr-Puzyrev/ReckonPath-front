@@ -11,15 +11,17 @@ import { styles } from "./gradient-styles";
 
 export type GradientName = keyof AppTheme["gradients"];
 
-interface IGradient {
-  name: GradientName;
-  radius?: number;
-}
+type IGradient = { radius?: number } & (
+  { name: GradientName; colors?: never } | { colors: readonly string[]; name?: never }
+);
 
-const Gradient = ({ name, radius = 0 }: IGradient) => {
+// Server colours (world covers) are content, like skins, and run along the world tokens' angle (цвета с сервера — контент, как скины, и идут под углом токенов миров).
+const SERVER_ANGLE = 135;
+
+const Gradient = ({ name, colors, radius = 0 }: IGradient) => {
   const { theme } = useUnistyles();
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const gradient = theme.gradients[name];
+  const gradient = name === undefined ? { colors, angle: SERVER_ANGLE } : theme.gradients[name];
   const { start, end } = gradientPoints(gradient.angle, size.width, size.height);
 
   const handleLayout = ({ nativeEvent }: LayoutChangeEvent) =>

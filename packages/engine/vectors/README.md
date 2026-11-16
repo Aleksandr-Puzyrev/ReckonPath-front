@@ -34,7 +34,7 @@ Coordinates are `[row, col]`, zero-based. Levels use the level v2 format (`contr
 
 ## `kind: "validate"`
 
-`{ level, context, expect: { codes: [...] } }` — the validator must return exactly this set of codes. `context`: `{ "kind": "campaign" | "custom" | "daily" }` or `{ "kind": "pvp", "format": { "size", "targets", "limits" } }`.
+`{ level, context, expect: { codes: [...] } }` — the validator must return exactly this set of codes. `context`: `{ "kind": "campaign" | "custom" | "daily" }` or `{ "kind": "pvp", "format": { "rows", "cols", "targets", "limits" } }`.
 
 ## `kind: "formula"`
 

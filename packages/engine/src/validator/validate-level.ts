@@ -20,7 +20,8 @@ import type { Cell } from "../model/types";
 export type PvpElement = "fences" | "streams" | "heavy" | "rocks" | "bridges" | "bombs";
 
 export interface PvpFormat {
-  size: number;
+  rows: number;
+  cols: number;
   targets: number;
   limits: Partial<Record<PvpElement, number>>;
 }
@@ -146,7 +147,7 @@ const findDisconnected = (level: NormalizedLevel): Cell[] => {
 const checkSize: Check = ({ rows, cols }, context) => {
   const isInRange = [rows, cols].every((size) => size >= MIN_BOARD_SIZE && size <= MAX_BOARD_SIZE);
   const matchesFormat =
-    context.kind !== "pvp" || (rows === context.format.size && cols === context.format.size);
+    context.kind !== "pvp" || (rows === context.format.rows && cols === context.format.cols);
   return isInRange && matchesFormat ? [] : [{ code: "SIZE" }];
 };
 
@@ -210,9 +211,12 @@ const checkCounts: Check = ({ rows, cols, bombs, rocks }, context) => {
 const checkPvp: Check = (level, context) => {
   if (context.kind !== "pvp") return [];
 
+  // A bridge lies on a stream here, but the backend counts it apart from the water (здесь мост лежит на ручье, но бэкенд считает его отдельно от воды).
+  const bridgeKeys = new Set(level.bridges.map(cellKey));
+  const water = level.streams.filter((cell) => !bridgeKeys.has(cellKey(cell)));
   const counts = [
     ["fences", level.fences.length],
-    ["streams", level.streams.length],
+    ["streams", water.length],
     ["heavy", level.heavy.length],
     ["rocks", level.rocks.length],
     ["bridges", level.bridges.length],

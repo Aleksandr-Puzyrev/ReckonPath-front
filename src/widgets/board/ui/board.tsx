@@ -6,7 +6,7 @@ import { useUnistyles } from "react-native-unistyles";
 
 import type { Idx } from "@reckon-path/engine";
 
-import { useGameSessionStore } from "@entities/level";
+import type { PlayView } from "@entities/level";
 
 import { computeBoardGeometry } from "../model/board-geometry";
 import { buildCellVisuals } from "../model/cell-visuals";
@@ -22,6 +22,8 @@ import { styles } from "./board-styles";
 import BoardTooltip from "./board-tooltip";
 
 interface IBoard {
+  view: PlayView;
+  flags: readonly Idx[];
   size: number;
   fx: BoardFx;
   showHidden: boolean;
@@ -35,14 +37,9 @@ interface Tooltip {
   text: string;
 }
 
-const lastTappedCell = () => {
-  const taps = useGameSessionStore
-    .getState()
-    .actions.flatMap((action) => (action.type === "tap" ? [action.cell] : []));
-  return taps.at(-1) ?? null;
-};
-
 const Board = ({
+  view,
+  flags,
   size,
   fx,
   showHidden,
@@ -53,22 +50,14 @@ const Board = ({
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const { isCoordinatesOn, boardSize } = useCoordinatesSize(size);
-  const board = useGameSessionStore((state) => state.game?.board);
-  const visuals = useSharedValue<CellVisual[]>([]);
+  const cells = buildCellVisuals(view, { flags, lastCell: view.lastCell, showHidden, highlight });
+  const visuals = useSharedValue<CellVisual[]>(cells);
   const [tooltip, setTooltip] = useState<Tooltip | null>(null);
   const [isScreenReader, setIsScreenReader] = useState(false);
 
   useEffect(() => {
-    const update = () => {
-      const { game, flags } = useGameSessionStore.getState();
-      if (game === null) return;
-      visuals.set(
-        buildCellVisuals(game, { flags, lastCell: lastTappedCell(), showHidden, highlight }),
-      );
-    };
-    update();
-    return useGameSessionStore.subscribe(update);
-  }, [visuals, showHidden, highlight]);
+    visuals.set(cells);
+  }, [visuals, cells]);
 
   useEffect(() => {
     void AccessibilityInfo.isScreenReaderEnabled().then(setIsScreenReader);
@@ -85,12 +74,11 @@ const Board = ({
     return () => clearTimeout(timer);
   }, [tooltip, theme.motion.toast.duration]);
 
-  if (board === undefined) return null;
+  const { board } = view;
   const geometry = computeBoardGeometry(board.rows, board.cols, boardSize);
 
   const handleCellPress = (idx: Idx) => {
-    const { game } = useGameSessionStore.getState();
-    const text = game === null ? null : describeRevealedCell(t, game, idx);
+    const text = describeRevealedCell(t, view, idx);
     setTooltip(text === null ? null : { idx, text });
     onCellPress(idx);
   };
@@ -115,6 +103,8 @@ const Board = ({
       )}
       {isScreenReader ? (
         <BoardA11yOverlay
+          view={view}
+          flags={flags}
           geometry={geometry}
           onCellPress={handleCellPress}
           onCellLongPress={onCellLongPress}

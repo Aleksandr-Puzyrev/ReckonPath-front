@@ -4,10 +4,8 @@ import type { ReactNode } from "react";
 
 import { useAccountStore } from "@entities/session";
 import { useDailyRecordStore } from "@entities/daily";
-import { CAMPAIGN_LEVELS } from "@entities/level";
-import { useProgressStore } from "@entities/progress";
 import { i18n } from "@shared/i18n";
-import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import { mockServer, mockUrl, passMockLevels } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import DailyScreen from "./daily-screen";
@@ -25,14 +23,7 @@ jest.mock("expo-router", () => ({
 }));
 jest.mock("@widgets/board", () => ({ BoardPreview: () => null }));
 
-const unlockDaily = () =>
-  useProgressStore
-    .getState()
-    .replaceBest(
-      Object.fromEntries(
-        CAMPAIGN_LEVELS.slice(0, 6).map(({ level }) => [level.id, { stars: 3, moves: 5 }]),
-      ),
-    );
+const unlockDaily = () => passMockLevels(6);
 
 const serveStreak = (overrides: Record<string, unknown>) =>
   mockServer.use(
@@ -44,6 +35,7 @@ const serveStreak = (overrides: Record<string, unknown>) =>
 const renderScreen = async (wrapper: ({ children }: { children: ReactNode }) => ReactNode) => {
   await render(<DailyScreen />, { wrapper });
   await act(() => jest.advanceTimersByTimeAsync(0));
+  await waitFor(() => expect(screen.toJSON()).not.toBeNull());
 };
 
 describe("DailyScreen", () => {
@@ -51,7 +43,6 @@ describe("DailyScreen", () => {
 
   beforeEach(() => {
     jest.useFakeTimers({ now: Date.UTC(2026, 8, 28, 12) });
-    useProgressStore.getState().reset();
     useDailyRecordStore.getState().reset();
   });
 
@@ -61,10 +52,10 @@ describe("DailyScreen", () => {
     jest.useRealTimers();
   });
 
-  test("is closed before campaign level 6", async () => {
+  test("is closed before the server opens it (decision 0060 #5)", async () => {
     await renderScreen(createQueryWrapper());
 
-    expect(screen.getByText("Откроется после уровня 6")).toBeOnTheScreen();
+    expect(await screen.findByText("Откроется после уровня 6")).toBeOnTheScreen();
   });
 
   test("shows the day, the streak, the calendar and the day's top", async () => {

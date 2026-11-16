@@ -1,23 +1,13 @@
 import type { HeatConfig } from "../model/types";
 
-export interface RatingConfig {
-  base: number;
-  divisor: number;
-  min: number;
-  max: number;
-  bronzeLossCap: number;
-}
-
 export interface EngineConfig {
   heat: HeatConfig;
   continueBonusMoves: number;
-  rating: RatingConfig;
 }
 
 export const DEFAULT_ENGINE_CONFIG: EngineConfig = {
   heat: { hotPct: 0.2, warmPct: 0.45 },
   continueBonusMoves: 3,
-  rating: { base: 30, divisor: 25, min: 10, max: 50, bronzeLossCap: 15 },
 };
 
 export const BUOY_BONUS_MOVES = 3;

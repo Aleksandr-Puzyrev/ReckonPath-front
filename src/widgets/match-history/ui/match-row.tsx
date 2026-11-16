@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import type { MatchSummary } from "@entities/match";
+import type { HistoryItem } from "@entities/match";
 import { Gradient } from "@shared/ui/gradient";
 import { Text } from "@shared/ui/text";
 
@@ -12,7 +12,7 @@ import { matchLineOf } from "../model/match-line-of";
 import { styles } from "./match-history-styles";
 
 interface IMatchRow {
-  match: MatchSummary;
+  match: HistoryItem;
   onOpen: (matchId: string) => void;
 }
 
@@ -25,29 +25,29 @@ const MatchRow = ({ match, onOpen }: IMatchRow) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const line = matchLineOf(match, t);
-  const delta = formatTrophyDelta(match.trophiesDelta);
-  styles.useVariants({ tone: toneOf(match.trophiesDelta) });
+  const delta = formatTrophyDelta(match.trophies);
+  styles.useVariants({ tone: toneOf(match.trophies) });
 
   return (
     <Pressable
       testID={`match-row-${match.matchId}`}
       accessibilityRole="button"
-      accessibilityLabel={`${match.opponent.nickname}, ${line}, ${delta}`}
+      accessibilityLabel={`${match.rival.name}, ${line}, ${delta}`}
       onPress={() => onOpen(match.matchId)}
       style={styles.row}
     >
       <View style={styles.avatar}>
         <Gradient name="primary" radius={theme.radius.m} />
         <Text variant="title.s" style={styles.initial}>
-          {match.opponent.nickname.slice(0, 1).toUpperCase()}
+          {match.rival.name.slice(0, 1).toUpperCase()}
         </Text>
       </View>
       <View style={styles.texts}>
         <View style={styles.name}>
           <Text variant="title.s" numberOfLines={1}>
-            {match.opponent.nickname}
+            {match.rival.name}
           </Text>
-          {match.opponent.isBot ? (
+          {match.rival.bot === true || match.kind === "bot" ? (
             <View style={styles.badge}>
               <Text variant="caption" style={styles.secondary}>
                 {t("arena.history.bot")}

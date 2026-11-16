@@ -1,89 +1,39 @@
 import { http, HttpResponse } from "msw/http";
-import { z } from "zod";
 
-import type { components } from "../generated/schema";
-
-import { mockActiveMapId } from "./arena-map-handlers";
-import { mockPassedLevels } from "./attempts-handlers";
-import { ARENA_FORMAT } from "./mock-arena-format";
+import { mockArenaMaps } from "./arena-map-handlers";
 import {
-  claimMockLastSeason,
+  arenaHomeMock,
+  claimMockPastSeason,
   claimMockStep,
-  mockArenaProfile,
-  mockLastSeason,
-  mockMatchHistory,
-  mockOnboardingDone,
-  mockSeasonTrack,
-  completeMockOnboarding,
-} from "./mock-arena-profile";
-import { mockWallet } from "./mock-wallet";
+  markMockRulesSeen,
+  mockSeason,
+} from "./mock-arena";
 import { mockUrl } from "./mock-url";
 
-type Arena = components["schemas"]["Arena"];
-
-const ARENA_UNLOCK_LEVEL = 12;
-const SEASON_DAYS = 28;
-const MOCK_SEASON_ID = 2;
-const DAY_MS = 86_400_000;
-const HISTORY_PAGE = 20;
-const HTTP_BAD_REQUEST = 400;
+const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
+const HTTP_CONFLICT = 409;
 
-const claimSchema = z.object({ step: z.number().int() });
-
-export const arenaMock = (now = Date.now()): Arena => ({
-  profile: mockArenaProfile(),
-  season: {
-    id: MOCK_SEASON_ID,
-    endsAt: new Date(now + SEASON_DAYS * DAY_MS).toISOString(),
-    track: mockSeasonTrack(),
-  },
-  format: ARENA_FORMAT,
-  activeMapId: mockActiveMapId(),
-  unlocked: mockPassedLevels() >= ARENA_UNLOCK_LEVEL,
-  onboardingDone: mockOnboardingDone(),
-  lastSeason: mockLastSeason(),
-});
-
-const summaryOf = ({
-  maps: _maps,
-  taps: _taps,
-  ...summary
-}: components["schemas"]["MatchDetails"]) => summary;
+const errorResponse = (code: string, status: number) =>
+  HttpResponse.json({ error: { code } }, { status });
 
 export const arenaHandlers = [
-  http.get(mockUrl("/arena"), () => HttpResponse.json(arenaMock())),
-  http.get(mockUrl("/arena/matches"), ({ request }) => {
-    const start = Number(new URL(request.url).searchParams.get("cursor") ?? 0);
-    const history = mockMatchHistory();
-    const end = start + HISTORY_PAGE;
-    return HttpResponse.json({
-      items: history.slice(start, end).map(summaryOf),
-      nextCursor: end < history.length ? String(end) : null,
-    });
+  http.get(mockUrl("/arena"), () => HttpResponse.json(arenaHomeMock(mockArenaMaps()))),
+  http.put(mockUrl("/arena/rules-seen"), () => {
+    markMockRulesSeen();
+    return new HttpResponse(null, { status: HTTP_NO_CONTENT });
   }),
-  http.get(mockUrl("/arena/matches/:id"), ({ params }) => {
-    const match = mockMatchHistory().find(({ matchId }) => matchId === String(params.id));
-    return match === undefined
-      ? HttpResponse.json({ error: { code: "not_found" } }, { status: HTTP_NOT_FOUND })
-      : HttpResponse.json(match);
+  http.get(mockUrl("/arena/season"), () => HttpResponse.json(mockSeason())),
+  http.post(mockUrl("/arena/season/track/:step/claim"), ({ params }) => {
+    const claimed = claimMockStep(Number(params.step));
+    if (claimed === "step_not_found") return errorResponse(claimed, HTTP_NOT_FOUND);
+    if (typeof claimed === "string") return errorResponse(claimed, HTTP_CONFLICT);
+    return HttpResponse.json(claimed);
   }),
-  http.post(mockUrl("/arena/onboarding"), () => {
-    completeMockOnboarding();
-    return HttpResponse.json({ onboardingDone: true });
-  }),
-  http.post(mockUrl("/arena/season/summary/claim"), () =>
-    HttpResponse.json({ ...claimMockLastSeason(), wallet: mockWallet() }),
-  ),
-  http.post(mockUrl("/arena/season/claim"), async ({ request }) => {
-    const body = claimSchema.safeParse(await request.json().catch(() => null));
-    const claimed = body.success ? claimMockStep(body.data.step) : null;
-    if (claimed === null) {
-      return HttpResponse.json(
-        { error: { code: "validation_failed" } },
-        { status: HTTP_BAD_REQUEST },
-      );
-    }
-    return HttpResponse.json({ ...claimed, wallet: mockWallet() });
+  http.post(mockUrl("/arena/season/result/claim"), () => {
+    const claimed = claimMockPastSeason();
+    return claimed === null
+      ? errorResponse("no_season_result", HTTP_NOT_FOUND)
+      : HttpResponse.json(claimed);
   }),
 ];

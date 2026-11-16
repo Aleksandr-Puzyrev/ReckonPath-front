@@ -13,9 +13,9 @@ interface RandomCallbacks {
 export const useRandomArenaMap = ({ onMap, onError }: RandomCallbacks) => {
   const { mutate, isPending } = useMutation({
     ...randomArenaMapMutationOptions(),
-    onSuccess: ({ map }) => onMap(map),
+    onSuccess: onMap,
     onError: (error) => onError(errorMessageKey(error)),
   });
 
-  return { requestRandom: mutate, isPending };
+  return { requestRandom: () => mutate(), isPending };
 };

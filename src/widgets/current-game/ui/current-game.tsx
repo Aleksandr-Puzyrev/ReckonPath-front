@@ -1,28 +1,39 @@
 import type { ReactNode } from "react";
-import { useShallow } from "zustand/react/shallow";
+import { useTranslation } from "react-i18next";
 
-import type { GameState } from "@reckon-path/engine";
-
-import { useGameSessionStore } from "@entities/level";
-import type { CampaignLevel } from "@entities/level";
-import { useProgressStore } from "@entities/progress";
+import { useCampaignLevelQuery, useCampaignQuery } from "@entities/level";
+import type { PublicBoard } from "@entities/level";
+import { useIsOnline } from "@shared/api";
+import { Text } from "@shared/ui/text";
 
 import { currentGameOf } from "../model/current-game";
 
 import CampaignDoneHero from "./campaign-done-hero";
+import { styles } from "./current-game-styles";
 import LevelHero from "./level-hero";
 
 interface ICurrentGame {
-  renderPreview: (campaignLevel: CampaignLevel, game: GameState | null) => ReactNode;
-  onPlay: (levelId: string, isResuming: boolean) => void;
+  renderPreview: (board: PublicBoard, levelNumber: number) => ReactNode;
+  onPlay: (levelNumber: number, isResuming: boolean) => void;
   onDaily: () => void;
 }
 
 const CurrentGame = ({ renderPreview, onPlay, onDaily }: ICurrentGame) => {
-  const best = useProgressStore((state) => state.best);
-  const saved = useGameSessionStore(useShallow(({ levelId, actions }) => ({ levelId, actions })));
-  const current = currentGameOf(best, saved);
+  const { t } = useTranslation();
+  const isOnline = useIsOnline();
+  const { data: overview, isError } = useCampaignQuery();
+  const current = overview === undefined ? null : currentGameOf(overview);
+  const { data: detail } = useCampaignLevelQuery(
+    current?.kind === "level" ? current.level.number : null,
+  );
 
+  if (current === null) {
+    return isError || !isOnline ? (
+      <Text variant="body.s" style={styles.offline} testID="campaign-offline">
+        {t("campaign.offline")}
+      </Text>
+    ) : null;
+  }
   if (current.kind === "done") {
     const [first] = current.belowThree;
     return (
@@ -30,7 +41,7 @@ const CurrentGame = ({ renderPreview, onPlay, onDaily }: ICurrentGame) => {
         total={current.total}
         belowThree={current.belowThree.length}
         onCollect={() => {
-          if (first !== undefined) onPlay(first.level.id, false);
+          if (first !== undefined) onPlay(first.number, false);
         }}
         onDaily={onDaily}
       />
@@ -38,10 +49,12 @@ const CurrentGame = ({ renderPreview, onPlay, onDaily }: ICurrentGame) => {
   }
   return (
     <LevelHero
-      campaignLevel={current.campaignLevel}
-      game={current.game}
+      level={current.level}
+      world={current.world}
+      board={detail?.board ?? null}
+      active={current.active}
       renderPreview={renderPreview}
-      onPlay={() => onPlay(current.campaignLevel.level.id, current.game !== null)}
+      onPlay={() => onPlay(current.level.number, current.active !== null)}
     />
   );
 };

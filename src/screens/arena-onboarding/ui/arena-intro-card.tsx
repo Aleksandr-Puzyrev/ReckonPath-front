@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
-import type { ArenaFormat } from "@entities/arena";
+import type { MatchFormat } from "@entities/match";
 import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
 
@@ -14,7 +14,7 @@ import { styles } from "./arena-onboarding-styles";
 interface IArenaIntroCard {
   card: Card;
   index: number;
-  format: ArenaFormat;
+  format: MatchFormat;
   isStarting: boolean;
   onNext: () => void;
   onSkip: () => void;
@@ -22,7 +22,6 @@ interface IArenaIntroCard {
 
 const ArenaIntroCard = ({ card, index, format, isStarting, onNext, onSkip }: IArenaIntroCard) => {
   const { t } = useTranslation();
-  const isLast = index === ARENA_INTRO_CARDS.length - 1;
 
   return (
     <View style={styles.card}>
@@ -42,8 +41,8 @@ const ArenaIntroCard = ({ card, index, format, isStarting, onNext, onSkip }: IAr
       </View>
       <Text variant="body.l" style={styles.secondary}>
         {t(`arenaIntro.cards.${card}.text`, {
-          sec: format.turnSec,
-          size: `${format.size}×${format.size}`,
+          sec: format.moveSeconds,
+          size: `${format.rows}×${format.cols}`,
         })}
       </Text>
       <View style={styles.dots}>
@@ -53,7 +52,7 @@ const ArenaIntroCard = ({ card, index, format, isStarting, onNext, onSkip }: IAr
       </View>
       <Button
         testID="intro-next"
-        label={t(isLast ? "arenaIntro.toTraining" : "arenaIntro.next").toLocaleUpperCase()}
+        label={t("arenaIntro.next").toLocaleUpperCase()}
         variant="primary"
         size="l"
         isDisabled={isStarting}

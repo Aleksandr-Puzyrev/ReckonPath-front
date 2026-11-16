@@ -2,7 +2,6 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { getItemAsync } from "expo-secure-store";
 import { http, HttpResponse } from "msw/http";
 
-import { useProgressStore } from "@entities/progress";
 import { useAccountStore, useSessionStore } from "@entities/session";
 import { MOCK_WRONG_PASSWORD } from "@shared/api/mocks/auth-handlers";
 import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
@@ -29,12 +28,10 @@ afterEach(() => {
   secureStore.__reset();
   useSessionStore.getState().reset();
   useAccountStore.getState().reset();
-  useProgressStore.getState().reset();
 });
 
 describe("useSignIn", () => {
-  test("opens the account's session and keeps the guest's progress (decision 0050 #4)", async () => {
-    useProgressStore.getState().recordWin("c-1", { stars: 3, moves: 4 });
+  test("opens the account's session", async () => {
     const handlers = callbacks();
     const { result } = await renderSignIn(handlers);
 
@@ -43,7 +40,6 @@ describe("useSignIn", () => {
     await waitFor(() => expect(handlers.onSignedIn).toHaveBeenCalled());
     expect(useAccountStore.getState().hasLogin).toBe(true);
     expect(await getItemAsync("reckon-path.refresh-token")).toBe("r_1");
-    expect(useProgressStore.getState().best["c-1"]).toBeDefined();
   });
 
   test("puts wrong credentials under the password field", async () => {

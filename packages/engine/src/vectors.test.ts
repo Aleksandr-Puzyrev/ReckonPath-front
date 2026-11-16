@@ -6,7 +6,6 @@ import dailyVectors from "../vectors/daily.json";
 import distanceVectors from "../vectors/distances.json";
 import formulaVectors from "../vectors/formulas.json";
 import levelCodeVectors from "../vectors/level-codes.json";
-import matchVectors from "../vectors/match.json";
 import normValidateVectors from "../vectors/norm-validate.json";
 import prngVectors from "../vectors/prng.json";
 import probeModeVectors from "../vectors/probe-modes.json";
@@ -50,7 +49,6 @@ const vectors: unknown[] = [
   ...solverTraceVectors,
   ...dailyVectors,
   ...levelCodeVectors,
-  ...matchVectors,
 ];
 const headers = vectors.map((vector) => headerSchema.parse(vector));
 

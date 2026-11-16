@@ -5,19 +5,17 @@ import type { ReactNode } from "react";
 import { useAccountStore } from "@entities/session";
 import { offerLinkAfterLevel } from "@features/link-account";
 import { useInterstitialStore } from "@entities/ad";
-import { useGameSessionStore } from "@entities/level";
-import { useOutboxStore } from "@entities/outbox";
-import { useProgressStore } from "@entities/progress";
+import { useCampaignFlagsStore } from "@entities/level";
 import { RULE_DEMOS, isRuleCardId, useRulesStore } from "@entities/rules";
-import { unlockTapInput } from "@features/tap-cell";
-import { i18n } from "@shared/i18n";
+import { apiClient } from "@shared/api";
 import { adsProvider } from "@shared/ads";
+import { i18n } from "@shared/i18n";
 import { bootstrapMock, mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import PlayScreen from "./play-screen";
 
-const mockParams: { mode: string; id: string; resume?: string } = { mode: "campaign", id: "c-a" };
+const mockParams: { mode: string; id: string; resume?: string } = { mode: "campaign", id: "1" };
 const mockRouter = { back: jest.fn(), replace: jest.fn(), canGoBack: () => true };
 
 jest.mock("expo-router", () => ({
@@ -40,18 +38,26 @@ jest.mock("@features/link-account", () => ({ offerLinkAfterLevel: jest.fn() }));
 
 const BOMB = 3;
 const TARGET = 15;
+const BOARD_LAYOUT = { nativeEvent: { layout: { width: 358, height: 358 } } };
+const FLUSHES = 10;
+
+const flushRequests = () => act(() => jest.advanceTimersByTimeAsync(1));
+
+const flushUntil = async (isDone: () => boolean) => {
+  for (let step = 0; step < FLUSHES && !isDone(); step += 1) await flushRequests();
+};
 
 const tap = async (...cells: number[]) => {
   for (const cell of cells) {
     await fireEvent.press(screen.getByTestId(`cell-${cell}`));
+    await flushRequests();
     await act(async () => jest.advanceTimersByTime(300));
   }
 };
 
-const BOARD_LAYOUT = { nativeEvent: { layout: { width: 358, height: 358 } } };
-
 const renderScreen = async () => {
   const view = await render(<PlayScreen />, { wrapper: createQueryWrapper() });
+  await flushUntil(() => screen.queryByTestId("campaign-loading") === null);
   const area = screen.queryByTestId("board-area");
   if (area !== null) await fireEvent(area, "layout", BOARD_LAYOUT);
   return view;
@@ -59,15 +65,19 @@ const renderScreen = async () => {
 
 const settle = () => act(async () => jest.advanceTimersByTime(1000));
 
-const flushRequests = () => act(() => jest.advanceTimersByTimeAsync(0));
+const loseByMoves = async () => {
+  await tap(0, 1, 2, 4);
+  await settle();
+};
 
 const continueForEmeralds = async () => {
   await flushRequests();
   await fireEvent.press(screen.getByTestId("continue-emeralds"));
   await flushRequests();
+  await flushRequests();
 };
 
-describe("PlayScreen", () => {
+describe("PlayScreen in the campaign", () => {
   beforeAll(async () => {
     await i18n.changeLanguage("ru");
   });
@@ -75,16 +85,15 @@ describe("PlayScreen", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockParams.mode = "campaign";
-    mockParams.id = "c-a";
+    mockParams.id = "1";
     mockParams.resume = undefined;
     mockRouter.replace.mockClear();
-    unlockTapInput();
-    useGameSessionStore.getState().reset();
-    useProgressStore.getState().reset();
-    useOutboxStore.getState().reset();
+    mockRouter.back.mockClear();
+    useCampaignFlagsStore.getState().reset();
     useRulesStore.getState().reset();
     useRulesStore.getState().markSeen(Object.keys(RULE_DEMOS).filter(isRuleCardId));
     useRulesStore.getState().skipTutorial();
+    useRulesStore.getState().markMovesHintSeen();
   });
 
   afterEach(() => {
@@ -94,26 +103,33 @@ describe("PlayScreen", () => {
     jest.useRealTimers();
   });
 
-  test("shows an error state for an unknown level", async () => {
-    mockParams.id = "c-missing";
+  test("shows an error state for a level the server does not have", async () => {
+    mockParams.id = "99";
     await renderScreen();
     expect(screen.getByText("Уровень не найден")).toBeOnTheScreen();
   });
 
-  test("does not open a locked level reached by a link", async () => {
-    mockParams.id = "c-b";
+  test("does not open a level the server keeps locked", async () => {
+    mockParams.id = "2";
     await renderScreen();
     expect(screen.getByText("Сначала пройди уровень 1")).toBeOnTheScreen();
-    expect(useGameSessionStore.getState().game).toBeNull();
   });
 
-  test("shows an error state for a mode other than the campaign", async () => {
-    mockParams.mode = "daily";
+  test("shows an error state for an unknown mode", async () => {
+    mockParams.mode = "event";
     await renderScreen();
     expect(screen.getByText("Уровень не найден")).toBeOnTheScreen();
   });
 
-  test("spends a move and shows the bearing of a tapped cell (LVL-01)", async () => {
+  test("asks for the network when the game cannot be opened (decision 0060 #3)", async () => {
+    mockServer.use(http.post(mockUrl("/campaign/levels/:number/play"), () => HttpResponse.error()));
+    await renderScreen();
+
+    expect(screen.getByText("Нужна сеть, чтобы играть кампанию")).toBeOnTheScreen();
+    expect(screen.getByText("Повторить")).toBeOnTheScreen();
+  });
+
+  test("spends a move and shows the server's bearing of a tapped cell (LVL-01)", async () => {
     await renderScreen();
     expect(screen.getByText("4 / 4")).toBeOnTheScreen();
     await tap(0);
@@ -121,7 +137,7 @@ describe("PlayScreen", () => {
     expect(screen.getByText(/^A1 → 6/)).toBeOnTheScreen();
   });
 
-  test("spends nothing on an opened cell (LVL-02)", async () => {
+  test("sends nothing for an opened cell (LVL-02)", async () => {
     await renderScreen();
     await tap(0, 0);
     expect(screen.getByText("3 / 4")).toBeOnTheScreen();
@@ -146,16 +162,14 @@ describe("PlayScreen", () => {
 
   test("shows the lose sheet when the moves run out", async () => {
     await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
+    await loseByMoves();
     expect(screen.getByText("Ходы закончились")).toBeOnTheScreen();
   });
 
-  test("continues once with three moves, then offers only a restart (LVL-13, LVL-15)", async () => {
+  test("continues once for ◆ on the server, then offers only a restart (LVL-13, LVL-15)", async () => {
     useAccountStore.getState().markSignedIn();
     await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
+    await loseByMoves();
     await continueForEmeralds();
     expect(screen.getByText("3 / 7")).toBeOnTheScreen();
 
@@ -166,73 +180,54 @@ describe("PlayScreen", () => {
     expect(screen.getByText("Начать заново")).toBeOnTheScreen();
   });
 
-  test("continues for an ad with three moves (LVL-13)", async () => {
+  test("hides the ad continue in the campaign (decision 0060 #4)", async () => {
     await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
-    await flushRequests();
-
-    await fireEvent.press(screen.getByTestId("continue-ad"));
-    await act(() => jest.advanceTimersByTimeAsync(2000));
-
-    expect(screen.getByText("3 / 7")).toBeOnTheScreen();
-  });
-
-  test("keeps the lose sheet when the ad is closed early (LVL-14)", async () => {
-    jest.spyOn(adsProvider, "showRewarded").mockResolvedValue({ rewarded: false });
-    await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
-    await flushRequests();
-
-    await fireEvent.press(screen.getByTestId("continue-ad"));
-    await act(() => jest.advanceTimersByTimeAsync(200));
-
-    expect(screen.getByText("Ходы закончились")).toBeOnTheScreen();
-    expect(screen.getByText("Реклама сейчас недоступна")).toBeOnTheScreen();
-  });
-
-  test("hides the ad continue after today's limit, keeping the ◆ one (LVL-16)", async () => {
-    useAccountStore.getState().markSignedIn();
-    mockServer.use(
-      http.get(mockUrl("/ads/limits"), () =>
-        HttpResponse.json({
-          gems: { used: 0, max: 5, resetAt: "2026-10-11T00:00:00Z" },
-          continue: { used: 2, max: 2, resetAt: "2026-10-11T00:00:00Z" },
-          streak: { used: 0, max: 1, resetAt: "2026-10-11T00:00:00Z" },
-        }),
-      ),
-    );
-    await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
+    await loseByMoves();
     await flushRequests();
 
     expect(screen.queryByTestId("continue-ad")).toBeNull();
     expect(screen.getByTestId("continue-emeralds")).toBeOnTheScreen();
   });
 
-  test("shows the targets and bombs after declining to continue", async () => {
+  test("opens the ways to earn when ◆ run short", async () => {
+    useAccountStore.getState().markSignedIn();
+    mockServer.use(
+      http.post(mockUrl("/campaign/games/:id/continue"), () =>
+        HttpResponse.json(
+          { error: { code: "not_enough_gems", details: { need: 5, currency: "gems" } } },
+          { status: 409 },
+        ),
+      ),
+    );
     await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
+    await loseByMoves();
+    await continueForEmeralds();
+
+    expect(screen.getByText("Где получить изумруды:")).toBeOnTheScreen();
+  });
+
+  test("shows the server's secrets after declining to continue", async () => {
+    await renderScreen();
+    await loseByMoves();
     await fireEvent.press(screen.getByText("Не продолжать"));
+    await flushRequests();
     expect(screen.getByTestId("hidden-shown")).toBeOnTheScreen();
   });
 
-  test("wins with stars and moves to the next level (LVL-11, LVL-12)", async () => {
+  test("wins with the server's stars, moves and reward and moves to the next level (LVL-11, LVL-12)", async () => {
     await renderScreen();
     await tap(TARGET);
     await settle();
     expect(screen.getByText("Уровень 1 пройден")).toBeOnTheScreen();
     expect(screen.getByLabelText("Звёзды: 3 из 3")).toBeOnTheScreen();
     expect(screen.getByText("1 из 4 · лучший: 1")).toBeOnTheScreen();
-    expect(useProgressStore.getState().best["c-a"]).toEqual({ stars: 3, moves: 1 });
+    expect(screen.getByText("+50")).toBeOnTheScreen();
+    expect(screen.getByText("+10 XP")).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByText("Дальше"));
     expect(mockRouter.replace).toHaveBeenCalledWith({
       pathname: "/play/[mode]/[id]",
-      params: { mode: "campaign", id: "c-b" },
+      params: { mode: "campaign", id: "2" },
     });
   });
 
@@ -284,39 +279,31 @@ describe("PlayScreen", () => {
   test("gives at most one star after a continue (LVL-13)", async () => {
     useAccountStore.getState().markSignedIn();
     await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
+    await loseByMoves();
     await continueForEmeralds();
     await tap(TARGET);
     await settle();
     expect(screen.getByLabelText("Звёзды: 1 из 3")).toBeOnTheScreen();
   });
 
-  test("places a flag by long press or in flag mode without spending a move (LVL-20)", async () => {
+  test("keeps flags on the device by long press or in flag mode without a move (LVL-20)", async () => {
     await renderScreen();
     await fireEvent(screen.getByTestId("cell-5"), "longPress");
-    expect(useGameSessionStore.getState().flags).toEqual([5]);
+    expect(useCampaignFlagsStore.getState().flags).toEqual([5]);
 
     await fireEvent.press(screen.getByTestId("flag-mode"));
     await tap(6);
-    expect(useGameSessionStore.getState().flags).toEqual([5, 6]);
+    expect(useCampaignFlagsStore.getState().flags).toEqual([5, 6]);
     expect(screen.getByText("4 / 4")).toBeOnTheScreen();
   });
 
-  test("asks before restarting a started game", async () => {
+  test("asks before restarting a started game and starts a new one on the server", async () => {
     await renderScreen();
     await tap(0);
     await fireEvent.press(screen.getByTestId("restart"));
     await fireEvent.press(screen.getByText("Заново"));
+    await flushUntil(() => screen.queryByText("4 / 4") !== null);
     expect(screen.getByText("4 / 4")).toBeOnTheScreen();
-  });
-
-  test("sends nothing when a game in progress is restarted", async () => {
-    await renderScreen();
-    await tap(0);
-    await fireEvent.press(screen.getByTestId("restart"));
-    await fireEvent.press(screen.getByText("Заново"));
-    expect(useOutboxStore.getState().attempts).toEqual([]);
   });
 
   test("restarts an untouched game without asking", async () => {
@@ -325,25 +312,23 @@ describe("PlayScreen", () => {
     expect(screen.queryByText("Начать заново? Ходы сбросятся")).toBeNull();
   });
 
-  test("offers to continue a saved game and restores it exactly (LVL-19)", async () => {
+  test("offers to continue the server's unfinished game with its flags (LVL-19)", async () => {
     const first = await renderScreen();
     await tap(0);
     await fireEvent(screen.getByTestId("cell-5"), "longPress");
     await first.unmount();
-    useGameSessionStore.setState({ game: null });
 
     await renderScreen();
     expect(screen.getByText("Продолжить или начать заново?")).toBeOnTheScreen();
     await fireEvent.press(screen.getByText("Продолжить"));
     expect(screen.getByText("3 / 4")).toBeOnTheScreen();
-    expect(useGameSessionStore.getState().flags).toEqual([5]);
+    expect(useCampaignFlagsStore.getState().flags).toEqual([5]);
   });
 
-  test("resumes a saved game without asking when Home already chose «Продолжить» (decision 0041 #3)", async () => {
+  test("resumes without asking when Home already chose «Продолжить» (decision 0041 #3)", async () => {
     const first = await renderScreen();
     await tap(0);
     await first.unmount();
-    useGameSessionStore.setState({ game: null });
     mockParams.resume = "1";
 
     await renderScreen();
@@ -352,66 +337,58 @@ describe("PlayScreen", () => {
     expect(screen.getByText("3 / 4")).toBeOnTheScreen();
   });
 
-  test("ends a lost attempt when leaving, so it is not offered again", async () => {
+  test("shows the lose sheet again for a lost game the server keeps", async () => {
     const first = await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
-    await fireEvent.press(screen.getByText("К уровням"));
-    expect(useGameSessionStore.getState().levelId).toBeNull();
-    expect(useOutboxStore.getState().attempts).toMatchObject([
-      { ref: "c-a", claimed: { result: "lost", movesUsed: 4, stars: null } },
-    ]);
-    await first.unmount();
-
-    await renderScreen();
-    expect(screen.queryByText("Продолжить или начать заново?")).toBeNull();
-    expect(screen.getByText("4 / 4")).toBeOnTheScreen();
-  });
-
-  test("sends the lost attempt when the lost game is restarted", async () => {
-    await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
-    await fireEvent.press(screen.getByText("Начать заново"));
-    expect(useOutboxStore.getState().attempts).toMatchObject([{ claimed: { result: "lost" } }]);
-    expect(screen.getByText("4 / 4")).toBeOnTheScreen();
-  });
-
-  test("sends a lost attempt left on the lose sheet when another level is opened", async () => {
-    const first = await renderScreen();
-    await tap(0, 1, 2, 4);
-    await settle();
-    await first.unmount();
-    useProgressStore.getState().recordWin("c-a", { stars: 3, moves: 2 });
-    mockParams.id = "c-b";
-
-    await renderScreen();
-
-    expect(useOutboxStore.getState().attempts).toMatchObject([
-      { ref: "c-a", claimed: { result: "lost" } },
-    ]);
-  });
-
-  test("dates a lost attempt by the loss, not by leaving the sheet", async () => {
-    const first = await renderScreen();
-    await tap(0, 1, 2, 4);
-    const lostAt = useGameSessionStore.getState().finishedAt;
-    await settle();
-    await act(async () => jest.advanceTimersByTime(60_000));
+    await loseByMoves();
     await fireEvent.press(screen.getByText("К уровням"));
     await first.unmount();
 
-    expect(useOutboxStore.getState().attempts[0]?.finishedAt).toBe(
-      new Date(lostAt ?? 0).toISOString(),
+    await renderScreen();
+
+    expect(screen.getByText("Ходы закончились")).toBeOnTheScreen();
+  });
+
+  test("takes the server's game when a repeated tap is stale (decision 0060 #2)", async () => {
+    await renderScreen();
+    const overview = await apiClient.GET("/campaign");
+    const gameId = overview.data?.active?.gameId ?? "";
+    await apiClient.POST("/campaign/games/{id}/tap", {
+      params: { path: { id: gameId } },
+      body: { row: 0, col: 0, seq: 0 },
+    });
+
+    await tap(1);
+
+    expect(screen.getByText("3 / 4")).toBeOnTheScreen();
+    expect(screen.getByText(/^A1 → 6/)).toBeOnTheScreen();
+  });
+
+  test("waits with a retry when the network drops during a tap (decision 0060 #3)", async () => {
+    mockServer.use(
+      http.post(mockUrl("/campaign/games/:id/tap"), () => HttpResponse.error(), { once: true }),
     );
+    await renderScreen();
+    await tap(0);
+
+    expect(screen.getByText("Нет связи с сервером")).toBeOnTheScreen();
+    expect(screen.getByText("4 / 4")).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByText("Повторить"));
+    await flushRequests();
+
+    expect(screen.queryByTestId("retry-bar")).toBeNull();
+    expect(screen.getByText("3 / 4")).toBeOnTheScreen();
   });
 
-  test("keeps a game in progress when leaving from the pause menu", async () => {
+  test("keeps the game on the server when leaving from the pause menu", async () => {
     await renderScreen();
     await tap(0);
     await fireEvent.press(screen.getByTestId("pause"));
-    await fireEvent.press(screen.getByText("К уровням"));
-    expect(useGameSessionStore.getState().actions).toHaveLength(1);
+    await act(async () => fireEvent.press(screen.getByText("К уровням")));
+
+    expect(mockRouter.back).toHaveBeenCalled();
+    const overview = await apiClient.GET("/campaign");
+    expect(overview.data?.active).toMatchObject({ level: 1 });
   });
 
   test("opens and closes the pause menu", async () => {

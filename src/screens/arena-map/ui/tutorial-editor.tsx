@@ -4,7 +4,6 @@ import { ScrollView, View } from "react-native";
 import { Button } from "@shared/ui/button";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
-import { leagueLabelOf } from "@widgets/arena-hero";
 import { StatusLine, ToolTile } from "@widgets/editor-kit";
 
 import { TUTORIAL_TOOLS } from "../model/editor-tutorial";
@@ -20,7 +19,7 @@ interface ITutorialEditor {
 
 const TutorialEditor = ({ editor, canSave }: ITutorialEditor) => {
   const { t } = useTranslation();
-  const { session, format, counts, limits, profile } = editor;
+  const { session, format, counts, limits } = editor;
   const steps = [
     { key: "targets", label: t("map.tutorial.stepTarget"), n: counts.targets, max: limits.targets },
     { key: "bombs", label: t("map.tutorial.stepBomb"), n: counts.bombs, max: limits.bombs },
@@ -34,11 +33,8 @@ const TutorialEditor = ({ editor, canSave }: ITutorialEditor) => {
             {session.name}
           </Text>
           <Text variant="caption" style={styles.secondary}>
-            {[
-              `${format.size}×${format.size}`,
-              profile === undefined ? null : leagueLabelOf(profile.league, profile.division),
-            ]
-              .filter((part) => part !== null)
+            {[`${format.rows}×${format.cols}`, editor.leagueLabel]
+              .filter((part) => part !== "")
               .join(" · ")}
           </Text>
         </View>

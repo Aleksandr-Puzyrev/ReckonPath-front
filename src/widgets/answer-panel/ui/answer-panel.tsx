@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { useGameSessionStore } from "@entities/level";
+import type { PlayView } from "@entities/level";
 import { Text } from "@shared/ui/text";
 
 import FlagIcon from "@assets/icons/play/flag.svg";
@@ -12,22 +12,17 @@ import { describeLastAnswer } from "../model/describe-last-answer";
 import { styles } from "./answer-panel-styles";
 
 interface IAnswerPanel {
+  view: PlayView;
   isFlagMode: boolean;
   onToggleFlagMode: () => void;
 }
 
-const AnswerPanel = ({ isFlagMode, onToggleFlagMode }: IAnswerPanel) => {
+const AnswerPanel = ({ view, isFlagMode, onToggleFlagMode }: IAnswerPanel) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
-  const game = useGameSessionStore((state) => state.game);
-  const lastCell = useGameSessionStore((state) => {
-    const taps = state.actions.flatMap((action) => (action.type === "tap" ? [action.cell] : []));
-    return taps.at(-1) ?? null;
-  });
   styles.useVariants({ isFlagMode });
-  if (game === null) return null;
 
-  const { title, subtitle, tone } = describeLastAnswer(t, game, lastCell);
+  const { title, subtitle, tone } = describeLastAnswer(t, view);
   const iconSize = theme.sizes.icon.l;
 
   return (

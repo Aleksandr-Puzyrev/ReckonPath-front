@@ -5,6 +5,7 @@ import { View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { playViewOfGame } from "@entities/level";
 import { HudCounter } from "@shared/ui/hud-counter";
 import { IconButton } from "@shared/ui/icon-button";
 import { Screen } from "@shared/ui/screen";
@@ -27,7 +28,7 @@ const LevelTryoutScreen = () => {
   const [boardSize, setBoardSize] = useState(0);
   const iconSize = theme.sizes.iconButton.icon;
   const { game } = tryout;
-  const values = game === null ? null : hudValuesOf(game);
+  const values = game === null ? null : hudValuesOf(playViewOfGame(game, null));
   const handleLayout = ({ nativeEvent }: LayoutChangeEvent) =>
     setBoardSize(Math.min(nativeEvent.layout.width, nativeEvent.layout.height));
 

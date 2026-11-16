@@ -1,7 +1,12 @@
 import type { components } from "@shared/api";
 
-export type Arena = components["schemas"]["Arena"];
-export type ArenaFormat = components["schemas"]["ArenaFormat"];
-export type SeasonStep = components["schemas"]["SeasonStep"];
-export type SeasonReward = components["schemas"]["SeasonReward"];
-export type SeasonSummary = components["schemas"]["SeasonSummary"];
+type Schemas = components["schemas"];
+
+export type ArenaHome = Schemas["ArenaHome"];
+export type LeagueStep = Schemas["LeagueStep"];
+export type LeagueView = Schemas["LeagueView"];
+export type SeasonView = Schemas["SeasonView"];
+export type SeasonResult = Schemas["SeasonResult"];
+export type SeasonClaim = Schemas["SeasonClaim"];
+export type TrackStepView = Schemas["TrackStepView"];
+export type RewardItem = Schemas["RewardItem"];

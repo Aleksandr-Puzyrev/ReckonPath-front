@@ -2,9 +2,8 @@ import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
 import { useAccountStore } from "@entities/session";
 import { useDailyRecordStore } from "@entities/daily";
-import { CAMPAIGN_LEVELS } from "@entities/level";
-import { useProgressStore } from "@entities/progress";
 import { i18n } from "@shared/i18n";
+import { mockServer, passMockLevels } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import DailyCard from "./daily-card";
@@ -14,14 +13,7 @@ jest.mock("@entities/streak", () => ({
   useStreakQuery: () => ({ data: undefined }),
 }));
 
-const unlockDaily = () =>
-  useProgressStore
-    .getState()
-    .replaceBest(
-      Object.fromEntries(
-        CAMPAIGN_LEVELS.slice(0, 6).map(({ level }) => [level.id, { stars: 3, moves: 5 }]),
-      ),
-    );
+const unlockDaily = () => passMockLevels(6);
 
 const renderCard = (onOpen = jest.fn()) =>
   render(<DailyCard onOpen={onOpen} />, { wrapper: createQueryWrapper() });
@@ -31,11 +23,11 @@ describe("DailyCard", () => {
 
   beforeEach(() => {
     jest.useFakeTimers({ now: Date.UTC(2026, 8, 28, 18, 47, 20) });
-    useProgressStore.getState().reset();
     useDailyRecordStore.getState().reset();
   });
 
   afterEach(() => {
+    mockServer.reset();
     useAccountStore.getState().reset();
     jest.useRealTimers();
   });
@@ -54,7 +46,7 @@ describe("DailyCard", () => {
     await renderCard();
 
     expect(screen.getByText("Пеленг дня · 28 сентября")).toBeOnTheScreen();
-    expect(screen.getByText("Сегодня ещё не сыгран")).toBeOnTheScreen();
+    expect(await screen.findByText("Сегодня ещё не сыгран")).toBeOnTheScreen();
     expect(screen.getByText("Новый через 05:12:40")).toBeOnTheScreen();
     await act(async () => jest.advanceTimersByTime(1000));
     expect(screen.getByText("Новый через 05:12:39")).toBeOnTheScreen();
@@ -72,7 +64,7 @@ describe("DailyCard", () => {
     });
     await renderCard();
 
-    expect(screen.getByText("Сыграно: 7 ходов")).toBeOnTheScreen();
+    expect(await screen.findByText("Сыграно: 7 ходов")).toBeOnTheScreen();
     expect(screen.getByText("1")).toBeOnTheScreen();
   });
 
@@ -87,7 +79,7 @@ describe("DailyCard", () => {
     });
     await renderCard();
 
-    expect(screen.getByText("Сыграно: 7 ходов")).toBeOnTheScreen();
+    expect(await screen.findByText("Сыграно: 7 ходов")).toBeOnTheScreen();
     expect(screen.queryByText("1")).toBeNull();
   });
 
@@ -95,6 +87,7 @@ describe("DailyCard", () => {
     unlockDaily();
     const onOpen = jest.fn();
     await renderCard(onOpen);
+    await screen.findByText("Сегодня ещё не сыгран");
 
     await fireEvent.press(screen.getByTestId("daily-card"));
 

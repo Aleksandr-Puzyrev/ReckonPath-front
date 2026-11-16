@@ -17,9 +17,11 @@ import { useSessionStore } from "../model/session-store";
 type TokenPair = components["schemas"]["TokenPair"];
 type DeviceInfo = components["schemas"]["DeviceInfo"];
 
-const keepTokens = async ({ accessToken, refreshToken }: TokenPair) => {
+const MS_PER_SECOND = 1000;
+
+const keepTokens = async ({ accessToken, refreshToken, expiresIn }: TokenPair) => {
   await saveRefreshToken(refreshToken);
-  useSessionStore.getState().setAccessToken(accessToken);
+  useSessionStore.getState().setAccessToken(accessToken, Date.now() + expiresIn * MS_PER_SECOND);
   return accessToken;
 };
 
@@ -76,6 +78,7 @@ export const endEverySession = async () => {
 
 export const apiSession: ApiSession = {
   getAccessToken: () => useSessionStore.getState().accessToken,
+  isAccessTokenExpired: () => useSessionStore.getState().isExpired(),
   refreshAccessToken,
   hasAccount: () => useAccountStore.getState().hasLogin,
   subscribeAccount: (listener) => useAccountStore.subscribe(listener),

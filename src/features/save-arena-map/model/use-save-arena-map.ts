@@ -6,7 +6,7 @@ import {
   arenaMapKeys,
   saveArenaMapMutationOptions,
 } from "@entities/arena-map";
-import type { ArenaMapInput } from "@entities/arena-map";
+import type { PvpMap } from "@entities/arena-map";
 import { errorMessageKey, isApiError } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 
@@ -37,7 +37,7 @@ export const useSaveArenaMap = ({
 
   const activate = useMutation({
     ...activateArenaMapMutationOptions(),
-    onSuccess: ({ activeMapId }) => onActivated(activeMapId),
+    onSuccess: ({ id }) => onActivated(id),
     onError: (error) => {
       if (hasCode(error, "map_invalid")) onDraft();
       else onError(errorMessageKey(error));
@@ -54,15 +54,15 @@ export const useSaveArenaMap = ({
       void refresh();
     },
     onError: (error) => {
-      if (hasCode(error, "limit_reached")) onMapsLimit();
+      if (hasCode(error, "maps_limit")) onMapsLimit();
       else onError(errorMessageKey(error));
     },
   });
 
   // A follow-up is passed with the call: mutation callbacks keep the closure of the render that started them (продолжение передаётся с вызовом: колбэки мутации хранят замыкание рендера, который их запустил).
-  const run = (id: string | null, input: ArenaMapInput, onFinish?: () => void) =>
+  const run = (id: string | null, name: string, map: PvpMap, onFinish?: () => void) =>
     save.mutate(
-      { id, input },
+      { id, name, map },
       {
         onSuccess: (map) => {
           if (!map.valid) {

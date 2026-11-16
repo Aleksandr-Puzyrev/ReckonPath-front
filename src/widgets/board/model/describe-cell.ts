@@ -1,11 +1,13 @@
 import type { TFunction } from "i18next";
 
-import { isStale } from "@reckon-path/engine";
-import type { GameState, Idx } from "@reckon-path/engine";
+import type { Idx } from "@reckon-path/engine";
 
-import { cellLabel } from "@entities/level";
+import { cellLabel, isStaleIn } from "@entities/level";
+import type { PlayView } from "@entities/level";
 
-export const describeRevealedCell = (t: TFunction, game: GameState, idx: Idx) => {
+type DescribedGame = Pick<PlayView, "board" | "revealed" | "epoch">;
+
+export const describeRevealedCell = (t: TFunction, game: DescribedGame, idx: Idx) => {
   const reveal = game.revealed.get(idx);
   if (reveal === undefined) return null;
   const cell = cellLabel(game.board.cols, idx);
@@ -20,7 +22,7 @@ export const describeRevealedCell = (t: TFunction, game: GameState, idx: Idx) =>
       return t("play.tooltip.hotcold", { cell, cmp: t(`play.probe.${reveal.cmp}`) });
     }
     const text = t("play.tooltip.distance", { cell, value: reveal.value });
-    return isStale(game, reveal) ? t("play.tooltip.stale", { text }) : text;
+    return isStaleIn(game, reveal) ? t("play.tooltip.stale", { text }) : text;
   })();
   return reveal.bombNear ? t("play.tooltip.bombNear", { text: base }) : base;
 };
@@ -33,7 +35,7 @@ const KIND_KEYS = {
 
 export const cellAccessibilityLabel = (
   t: TFunction,
-  game: GameState,
+  game: DescribedGame,
   idx: Idx,
   hasFlag: boolean,
 ) => {

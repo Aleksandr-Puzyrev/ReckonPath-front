@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import type { SeasonStep } from "@entities/arena";
+import type { TrackStepView } from "@entities/arena";
 import { formatNumber } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 
@@ -13,7 +13,7 @@ import EmeraldIcon from "@assets/icons/play/emerald.svg";
 import { styles } from "./season-track-styles";
 
 interface ISeasonStepCard {
-  step: SeasonStep;
+  step: TrackStepView;
   isDisabled: boolean;
   onClaim: (step: number) => void;
 }
@@ -21,27 +21,36 @@ interface ISeasonStepCard {
 const SeasonStepCard = ({ step, isDisabled, onClaim }: ISeasonStepCard) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
-  const { reward, state } = step;
+  const { state } = step;
   const iconSize = theme.sizes.icon.l;
-  // TODO: show item rewards once the catalog has season items (the mock gives currency only, decision 0031 #2)
-  const Icon = reward.currency === "emerald" ? EmeraldIcon : CoinIcon;
+  const isGems = step.gems > 0;
+  const Icon = isGems ? EmeraldIcon : CoinIcon;
+  const amount = isGems ? step.gems : step.coins;
   styles.useVariants({ state });
 
   return (
-    <View style={styles.card} testID={`season-step-${step.step}`}>
+    <View style={styles.card} testID={`season-step-${step.id}`}>
       <Text variant="caption" style={styles.secondary}>
         {t("arena.track.stepRp", { rp: formatNumber(step.rp, i18n.language) })}
       </Text>
-      <View style={styles.icon}>
-        <Icon width={iconSize} height={iconSize} />
-      </View>
-      <Text variant="title.s">{formatNumber(reward.amount ?? 0, i18n.language)}</Text>
-      {state === "available" ? (
+      {step.item === undefined || amount > 0 ? (
+        <>
+          <View style={styles.icon}>
+            <Icon width={iconSize} height={iconSize} />
+          </View>
+          <Text variant="title.s">{formatNumber(amount, i18n.language)}</Text>
+        </>
+      ) : (
+        <Text variant="title.s" numberOfLines={2}>
+          {step.item.title}
+        </Text>
+      )}
+      {state === "ready" ? (
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ disabled: isDisabled }}
           disabled={isDisabled}
-          onPress={() => onClaim(step.step)}
+          onPress={() => onClaim(step.id)}
           style={styles.claim}
         >
           <Text variant="button.s" style={styles.claimLabel}>

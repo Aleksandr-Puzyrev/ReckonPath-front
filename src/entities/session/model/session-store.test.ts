@@ -16,4 +16,17 @@ describe("useSessionStore", () => {
 
     expect(useSessionStore.getState().accessToken).toBeNull();
   });
+
+  test("treats a token as expired shortly before its expiry", () => {
+    useSessionStore.getState().setAccessToken("a_1", 100_000);
+
+    expect(useSessionStore.getState().isExpired(60_000)).toBe(false);
+    expect(useSessionStore.getState().isExpired(80_000)).toBe(true);
+  });
+
+  test("does not call a token without a known expiry expired", () => {
+    useSessionStore.getState().setAccessToken("a_1");
+
+    expect(useSessionStore.getState().isExpired(Number.MAX_SAFE_INTEGER)).toBe(false);
+  });
 });

@@ -6,17 +6,16 @@ import { getResponse } from "msw/utils/get-response";
 
 import { resetMockAds } from "./ads-handlers";
 import { resetMockArenaMaps } from "./arena-map-handlers";
-import { resetMockAsync } from "./async-handlers";
 import { resetMockAttempts } from "./attempts-handlers";
 import { resetMockAuth } from "./auth-handlers";
+import { resetMockCampaign } from "./mock-campaign";
 import { serveBackendStyle } from "./backend-style";
 import { resetMockCustomLevels } from "./custom-level-handlers";
 import { resetMockDaily } from "./daily-handlers";
 import { resetMockDevices } from "./device-handlers";
-import { fakeGameServer } from "./fake-game/fake-game-server";
-import { resetMockArenaProfile } from "./mock-arena-profile";
+import { resetMockArena } from "./mock-arena";
+import { resetMockMatch } from "./match-handlers";
 import { resetMockPlayer } from "./mock-player";
-import { resetMockMapCheck } from "./mock-map-check";
 import { resetMockMe } from "./me-handlers";
 import { resetMockShop } from "./mock-shop";
 import { resetMockSupport } from "./support-handlers";
@@ -48,6 +47,7 @@ export const mockServer = {
     overrides = [];
     resetMockAuth();
     resetMockAttempts();
+    resetMockCampaign();
     resetMockDaily();
     resetMockDevices();
     resetMockWallet();
@@ -58,11 +58,9 @@ export const mockServer = {
     resetMockPurchases();
     resetMockAds();
     resetMockArenaMaps();
-    resetMockAsync();
-    resetMockMapCheck();
-    resetMockArenaProfile();
+    resetMockArena();
+    resetMockMatch();
     resetMockPlayer();
-    fakeGameServer.reset();
   },
   fetch: serveBackendStyle(respond),
 };

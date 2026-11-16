@@ -4,12 +4,11 @@ import { View } from "react-native";
 
 import { useArenaQuery } from "@entities/arena";
 import { useInventoryQuery } from "@entities/item";
-import { CAMPAIGN_WORLDS } from "@entities/level";
-import { campaignStars, useProgressStore } from "@entities/progress";
+import { useCampaignQuery } from "@entities/level";
 import { useWalletQuery } from "@entities/wallet";
 import { formatNumber } from "@shared/lib";
 import { Text } from "@shared/ui/text";
-import { leagueLabelOf } from "@widgets/arena-hero";
+import { stepLabelOf } from "@widgets/arena-hero";
 
 import CurrencyAmounts from "./currency-amounts";
 import { styles } from "./settings-styles";
@@ -22,7 +21,7 @@ interface Line {
 
 const DeletionSummary = () => {
   const { t, i18n } = useTranslation();
-  const best = useProgressStore((state) => state.best);
+  const { data: campaign } = useCampaignQuery();
   const { data: wallet } = useWalletQuery();
   const { data: inventory } = useInventoryQuery();
   const { data: arena } = useArenaQuery();
@@ -32,8 +31,8 @@ const DeletionSummary = () => {
       key: "campaign",
       label: t("settings.delete.campaign"),
       value: t("settings.delete.campaignValue", {
-        count: Object.keys(best).length,
-        stars: format(campaignStars(CAMPAIGN_WORLDS, best)),
+        count: campaign?.levelsDone ?? 0,
+        stars: format(campaign?.stars ?? 0),
       }),
     },
   ];
@@ -56,8 +55,8 @@ const DeletionSummary = () => {
       key: "arena",
       label: t("settings.delete.arena"),
       value: t("settings.delete.arenaValue", {
-        league: leagueLabelOf(arena.profile.league, arena.profile.division),
-        count: arena.profile.trophies,
+        league: stepLabelOf(arena.league),
+        count: arena.trophies,
       }),
     });
   }

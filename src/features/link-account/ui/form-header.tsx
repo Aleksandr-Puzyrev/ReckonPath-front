@@ -12,7 +12,7 @@ import { styles } from "./form-header-styles";
 interface IFormHeader {
   eyebrow: string;
   title: string;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 const FormHeader = ({ eyebrow, title, onBack }: IFormHeader) => {
@@ -22,13 +22,15 @@ const FormHeader = ({ eyebrow, title, onBack }: IFormHeader) => {
 
   return (
     <View style={styles.header}>
-      <IconButton
-        icon={
-          <ChevronLeftIcon width={iconSize} height={iconSize} color={theme.colors.text.primary} />
-        }
-        accessibilityLabel={t("common.back")}
-        onPress={onBack}
-      />
+      {onBack === undefined ? null : (
+        <IconButton
+          icon={
+            <ChevronLeftIcon width={iconSize} height={iconSize} color={theme.colors.text.primary} />
+          }
+          accessibilityLabel={t("common.back")}
+          onPress={onBack}
+        />
+      )}
       <ScreenTitle eyebrow={eyebrow} title={title} />
     </View>
   );

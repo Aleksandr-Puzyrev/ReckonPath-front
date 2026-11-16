@@ -2,9 +2,8 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { levelElements } from "@entities/level";
-import type { CampaignLevel } from "@entities/level";
-import { useProgressStore } from "@entities/progress";
+import { publicBoardElements } from "@entities/level";
+import type { CampaignLevel, CampaignWorld, PublicBoard } from "@entities/level";
 import { Button } from "@shared/ui/button";
 import { Chip } from "@shared/ui/chip";
 import { Sheet } from "@shared/ui/sheet";
@@ -13,33 +12,38 @@ import { Text } from "@shared/ui/text";
 
 import { styles } from "./level-sheet-styles";
 
+interface ISheetLevel {
+  level: CampaignLevel;
+  world: CampaignWorld;
+}
+
 interface ILevelSheet {
-  campaignLevel: CampaignLevel | null;
+  sheet: ISheetLevel | null;
+  board: PublicBoard | null;
   preview: ReactNode;
-  onPlay: (campaignLevel: CampaignLevel) => void;
+  onPlay: (level: CampaignLevel) => void;
   onDismiss: () => void;
 }
 
-const LevelSheet = ({ campaignLevel, preview, onPlay, onDismiss }: ILevelSheet) => {
-  const { t, i18n } = useTranslation();
-  const best = useProgressStore((state) =>
-    campaignLevel === null ? undefined : state.best[campaignLevel.level.id],
-  );
+const NO_LIMIT = 0;
 
-  if (campaignLevel === null)
+const LevelSheet = ({ sheet, board, preview, onPlay, onDismiss }: ILevelSheet) => {
+  const { t } = useTranslation();
+
+  if (sheet === null)
     return (
       <Sheet isOpen={false} onDismiss={onDismiss}>
         {null}
       </Sheet>
     );
-  const { level, number, world } = campaignLevel;
-  const name = i18n.language === "ru" ? level.title?.ru : level.title?.en;
-  const worldName = t(`levels.world.name.${world}`);
+  const { level, world } = sheet;
+  const hasLimit = board !== null && board.limit !== NO_LIMIT;
+  const [three, two] = board?.stars ?? [];
   const facts = [
-    level.moveLimit == null ? null : t("levels.sheet.limit", { count: level.moveLimit }),
-    level.stars == null ? null : t("levels.sheet.three", { count: level.stars[0] }),
-    level.stars == null ? null : t("levels.sheet.two", { count: level.stars[1] }),
-    best === undefined ? null : t("levels.sheet.best", { count: best.moves }),
+    hasLimit ? t("levels.sheet.limit", { count: board.limit }) : null,
+    hasLimit && three !== undefined ? t("levels.sheet.three", { count: three }) : null,
+    hasLimit && two !== undefined ? t("levels.sheet.two", { count: two }) : null,
+    level.bestMoves === undefined ? null : t("levels.sheet.best", { count: level.bestMoves }),
   ].filter((fact) => fact !== null);
 
   return (
@@ -47,19 +51,19 @@ const LevelSheet = ({ campaignLevel, preview, onPlay, onDismiss }: ILevelSheet) 
       <View style={styles.header}>
         <View style={styles.titles}>
           <Text variant="eyebrow" style={styles.eyebrow}>
-            {t("levels.world.sheetEyebrow", { n: world, name: worldName })}
+            {t("levels.world.sheetEyebrow", { n: world.number, name: world.title })}
           </Text>
-          <Text variant="display.m">{t("levels.sheet.title", { n: number })}</Text>
-          {name === undefined ? null : (
+          <Text variant="display.m">{t("levels.sheet.title", { n: level.number })}</Text>
+          {level.title === "" ? null : (
             <Text variant="body.s" style={styles.secondary}>
-              {name}
+              {level.title}
             </Text>
           )}
         </View>
         <StarRating
-          stars={best?.stars ?? 0}
+          stars={level.stars}
           size="l"
-          accessibilityLabel={t("result.stars", { count: best?.stars ?? 0 })}
+          accessibilityLabel={t("result.stars", { count: level.stars })}
         />
       </View>
       <View style={styles.body}>
@@ -73,7 +77,7 @@ const LevelSheet = ({ campaignLevel, preview, onPlay, onDismiss }: ILevelSheet) 
         </View>
       </View>
       <View style={styles.chips}>
-        {levelElements(level).map(({ element, count }) => (
+        {(board === null ? [] : publicBoardElements(board)).map(({ element, count }) => (
           <Chip key={element} label={t(`levels.element.${element}`, { count })} />
         ))}
       </View>
@@ -82,7 +86,7 @@ const LevelSheet = ({ campaignLevel, preview, onPlay, onDismiss }: ILevelSheet) 
         label={t("home.play")}
         variant="primary"
         size="l"
-        onPress={() => onPlay(campaignLevel)}
+        onPress={() => onPlay(level)}
       />
     </Sheet>
   );

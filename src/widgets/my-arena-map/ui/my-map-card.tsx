@@ -58,7 +58,7 @@ const MyMapCard = ({ map, canSwitch, renderMap, onSwitch, onEdit, onCreate }: IM
           {mapSubtitleOf(map, t)}
         </Text>
         <Text variant="body.s" style={styles.secondary}>
-          {t("arena.defended", { count: map.defended })}
+          {t("arena.defended", { count: map.wins })}
         </Text>
         <View style={styles.actions}>
           <View style={styles.action}>

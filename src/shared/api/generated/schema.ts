@@ -353,22 +353,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/progress": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["getProgress"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/continue": {
     parameters: {
       query?: never;
@@ -618,13 +602,14 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        id: string;
+      };
       cookie?: never;
     };
     get?: never;
     put: operations["putArenaMap"];
     post?: never;
-    /** @description The active map cannot be deleted (409 map_active, decision 0029). */
     delete: operations["deleteArenaMap"];
     options?: never;
     head?: never;
@@ -635,28 +620,14 @@ export interface paths {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        id: string;
+      };
       cookie?: never;
     };
     get?: never;
     put?: never;
     post: operations["activateArenaMap"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/arena/maps/validate": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["validateArenaMap"];
     delete?: never;
     options?: never;
     head?: never;
@@ -679,93 +650,13 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/arena/onboarding": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** @description Marks the arena onboarding as done (decision 0037 */
-    post: operations["completeArenaOnboarding"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/arena/async": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["startAsyncMatch"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/arena/async/{id}/surrender": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** @description Ends the async match as a loss (decision 0036 */
-    post: operations["surrenderAsyncMatch"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/arena/async/{id}/tap": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["tapAsyncMatch"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/arena/matches": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get: operations["getArenaMatches"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/arena/matches/{id}": {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        id: string;
+      };
       cookie?: never;
     };
     get: operations["getArenaMatch"];
@@ -777,23 +668,131 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/arena/season/claim": {
+  "/campaign": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    get: operations["getCampaign"];
     put?: never;
-    post: operations["claimSeasonStep"];
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  "/arena/season/summary/claim": {
+  "/campaign/levels/{number}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        number: number;
+      };
+      cookie?: never;
+    };
+    get: operations["getCampaignLevel"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/levels/{number}/play": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        number: number;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["playCampaignLevel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/games/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get: operations["getCampaignGame"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/games/{id}/tap": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tapCampaignGame"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/games/{id}/continue": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["continueCampaignGame"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/games/{id}/give-up": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["giveUpCampaignGame"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/tutorials": {
     parameters: {
       query?: never;
       header?: never;
@@ -802,8 +801,225 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description Claims the rewards of the finished season (decision 0038 */
-    post: operations["claimSeasonSummary"];
+    post: operations["postCampaignTutorial"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/rules-seen": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["putArenaRulesSeen"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/maps/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["checkArenaMap"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/queue": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getArenaQueue"];
+    put?: never;
+    post: operations["joinArenaQueue"];
+    delete: operations["leaveArenaQueue"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/map-match": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["startMapMatch"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/matches/current": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getCurrentMatch"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/matches/{id}/map": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["putMatchMap"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/matches/{id}/ready": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["postMatchReady"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/matches/{id}/tap": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["postMatchTap"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/matches/{id}/surrender": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["postMatchSurrender"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/history": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getArenaHistory"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/season": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getArenaSeason"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/season/track/{step}/claim": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        step: number;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["claimSeasonTrackStep"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/season/result/claim": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["claimSeasonResult"];
     delete?: never;
     options?: never;
     head?: never;
@@ -964,7 +1180,24 @@ export interface components {
       | "invalid_app_version"
       | "invalid_document_type"
       | "body_too_large"
-      | "method_not_allowed";
+      | "method_not_allowed"
+      | "continue_method"
+      | "arena_locked"
+      | "arena_unavailable"
+      | "maps_limit"
+      | "map_not_found"
+      | "match_not_found"
+      | "match_in_progress"
+      | "match_not_preparing"
+      | "already_ready"
+      | "stale_state"
+      | "not_your_turn"
+      | "match_not_playing"
+      | "match_starting"
+      | "step_not_found"
+      | "step_locked"
+      | "step_claimed"
+      | "no_season_result";
     VersionInfo: {
       /** @description Soft update is offered */
       showModal: boolean;
@@ -1120,6 +1353,8 @@ export interface components {
          * @description Until then the deletion can be cancelled
          */
         purgeAfter?: string;
+        /** @description Active bans (decision 0060 */
+        bans?: components["schemas"]["BanDetails"][];
       };
       consents: components["schemas"]["Consent"][];
       consentsRequired: components["schemas"]["ConsentType"][];
@@ -1320,117 +1555,489 @@ export interface components {
     };
     Fence: [components["schemas"]["Cell"], components["schemas"]["Cell"]];
     Cells: components["schemas"]["Cell"][];
-    /** @description Level v2 without moveLimit (Part 7 §5, decision 0029 */
-    PvpMap: {
-      rows: number;
-      cols: number;
-      targets: components["schemas"]["Cells"];
-      bombs?: components["schemas"]["Cells"];
-      streams?: components["schemas"]["Cells"];
-      bridges?: components["schemas"]["Cells"];
-      heavy?: components["schemas"]["Cells"];
-      rocks?: components["schemas"]["Cells"];
-      fences?: components["schemas"]["Fence"][];
-    };
-    /** @description An opponent's map without targets and bombs */
-    MapLayout: {
-      rows: number;
-      cols: number;
-      streams?: components["schemas"]["Cells"];
-      bridges?: components["schemas"]["Cells"];
-      heavy?: components["schemas"]["Cells"];
-      rocks?: components["schemas"]["Cells"];
-      fences?: components["schemas"]["Fence"][];
-    };
-    MapError: {
-      /** @description Validator codes of Part 6 §6.1 */
-      code: string;
-      cells: components["schemas"]["Cells"];
-    };
-    MapValidation: {
-      valid: boolean;
-      errors: components["schemas"]["MapError"][];
-      botNorm: number | null;
-    };
     ArenaMapInput: {
       name: string;
-      format: number;
-      map: components["schemas"]["PvpMap"];
+      level: components["schemas"]["GameLevel"];
     };
-    ArenaMap: components["schemas"]["ArenaMapInput"] & {
+    /** @enum {string} */
+    LevelMode: "number" | "hot_cold" | "course";
+    /** @description The backend level (game.Level); terrain rows of . s b h r, bridge b, cells [r, c] (decision 0060 */
+    GameLevel: {
+      rows: number;
+      cols: number;
+      terrain: string[];
+      fences?: components["schemas"]["Fence"][];
+      beacons?: components["schemas"]["Cells"];
+      targets: components["schemas"]["Cells"];
+      bombs?: components["schemas"]["Cells"];
+      buoys?: components["schemas"]["Cells"];
+      mode: components["schemas"]["LevelMode"];
+      fog?: number;
+      order?: boolean;
+      noBombHint?: boolean;
+      /** @description 0 — no move limit */
+      limit: number;
+      stars: number[];
+    };
+    PublicBoard: {
+      rows: number;
+      cols: number;
+      terrain: string[];
+      fences: components["schemas"]["Fence"][];
+      beacons: components["schemas"]["Cells"];
+      mode: components["schemas"]["LevelMode"];
+      fog: number;
+      order: boolean;
+      limit: number;
+      stars: number[];
+      targets: number;
+      bombs: number;
+      buoys: number;
+    };
+    CellView: {
+      row: number;
+      col: number;
+      /** @enum {string} */
+      kind: "number" | "target" | "bomb" | "buoy" | "beacon";
+      value?: number;
+      /** @enum {string} */
+      tone?: "hot" | "warm" | "cold";
+      /** @enum {string} */
+      direction?: "up" | "right" | "down" | "left";
+      /** @enum {string} */
+      compare?: "warmer" | "colder" | "same" | "none";
+      nearBomb?: boolean;
+      epoch: number;
+      order?: number;
+    };
+    Secrets: {
+      targets: components["schemas"]["Cells"];
+      bombs: components["schemas"]["Cells"];
+      buoys: components["schemas"]["Cells"];
+    };
+    TapRequest: {
+      row: number;
+      col: number;
+      seq: number;
+    };
+    /** @enum {string} */
+    LevelState: "locked" | "current" | "done" | "perfect";
+    CampaignLevel: {
+      number: number;
+      title: string;
+      description: string;
+      rows: number;
+      cols: number;
+      mode: components["schemas"]["LevelMode"];
+      elements: string[];
+      introduces: string[];
+      tutorial?: string;
+      state: components["schemas"]["LevelState"];
+      stars: number;
+      bestMoves?: number;
+      rewards: number[];
+      coinsEarned: number;
+    };
+    CampaignLevelDetail: components["schemas"]["CampaignLevel"] & {
+      board: components["schemas"]["PublicBoard"];
+    };
+    CampaignWorld: {
+      number: number;
+      title: string;
+      subtitle: string;
+      colorFrom: string;
+      colorTo: string;
+      firstLevel: number;
+      lastLevel: number;
+      stars: number;
+      starsMax: number;
+      state: components["schemas"]["LevelState"];
+      levels: components["schemas"]["CampaignLevel"][];
+    };
+    CampaignOverview: {
+      stars: number;
+      starsMax: number;
+      levelsDone: number;
+      perfect: number;
+      coinsEarned: number;
+      /** @description 0 — the campaign is completed */
+      currentLevel: number;
+      completed: boolean;
+      unlocks: {
+        dailyLevel: number;
+        arenaLevel: number;
+        daily: boolean;
+        arena: boolean;
+      };
+      knownElements: string[];
+      tutorials: string[];
+      active?: {
+        gameId: string;
+        level: number;
+        found: number;
+        total: number;
+      };
+      worlds: components["schemas"]["CampaignWorld"][];
+      wallet: components["schemas"]["BackendWallet"];
+    };
+    CampaignGameResult: {
+      stars: number;
+      moves: number;
+      bestMoves?: number;
+      newRecord: boolean;
+      reward: number;
+      xp: number;
+      worldGems?: number;
+      canContinue: boolean;
+      continueCost: number;
+      nextLevel?: number;
+      secrets?: components["schemas"]["Secrets"];
+      wallet?: components["schemas"]["BackendWallet"];
+    };
+    CampaignGame: {
       id: string;
-      valid: boolean;
-      errors: components["schemas"]["MapError"][];
-      active: boolean;
-      botNorm: number | null;
-      plays: number;
-      defended: number;
+      level: number;
+      version: number;
+      seq: number;
+      /** @enum {string} */
+      status: "play" | "lost" | "won" | "abandoned";
+      board: components["schemas"]["PublicBoard"];
+      moves: number;
+      /** @description With bonuses; 0 — no limit */
+      limit: number;
+      found: number;
+      bombsLeft: number;
+      epoch: number;
+      continues: number;
+      cells: components["schemas"]["CellView"][];
+      result?: components["schemas"]["CampaignGameResult"];
     };
-    FormatLimits: {
-      fence: number;
+    MapProblem: {
+      /** @enum {string} */
+      code:
+        | "size"
+        | "terrain"
+        | "targets"
+        | "bombs"
+        | "fences"
+        | "elements"
+        | "caps"
+        | "bombs_limit"
+        | "rocks_limit"
+        | "bridge"
+        | "cut";
+      message: string;
+      cells?: components["schemas"]["Cells"];
+    };
+    MapCheck: {
+      valid: boolean;
+      problems?: components["schemas"]["MapProblem"][];
+      bot?: {
+        /** @description A bomb counts as 2 moves */
+        moves: number;
+        taps: components["schemas"]["Cells"];
+      };
+    };
+    MapCaps: {
       stream: number;
+      bridge: number;
       heavy: number;
       rock: number;
-      bridge: number;
-      bomb: number;
+      bombs: number;
+      fences: number;
     };
-    ArenaFormat: {
-      size: number;
+    MatchFormat: {
+      rows: number;
+      cols: number;
       targets: number;
-      turnSec: number;
-      bombHint: boolean;
-      limits: components["schemas"]["FormatLimits"];
+      caps: components["schemas"]["MapCaps"];
+      moveSeconds: number;
+      league: string;
+      leagueTitle: string;
     };
-    /** @description A currency amount or an item, as in the Part 7 §5 examples */
-    SeasonReward: {
-      /** @enum {string} */
-      currency?: "coin" | "emerald";
-      amount?: number;
-      item?: string;
+    LeagueStep: {
+      league: string;
+      title: string;
+      /** @description Empty — the league has one division */
+      division: string;
+      min: number;
     };
-    SeasonStep: {
-      step: number;
-      rp: number;
-      reward: components["schemas"]["SeasonReward"];
-      /** @enum {string} */
-      state: "claimed" | "available" | "locked";
+    LeagueView: components["schemas"]["LeagueStep"] & {
+      next?: components["schemas"]["LeagueStep"];
+      floor: number;
+      format: components["schemas"]["MatchFormat"];
     };
-    Arena: {
-      profile: {
-        trophies: number;
-        league: string;
-        division: number;
-        divisionMin: number;
-        divisionMax: number;
-        peak: number;
-        rp: number;
-        wins: number;
-        losses: number;
-        draws: number;
-      };
-      season: {
-        id: number;
-        /** Format: date-time */
-        endsAt: string;
-        track: components["schemas"]["SeasonStep"][];
-      };
-      format: components["schemas"]["ArenaFormat"];
-      activeMapId: string | null;
-      unlocked: boolean;
-      onboardingDone: boolean;
-      /** @description The finished season until its summary is claimed (decision 0038 */
-      lastSeason: components["schemas"]["SeasonSummary"] | null;
-    };
-    SeasonSummary: {
-      seasonId: number;
-      peakLeague: string;
-      peakDivision: number;
-      rank: number | null;
+    ArenaStats: {
+      matches: number;
       wins: number;
-      rewards: components["schemas"]["SeasonReward"][];
+      losses: number;
+      draws: number;
+      winRate: number;
+      streak: number;
+      bestStreak: number;
+      peak: number;
+    };
+    MatchRef: {
+      id: string;
+      kind: components["schemas"]["MatchKind"];
+      /** @enum {string} */
+      status: "prepare" | "play";
+    };
+    /** @enum {string} */
+    MatchKind: "duel" | "bot" | "map";
+    QueueView: {
+      /** Format: date-time */
+      joinedAt: string;
+      /** Format: date-time */
+      serverTime: string;
+      /** Format: date-time */
+      mapOfferAt: string;
+      /** Format: date-time */
+      botAt: string;
+      format: components["schemas"]["MatchFormat"];
+    };
+    QueueState: {
+      queue?: components["schemas"]["QueueView"];
+      match?: components["schemas"]["MatchRef"];
+    };
+    ArenaMapView: {
+      id: string;
+      name: string;
+      level: components["schemas"]["GameLevel"];
+      valid: boolean;
+      problems?: components["schemas"]["MapProblem"][];
+      botMoves?: number;
+      wins: number;
+      plays: number;
+      active: boolean;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    Look: {
+      avatar?: components["schemas"]["ShopItemView"];
+      frame?: components["schemas"]["ShopItemView"];
+      title?: components["schemas"]["ShopItemView"];
+    };
+    PlayerView: {
+      /** @description No id for the bot */
+      id?: string;
+      name: string;
+      bot?: boolean;
+      trophies: number;
+      league: components["schemas"]["LeagueStep"];
+      look: components["schemas"]["Look"];
+      skins: {
+        [key: string]: components["schemas"]["ShopItemView"];
+      };
+      ready: boolean;
+      found: number;
+      moves: number;
+      skips: number;
+      timeouts: number;
+    };
+    BoardView: {
+      rows: number;
+      cols: number;
+      terrain: string[];
+      fences: components["schemas"]["Fence"][];
+      targets: number;
+      bombs: number;
+      revealed: components["schemas"]["CellView"][];
+      taps: components["schemas"]["Cells"];
+      secrets?: components["schemas"]["Secrets"];
+    };
+    MoveView: {
+      /** @description From 1; a skip after a bomb is a turn too */
+      turn: number;
+      /** @enum {string} */
+      by: "me" | "rival";
+      cell?: components["schemas"]["Cell"];
+      /** @enum {string} */
+      kind: "number" | "buoy" | "target" | "bomb" | "timeout" | "skip";
+      /** Format: date-time */
+      at: string;
+    };
+    MatchResultView: {
+      /** @enum {string} */
+      outcome: "win" | "loss" | "draw";
+      /** @enum {string} */
+      reason:
+        | "targets"
+        | "final"
+        | "equal"
+        | "timeouts"
+        | "surrender"
+        | "norm"
+        | "abandoned"
+        | "max_turns"
+        | "cancelled";
+      trophies: number;
+      trophyNow: number;
+      league: components["schemas"]["LeagueStep"];
+      next?: components["schemas"]["LeagueStep"];
+      coins: number;
+      gems: number;
+      xp: number;
+      rp: number;
+      promotion?: components["schemas"]["LeagueStep"] & {
+        coins: number;
+        gems: number;
+      };
+    };
+    MatchView: {
+      id: string;
+      kind: components["schemas"]["MatchKind"];
+      /** @enum {string} */
+      status: "prepare" | "play" | "done";
+      seq: number;
+      /** Format: date-time */
+      serverTime: string;
+      format: components["schemas"]["MatchFormat"];
+      me: components["schemas"]["PlayerView"];
+      rival: components["schemas"]["PlayerView"];
+      /** @enum {string} */
+      turn?: "me" | "rival";
+      /** @enum {string} */
+      first?: "me" | "rival";
+      final?: boolean;
+      /** Format: date-time */
+      deadline: string;
+      /** Format: date-time */
+      startsAt?: string;
+      norm?: number;
+      myMap?: components["schemas"]["BoardView"];
+      rivalMap?: components["schemas"]["BoardView"];
+      last?: components["schemas"]["MoveView"];
+      surrenderLoss?: number;
+      mapSeenByRival?: boolean;
+      /** @description A friendly challenge — no trophies or rewards */
+      friendly?: boolean;
+      /** @description Duel only — the rival is connected */
+      rivalOnline?: boolean;
+      /** @description Every move in order */
+      log: components["schemas"]["MoveView"][];
+      result?: components["schemas"]["MatchResultView"];
+    };
+    /** @description A WebSocket push from /arena/ws (decision 0060 */
+    ArenaEvent: {
+      /** @enum {string} */
+      type: "hello" | "match" | "queue" | "presence" | "challenge";
+      /** Format: date-time */
+      time: string;
+      match?: components["schemas"]["MatchView"];
+      queue?: components["schemas"]["QueueState"];
+      presence?: {
+        matchId: string;
+        /** @description The rival is connected */
+        online: boolean;
+      };
+      challenge?: {
+        id: string;
+        /** @enum {string} */
+        status: "pending" | "accepted" | "declined" | "cancelled" | "expired";
+      };
+    };
+    HistoryItem: {
+      matchId: string;
+      kind: components["schemas"]["MatchKind"];
+      /** @enum {string} */
+      outcome: "win" | "loss" | "draw";
+      reason: string;
+      rival: {
+        id?: string;
+        name: string;
+        bot?: boolean;
+      };
+      moves: number;
+      rivalMoves: number;
+      trophies: number;
+      friendly?: boolean;
+      /** Format: date-time */
+      finishedAt: string;
+    };
+    RewardItem: {
+      key: string;
+      kind: string;
+      title: string;
+      image?: string;
+    };
+    TrackStepView: {
+      id: number;
+      rp: number;
+      coins: number;
+      gems: number;
+      item?: components["schemas"]["RewardItem"];
+      /** @enum {string} */
+      state: "locked" | "ready" | "claimed";
+    };
+    SeasonResult: {
+      number: number;
+      peak: number;
+      league: components["schemas"]["LeagueStep"];
+      rank: number;
+      wins: number;
       trophiesBefore: number;
       trophiesAfter: number;
-      claimed: boolean;
+      coins: number;
+      gems: number;
+      item?: components["schemas"]["RewardItem"];
+    };
+    SeasonView: {
+      number: number;
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      rp: number;
+      peak: number;
+      track: components["schemas"]["TrackStepView"][];
+      ready: number;
+      result?: components["schemas"]["SeasonResult"];
+    };
+    SeasonClaim: {
+      coins: number;
+      gems: number;
+      item?: components["schemas"]["RewardItem"];
+      wallet: components["schemas"]["BackendWallet"];
+      season: components["schemas"]["SeasonView"];
+    };
+    ArenaHome: {
+      /** Format: date-time */
+      serverTime: string;
+      unlocked: boolean;
+      unlockLevel: number;
+      rulesSeen: boolean;
+      trophies: number;
+      rank: number;
+      league: components["schemas"]["LeagueView"];
+      stats: components["schemas"]["ArenaStats"];
+      activeMap?: components["schemas"]["ArenaMapView"];
+      maps: number;
+      maxMaps: number;
+      rewards: {
+        winCoins: number;
+        drawCoins: number;
+        lossCoins: number;
+        winGems: number;
+        gemWinsLeft: number;
+        botFactor: number;
+      };
+      history: components["schemas"]["HistoryItem"][];
+      match?: components["schemas"]["MatchRef"];
+      queue?: components["schemas"]["QueueView"];
+      timing: {
+        prepareSeconds: number;
+        vsSeconds: number;
+        mapOfferAfter: number;
+        botAfter: number;
+        maxTimeouts: number;
+      };
+      season?: components["schemas"]["SeasonView"];
+    };
+    ArenaMapsList: {
+      format: components["schemas"]["MatchFormat"];
+      maps: components["schemas"]["ArenaMapView"][];
+      max: number;
     };
     CustomLevelInput: {
       /** @description Level v2 (contracts/schemas/level.schema.json) */
@@ -1464,92 +2071,6 @@ export interface components {
       /** Format: date-time */
       until?: string | null;
       reason?: string;
-    };
-    AsyncMatch: {
-      asyncId: string;
-      author: {
-        id: string;
-        nickname: string;
-        league: string;
-        avatar?: string;
-      };
-      map: components["schemas"]["MapLayout"];
-      bombCount: number;
-      targetsCount: number;
-      norm: number;
-      turnSec: number;
-      bombHint: boolean;
-      /**
-       * Format: date-time
-       * @description The first turn's deadline (decision 0036
-       */
-      deadline?: string;
-      skin?: Record<string, never>;
-    };
-    /** @enum {string} */
-    TapOutcome: "pelang" | "target" | "bomb";
-    AsyncTapResult: {
-      turn: number;
-      outcome: components["schemas"]["TapOutcome"];
-      value?: number | null;
-      bombNear?: boolean;
-      turnsUsed: number;
-      /** Format: date-time */
-      deadline: string;
-    };
-    /** @enum {string} */
-    MatchResult: "win" | "loss" | "draw" | "annulled";
-    AsyncFinish: {
-      /** @constant */
-      finished: true;
-      result: components["schemas"]["MatchResult"];
-      turnsUsed: number;
-      norm: number;
-      trophiesDelta: number;
-      rp: number;
-      rewards: {
-        [key: string]: unknown;
-      }[];
-      map: {
-        targets: components["schemas"]["Cells"];
-        bombs: components["schemas"]["Cells"];
-      };
-    };
-    MatchSummary: {
-      matchId: string;
-      /** @enum {string} */
-      mode: "ranked" | "bot" | "async" | "training" | "friendly";
-      opponent: {
-        id: string;
-        nickname: string;
-        league: string;
-        isBot: boolean;
-        label?: string | null;
-      };
-      result: components["schemas"]["MatchResult"];
-      /** @enum {string} */
-      reason: "targets" | "surrender" | "afk" | "turnLimit" | "annulled";
-      turns: {
-        me: number;
-        opponent: number;
-      };
-      trophiesDelta: number;
-      /** Format: date-time */
-      endedAt: string;
-    };
-    MatchDetails: components["schemas"]["MatchSummary"] & {
-      maps: {
-        mine: components["schemas"]["PvpMap"];
-        opponent: components["schemas"]["PvpMap"];
-      };
-      taps: {
-        turn: number;
-        /** @enum {string} */
-        player: "me" | "opponent";
-        cell: components["schemas"]["Cell"];
-        outcome: components["schemas"]["TapOutcome"];
-        value?: number | null;
-      }[];
     };
   };
   responses: {
@@ -2132,35 +2653,6 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
-  getProgress: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Campaign progress */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            currentLevel: number;
-            levels: {
-              id: string;
-              bestStars: number;
-              bestMoves: number;
-            }[];
-            worldsCompleted: number[];
-          };
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
   postContinue: {
     parameters: {
       query?: never;
@@ -2536,13 +3028,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Arena profile, season and format */
+      /** @description The arena home (decision 0060 */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["Arena"];
+          "application/json": components["schemas"]["ArenaHome"];
         };
       };
       default: components["responses"]["Error"];
@@ -2557,13 +3049,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description The player's maps */
+      /** @description Up to three maps and the league format */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ArenaMap"][];
+          "application/json": components["schemas"]["ArenaMapsList"];
         };
       };
       default: components["responses"]["Error"];
@@ -2582,13 +3074,13 @@ export interface operations {
       };
     };
     responses: {
-      /** @description The saved map; the server computes valid, errors and botNorm */
+      /** @description The saved map; an invalid one is a draft with problems */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ArenaMap"];
+          "application/json": components["schemas"]["ArenaMapView"];
         };
       };
       default: components["responses"]["Error"];
@@ -2615,7 +3107,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["ArenaMap"];
+          "application/json": components["schemas"]["ArenaMapView"];
         };
       };
       default: components["responses"]["Error"];
@@ -2653,43 +3145,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description The new active map */
+      /** @description The new active map; an invalid one is 422 map_invalid */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            activeMapId: string;
-          };
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
-  validateArenaMap: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          format: number;
-          map: components["schemas"]["PvpMap"];
-        };
-      };
-    };
-    responses: {
-      /** @description Validation without saving */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["MapValidation"];
+          "application/json": components["schemas"]["ArenaMapView"];
         };
       };
       default: components["responses"]["Error"];
@@ -2702,147 +3164,16 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody: {
-      content: {
-        "application/json": {
-          format: number;
-        };
-      };
-    };
+    requestBody?: never;
     responses: {
-      /** @description A random valid map */
+      /** @description A valid random map of the league format, not saved */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
           "application/json": {
-            map: components["schemas"]["PvpMap"];
-            botNorm: number;
-          };
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
-  completeArenaOnboarding: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description The new flag */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            onboardingDone: boolean;
-          };
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
-  startAsyncMatch: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description A match against another player's map */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AsyncMatch"];
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
-  surrenderAsyncMatch: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description The final result */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AsyncFinish"];
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
-  tapAsyncMatch: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          turn: number;
-          cell: components["schemas"]["Cell"];
-        };
-      };
-    };
-    responses: {
-      /** @description The tap result, or the final result once the match is over */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json":
-            components["schemas"]["AsyncTapResult"] | components["schemas"]["AsyncFinish"];
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
-  getArenaMatches: {
-    parameters: {
-      query?: {
-        cursor?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Match history */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            items: components["schemas"]["MatchSummary"][];
-            nextCursor: string | null;
+            level: components["schemas"]["GameLevel"];
           };
         };
       };
@@ -2860,19 +3191,197 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Both maps and every tap (decision 0029 */
+      /** @description The match; a finished one has both maps with secrets */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["MatchDetails"];
+          "application/json": components["schemas"]["MatchView"];
         };
       };
       default: components["responses"]["Error"];
     };
   };
-  claimSeasonStep: {
+  getCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Campaign overview, worlds and levels (decision 0060 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CampaignOverview"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getCampaignLevel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        number: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The level sheet with its public board */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CampaignLevelDetail"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  playCampaignLevel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        number: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          restart?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description The unfinished game of the level, or a new one */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CampaignGame"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getCampaignGame: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The whole game */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CampaignGame"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  tapCampaignGame: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TapRequest"];
+      };
+    };
+    responses: {
+      /** @description The opened cell and the game after it */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            cell: components["schemas"]["CellView"];
+            game: components["schemas"]["CampaignGame"];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  continueCampaignGame: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          seq: number;
+        };
+      };
+    };
+    responses: {
+      /** @description The game with +3 moves */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CampaignGame"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  giveUpCampaignGame: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The abandoned game with its secrets */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CampaignGame"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  postCampaignTutorial: {
     parameters: {
       query?: never;
       header?: never;
@@ -2882,30 +3391,22 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": {
-          step: number;
+          key: string;
         };
       };
     };
     responses: {
-      /** @description The reward; a repeat answers duplicate without an error */
-      200: {
+      /** @description Saved */
+      204: {
         headers: {
           [name: string]: unknown;
         };
-        content: {
-          "application/json": {
-            /** @description Decision 0029, to agree with the backend */
-            duplicate: boolean;
-            reward?: components["schemas"]["SeasonReward"];
-            wallet?: components["schemas"]["Wallet"];
-            inventoryAdded?: string[];
-          };
-        };
+        content?: never;
       };
       default: components["responses"]["Error"];
     };
   };
-  claimSeasonSummary: {
+  putArenaRulesSeen: {
     parameters: {
       query?: never;
       header?: never;
@@ -2914,17 +3415,348 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description The credited rewards */
+      /** @description Saved */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  checkArenaMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          level: components["schemas"]["GameLevel"];
+        };
+      };
+    };
+    responses: {
+      /** @description Validity, problems and the bot run */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MapCheck"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getArenaQueue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The search state */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QueueState"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  joinArenaQueue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description In the search, or the match already found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["QueueState"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  leaveArenaQueue: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Left the search */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  startMapMatch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A «против карты» match */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getCurrentMatch: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The live match */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  putMatchMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json":
+          | {
+              /** @constant */
+              source: "draw";
+              level: components["schemas"]["GameLevel"];
+            }
+          | {
+              /** @constant */
+              source: "saved";
+              mapId: string;
+            }
+          | {
+              /** @constant */
+              source: "random";
+            };
+      };
+    };
+    responses: {
+      /** @description The match with the chosen map */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  postMatchReady: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The match after «Готов» */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  postMatchTap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TapRequest"];
+      };
+    };
+    responses: {
+      /** @description The match after the tap */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  postMatchSurrender: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The finished match */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getArenaHistory: {
+    parameters: {
+      query?: {
+        limit?: number;
+        before?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Finished matches, newest first */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
           "application/json": {
-            duplicate: boolean;
-            rewards: components["schemas"]["SeasonReward"][];
-            wallet: components["schemas"]["Wallet"];
+            items: components["schemas"]["HistoryItem"][];
+            /** Format: date-time */
+            nextBefore?: string;
           };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getArenaSeason: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The current season and its track */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeasonView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  claimSeasonTrackStep: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        step: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The reward of the step */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeasonClaim"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  claimSeasonResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The reward of the past season */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SeasonClaim"];
         };
       };
       default: components["responses"]["Error"];
@@ -3156,6 +3988,23 @@ export const errorCodeValues: ReadonlyArray<
   "invalid_document_type",
   "body_too_large",
   "method_not_allowed",
+  "continue_method",
+  "arena_locked",
+  "arena_unavailable",
+  "maps_limit",
+  "map_not_found",
+  "match_not_found",
+  "match_in_progress",
+  "match_not_preparing",
+  "already_ready",
+  "stale_state",
+  "not_your_turn",
+  "match_not_playing",
+  "match_starting",
+  "step_not_found",
+  "step_locked",
+  "step_claimed",
+  "no_season_result",
 ];
 export const meLocaleValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Me"]["locale"]
@@ -3218,27 +4067,91 @@ export const adIntentStatusStatusValues: ReadonlyArray<
 export const adIntentStatusRewardCurrencyValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["AdIntentStatus"]["reward"]["currency"]
 > = ["emerald", "coin"];
-export const seasonRewardCurrencyValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["SeasonReward"]["currency"]
-> = ["coin", "emerald"];
-export const seasonStepStateValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["SeasonStep"]["state"]
-> = ["claimed", "available", "locked"];
+export const levelModeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["LevelMode"]
+> = ["number", "hot_cold", "course"];
+export const cellViewKindValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["CellView"]["kind"]
+> = ["number", "target", "bomb", "buoy", "beacon"];
+export const cellViewToneValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["CellView"]["tone"]
+> = ["hot", "warm", "cold"];
+export const cellViewDirectionValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["CellView"]["direction"]
+> = ["up", "right", "down", "left"];
+export const cellViewCompareValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["CellView"]["compare"]
+> = ["warmer", "colder", "same", "none"];
+export const levelStateValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["LevelState"]
+> = ["locked", "current", "done", "perfect"];
+export const campaignGameStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["CampaignGame"]["status"]
+> = ["play", "lost", "won", "abandoned"];
+export const mapProblemCodeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MapProblem"]["code"]
+> = [
+  "size",
+  "terrain",
+  "targets",
+  "bombs",
+  "fences",
+  "elements",
+  "caps",
+  "bombs_limit",
+  "rocks_limit",
+  "bridge",
+  "cut",
+];
+export const matchRefStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchRef"]["status"]
+> = ["prepare", "play"];
+export const matchKindValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchKind"]
+> = ["duel", "bot", "map"];
+export const moveViewByValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MoveView"]["by"]
+> = ["me", "rival"];
+export const moveViewKindValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MoveView"]["kind"]
+> = ["number", "buoy", "target", "bomb", "timeout", "skip"];
+export const matchResultViewOutcomeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchResultView"]["outcome"]
+> = ["win", "loss", "draw"];
+export const matchResultViewReasonValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchResultView"]["reason"]
+> = [
+  "targets",
+  "final",
+  "equal",
+  "timeouts",
+  "surrender",
+  "norm",
+  "abandoned",
+  "max_turns",
+  "cancelled",
+];
+export const matchViewStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchView"]["status"]
+> = ["prepare", "play", "done"];
+export const matchViewTurnValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchView"]["turn"]
+> = ["me", "rival"];
+export const matchViewFirstValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["MatchView"]["first"]
+> = ["me", "rival"];
+export const arenaEventTypeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ArenaEvent"]["type"]
+> = ["hello", "match", "queue", "presence", "challenge"];
+export const arenaEventChallengeStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ArenaEvent"]["challenge"]["status"]
+> = ["pending", "accepted", "declined", "cancelled", "expired"];
+export const historyItemOutcomeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["HistoryItem"]["outcome"]
+> = ["win", "loss", "draw"];
+export const trackStepViewStateValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["TrackStepView"]["state"]
+> = ["locked", "ready", "claimed"];
 export const banDetailsScopeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["BanDetails"]["scope"]
 > = ["all", "arena"];
-export const tapOutcomeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["TapOutcome"]
-> = ["pelang", "target", "bomb"];
-export const matchResultValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["MatchResult"]
-> = ["win", "loss", "draw", "annulled"];
-export const matchSummaryModeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["MatchSummary"]["mode"]
-> = ["ranked", "bot", "async", "training", "friendly"];
-export const matchSummaryReasonValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["MatchSummary"]["reason"]
-> = ["targets", "surrender", "afk", "turnLimit", "annulled"];
-export const matchDetailsTapsPlayerValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["MatchDetails"]["taps"]["player"]
-> = ["me", "opponent"];
