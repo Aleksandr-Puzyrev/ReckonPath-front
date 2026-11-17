@@ -3,10 +3,17 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-
 import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 
+import { ADD_FRIEND_PARAM } from "@entities/friend";
 import { campaignQueryOptions } from "@entities/level";
 import { useAccountStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
-import { mockOverview, mockServer, mockUrl, passMockLevels } from "@shared/test-utils/api-mock";
+import {
+  mockOverview,
+  mockServer,
+  mockUrl,
+  passMockLevels,
+  setMockFriends,
+} from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import DailyScreen from "./daily-screen";
@@ -145,6 +152,59 @@ describe("DailyScreen", () => {
     expect(await screen.findByText("Место 4 из 1240")).toBeOnTheScreen();
     expect(screen.getByText("Сыграно: 7 ходов")).toBeOnTheScreen();
     expect(screen.queryByTestId("daily-play")).toBeNull();
+  });
+
+  test("shows my row without a rank in the friends tab outside the friends list (decision 0062 #12)", async () => {
+    useAccountStore.getState().markSignedIn();
+    unlockDaily();
+    serveDay({ status: "won", mine: { rank: 4, stars: 3, moves: 7, attempts: 2 } });
+    mockServer.use(
+      http.get(mockUrl("/daily/leaderboard"), ({ request }) =>
+        new URL(request.url).searchParams.get("scope") === "friends"
+          ? HttpResponse.json({
+              date: DAY,
+              entries: [{ rank: 1, id: "mock-2", name: "Kira", stars: 3, moves: 4, attempts: 1 }],
+              mine: { id: "me", me: true, stars: 3, moves: 7, attempts: 2 },
+            })
+          : HttpResponse.json({ date: DAY, entries: [] }),
+      ),
+    );
+    await renderScreen();
+
+    await fireEvent.press(await screen.findByTestId("leaderboard-scope-friends"));
+
+    expect(await screen.findByText("Kira")).toBeOnTheScreen();
+    expect(screen.getByLabelText("Ты, 7 ходов")).toBeOnTheScreen();
+  });
+
+  test("leads to adding friends from an empty friends tab", async () => {
+    useAccountStore.getState().markSignedIn();
+    setMockFriends({ friends: {} });
+    unlockDaily();
+    serveDay({ status: "won", mine: { rank: 4, stars: 3, moves: 7, attempts: 2 } });
+    await renderScreen();
+
+    await fireEvent.press(await screen.findByTestId("leaderboard-scope-friends"));
+    await fireEvent.press(await screen.findByTestId("leaderboard-add-friends"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: "/friends",
+      params: { add: ADD_FRIEND_PARAM },
+    });
+  });
+
+  test("keeps the way to add friends off while offline", async () => {
+    useAccountStore.getState().markSignedIn();
+    setMockFriends({ friends: {} });
+    unlockDaily();
+    serveDay({ status: "won", mine: { rank: 4, stars: 3, moves: 7, attempts: 2 } });
+    await renderScreen();
+    await fireEvent.press(await screen.findByTestId("leaderboard-scope-friends"));
+    await screen.findByTestId("leaderboard-add-friends");
+
+    await act(async () => onlineManager.setOnline(false));
+
+    expect(screen.getByTestId("leaderboard-add-friends")).toBeDisabled();
   });
 
   test("tells that today's level is not ready yet", async () => {

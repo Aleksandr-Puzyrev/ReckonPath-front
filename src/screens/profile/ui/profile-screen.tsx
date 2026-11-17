@@ -14,6 +14,7 @@ import type { ToastMessage } from "@shared/ui/toast";
 import { BoardTryout } from "@widgets/board";
 import { CollectionGrid, SlotSheet } from "@widgets/collection";
 import { EarnSheet } from "@widgets/earn-sheet";
+import { ProfileFriendsRow } from "@widgets/profile-friends-row";
 import { TopBar } from "@widgets/top-bar";
 
 import { NICKNAME_CHANGED_NOTICE } from "../model/profile-notice";
@@ -64,6 +65,12 @@ const ProfileScreen = () => {
               progress={profile.me}
               onNicknamePress={() => router.push("/profile/nickname")}
             />
+            {profile.friendCounts === undefined ? null : (
+              <ProfileFriendsRow
+                counts={profile.friendCounts}
+                onPress={() => router.push("/friends")}
+              />
+            )}
             <Text variant="eyebrow" style={styles.section}>
               {t("profile.collection")}
             </Text>

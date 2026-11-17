@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { forwardRef, useEffect, useImperativeHandle } from "react";
+import { TextInput } from "react-native";
+import type { TextInputProps } from "react-native";
 
 interface IModal {
   onDismiss: () => void;
@@ -25,3 +27,7 @@ export const dismissByUser = () => lastSheet.onDismiss?.();
 export const BottomSheetView = ({ children }: { children: ReactNode }) => children;
 
 export const BottomSheetBackdrop = () => null;
+
+export const BottomSheetScrollView = ({ children }: { children: ReactNode }) => children;
+
+export const BottomSheetTextInput = (props: TextInputProps) => <TextInput {...props} />;

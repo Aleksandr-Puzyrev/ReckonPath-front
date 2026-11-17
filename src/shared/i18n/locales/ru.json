@@ -397,7 +397,17 @@
     "invalid_code": "Неверный код",
     "too_many_attempts": "Слишком много попыток. Запроси новый код",
     "wrong_password": "Неверный пароль",
-    "same_email": "Это и так твой e-mail"
+    "same_email": "Это и так твой e-mail",
+    "already_friends": "Вы уже друзья",
+    "request_exists": "Заявка уже отправлена",
+    "requests_limit": "Слишком много отправленных заявок (до 50)",
+    "request_not_found": "Заявка уже неактуальна",
+    "not_friends": "Этот игрок уже не в друзьях",
+    "user_not_found": "Игрок не найден",
+    "invite_invalid": "Такого кода нет",
+    "invite_used": "Код приглашения уже введён",
+    "invite_expired": "Код можно ввести только в первые 7 дней",
+    "invite_self": "Это твой собственный код"
   },
   "system": {
     "update": {
@@ -468,7 +478,12 @@
     "attempt": "Попытка {{n}} — чем меньше попыток, тем выше место",
     "restoreFirst": "Сначала восстанови серию — после победы она начнётся заново",
     "place": "Место {{rank}} из {{total}}",
-    "network": "Нужна сеть, чтобы играть пеленг дня"
+    "network": "Нужна сеть, чтобы играть пеленг дня",
+    "scope": {
+      "all": "Все",
+      "friends": "Друзья"
+    },
+    "addFriends": "Добавь друзей"
   },
   "streak": {
     "days_one": "{{count}} день подряд",
@@ -534,6 +549,7 @@
     "moreInShop": "Ещё в витрине",
     "default": "По умолчанию",
     "level": "Уровень {{level}}",
+    "friends": "Друзья · {{count}} · {{online}} онлайн",
     "xp": "XP {{xp}} / {{max}}",
     "guestNote": "Гостевой прогресс пропадёт при смене телефона",
     "have": "Есть",
@@ -555,6 +571,47 @@
       "frame": "Рамка",
       "title": "Титул"
     }
+  },
+  "friends": {
+    "title": "Друзья",
+    "requests": "Заявки",
+    "requestsCount": "Заявки ({{count}})",
+    "noRequests": "Заявок пока нет",
+    "add": "Добавить",
+    "addFriend": "Добавить друга",
+    "myCode": "Мой код",
+    "copy": "Скопировать",
+    "copied": "Скопировано ✓",
+    "invite": "Поделиться кодом",
+    "inviteAction": "Пригласить",
+    "status": {
+      "online": "Онлайн",
+      "inMatch": "В матче"
+    },
+    "offline": "Не в сети",
+    "offlineBar": "Нет сети",
+    "trophies_one": "{{value}} кубок",
+    "trophies_few": "{{value}} кубка",
+    "trophies_many": "{{value}} кубков",
+    "trophies_other": "{{value}} кубка",
+    "wantsToBeFriends": "хочет в друзья",
+    "accept": "Принять",
+    "decline": "Отклонить",
+    "accepted": "{{name}} теперь в друзьях",
+    "sent": "Отправлено ✓",
+    "empty": "Играть с друзьями веселее",
+    "emptyBody": "Вызывай на дуэли и сравнивай пеленг дня.",
+    "searchHint": "Введите хотя бы 3 символа ника",
+    "noResults": "Никого не нашли",
+    "outgoing": "Отправленные",
+    "withdraw": "Отозвать",
+    "isFriend": "В друзьях",
+    "remove": "Удалить из друзей",
+    "removeConfirm": "Удалить {{name}} из друзей?",
+    "redeem": "Код приглашения",
+    "redeemDone": "Код принят — {{name}} теперь в друзьях",
+    "redeemAccepted": "Код принят",
+    "inviteReward": "Друг сыграет первый матч на арене — тебе ◆ {{gems}}"
   },
   "account": {
     "benefits": {

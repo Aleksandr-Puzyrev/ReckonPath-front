@@ -12,6 +12,7 @@ import { campaignHandlers } from "./campaign-handlers";
 import { customLevelHandlers } from "./custom-level-handlers";
 import { dailyHandlers } from "./daily-handlers";
 import { deviceHandlers } from "./device-handlers";
+import { friendsHandlers } from "./friends-handlers";
 import { matchHandlers } from "./match-handlers";
 import { meHandlers } from "./me-handlers";
 import { mockUrl } from "./mock-url";
@@ -73,4 +74,5 @@ export const handlers = [
   ...matchHandlers,
   ...supportHandlers,
   ...customLevelHandlers,
+  ...friendsHandlers,
 ];

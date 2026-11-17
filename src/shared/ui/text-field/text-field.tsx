@@ -1,3 +1,4 @@
+import { BottomSheetTextInput } from "@gorhom/bottom-sheet";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Pressable, TextInput, View } from "react-native";
@@ -31,6 +32,7 @@ interface ITextField extends Pick<
   counter?: string;
   hint?: ReactNode;
   secureToggle?: SecureToggle;
+  isInSheet?: boolean;
   testID?: string;
 }
 
@@ -42,6 +44,7 @@ const TextField = ({
   counter,
   hint,
   secureToggle,
+  isInSheet = false,
   testID,
   onBlur,
   ...input
@@ -50,6 +53,8 @@ const TextField = ({
   const [isFocused, setIsFocused] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
   const hasError = error !== undefined;
+  // Inside a bottom sheet the sheet's own input lets the sheet move above the keyboard (внутри нижнего листа его собственное поле позволяет листу подняться над клавиатурой).
+  const Input = isInSheet ? BottomSheetTextInput : TextInput;
   styles.useVariants({
     isFocused,
     hasError,
@@ -70,7 +75,7 @@ const TextField = ({
         )}
       </View>
       <View>
-        <TextInput
+        <Input
           {...input}
           testID={testID}
           accessibilityLabel={label}

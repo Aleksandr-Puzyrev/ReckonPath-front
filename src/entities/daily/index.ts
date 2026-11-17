@@ -4,11 +4,13 @@ export {
   dailyKeys,
   dailyQueryOptions,
   invalidateDailyProgress,
+  invalidateFriendsLeaderboard,
   useDailyGameQuery,
   useDailyHistoryQuery,
   useDailyLeaderboardQuery,
   useDailyQuery,
 } from "./api/daily-queries";
+export type { DailyLeaderboardScope } from "./api/daily-queries";
 export { playDailyMutationOptions, tapDailyGameMutationOptions } from "./api/daily-game-mutations";
 export { dayResultOf, todayOf } from "./model/day-result";
 export type { DayPlace } from "./model/day-result";

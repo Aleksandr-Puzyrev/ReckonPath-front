@@ -1,4 +1,9 @@
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 import type { BottomSheetBackdropProps } from "@gorhom/bottom-sheet";
 import type { ReactNode } from "react";
 import { useEffect, useEffectEvent, useRef } from "react";
@@ -10,12 +15,26 @@ interface ISheet {
   isOpen: boolean;
   onDismiss: () => void;
   isDismissible?: boolean;
+  isScrollable?: boolean;
   children: ReactNode;
 }
 
 const HIDDEN_INDEX = -1;
 
-const Sheet = ({ isOpen, onDismiss, isDismissible = true, children }: ISheet) => {
+// A long sheet with fields scrolls and rises above the keyboard; short sheets keep their default behaviour (длинный лист с полями прокручивается и поднимается над клавиатурой; короткие листы ведут себя как раньше).
+const SCROLLABLE_KEYBOARD = {
+  keyboardBehavior: "interactive",
+  keyboardBlurBehavior: "restore",
+  android_keyboardInputMode: "adjustResize",
+} as const;
+
+const Sheet = ({
+  isOpen,
+  onDismiss,
+  isDismissible = true,
+  isScrollable = false,
+  children,
+}: ISheet) => {
   const ref = useRef<BottomSheetModal>(null);
   const isPresentedRef = useRef(false);
   const isClosingRef = useRef(false);
@@ -78,8 +97,18 @@ const Sheet = ({ isOpen, onDismiss, isDismissible = true, children }: ISheet) =>
       backdropComponent={renderBackdrop}
       backgroundStyle={styles.background}
       handleIndicatorStyle={styles.handle}
+      {...(isScrollable ? SCROLLABLE_KEYBOARD : {})}
     >
-      <BottomSheetView style={styles.content}>{children}</BottomSheetView>
+      {isScrollable ? (
+        <BottomSheetScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
+          {children}
+        </BottomSheetScrollView>
+      ) : (
+        <BottomSheetView style={styles.content}>{children}</BottomSheetView>
+      )}
     </BottomSheetModal>
   );
 };

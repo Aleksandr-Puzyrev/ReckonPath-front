@@ -363,7 +363,17 @@
     "invalid_code": "Wrong code",
     "too_many_attempts": "Too many attempts. Request a new code",
     "wrong_password": "Wrong password",
-    "same_email": "This is already your e-mail"
+    "same_email": "This is already your e-mail",
+    "already_friends": "You’re already friends",
+    "request_exists": "Request already sent",
+    "requests_limit": "Too many sent requests (up to 50)",
+    "request_not_found": "This request is no longer active",
+    "not_friends": "This player is no longer your friend",
+    "user_not_found": "Player not found",
+    "invite_invalid": "No such code",
+    "invite_used": "An invite code has already been used",
+    "invite_expired": "The code can only be entered in your first 7 days",
+    "invite_self": "That’s your own code"
   },
   "system": {
     "update": {
@@ -430,7 +440,12 @@
     "attempt": "Attempt {{n}} — fewer attempts rank higher",
     "restoreFirst": "Restore your streak first — a win starts it over",
     "place": "Place {{rank}} of {{total}}",
-    "network": "You need a connection to play the daily bearing"
+    "network": "You need a connection to play the daily bearing",
+    "scope": {
+      "all": "All",
+      "friends": "Friends"
+    },
+    "addFriends": "Add friends"
   },
   "streak": {
     "days_one": "{{count}}-day streak",
@@ -488,6 +503,7 @@
     "moreInShop": "More in the showroom",
     "default": "Default",
     "level": "Level {{level}}",
+    "friends": "Friends · {{count}} · {{online}} online",
     "xp": "XP {{xp}} / {{max}}",
     "guestNote": "Guest progress is lost on a new phone",
     "have": "Owned",
@@ -509,6 +525,45 @@
       "frame": "Frame",
       "title": "Title"
     }
+  },
+  "friends": {
+    "title": "Friends",
+    "requests": "Requests",
+    "requestsCount": "Requests ({{count}})",
+    "noRequests": "No requests yet",
+    "add": "Add",
+    "addFriend": "Add a friend",
+    "myCode": "My code",
+    "copy": "Copy",
+    "copied": "Copied ✓",
+    "invite": "Share code",
+    "inviteAction": "Invite",
+    "status": {
+      "online": "Online",
+      "inMatch": "In a match"
+    },
+    "offline": "Offline",
+    "offlineBar": "Offline",
+    "trophies_one": "{{value}} trophy",
+    "trophies_other": "{{value}} trophies",
+    "wantsToBeFriends": "wants to be friends",
+    "accept": "Accept",
+    "decline": "Decline",
+    "accepted": "{{name}} is now a friend",
+    "sent": "Sent ✓",
+    "empty": "It’s more fun with friends",
+    "emptyBody": "Challenge them and compare daily bearings.",
+    "searchHint": "Type at least 3 characters of the nickname",
+    "noResults": "No one found",
+    "outgoing": "Sent",
+    "withdraw": "Withdraw",
+    "isFriend": "Friends",
+    "remove": "Remove from friends",
+    "removeConfirm": "Remove {{name}} from friends?",
+    "redeem": "Invite code",
+    "redeemDone": "Code accepted — {{name}} is now your friend",
+    "redeemAccepted": "Code accepted",
+    "inviteReward": "When your friend plays their first arena match, you get ◆ {{gems}}"
   },
   "account": {
     "benefits": {

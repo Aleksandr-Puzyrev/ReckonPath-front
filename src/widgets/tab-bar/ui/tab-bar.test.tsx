@@ -1,7 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react-native";
 import type { BottomTabBarProps } from "expo-router/tabs";
 
+import { useAccountStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
+import { mockServer, setMockFriends } from "@shared/test-utils/api-mock";
+import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import { TAB_ITEMS } from "../model/tab-items";
 
@@ -27,9 +30,35 @@ describe("TabBar", () => {
     await i18n.changeLanguage("ru");
   });
 
+  afterEach(async () => {
+    await cleanup();
+    mockServer.reset();
+    useAccountStore.getState().reset();
+  });
+
+  test("marks the Profile tab while friend requests wait (decision 0062 #13)", async () => {
+    useAccountStore.getState().markSignedIn();
+    const { props } = createProps(0);
+    await render(<TabBar {...props} />, { wrapper: createQueryWrapper() });
+
+    expect(await screen.findByTestId("tab-dot-profile")).toBeOnTheScreen();
+    expect(screen.getByRole("tab", { name: "Профиль, Заявки (2)" })).toBeOnTheScreen();
+    expect(screen.queryByTestId("tab-dot-shop")).toBeNull();
+  });
+
+  test("shows no dot without incoming requests", async () => {
+    useAccountStore.getState().markSignedIn();
+    setMockFriends({ requests: [] });
+    const { props } = createProps(0);
+    await render(<TabBar {...props} />, { wrapper: createQueryWrapper() });
+
+    await screen.findByRole("tab", { name: "Профиль" });
+    expect(screen.queryByTestId("tab-dot-profile")).toBeNull();
+  });
+
   test("shows the five tabs in spec order with localized labels", async () => {
     const { props } = createProps(0);
-    await render(<TabBar {...props} />);
+    await render(<TabBar {...props} />, { wrapper: createQueryWrapper() });
 
     const labels = screen.getAllByRole("tab").map((tab) => tab.props.accessibilityLabel);
     expect(labels).toEqual(["Игра", "Уровни", "Арена", "Витрина", "Профиль"]);
@@ -43,7 +72,9 @@ describe("TabBar", () => {
       name,
     }));
     const shuffledProps = { ...props, state: { ...props.state, index: 1, routes: shuffled } };
-    await render(<TabBar {...(shuffledProps as unknown as BottomTabBarProps)} />);
+    await render(<TabBar {...(shuffledProps as unknown as BottomTabBarProps)} />, {
+      wrapper: createQueryWrapper(),
+    });
 
     const labels = screen.getAllByRole("tab").map((tab) => tab.props.accessibilityLabel);
     expect(labels).toEqual(["Игра", "Уровни", "Арена", "Витрина", "Профиль"]);
@@ -52,7 +83,7 @@ describe("TabBar", () => {
 
   test("marks only the active tab as selected", async () => {
     const { props } = createProps(2);
-    await render(<TabBar {...props} />);
+    await render(<TabBar {...props} />, { wrapper: createQueryWrapper() });
 
     expect(screen.getByRole("tab", { name: "Арена" })).toBeSelected();
     expect(screen.getByRole("tab", { name: "Игра" })).not.toBeSelected();
@@ -60,7 +91,7 @@ describe("TabBar", () => {
 
   test("navigates to a tab when an inactive tab is pressed", async () => {
     const { props, navigation } = createProps(0);
-    await render(<TabBar {...props} />);
+    await render(<TabBar {...props} />, { wrapper: createQueryWrapper() });
 
     fireEvent.press(screen.getByRole("tab", { name: "Витрина" }));
 
@@ -72,7 +103,7 @@ describe("TabBar", () => {
 
   test("does not navigate when the active tab is pressed again", async () => {
     const { props, navigation } = createProps(1);
-    await render(<TabBar {...props} />);
+    await render(<TabBar {...props} />, { wrapper: createQueryWrapper() });
 
     fireEvent.press(screen.getByRole("tab", { name: "Уровни" }));
 
@@ -82,7 +113,7 @@ describe("TabBar", () => {
 
   test("does not navigate when the press is prevented by a listener", async () => {
     const { props, navigation } = createProps(0, true);
-    await render(<TabBar {...props} />);
+    await render(<TabBar {...props} />, { wrapper: createQueryWrapper() });
 
     fireEvent.press(screen.getByRole("tab", { name: "Профиль" }));
 
@@ -92,7 +123,7 @@ describe("TabBar", () => {
   test("uses English labels when the language is English", async () => {
     await i18n.changeLanguage("en");
     const { props } = createProps(0);
-    await render(<TabBar {...props} />);
+    await render(<TabBar {...props} />, { wrapper: createQueryWrapper() });
 
     expect(screen.getByRole("tab", { name: "Shop" })).toBeTruthy();
   });

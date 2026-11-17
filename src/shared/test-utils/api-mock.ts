@@ -13,3 +13,9 @@ export {
   playingMatchMock,
 } from "../api/mocks/mock-match";
 export { setMockDailyLevel, setMockStreak } from "../api/mocks/mock-daily";
+export {
+  MOCK_INVITE_CODE,
+  MOCK_ME_ID,
+  MOCK_PLAYERS,
+  setMockFriends,
+} from "../api/mocks/mock-friends";

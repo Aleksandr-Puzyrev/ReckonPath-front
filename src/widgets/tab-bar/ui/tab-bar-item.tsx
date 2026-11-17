@@ -1,4 +1,4 @@
-import { Pressable } from "react-native";
+import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@shared/ui/text";
@@ -10,12 +10,22 @@ import { styles } from "./tab-bar-item-styles";
 interface ITabBarItem {
   item: TabItem;
   label: string;
+  accessibilityLabel: string;
   isActive: boolean;
+  hasDot?: boolean;
   onPress: () => void;
   onLongPress: () => void;
 }
 
-const TabBarItem = ({ item, label, isActive, onPress, onLongPress }: ITabBarItem) => {
+const TabBarItem = ({
+  item,
+  label,
+  accessibilityLabel,
+  isActive,
+  hasDot = false,
+  onPress,
+  onLongPress,
+}: ITabBarItem) => {
   const { theme } = useUnistyles();
   styles.useVariants({ isActive });
 
@@ -25,13 +35,16 @@ const TabBarItem = ({ item, label, isActive, onPress, onLongPress }: ITabBarItem
   return (
     <Pressable
       accessibilityRole="tab"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ selected: isActive }}
       onPress={onPress}
       onLongPress={onLongPress}
       style={styles.item}
     >
-      <Icon width={theme.sizes.icon.l} height={theme.sizes.icon.l} color={iconColor} />
+      <View>
+        <Icon width={theme.sizes.icon.l} height={theme.sizes.icon.l} color={iconColor} />
+        {hasDot ? <View style={styles.dot} testID={`tab-dot-${item.routeName}`} /> : null}
+      </View>
       <Text variant="tab" style={styles.label}>
         {label}
       </Text>

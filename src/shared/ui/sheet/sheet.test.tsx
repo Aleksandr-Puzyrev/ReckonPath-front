@@ -1,5 +1,5 @@
-import { act, render } from "@testing-library/react-native";
-import { BackHandler } from "react-native";
+import { act, render, screen } from "@testing-library/react-native";
+import { BackHandler, Text } from "react-native";
 
 import Sheet from "./sheet";
 
@@ -59,5 +59,15 @@ describe("Sheet", () => {
     expect(handler?.({ type: "hardwareBackPress", timeStamp: 0 })).toBe(true);
     expect(onDismiss).toHaveBeenCalledTimes(1);
     listen.mockRestore();
+  });
+
+  test("renders a scrollable sheet's content", async () => {
+    await render(
+      <Sheet isOpen isScrollable onDismiss={jest.fn()}>
+        <Text>content</Text>
+      </Sheet>,
+    );
+
+    expect(screen.getByText("content")).toBeOnTheScreen();
   });
 });

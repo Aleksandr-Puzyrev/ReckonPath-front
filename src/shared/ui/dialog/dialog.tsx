@@ -11,6 +11,7 @@ export interface DialogAction {
   label: string;
   variant: ButtonVariant;
   onPress: () => void;
+  testID?: string;
 }
 
 interface IDialog {
@@ -38,7 +39,12 @@ const Dialog = ({ isOpen, title, message, actions, onCancel, children }: IDialog
         <View style={styles.actions}>
           {actions.map((action) => (
             <View key={action.label} style={styles.action}>
-              <Button label={action.label} variant={action.variant} onPress={action.onPress} />
+              <Button
+                testID={action.testID}
+                label={action.label}
+                variant={action.variant}
+                onPress={action.onPress}
+              />
             </View>
           ))}
         </View>

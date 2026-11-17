@@ -4,6 +4,7 @@ import type { LevelInput } from "@reckon-path/engine";
 import type { components } from "../generated/schema";
 
 import { cellViewOf, publicBoardOf, replayMockGame, secretsOf } from "./mock-campaign-game";
+import { mockFriendIds } from "./mock-friends";
 import { clearMockState, loadMockState, saveMockState } from "./mock-state";
 
 type DailyGame = components["schemas"]["DailyGame"];
@@ -224,15 +225,17 @@ const mineOf = (date: string): DailyEntry | null => {
   return { rank, id: "me", me: true, ...mine };
 };
 
-export const mockDailyLeaderboard = (date: string) => {
+// The friends scope ranks me among my friends only, like the backend (область друзей считает место только среди друзей, как у бэкенда).
+export const mockDailyLeaderboard = (date: string, scope: string | null = null) => {
+  const friendIds = mockFriendIds();
+  const top = scope === "friends" ? TOP.filter(({ id }) => friendIds.includes(id ?? "")) : TOP;
   const mine = mineOf(date);
-  if (mine === null) return { date, entries: TOP };
-  const position = (mine.rank ?? 1) - 1;
-  const entries = [...TOP.slice(0, position), mine, ...TOP.slice(position)].map((entry, index) => ({
-    ...entry,
-    rank: index + 1,
-  }));
-  return { date, entries, mine };
+  const ranked = (entries: DailyEntry[]) =>
+    entries.map((entry, index) => ({ ...entry, rank: index + 1 }));
+  if (mine === null) return { date, entries: ranked(top) };
+  const position = top.filter((entry) => isBetter(entry, mine)).length;
+  const entries = ranked([...top.slice(0, position), mine, ...top.slice(position)]);
+  return { date, entries, mine: entries[position] ?? mine };
 };
 
 export const mockDailyDay = (date: string): DailyDay => {

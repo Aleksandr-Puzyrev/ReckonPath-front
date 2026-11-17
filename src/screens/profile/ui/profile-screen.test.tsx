@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { useAccountStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
 import { buyMockItem, equipMockItem } from "@shared/test-utils/buy-mock-item";
-import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import { mockServer, mockUrl, setMockFriends } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import ProfileScreen from "./profile-screen";
@@ -19,6 +19,7 @@ jest.mock("expo-router", () => ({
     return mockRouter;
   },
   useLocalSearchParams: () => mockParams,
+  useIsFocused: () => true,
 }));
 jest.mock("@shared/ui/sheet", () => ({
   Sheet: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
@@ -62,6 +63,25 @@ describe("ProfileScreen", () => {
     await fireEvent.press(screen.getByTestId("profile-nickname"));
 
     expect(mockRouter.push).toHaveBeenCalledWith("/profile/nickname");
+  });
+
+  test("shows the friends with the request badge and opens them (design 23.1, decision 0062 #13)", async () => {
+    await renderProfile();
+
+    const row = await screen.findByTestId("profile-friends");
+    expect(row).toHaveTextContent(/Друзья · 3 · 2 онлайн/);
+    expect(screen.getByTestId("profile-friends-badge")).toHaveTextContent("2");
+    await fireEvent.press(row);
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/friends");
+  });
+
+  test("shows no badge without incoming requests", async () => {
+    setMockFriends({ requests: [] });
+    await renderProfile();
+
+    await screen.findByTestId("profile-friends");
+    expect(screen.queryByTestId("profile-friends-badge")).toBeNull();
   });
 
   test("confirms a changed nickname (decision 0059 #7)", async () => {

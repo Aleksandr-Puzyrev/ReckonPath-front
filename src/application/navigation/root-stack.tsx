@@ -65,6 +65,7 @@ const RootStack = () => {
         >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
+          <Stack.Screen name="friends" />
           <Stack.Screen name="editor/index" />
           <Stack.Screen name="editor/[id]" options={{ gestureEnabled: false }} />
           <Stack.Screen

@@ -68,4 +68,13 @@ export const BACKEND_ROUTES: readonly BackendRoute[] = [
   { method: "GET", path: "/arena/season" },
   { method: "POST", path: "/arena/season/track/{step}/claim" },
   { method: "POST", path: "/arena/season/result/claim" },
+  { method: "GET", path: "/friends" },
+  { method: "GET", path: "/friends/search" },
+  { method: "POST", path: "/friends/requests" },
+  { method: "POST", path: "/friends/requests/{id}/accept" },
+  { method: "POST", path: "/friends/requests/{id}/decline" },
+  { method: "DELETE", path: "/friends/requests/{id}" },
+  { method: "DELETE", path: "/friends/{id}" },
+  { method: "GET", path: "/me/invite" },
+  { method: "POST", path: "/me/invite" },
 ];

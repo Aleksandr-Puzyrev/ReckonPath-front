@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: >
     Stage 2 subset of spec Part 7 (decision 0014 #2): bootstrap, guest auth, profile.
-    Daily and streak follow the backend (decision 0061). Written from Part 7 by the client team,
+    Daily and streak follow the backend (decision 0061); friends follow the backend (decision 0062). Written from Part 7 by the client team,
     reviewed by the backend. Fields not stated in Part 7 are not added. `/auth/register`
     and `/auth/login` replace Part 7's Apple / Google sign-in and are a proposal to agree
     with the backend (decision 0019 #14). Shop, inventory and loadout follow Part 7 §6 with
@@ -1103,6 +1103,134 @@ paths:
                   ticketId: { type: string }
         default: { $ref: "#/components/responses/Error" }
 
+  /friends:
+    get:
+      operationId: listFriends
+      description: Friends (online, then in_match, then offline), my incoming and outgoing requests (decision 0062).
+      responses:
+        "200":
+          description: Friends, requests and counts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FriendsList" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /friends/search:
+    get:
+      operationId: searchFriends
+      description: Up to 20 players whose nickname starts with the text (from 3 characters), the exact match first.
+      parameters:
+        - name: nickname
+          in: query
+          required: true
+          schema: { type: string, minLength: 3 }
+      responses:
+        "200":
+          description: The found players with my relation to each
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [users]
+                properties:
+                  users:
+                    type: array
+                    items: { $ref: "#/components/schemas/FoundPlayer" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /friends/requests:
+    post:
+      operationId: sendFriendRequest
+      description: >
+        A friend request; when that player has already asked me, we become friends at once
+        (status accepted). Errors user_not_found, friend_self, already_friends, request_exists,
+        friends_limit, requests_limit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: string }
+      responses:
+        "200":
+          description: Sent, or accepted at once
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FriendRequestSent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /friends/requests/{id}/accept:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: acceptFriendRequest
+      description: Errors request_not_found, friends_limit.
+      responses:
+        "204": { description: We are friends }
+        default: { $ref: "#/components/responses/Error" }
+
+  /friends/requests/{id}/decline:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: declineFriendRequest
+      description: Error request_not_found.
+      responses:
+        "204": { description: Declined }
+        default: { $ref: "#/components/responses/Error" }
+
+  /friends/requests/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    delete:
+      operationId: withdrawFriendRequest
+      description: Withdraws my own request; error request_not_found.
+      responses:
+        "204": { description: Withdrawn }
+        default: { $ref: "#/components/responses/Error" }
+
+  /friends/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: The player id }
+    delete:
+      operationId: removeFriend
+      description: Error not_friends.
+      responses:
+        "204": { description: Removed }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/invite:
+    get:
+      operationId: getInvite
+      description: My invite code; the inviter gets rewardGems when the friend plays the first arena match, up to limit.
+      responses:
+        "200":
+          description: My code and who invited me
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Invite" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      operationId: redeemInvite
+      description: >
+        Enters a friend's invite code once, within the first days after sign-up; the players
+        become friends. Errors invite_invalid, invite_used, invite_expired, invite_self.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, maxLength: 16 }
+      responses:
+        "204": { description: Redeemed }
+        default: { $ref: "#/components/responses/Error" }
+
   /levels/custom:
     get:
       operationId: listCustomLevels
@@ -1301,6 +1429,17 @@ components:
         - step_locked
         - step_claimed
         - no_season_result
+        - friend_self
+        - already_friends
+        - request_exists
+        - requests_limit
+        - user_not_found
+        - request_not_found
+        - not_friends
+        - invite_invalid
+        - invite_used
+        - invite_expired
+        - invite_self
 
     VersionInfo:
       type: object
@@ -2611,3 +2750,78 @@ components:
         scope: { type: string, enum: [all, arena] }
         until: { type: [string, "null"], format: date-time }
         reason: { type: string }
+
+    FriendStatus:
+      type: string
+      enum: [online, in_match, offline]
+
+    FriendView:
+      type: object
+      required: [id, name, trophies, league]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        country: { type: string }
+        trophies: { type: integer }
+        league: { type: string, description: Lower case, e.g. gold }
+        status: { $ref: "#/components/schemas/FriendStatus" }
+        since: { type: string, format: date-time }
+
+    FriendRequestView:
+      type: object
+      required: [id, user, createdAt]
+      properties:
+        id: { type: string }
+        user: { $ref: "#/components/schemas/FriendView" }
+        createdAt: { type: string, format: date-time }
+
+    FriendsList:
+      type: object
+      required: [friends, incoming, outgoing, counts]
+      properties:
+        friends:
+          type: array
+          items: { $ref: "#/components/schemas/FriendView" }
+        incoming:
+          type: array
+          items: { $ref: "#/components/schemas/FriendRequestView" }
+        outgoing:
+          type: array
+          items: { $ref: "#/components/schemas/FriendRequestView" }
+        counts:
+          type: object
+          required: [friends, online, incoming]
+          properties:
+            friends: { type: integer }
+            online: { type: integer, description: Online or in a match }
+            incoming: { type: integer }
+
+    FriendRelation:
+      type: string
+      enum: [none, friend, incoming, outgoing, blocked]
+
+    FoundPlayer:
+      allOf:
+        - { $ref: "#/components/schemas/FriendView" }
+        - type: object
+          required: [relation]
+          properties:
+            relation: { $ref: "#/components/schemas/FriendRelation" }
+
+    FriendRequestSent:
+      type: object
+      required: [status, requestId]
+      properties:
+        status: { type: string, enum: [sent, accepted] }
+        requestId: { type: string }
+
+    Invite:
+      type: object
+      required: [code, invited, rewarded, rewardGems, limit]
+      properties:
+        code: { type: string }
+        invited: { type: integer }
+        rewarded: { type: integer }
+        rewardGems: { type: integer }
+        limit: { type: integer }
+        invitedBy: { type: string, description: The id of the player whose code I entered }

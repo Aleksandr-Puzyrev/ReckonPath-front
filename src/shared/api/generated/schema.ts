@@ -1094,6 +1094,152 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/friends": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Friends (online, then in_match, then offline), my incoming and outgoing requests (decision 0062). */
+    get: operations["listFriends"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/friends/search": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description Up to 20 players whose nickname starts with the text (from 3 characters), the exact match first. */
+    get: operations["searchFriends"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/friends/requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A friend request; when that player has already asked me, we become friends at once (status accepted). Errors user_not_found, friend_self, already_friends, request_exists, friends_limit, requests_limit. */
+    post: operations["sendFriendRequest"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/friends/requests/{id}/accept": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Errors request_not_found, friends_limit. */
+    post: operations["acceptFriendRequest"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/friends/requests/{id}/decline": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Error request_not_found. */
+    post: operations["declineFriendRequest"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/friends/requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** @description Withdraws my own request; error request_not_found. */
+    delete: operations["withdrawFriendRequest"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/friends/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** @description Error not_friends. */
+    delete: operations["removeFriend"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/invite": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description My invite code; the inviter gets rewardGems when the friend plays the first arena match, up to limit. */
+    get: operations["getInvite"];
+    put?: never;
+    /** @description Enters a friend's invite code once, within the first days after sign-up; the players become friends. Errors invite_invalid, invite_used, invite_expired, invite_self. */
+    post: operations["redeemInvite"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/levels/custom": {
     parameters: {
       query?: never;
@@ -1250,7 +1396,18 @@ export interface components {
       | "step_not_found"
       | "step_locked"
       | "step_claimed"
-      | "no_season_result";
+      | "no_season_result"
+      | "friend_self"
+      | "already_friends"
+      | "request_exists"
+      | "requests_limit"
+      | "user_not_found"
+      | "request_not_found"
+      | "not_friends"
+      | "invite_invalid"
+      | "invite_used"
+      | "invite_expired"
+      | "invite_self";
     VersionInfo: {
       /** @description Soft update is offered */
       showModal: boolean;
@@ -2161,6 +2318,55 @@ export interface components {
       /** Format: date-time */
       until?: string | null;
       reason?: string;
+    };
+    /** @enum {string} */
+    FriendStatus: "online" | "in_match" | "offline";
+    FriendView: {
+      id: string;
+      name: string;
+      country?: string;
+      trophies: number;
+      /** @description Lower case */
+      league: string;
+      status?: components["schemas"]["FriendStatus"];
+      /** Format: date-time */
+      since?: string;
+    };
+    FriendRequestView: {
+      id: string;
+      user: components["schemas"]["FriendView"];
+      /** Format: date-time */
+      createdAt: string;
+    };
+    FriendsList: {
+      friends: components["schemas"]["FriendView"][];
+      incoming: components["schemas"]["FriendRequestView"][];
+      outgoing: components["schemas"]["FriendRequestView"][];
+      counts: {
+        friends: number;
+        /** @description Online or in a match */
+        online: number;
+        incoming: number;
+      };
+    };
+    /** @enum {string} */
+    FriendRelation: "none" | "friend" | "incoming" | "outgoing" | "blocked";
+    FoundPlayer: components["schemas"]["FriendView"] & {
+      relation: components["schemas"]["FriendRelation"];
+    };
+    FriendRequestSent: {
+      /** @enum {string} */
+      status: "sent" | "accepted";
+      requestId: string;
+    };
+    Invite: {
+      code: string;
+      invited: number;
+      rewarded: number;
+      rewardGems: number;
+      limit: number;
+      /** @description The id of the player whose code I entered */
+      invitedBy?: string;
     };
   };
   responses: {
@@ -3899,6 +4105,210 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  listFriends: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Friends, requests and counts */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FriendsList"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  searchFriends: {
+    parameters: {
+      query: {
+        nickname: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The found players with my relation to each */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            users: components["schemas"]["FoundPlayer"][];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  sendFriendRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          userId: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Sent, or accepted at once */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["FriendRequestSent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  acceptFriendRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description We are friends */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  declineFriendRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Declined */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  withdrawFriendRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Withdrawn */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  removeFriend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Removed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description My code and who invited me */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Invite"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  redeemInvite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          code: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Redeemed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
   listCustomLevels: {
     parameters: {
       query?: never;
@@ -4123,6 +4533,17 @@ export const errorCodeValues: ReadonlyArray<
   "step_locked",
   "step_claimed",
   "no_season_result",
+  "friend_self",
+  "already_friends",
+  "request_exists",
+  "requests_limit",
+  "user_not_found",
+  "request_not_found",
+  "not_friends",
+  "invite_invalid",
+  "invite_used",
+  "invite_expired",
+  "invite_self",
 ];
 export const meLocaleValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Me"]["locale"]
@@ -4267,3 +4688,12 @@ export const trackStepViewStateValues: ReadonlyArray<
 export const banDetailsScopeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["BanDetails"]["scope"]
 > = ["all", "arena"];
+export const friendStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["FriendStatus"]
+> = ["online", "in_match", "offline"];
+export const friendRelationValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["FriendRelation"]
+> = ["none", "friend", "incoming", "outgoing", "blocked"];
+export const friendRequestSentStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["FriendRequestSent"]["status"]
+> = ["sent", "accepted"];

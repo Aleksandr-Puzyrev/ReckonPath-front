@@ -11,11 +11,13 @@ import {
   useDailyLeaderboardQuery,
   useDailyQuery,
 } from "@entities/daily";
+import type { DailyLeaderboardScope } from "@entities/daily";
+import { ADD_FRIEND_PARAM, useFriendsQuery } from "@entities/friend";
 import { useAccountStore } from "@entities/session";
 import { streakSummaryOf, useStreakQuery } from "@entities/streak";
 import { useDailyToday } from "@features/daily-today";
 import { restoreOfferOf, useRestoreStreak } from "@features/restore-streak";
-import { errorMessageKey, isApiError } from "@shared/api";
+import { errorMessageKey, isApiError, useIsOnline } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 import type { ToastMessage } from "@shared/ui/toast";
 
@@ -44,7 +46,10 @@ export const useDailyScreen = () => {
   const daily = useDailyQuery();
   const { data: streakView } = useStreakQuery();
   const history = useDailyHistoryQuery();
-  const leaderboard = useDailyLeaderboardQuery();
+  const [scope, setScope] = useState<DailyLeaderboardScope>("all");
+  const leaderboard = useDailyLeaderboardQuery(scope);
+  const { data: friends } = useFriendsQuery();
+  const isOnline = useIsOnline();
   const hasLogin = useAccountStore((state) => state.hasLogin);
   const [restoredDays, setRestoredDays] = useState<number | null>(null);
   const [isRestoreFirstOpen, setIsRestoreFirstOpen] = useState(false);
@@ -81,6 +86,9 @@ export const useDailyScreen = () => {
     streak: streakSummaryOf(streak),
     wonDays: new Set((history.data?.days ?? []).map(({ date }) => date)),
     leaderboard: board,
+    scope,
+    hasFriends: friends?.counts.friends !== 0,
+    isOnline,
     hasWon: dayResultOf(day) !== null,
     restoreOffer,
     restoredDays,
@@ -104,6 +112,9 @@ export const useDailyScreen = () => {
       startPlay();
     },
     handleRestoreFirstClose: () => setIsRestoreFirstOpen(false),
+    handleScopeChange: setScope,
+    handleAddFriends: () =>
+      router.push({ pathname: "/friends", params: { add: ADD_FRIEND_PARAM } }),
     handleBack: () => (router.canGoBack() ? router.back() : router.replace("/")),
   };
 };

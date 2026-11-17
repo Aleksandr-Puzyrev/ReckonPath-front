@@ -6,7 +6,7 @@ import { Text } from "@shared/ui/text";
 import { styles } from "./leaderboard-row-styles";
 
 interface ILeaderboardRow {
-  rank: number;
+  rank: number | null;
   name: string;
   moves: number;
   isMine?: boolean;
@@ -16,18 +16,19 @@ const MEDALS = ["gold", "silver", "bronze"] as const;
 
 const LeaderboardRow = ({ rank, name, moves, isMine = false }: ILeaderboardRow) => {
   const { t } = useTranslation();
-  styles.useVariants({ medal: MEDALS[rank - 1] ?? "none", isMine });
+  styles.useVariants({ medal: rank === null ? "none" : (MEDALS[rank - 1] ?? "none"), isMine });
   const value = t("daily.movesShort", { count: moves });
+  const movesText = t("daily.moves", { count: moves });
 
   return (
     <View
       style={styles.row}
       accessible
-      accessibilityLabel={t("daily.rowLabel", {
-        rank,
-        name,
-        moves: t("daily.moves", { count: moves }),
-      })}
+      accessibilityLabel={
+        rank === null
+          ? `${name}, ${movesText}`
+          : t("daily.rowLabel", { rank, name, moves: movesText })
+      }
     >
       <View style={styles.rank}>
         <Text variant="caption" style={styles.rankText}>

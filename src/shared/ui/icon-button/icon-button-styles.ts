@@ -10,6 +10,12 @@ export const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.bg.surface,
     alignItems: "center",
     justifyContent: "center",
+    variants: {
+      isDisabled: {
+        true: { backgroundColor: theme.colors.bg.sunken, borderColor: theme.colors.bg.sunken },
+        false: {},
+      },
+    },
   },
   pressed: {
     transform: [{ scale: theme.motion.press.scale }],

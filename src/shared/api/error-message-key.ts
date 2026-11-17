@@ -18,6 +18,16 @@ const CODES_WITH_TEXT = [
   "map_invalid",
   "in_match",
   "friends_limit",
+  "already_friends",
+  "request_exists",
+  "requests_limit",
+  "request_not_found",
+  "not_friends",
+  "user_not_found",
+  "invite_invalid",
+  "invite_used",
+  "invite_expired",
+  "invite_self",
   "too_many_requests",
 ] as const satisfies readonly ApiErrorCode[];
 

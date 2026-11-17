@@ -42,6 +42,11 @@ const DailyBody = ({ daily }: IDailyBody) => {
           entries={leaderboard.entries}
           mine={leaderboard.mine ?? null}
           hasWon={daily.hasWon}
+          scope={daily.scope}
+          hasFriends={daily.hasFriends}
+          isOnline={daily.isOnline}
+          onScopeChange={daily.handleScopeChange}
+          onAddFriends={daily.handleAddFriends}
         />
       ) : null}
     </>

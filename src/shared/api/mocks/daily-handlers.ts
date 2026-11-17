@@ -62,11 +62,12 @@ export const dailyHandlers = [
   http.get(mockUrl("/daily/history"), ({ request }) =>
     HttpResponse.json({ days: mockDailyHistory(limitOf(request)) }),
   ),
-  http.get(mockUrl("/daily/leaderboard"), ({ request }) =>
-    HttpResponse.json(
-      mockDailyLeaderboard(new URL(request.url).searchParams.get("date") ?? mockToday()),
-    ),
-  ),
+  http.get(mockUrl("/daily/leaderboard"), ({ request }) => {
+    const { searchParams } = new URL(request.url);
+    return HttpResponse.json(
+      mockDailyLeaderboard(searchParams.get("date") ?? mockToday(), searchParams.get("scope")),
+    );
+  }),
   http.post(mockUrl("/daily/play"), async ({ request }) => {
     const body = await readBody(request);
     return reply(playMockDaily(body.restart === true));

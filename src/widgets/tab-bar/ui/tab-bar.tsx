@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet as NativeStyleSheet, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { useFriendsQuery } from "@entities/friend";
+
 import { createTabPressHandlers } from "../model/create-tab-press-handlers";
 import { TAB_ITEMS } from "../model/tab-items";
 
@@ -11,10 +13,13 @@ import { styles } from "./tab-bar-styles";
 import TabBarItem from "./tab-bar-item";
 
 const isBlurSupported = Platform.OS === "ios";
+const PROFILE_ROUTE = "profile";
 
 const TabBar = ({ state, navigation }: BottomTabBarProps) => {
   const { t } = useTranslation();
   const { theme, rt } = useUnistyles();
+  const { data: friends } = useFriendsQuery();
+  const incoming = friends?.counts.incoming ?? 0;
 
   return (
     <View style={styles.container}>
@@ -31,14 +36,20 @@ const TabBar = ({ state, navigation }: BottomTabBarProps) => {
           if (!route) return null;
 
           const isActive = state.routes[state.index]?.key === route.key;
+          const hasDot = item.routeName === PROFILE_ROUTE && incoming > 0;
+          const label = t(item.labelKey);
           const { onPress, onLongPress } = createTabPressHandlers(navigation, route, isActive);
 
           return (
             <TabBarItem
               key={route.key}
               item={item}
-              label={t(item.labelKey)}
+              label={label}
+              accessibilityLabel={
+                hasDot ? `${label}, ${t("friends.requestsCount", { count: incoming })}` : label
+              }
               isActive={isActive}
+              hasDot={hasDot}
               onPress={onPress}
               onLongPress={onLongPress}
             />

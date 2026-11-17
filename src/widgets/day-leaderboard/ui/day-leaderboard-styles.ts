@@ -19,6 +19,14 @@ export const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.m,
     backgroundColor: theme.colors.bg.sunken,
   },
+  empty: {
+    alignItems: "center",
+    gap: theme.space[4],
+    paddingVertical: theme.space[5],
+  },
+  emptyTitle: {
+    textAlign: "center",
+  },
   secondary: {
     flexShrink: 1,
     color: theme.colors.text.secondary,
