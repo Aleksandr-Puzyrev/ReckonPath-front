@@ -5,25 +5,25 @@ import { formatDayMonth, mondayFirstWeekdays } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 
 import { calendarWeeksOf } from "../model/calendar-weeks";
-import type { CalendarCell as CalendarCellData, CalendarDayResult } from "../model/calendar-weeks";
+import type { CalendarCell as CalendarCellData } from "../model/calendar-weeks";
 
 import CalendarCell from "./calendar-cell";
 import { styles } from "./daily-calendar-styles";
 
 interface IDailyCalendar {
   todayKey: string;
-  results: ReadonlyMap<string, CalendarDayResult>;
+  wonDays: ReadonlySet<string>;
 }
 
-const DailyCalendar = ({ todayKey, results }: IDailyCalendar) => {
+const DailyCalendar = ({ todayKey, wonDays }: IDailyCalendar) => {
   const { t, i18n } = useTranslation();
-  const weeks = calendarWeeksOf(todayKey, results);
+  const weeks = calendarWeeksOf(todayKey, wonDays);
   const weekdays = mondayFirstWeekdays(i18n.language);
 
   const labelOf = (cell: CalendarCellData) => {
     if (cell === null) return "";
     const date = formatDayMonth(cell.dayKey, i18n.language);
-    return cell.result === null ? date : `${date}, ${t(`daily.${cell.result}`)}`;
+    return cell.isWon ? `${date}, ${t("daily.won")}` : date;
   };
 
   return (
@@ -35,12 +35,6 @@ const DailyCalendar = ({ todayKey, results }: IDailyCalendar) => {
             <View style={styles.legendWon} />
             <Text variant="caption" style={styles.secondary}>
               {t("daily.won")}
-            </Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={styles.legendLost} />
-            <Text variant="caption" style={styles.secondary}>
-              {t("daily.lost")}
             </Text>
           </View>
         </View>

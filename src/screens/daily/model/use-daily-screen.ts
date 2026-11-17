@@ -2,79 +2,108 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  dayKeyAfter,
-  dailyLevelId,
-  dailyLevelOf,
-  useDailyDayQuery,
-  useDailyHistoryQuery,
-  useDailyRecordStore,
-} from "@entities/daily";
-import { selectHasSavedSession, useGameSessionStore } from "@entities/level";
-import { streakForecastOf, useStreakQuery } from "@entities/streak";
-import { useDailyToday } from "@features/daily-today";
-import { restoreOfferOf } from "@features/restore-streak";
 import type { AdMessageKey } from "@entities/ad";
+import {
+  dailyLevelId,
+  dayResultOf,
+  todayOf,
+  useDailyHistoryQuery,
+  useDailyLeaderboardQuery,
+  useDailyQuery,
+} from "@entities/daily";
 import { useAccountStore } from "@entities/session";
+import { streakSummaryOf, useStreakQuery } from "@entities/streak";
+import { useDailyToday } from "@features/daily-today";
+import { restoreOfferOf, useRestoreStreak } from "@features/restore-streak";
+import { errorMessageKey, isApiError } from "@shared/api";
+import type { ErrorMessageKey } from "@shared/api";
 import type { ToastMessage } from "@shared/ui/toast";
-import type { CalendarDayResult } from "@widgets/daily-calendar";
 
-import { calendarResultsOf } from "./calendar-results";
+import { isRestoreFirst } from "./restore-first";
+
+export type DailyScreenState =
+  | { kind: "loading" }
+  | { kind: "ready" }
+  | { kind: "unavailable" }
+  | { kind: "offline" }
+  | { kind: "failed"; messageKey: ErrorMessageKey };
+
+// Without a connection the query waits paused, so a missing day then means no network (без связи запрос ждёт на паузе, поэтому отсутствие дня тогда означает «нет сети»).
+const stateOf = (hasDay: boolean, isPaused: boolean, error: unknown): DailyScreenState => {
+  if (hasDay) return { kind: "ready" };
+  if (isPaused) return { kind: "offline" };
+  if (error === null) return { kind: "loading" };
+  if (!isApiError(error)) return { kind: "offline" };
+  if (error.code === "daily_unavailable") return { kind: "unavailable" };
+  return { kind: "failed", messageKey: errorMessageKey(error) };
+};
 
 export const useDailyScreen = () => {
   const { t } = useTranslation();
-  const { todayKey, yesterdayKey } = useDailyToday();
+  const { todayKey } = useDailyToday();
+  const daily = useDailyQuery();
+  const { data: streakView } = useStreakQuery();
+  const history = useDailyHistoryQuery();
+  const leaderboard = useDailyLeaderboardQuery();
+  const hasLogin = useAccountStore((state) => state.hasLogin);
   const [restoredDays, setRestoredDays] = useState<number | null>(null);
+  const [isRestoreFirstOpen, setIsRestoreFirstOpen] = useState(false);
   const [earnShortBy, setEarnShortBy] = useState<number | null>(null);
   const [toast, setToast] = useState<ToastMessage | null>(null);
-  const day = useDailyDayQuery(todayKey);
-  const history = useDailyHistoryQuery();
-  const hasLogin = useAccountStore((state) => state.hasLogin);
-  const { data: streak } = useStreakQuery();
-  const records = useDailyRecordStore((state) => state.days);
-  const levelId = dailyLevelId(todayKey);
-  const hasSavedGame = useGameSessionStore(selectHasSavedSession(levelId));
-  const record = records[todayKey];
-  const level = dailyLevelOf(todayKey, day.data?.override ?? null);
-  const hasPlayed = record !== undefined || day.data?.me.played === true;
-  const rank = day.data?.me.rank ?? record?.rank ?? null;
-  const results: ReadonlyMap<string, CalendarDayResult> = calendarResultsOf(
-    history.data?.days ?? [],
-    records,
-  );
+  const streak = streakView ?? daily.data?.streak;
+  const restoreOffer = restoredDays === null ? restoreOfferOf(streak) : null;
+  const day = todayOf(daily.data?.day, todayKey);
+  const board = todayOf(leaderboard.data, todayKey);
 
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
-
-  return {
-    hasLogin,
-    todayKey,
-    level,
-    record,
-    hasSavedGame,
-    hasPlayed,
-    streak: streakForecastOf(streak, {
-      todayKey,
-      yesterdayKey,
-      hasCountedToday: record !== undefined,
-    }),
-    results,
-    top: day.data?.leaderboardPreview.top ?? (day.isError ? null : []),
-    median: day.data?.leaderboardPreview.median ?? null,
-    myPlace: rank === null || record === undefined ? null : { rank, moves: record.movesUsed },
-    restoreOffer: restoredDays === null ? restoreOfferOf(streak, dayKeyAfter(todayKey, -2)) : null,
-    restoredDays,
-    earnShortBy,
-    toast,
-    handleRestored: (days: number) => {
+  const restoreCallbacks = {
+    onRestored: (days: number) => {
       setRestoredDays(days);
       showToast(t("streak.restoredToast", { count: days }));
     },
-    handleShortOfEmeralds: setEarnShortBy,
-    handleError: (messageKey: AdMessageKey) => showToast(t(messageKey)),
+    onShortOfEmeralds: setEarnShortBy,
+    onError: (messageKey: AdMessageKey) => showToast(t(messageKey)),
+  };
+  const restore = useRestoreStreak(streak?.restoreCost ?? 0, restoreCallbacks);
+
+  const startPlay = () =>
+    router.push({
+      pathname: "/play/[mode]/[id]",
+      params: { mode: "daily", id: dailyLevelId(todayKey) },
+    });
+
+  return {
+    state: stateOf(day !== undefined, daily.fetchStatus === "paused", daily.error),
+    hasLogin,
+    todayKey,
+    day,
+    rewards: daily.data?.rewards,
+    streak: streakSummaryOf(streak),
+    wonDays: new Set((history.data?.days ?? []).map(({ date }) => date)),
+    leaderboard: board,
+    hasWon: dayResultOf(day) !== null,
+    restoreOffer,
+    restoredDays,
+    restoreCallbacks,
+    isRestoreFirstOpen,
+    earnShortBy,
+    toast,
     handleEarnClose: () => setEarnShortBy(null),
     handleToastHide: () => setToast(null),
-    handlePlay: () =>
-      router.push({ pathname: "/play/[mode]/[id]", params: { mode: "daily", id: levelId } }),
+    handleRetry: () => void daily.refetch(),
+    handlePlay: () => {
+      if (isRestoreFirst(streak)) setIsRestoreFirstOpen(true);
+      else startPlay();
+    },
+    handleRestoreFirst: () => {
+      setIsRestoreFirstOpen(false);
+      restore.handleRestore();
+    },
+    handlePlayAnyway: () => {
+      setIsRestoreFirstOpen(false);
+      startPlay();
+    },
+    handleRestoreFirstClose: () => setIsRestoreFirstOpen(false),
     handleBack: () => (router.canGoBack() ? router.back() : router.replace("/")),
   };
 };

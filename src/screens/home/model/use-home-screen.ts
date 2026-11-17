@@ -3,17 +3,15 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useArenaUnlock } from "@features/arena-access";
-import { useDailyToday } from "@features/daily-today";
 import { useSeenGuides } from "@features/mark-guides-seen";
 import { restoreOfferOf } from "@features/restore-streak";
 import type { AdMessageKey } from "@entities/ad";
 import { useServerMinute } from "@entities/app-config";
-import { dayKeyAfter, useDailyRecordStore } from "@entities/daily";
 import { formatDropLeft, useShopQuery } from "@entities/item";
 import { RESUME_PARAM, useCampaignQuery } from "@entities/level";
 import type { CampaignOverview } from "@entities/level";
 import { TUTORIAL_KEYS } from "@entities/rules";
-import { streakForecastOf, useStreakQuery } from "@entities/streak";
+import { useStreakQuery } from "@entities/streak";
 import { useMeQuery } from "@entities/wallet";
 import { useAccountStore } from "@entities/session";
 import { useIsOnline } from "@shared/api";
@@ -36,8 +34,6 @@ export const useHomeScreen = () => {
   const hasLogin = useAccountStore((state) => state.hasLogin);
   const { data: streakData } = useStreakQuery();
   const { data: shop } = useShopQuery();
-  const { todayKey, yesterdayKey } = useDailyToday();
-  const record = useDailyRecordStore((state) => state.days[todayKey]);
   const isOnline = useIsOnline();
   const now = useServerMinute();
   const [earnShortBy, setEarnShortBy] = useState<number | null>(null);
@@ -55,11 +51,6 @@ export const useHomeScreen = () => {
   const tutorialToStart =
     tutorialLevel?.state === "current" && !isTutorialSeen ? tutorialLevel.number : null;
   const arena = hasLogin ? me.data?.arena : undefined;
-  const streak = streakForecastOf(streakData, {
-    todayKey,
-    yesterdayKey,
-    hasCountedToday: record !== undefined,
-  });
   const featured = hasLogin ? (shop?.featured ?? null) : null;
   const dropMs = featured === null ? 0 : Date.parse(featured.endsAt) - now;
 
@@ -84,7 +75,7 @@ export const useHomeScreen = () => {
 
   // The streak and the trophies live on the server, so a guest sees only what the device knows (серия и кубки хранятся на сервере, поэтому гость видит только то, что знает устройство).
   const stats: TodayStat[] = hasLogin
-    ? [{ key: "streak", label: t("home.stats.streak"), value: format(streak.current) }]
+    ? [{ key: "streak", label: t("home.stats.streak"), value: format(streakData?.current ?? 0) }]
     : [];
   if (!isArenaOpen || !hasLogin) {
     stats.push(
@@ -116,10 +107,7 @@ export const useHomeScreen = () => {
         : t("common.updatedAt", {
             time: formatClockTime(new Date(me.dataUpdatedAt).toISOString(), i18n.language),
           }),
-    restoreOffer:
-      hasLogin && restoredDays === null
-        ? restoreOfferOf(streakData, dayKeyAfter(todayKey, -2))
-        : null,
+    restoreOffer: hasLogin && restoredDays === null ? restoreOfferOf(streakData) : null,
     earnShortBy,
     isEarnOpen,
     toast,

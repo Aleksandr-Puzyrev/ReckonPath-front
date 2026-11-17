@@ -10,13 +10,7 @@ export const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.bg.surface,
     boxShadow: theme.elevation[1],
   },
-  summary: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: theme.space[4],
-  },
   details: {
-    flex: 1,
     gap: theme.space[2],
   },
   secondary: {

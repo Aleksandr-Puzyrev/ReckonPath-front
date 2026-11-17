@@ -1,5 +1,4 @@
-export { streakKeys, streakQueryOptions, useStreakQuery } from "./api/streak-queries";
-export { streakForecastOf } from "./model/streak-forecast";
-export type { StreakForecast } from "./model/streak-forecast";
-export { nextMilestoneOf, STREAK_MILESTONES } from "./model/streak-milestones";
-export type { StreakMilestone } from "./model/streak-milestones";
+export { streakKeys, useStreakQuery } from "./api/streak-queries";
+export { streakSummaryOf } from "./model/streak-summary";
+export type { StreakSummary } from "./model/streak-summary";
+export type { StreakMilestone, StreakView } from "./model/streak-types";

@@ -21,10 +21,6 @@ export const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.space[4],
     gap: theme.space[2],
   },
-  statDivider: {
-    borderLeftWidth: 1,
-    borderLeftColor: theme.colors.border.default,
-  },
   label: {
     color: theme.colors.text.secondary,
   },
@@ -42,12 +38,5 @@ export const styles = StyleSheet.create((theme) => ({
     paddingHorizontal: theme.space[5],
     borderRadius: theme.radius.l,
     backgroundColor: theme.colors.bg.sunken,
-  },
-  actions: {
-    flexDirection: "row",
-    gap: theme.space[3],
-  },
-  action: {
-    flex: 1,
   },
 }));

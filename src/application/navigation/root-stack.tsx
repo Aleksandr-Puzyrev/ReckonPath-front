@@ -21,19 +21,20 @@ import { useSystemSignalRefetch } from "../query/use-system-signal-refetch";
 import "../session/register-api-session";
 import { useGuestCacheCleanup } from "../session/use-guest-cache-cleanup";
 import SplashGate from "../splash/splash-gate";
-import { useAttemptsSync } from "../sync/use-attempts-sync";
-import { useDailyWeekPrefetch } from "../sync/use-daily-week-prefetch";
+import { removeRetiredStores } from "../storage/remove-retired-stores";
 
 const RootStack = () => {
   useSystemSignalRefetch();
   useGuestCacheCleanup();
   useLocaleSync();
-  useAttemptsSync();
-  useDailyWeekPrefetch();
   const { state } = useSystemState();
   const isMaintenanceDismissed = useSystemNoticeStore((notices) => notices.isMaintenanceDismissed);
   const softUpdateDismissedAt = useSystemNoticeStore((notices) => notices.softUpdateDismissedAt);
   const [launchedAt] = useState(Date.now);
+
+  useEffect(() => {
+    removeRetiredStores();
+  }, []);
 
   // The first launch starts the quiet first session of interstitials (первый запуск начинает тихую первую сессию без межстраничной рекламы).
   useEffect(() => {

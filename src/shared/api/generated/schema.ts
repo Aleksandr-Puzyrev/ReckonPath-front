@@ -337,39 +337,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/attempts:batch": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["postAttemptsBatch"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/continue": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post: operations["postContinue"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/daily/{date}": {
+  "/daily": {
     parameters: {
       query?: never;
       header?: never;
@@ -385,6 +353,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/daily/{date}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getDailyDay"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/daily/history": {
     parameters: {
       query?: never;
@@ -392,10 +376,77 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description PROPOSAL by the client team (decision 0017 #2), not in Part 7: the player's own daily results for the calendar of the last days. */
     get: operations["getDailyHistory"];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/daily/leaderboard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getDailyLeaderboard"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/daily/play": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["playDaily"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/daily/games/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get: operations["getDailyGame"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/daily/games/{id}/tap": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tapDailyGame"];
     delete?: never;
     options?: never;
     head?: never;
@@ -427,7 +478,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations["postStreakRestore"];
+    post: operations["restoreStreak"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1173,6 +1224,8 @@ export interface components {
       | "game_over"
       | "game_not_lost"
       | "stale_game"
+      | "daily_done"
+      | "daily_unavailable"
       | "unknown_pack"
       | "not_in_pack"
       | "captcha_failed"
@@ -1380,71 +1433,108 @@ export interface components {
       consentsRequired: components["schemas"]["ConsentType"][];
     };
     Cell: [number, number];
-    Attempt: {
-      attemptId: string;
+    DailyGameResult: {
+      stars: number;
+      moves: number;
+      coins: number;
+      xp: number;
+      streak?: number;
+      streakGems?: number;
+      secrets?: components["schemas"]["Secrets"];
+      wallet?: components["schemas"]["BackendWallet"];
+    };
+    DailyGame: {
+      id: string;
+      /** Format: date */
+      date: string;
+      title: string;
+      attempt: number;
+      seq: number;
       /** @enum {string} */
-      mode: "campaign" | "daily";
-      ref: string;
-      contentVersion?: string;
-      /** Format: date-time */
-      startedAt?: string;
-      /** Format: date-time */
-      finishedAt?: string;
-      durationMs?: number;
-      taps: components["schemas"]["Cell"][];
-      continued?: boolean;
-      continueMethod?: string | null;
-      claimed: {
-        /** @enum {string} */
-        result: "won" | "lost";
-        movesUsed: number;
-        stars: number | null;
-      };
+      status: "play" | "lost" | "won" | "abandoned";
+      board: components["schemas"]["PublicBoard"];
+      moves: number;
+      /** @description 0 — no move limit */
+      limit: number;
+      found: number;
+      bombsLeft: number;
+      epoch: number;
+      cells: components["schemas"]["CellView"][];
+      result?: components["schemas"]["DailyGameResult"];
     };
-    AttemptResult: {
-      attemptId: string;
+    DailyEntry: {
+      rank?: number;
+      id?: string;
+      name?: string;
+      country?: string;
+      me?: boolean;
+      stars: number;
+      moves: number;
+      attempts: number;
+    };
+    DailyDay: {
+      /** Format: date */
+      date: string;
+      today: boolean;
+      title?: string;
+      /** @description [rows, cols] */
+      size?: [number, number];
+      /** @description Players who won the day */
+      players: number;
+      mine?: components["schemas"]["DailyEntry"];
+      gameId?: string;
       /** @enum {string} */
-      status: "accepted" | "duplicate" | "corrected" | "rejected" | "late";
-      result?: string;
-      stars?: number | null;
-      rewards?: {
-        currency?: string;
-        amount?: number;
-        reason?: string;
-        xp?: number;
-      }[];
-      daily?: {
-        rank?: number;
-        percentile?: number;
-        ranked?: boolean;
-      };
-      streak?: components["schemas"]["Streak"];
+      status?: "play" | "lost" | "won" | "abandoned";
+      attempts?: number;
+      /** Format: date-time */
+      nextDayAt: string;
     };
-    LeaderboardRow: {
-      rank: number;
-      user: {
-        id: string;
-        nickname: string;
-        avatar?: string;
-        frame?: string;
-        league?: string;
-      };
-      value: number;
+    DailyRewards: {
+      coins: number;
+      coinsPerStar: number;
+      xp: number;
+      topSize: number;
+      topGems: number;
     };
-    Streak: {
-      current: number;
-      best: number;
+    DailyOverview: {
+      day: components["schemas"]["DailyDay"];
+      streak: components["schemas"]["StreakView"];
+      rewards: components["schemas"]["DailyRewards"];
     };
-    StreakState: {
+    DailyHistoryDay: {
+      /** Format: date */
+      date: string;
+      stars: number;
+      moves: number;
+      attempts: number;
+    };
+    DailyLeaderboard: {
+      /** Format: date */
+      date: string;
+      entries: components["schemas"]["DailyEntry"][];
+      mine?: components["schemas"]["DailyEntry"];
+    };
+    StreakMilestone: {
+      days: number;
+      gems: number;
+      reached: boolean;
+    };
+    StreakView: {
       current: number;
       best: number;
       /** Format: date */
-      lastDay: string;
+      lastDay?: string;
+      todayDone: boolean;
+      /** @description The streak a single missed day broke */
+      broken?: number;
       restorable: boolean;
-      /** Format: date-time */
-      restoreUntil?: string;
-      restoreMethods?: ("ad" | "emeralds")[];
-      price?: number;
+      restoreCost: number;
+      /**
+       * Format: date-time
+       * @description When a restore is possible again
+       */
+      restoreAt?: string;
+      milestones: components["schemas"]["StreakMilestone"][];
     };
     /** @description Exactly one currency (decision 0021 */
     Price:
@@ -2619,81 +2709,28 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
-  postAttemptsBatch: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": {
-          attempts: components["schemas"]["Attempt"][];
-        };
-      };
-    };
-    responses: {
-      /** @description Result per attempt and the final state */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            results: components["schemas"]["AttemptResult"][];
-            progress: {
-              currentLevel: number;
-              totalStars: number;
-            };
-            wallet: components["schemas"]["Wallet"];
-          };
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
-  postContinue: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json":
-          | {
-              attemptId: string;
-              /** @constant */
-              method: "emeralds";
-            }
-          | {
-              attemptId: string;
-              /** @constant */
-              method: "ad";
-              adIntentId: string;
-            };
-      };
-    };
-    responses: {
-      /** @description Continue granted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            granted: boolean;
-            bonusMoves: number;
-            wallet: components["schemas"]["Wallet"];
-          };
-        };
-      };
-      default: components["responses"]["Error"];
-    };
-  };
   getDaily: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Today's daily, the streak and the rewards (decision 0061) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DailyOverview"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getDailyDay: {
     parameters: {
       query?: never;
       header?: never;
@@ -2704,28 +2741,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Daily level of the date */
+      /** @description My result and place for a past day or today */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            /** Format: date */
-            date: string;
-            /** @description Level v2 (contracts/schemas/level.schema.json) or null */
-            override: null | Record<string, never>;
-            leaderboardPreview: {
-              /** @description Rows as in GET /leaderboards (Part 7 §6); the preview shape is not detailed in Part 7 */
-              top: components["schemas"]["LeaderboardRow"][];
-              median: number;
-            };
-            me: {
-              played: boolean;
-              result?: string | null;
-              rank?: number | null;
-            };
-          };
+          "application/json": components["schemas"]["DailyDay"];
         };
       };
       default: components["responses"]["Error"];
@@ -2733,8 +2755,8 @@ export interface operations {
   };
   getDailyHistory: {
     parameters: {
-      query: {
-        days: number;
+      query?: {
+        limit?: number;
       };
       header?: never;
       path?: never;
@@ -2742,21 +2764,118 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description One entry per played or restored day, newest first */
+      /** @description My won days, newest first */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
           "application/json": {
-            days: {
-              /** Format: date */
-              date: string;
-              /** @enum {string|null} */
-              result: "won" | "lost" | null;
-              stars: number | null;
-              restored: boolean;
-            }[];
+            days: components["schemas"]["DailyHistoryDay"][];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getDailyLeaderboard: {
+    parameters: {
+      query?: {
+        date?: string;
+        scope?: "all" | "friends";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Up to 50 places of the day and mine */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DailyLeaderboard"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  playDaily: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          restart?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description The unfinished game of the day, or a new attempt */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DailyGame"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getDailyGame: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The whole game */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DailyGame"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  tapDailyGame: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TapRequest"];
+      };
+    };
+    responses: {
+      /** @description The opened cell and the game after it */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            cell: components["schemas"]["CellView"];
+            game: components["schemas"]["DailyGame"];
           };
         };
       };
@@ -2772,50 +2891,41 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Streak state */
+      /** @description The streak of days */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["StreakState"];
+          "application/json": components["schemas"]["StreakView"];
         };
       };
       default: components["responses"]["Error"];
     };
   };
-  postStreakRestore: {
+  restoreStreak: {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    requestBody: {
+    requestBody?: {
       content: {
-        "application/json":
-          | {
-              /** @constant */
-              method: "emeralds";
-            }
-          | {
-              /** @constant */
-              method: "ad";
-              adIntentId: string;
-            };
+        "application/json": {
+          /** @enum {string} */
+          method?: "gems";
+        };
       };
     };
     responses: {
-      /** @description Restored streak */
+      /** @description The restored streak */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            streak: components["schemas"]["Streak"];
-            wallet: components["schemas"]["Wallet"];
-          };
+          "application/json": components["schemas"]["StreakView"];
         };
       };
       default: components["responses"]["Error"];
@@ -3897,6 +4007,12 @@ type ReadonlyArray<T> = [Exclude<T, undefined>] extends [unknown[]]
 export const pathsMePatchRequestBodyContentApplicationJsonLocaleValues: ReadonlyArray<
   FlattenedDeepRequired<paths>["/me"]["patch"]["requestBody"]["content"]["application/json"]["locale"]
 > = ["ru", "en"];
+export const pathsDailyLeaderboardGetParametersQueryScopeValues: ReadonlyArray<
+  FlattenedDeepRequired<paths>["/daily/leaderboard"]["get"]["parameters"]["query"]["scope"]
+> = ["all", "friends"];
+export const pathsStreakRestorePostRequestBodyContentApplicationJsonMethodValues: ReadonlyArray<
+  FlattenedDeepRequired<paths>["/streak/restore"]["post"]["requestBody"]["content"]["application/json"]["method"]
+> = ["gems"];
 export const platformValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Platform"]
 > = ["ios", "android"];
@@ -3980,6 +4096,8 @@ export const errorCodeValues: ReadonlyArray<
   "game_over",
   "game_not_lost",
   "stale_game",
+  "daily_done",
+  "daily_unavailable",
   "unknown_pack",
   "not_in_pack",
   "captcha_failed",
@@ -4015,18 +4133,12 @@ export const meArenaDivisionValues: ReadonlyArray<
 export const consentTypeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["ConsentType"]
 > = ["terms", "privacy", "marketing"];
-export const attemptModeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["Attempt"]["mode"]
-> = ["campaign", "daily"];
-export const attemptClaimedResultValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["Attempt"]["claimed"]["result"]
-> = ["won", "lost"];
-export const attemptResultStatusValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["AttemptResult"]["status"]
-> = ["accepted", "duplicate", "corrected", "rejected", "late"];
-export const streakStateRestoreMethodsValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["StreakState"]["restoreMethods"]
-> = ["ad", "emeralds"];
+export const dailyGameStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["DailyGame"]["status"]
+> = ["play", "lost", "won", "abandoned"];
+export const dailyDayStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["DailyDay"]["status"]
+> = ["play", "lost", "won", "abandoned"];
 export const shopRarityValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["ShopRarity"]
 > = ["common", "rare", "epic", "legendary", "exclusive"];

@@ -6,12 +6,11 @@ import { getResponse } from "msw/utils/get-response";
 
 import { resetMockAds } from "./ads-handlers";
 import { resetMockArenaMaps } from "./arena-map-handlers";
-import { resetMockAttempts } from "./attempts-handlers";
 import { resetMockAuth } from "./auth-handlers";
 import { resetMockCampaign } from "./mock-campaign";
 import { serveBackendStyle } from "./backend-style";
 import { resetMockCustomLevels } from "./custom-level-handlers";
-import { resetMockDaily } from "./daily-handlers";
+import { resetMockDaily } from "./mock-daily";
 import { resetMockDevices } from "./device-handlers";
 import { resetMockArena } from "./mock-arena";
 import { resetMockMatch } from "./match-handlers";
@@ -46,7 +45,6 @@ export const mockServer = {
   reset: () => {
     overrides = [];
     resetMockAuth();
-    resetMockAttempts();
     resetMockCampaign();
     resetMockDaily();
     resetMockDevices();

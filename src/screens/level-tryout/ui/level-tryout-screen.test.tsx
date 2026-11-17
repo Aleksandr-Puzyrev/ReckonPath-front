@@ -8,7 +8,6 @@ import {
   useLevelEditorStore,
   useTryoutBestStore,
 } from "@entities/custom-level";
-import { useGameSessionStore } from "@entities/level";
 import { i18n } from "@shared/i18n";
 
 import LevelTryoutScreen from "./level-tryout-screen";
@@ -93,16 +92,6 @@ describe("LevelTryoutScreen", () => {
     await fireEvent.press(screen.getByTestId("tryout-back"));
 
     expect(mockRouter.back).toHaveBeenCalled();
-  });
-
-  test("keeps the saved campaign game untouched", async () => {
-    useGameSessionStore.setState({ levelId: "c-5", actions: [{ type: "tap", cell: 3 }] });
-    await renderTryout();
-
-    await fireEvent.press(screen.getByTestId("cell-24"));
-
-    expect(useGameSessionStore.getState()).toMatchObject({ levelId: "c-5" });
-    useGameSessionStore.getState().reset();
   });
 
   test("remembers the author's best result for the challenge (decision 0044 #1)", async () => {

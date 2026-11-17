@@ -2,8 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { useDailyRecordStore } from "@entities/daily";
-import { streakForecastOf, useStreakQuery } from "@entities/streak";
+import { dayResultOf, todayOf, useDailyQuery } from "@entities/daily";
 import { useAccountStore } from "@entities/session";
 import { NextDailyCountdown, useDailyToday, useDailyUnlock } from "@features/daily-today";
 import { formatDayMonth } from "@shared/lib";
@@ -21,24 +20,18 @@ const DailyCard = ({ onOpen }: IDailyCard) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
   const { isUnlocked, unlockLevel } = useDailyUnlock();
-  const { todayKey, yesterdayKey } = useDailyToday();
-  const record = useDailyRecordStore((state) => state.days[todayKey]);
-  const { data } = useStreakQuery();
+  const { todayKey } = useDailyToday();
+  const { data: daily } = useDailyQuery();
   const hasLogin = useAccountStore((state) => state.hasLogin);
-  const streak = streakForecastOf(data, {
-    todayKey,
-    yesterdayKey,
-    hasCountedToday: record !== undefined,
-  });
+  const day = todayOf(daily?.day, todayKey);
+  const result = dayResultOf(day);
+  const streak = daily?.streak.current ?? 0;
   const iconSize = theme.sizes.icon.xl;
 
   const statusText = () => {
     if (!isUnlocked) return t("daily.locked", { n: unlockLevel });
-    if (record === undefined) return t("daily.notPlayed");
-    const moves = t("daily.moves", { count: record.movesUsed });
-    return record.rank === null
-      ? t("daily.doneNoRank", { moves })
-      : t("daily.done", { moves, rank: record.rank });
+    if (result === null) return t("daily.notPlayed");
+    return t("daily.doneNoRank", { moves: t("daily.moves", { count: result.moves }) });
   };
 
   return (
@@ -62,9 +55,9 @@ const DailyCard = ({ onOpen }: IDailyCard) => {
       {isUnlocked && hasLogin ? (
         <View style={styles.streak}>
           <FlameIcon width={iconSize} height={iconSize} color={theme.colors.feedback.warm} />
-          <Text variant="title.m">{streak.current}</Text>
+          <Text variant="title.m">{streak}</Text>
           <Text variant="caption" style={styles.secondary}>
-            {t("streak.daysShort", { count: streak.current })}
+            {t("streak.daysShort", { count: streak })}
           </Text>
         </View>
       ) : null}

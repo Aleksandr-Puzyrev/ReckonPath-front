@@ -15,10 +15,10 @@ export const trackShareOf = (days: number, milestones: readonly StreakMilestone[
   return (reached - 1 + partial) / steps;
 };
 
-export const milestoneStatesOf = (days: number, milestones: readonly StreakMilestone[]) => {
-  const nextIndex = milestones.findIndex((milestone) => days < milestone.days);
+export const milestoneStatesOf = (milestones: readonly StreakMilestone[]) => {
+  const nextIndex = milestones.findIndex((milestone) => !milestone.reached);
   return milestones.map((milestone, index): MilestoneState => {
-    if (days >= milestone.days) return "reached";
+    if (milestone.reached) return "reached";
     return index === nextIndex ? "next" : "ahead";
   });
 };

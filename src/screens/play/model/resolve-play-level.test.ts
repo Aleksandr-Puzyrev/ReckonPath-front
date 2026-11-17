@@ -1,41 +1,30 @@
-import { resolveDailyLevel } from "./resolve-play-level";
+import { resolveDailyRoute } from "./resolve-play-level";
 
-const NOW = Date.UTC(2026, 9, 2, 12);
-
-const context = (overrides: Partial<Parameters<typeof resolveDailyLevel>[1]> = {}) => ({
+const context = (overrides: Partial<Parameters<typeof resolveDailyRoute>[1]> = {}) => ({
   isUnlocked: true,
-  now: NOW,
-  savedLevelId: null,
-  dailyOverride: () => null,
+  todayKey: "2026-10-02",
   ...overrides,
 });
 
-describe("resolveDailyLevel", () => {
+describe("resolveDailyRoute", () => {
   test("opens today's daily", () => {
-    expect(resolveDailyLevel("d-2026-10-02", context())).toMatchObject({
+    expect(resolveDailyRoute("d-2026-10-02", context())).toEqual({
       kind: "daily",
       dayKey: "2026-10-02",
-      level: { id: "d-2026-10-02" },
     });
   });
 
-  test("does not open another day's daily", () => {
-    expect(resolveDailyLevel("d-2026-10-01", context()).kind).toBe("missing");
-  });
-
-  test("lets a game started yesterday be finished (DLY-03)", () => {
-    expect(resolveDailyLevel("d-2026-10-01", context({ savedLevelId: "d-2026-10-01" })).kind).toBe(
-      "daily",
-    );
+  test("ends another day's daily (decision 0061 #11)", () => {
+    expect(resolveDailyRoute("d-2026-10-01", context()).kind).toBe("dayOver");
   });
 
   test("keeps the daily closed until the server opens it", () => {
-    expect(resolveDailyLevel("d-2026-10-02", context({ isUnlocked: false })).kind).toBe(
+    expect(resolveDailyRoute("d-2026-10-02", context({ isUnlocked: false })).kind).toBe(
       "dailyLocked",
     );
   });
 
   test("knows nothing of ids that are not a daily", () => {
-    expect(resolveDailyLevel("e-1", context()).kind).toBe("missing");
+    expect(resolveDailyRoute("e-1", context()).kind).toBe("missing");
   });
 });

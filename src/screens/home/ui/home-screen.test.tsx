@@ -229,12 +229,14 @@ describe("HomeScreen", () => {
     mockServer.use(
       http.get(mockUrl("/streak"), () =>
         HttpResponse.json({
-          current: 12,
+          current: 0,
           best: 19,
           lastDay: dayKey(-2),
+          todayDone: false,
+          broken: 12,
           restorable: true,
-          price: 30,
-          restoreUntil: new Date(Date.now() + DAY_MS).toISOString(),
+          restoreCost: 30,
+          milestones: [],
         }),
       ),
     );

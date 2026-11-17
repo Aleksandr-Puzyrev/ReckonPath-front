@@ -1,6 +1,5 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
 
-import { useOutboxStore } from "@entities/outbox";
 import { useAccountStore, useSessionStore } from "@entities/session";
 import { i18n } from "@shared/i18n";
 import { mockServer } from "@shared/test-utils/api-mock";
@@ -36,7 +35,6 @@ describe("SignIn", () => {
   beforeEach(() => {
     useSessionStore.getState().reset();
     useAccountStore.getState().reset();
-    useOutboxStore.getState().reset();
   });
 
   afterEach(() => {

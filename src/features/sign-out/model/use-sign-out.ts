@@ -1,9 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useEditorStore } from "@entities/arena-map";
-import { useDailyRecordStore } from "@entities/daily";
-import { useCampaignFlagsStore, useGameSessionStore } from "@entities/level";
-import { useOutboxStore } from "@entities/outbox";
+import { useCampaignFlagsStore } from "@entities/level";
 import { endEverySession, endSession } from "@entities/session";
 import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
@@ -17,10 +15,7 @@ interface SignOutOptions {
 // The account's data leaves the device with it; the new guest starts empty (данные аккаунта уходят с устройства вместе с ним; новый гость начинает с нуля).
 const signOut = async (isEverywhere: boolean) => {
   await (isEverywhere ? endEverySession() : endSession());
-  useGameSessionStore.getState().reset();
-  useOutboxStore.getState().reset();
   useCampaignFlagsStore.getState().reset();
-  useDailyRecordStore.getState().reset();
   useEditorStore.getState().reset();
 };
 

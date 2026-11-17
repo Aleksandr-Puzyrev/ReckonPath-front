@@ -1,13 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uuidv7 } from "uuidv7";
 
+import type { AdMessageKey } from "@entities/ad";
 import { campaignGameKey, continueCampaignGameMutationOptions, freshGameOf } from "@entities/level";
 import type { CampaignGame } from "@entities/level";
 import { useWalletQuery, walletKeys } from "@entities/wallet";
 import { errorMessageKey, isApiError, isInsufficientFunds } from "@shared/api";
 import { haptic } from "@shared/haptics";
 
-import type { ContinueCallbacks } from "./use-continue-for-emeralds";
+export interface ContinueCallbacks {
+  onContinued: () => void;
+  onShortOfEmeralds: (need: number) => void;
+  onError: (messageKey: AdMessageKey) => void;
+}
 
 const needOf = (details: Record<string, unknown>, fallback: number) =>
   typeof details.need === "number" ? details.need : fallback;
@@ -32,7 +37,7 @@ export const useContinueCampaignGame = (
       onContinued();
     },
     onError: (error) => {
-      const fresh = freshGameOf(error);
+      const fresh = freshGameOf<CampaignGame>(error);
       if (fresh !== null) {
         queryClient.setQueryData(campaignGameKey(fresh.id), fresh);
         return;

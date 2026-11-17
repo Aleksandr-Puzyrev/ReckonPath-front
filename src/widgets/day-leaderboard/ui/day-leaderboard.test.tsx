@@ -4,27 +4,33 @@ import { i18n } from "@shared/i18n";
 
 import DayLeaderboard from "./day-leaderboard";
 
-const TOP = Array.from({ length: 12 }, (_, index) => ({
+const ENTRIES = Array.from({ length: 12 }, (_, index) => ({
   rank: index + 1,
-  user: { id: `u${index + 1}`, nickname: `Player ${index + 1}` },
-  value: 3 + index,
+  id: `u${index + 1}`,
+  name: `Player ${index + 1}`,
+  stars: 3,
+  moves: 3 + index,
+  attempts: 1,
 }));
 
 describe("DayLeaderboard", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
 
-  test("shows only the top and the median before the own attempt (DLY-15)", async () => {
-    await render(<DayLeaderboard top={TOP} median={9} myPlace={null} hasPlayed={false} />);
+  test("shows only the top before the own win (DLY-15)", async () => {
+    await render(<DayLeaderboard entries={ENTRIES} mine={null} hasWon={false} />);
 
     expect(screen.getByText("Player 3")).toBeOnTheScreen();
     expect(screen.queryByText("Player 4")).toBeNull();
     expect(screen.getByText("Твоё место — после попытки")).toBeOnTheScreen();
-    expect(screen.getByText("В среднем 9 ходов")).toBeOnTheScreen();
   });
 
-  test("shows the top ten and the own row after the attempt", async () => {
+  test("shows the top ten and the own row after the win", async () => {
     await render(
-      <DayLeaderboard top={TOP} median={9} myPlace={{ rank: 134, moves: 7 }} hasPlayed />,
+      <DayLeaderboard
+        entries={ENTRIES}
+        mine={{ rank: 134, stars: 2, moves: 7, attempts: 2, me: true }}
+        hasWon
+      />,
     );
 
     expect(screen.getByText("Player 10")).toBeOnTheScreen();
@@ -33,9 +39,10 @@ describe("DayLeaderboard", () => {
     expect(screen.queryByText("Твоё место — после попытки")).toBeNull();
   });
 
-  test("tells the result will be sent when the standings cannot load", async () => {
-    await render(<DayLeaderboard top={null} median={null} myPlace={null} hasPlayed={false} />);
+  test("does not repeat the own row when it is in the top", async () => {
+    const entries = ENTRIES.map((entry) => (entry.rank === 2 ? { ...entry, me: true } : entry));
+    await render(<DayLeaderboard entries={entries} mine={entries[1] ?? null} hasWon />);
 
-    expect(screen.getByText("Результат отправится, когда появится сеть")).toBeOnTheScreen();
+    expect(screen.getAllByText("Ты")).toHaveLength(1);
   });
 });

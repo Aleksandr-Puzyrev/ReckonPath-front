@@ -1,73 +1,53 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 
-import type { LevelInput } from "@reckon-path/engine";
-
+import type { DailyDay, DailyRewards } from "@entities/daily";
 import { i18n } from "@shared/i18n";
 
 import DailyTodayCard from "./daily-today-card";
 
-const LEVEL: LevelInput = {
-  v: 2,
-  id: "d-2026-09-28",
-  rows: 7,
-  cols: 7,
-  targets: [
-    [1, 1],
-    [5, 5],
-  ],
-  bombs: [[3, 3]],
-  probeMode: "distance",
-  moveLimit: 12,
-  stars: [7, 9],
+const DAY: DailyDay = {
+  date: "2026-09-28",
+  today: true,
+  title: "Штиль",
+  size: [7, 8],
+  players: 1240,
+  nextDayAt: "2026-09-29T00:00:00Z",
 };
+const REWARDS: DailyRewards = { coins: 30, coinsPerStar: 10, xp: 15, topSize: 10, topGems: 10 };
 
-const RECORD = {
-  attemptId: "a",
-  result: "won" as const,
-  movesUsed: 7,
-  stars: 3,
-  durationMs: 84_000,
-  rank: 134,
-  percentile: 88,
-  ranked: true,
-};
-
-const renderCard = (props: Partial<Parameters<typeof DailyTodayCard>[0]> = {}) =>
-  render(
-    <DailyTodayCard
-      level={LEVEL}
-      preview={null}
-      record={undefined}
-      hasSavedGame={false}
-      onPlay={jest.fn()}
-      {...props}
-    />,
-  );
+const renderCard = (day: DailyDay, onPlay = jest.fn()) =>
+  render(<DailyTodayCard day={day} rewards={REWARDS} onPlay={onPlay} />);
 
 describe("DailyTodayCard", () => {
   beforeAll(() => i18n.changeLanguage("ru"));
 
-  test("describes today's level and offers to play", async () => {
+  test("previews the day without a board: title, size and rewards (decision 0061 #2)", async () => {
     const onPlay = jest.fn();
-    await renderCard({ onPlay });
+    await renderCard(DAY, onPlay);
 
-    expect(screen.getByText("7×7 · 2 цели")).toBeOnTheScreen();
-    expect(screen.getByText("1 бомба")).toBeOnTheScreen();
-    expect(screen.getByText("лимит 12 ходов · 3★ до 7")).toBeOnTheScreen();
+    expect(screen.getByText("Штиль")).toBeOnTheScreen();
+    expect(screen.getByText("7×8")).toBeOnTheScreen();
+    expect(screen.getByText("+60")).toBeOnTheScreen();
+    expect(screen.getByText("+15 XP")).toBeOnTheScreen();
     await fireEvent.press(screen.getByText("Играть"));
     expect(onPlay).toHaveBeenCalled();
   });
 
-  test("offers to continue a saved game", async () => {
-    await renderCard({ hasSavedGame: true });
+  test("continues a game of the day that is running", async () => {
+    await renderCard({ ...DAY, gameId: "game-1", status: "play", attempts: 1 });
 
     expect(screen.getByText("Продолжить")).toBeOnTheScreen();
   });
 
-  test("shows the counted result and a replay without reward", async () => {
-    await renderCard({ record: RECORD });
+  test("shows the won result with the place and no way to play again", async () => {
+    await renderCard({
+      ...DAY,
+      status: "won",
+      mine: { rank: 4, stars: 3, moves: 7, attempts: 2 },
+    });
 
-    expect(screen.getByText("Сыграно: 7 ходов · #134")).toBeOnTheScreen();
-    expect(screen.getByText("Сыграть ещё (без награды)")).toBeOnTheScreen();
+    expect(screen.getByText("Сыграно: 7 ходов")).toBeOnTheScreen();
+    expect(screen.getByText("Место 4 из 1240")).toBeOnTheScreen();
+    expect(screen.queryByTestId("daily-play")).toBeNull();
   });
 });

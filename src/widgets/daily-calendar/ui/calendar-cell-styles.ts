@@ -10,12 +10,6 @@ export const styles = StyleSheet.create((theme) => ({
     variants: {
       result: {
         won: { backgroundColor: theme.colors.status.success },
-        lost: {
-          backgroundColor: theme.colors.bg.sunken,
-          borderWidth: 2,
-          borderColor: theme.colors.status.danger,
-        },
-        restored: { backgroundColor: theme.colors.bg.sunken },
         none: { backgroundColor: theme.colors.bg.sunken },
         padding: { backgroundColor: "transparent" },
       },

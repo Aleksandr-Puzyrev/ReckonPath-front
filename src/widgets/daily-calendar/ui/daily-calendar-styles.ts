@@ -30,13 +30,6 @@ export const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.xs,
     backgroundColor: theme.colors.status.success,
   },
-  legendLost: {
-    width: theme.space[3],
-    height: theme.space[3],
-    borderRadius: theme.radius.xs,
-    borderWidth: 1,
-    borderColor: theme.colors.status.danger,
-  },
   secondary: {
     color: theme.colors.text.secondary,
   },

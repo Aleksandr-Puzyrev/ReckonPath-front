@@ -1,19 +1,40 @@
 import { act, fireEvent, render, screen } from "@testing-library/react-native";
+import { http, HttpResponse } from "msw/http";
 
 import { useAccountStore } from "@entities/session";
-import { useDailyRecordStore } from "@entities/daily";
 import { i18n } from "@shared/i18n";
-import { mockServer, passMockLevels } from "@shared/test-utils/api-mock";
+import { mockServer, mockUrl, passMockLevels } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import DailyCard from "./daily-card";
 
-jest.mock("@entities/streak", () => ({
-  ...jest.requireActual("@entities/streak"),
-  useStreakQuery: () => ({ data: undefined }),
-}));
-
 const unlockDaily = () => passMockLevels(6);
+
+const serveDaily = (day: Record<string, unknown>, streak: Record<string, unknown> = {}) =>
+  mockServer.use(
+    http.get(mockUrl("/daily"), () =>
+      HttpResponse.json({
+        day: {
+          date: "2026-09-28",
+          today: true,
+          size: [6, 6],
+          players: 1240,
+          nextDayAt: "2026-09-29T00:00:00Z",
+          ...day,
+        },
+        streak: {
+          current: 0,
+          best: 0,
+          todayDone: false,
+          restorable: false,
+          restoreCost: 30,
+          milestones: [],
+          ...streak,
+        },
+        rewards: { coins: 30, coinsPerStar: 10, xp: 15, topSize: 10, topGems: 10 },
+      }),
+    ),
+  );
 
 const renderCard = (onOpen = jest.fn()) =>
   render(<DailyCard onOpen={onOpen} />, { wrapper: createQueryWrapper() });
@@ -23,7 +44,6 @@ describe("DailyCard", () => {
 
   beforeEach(() => {
     jest.useFakeTimers({ now: Date.UTC(2026, 8, 28, 18, 47, 20) });
-    useDailyRecordStore.getState().reset();
   });
 
   afterEach(() => {
@@ -41,7 +61,7 @@ describe("DailyCard", () => {
     expect(onOpen).not.toHaveBeenCalled();
   });
 
-  test("invites to play today's bearing and counts down to the next one", async () => {
+  test("invites to play today's bearing and counts down to 00:00 UTC", async () => {
     unlockDaily();
     await renderCard();
 
@@ -52,35 +72,25 @@ describe("DailyCard", () => {
     expect(screen.getByText("Новый через 05:12:39")).toBeOnTheScreen();
   });
 
-  test("shows today's result and the streak with it", async () => {
+  test("shows today's win and the streak from GET /daily", async () => {
     useAccountStore.getState().markSignedIn();
     unlockDaily();
-    useDailyRecordStore.getState().recordCounted("2026-09-28", {
-      attemptId: "a",
-      result: "won",
-      movesUsed: 7,
-      stars: 3,
-      durationMs: 1,
-    });
+    serveDaily(
+      { status: "won", mine: { rank: 4, stars: 3, moves: 7, attempts: 1 } },
+      { current: 5, best: 5, todayDone: true },
+    );
     await renderCard();
 
     expect(await screen.findByText("Сыграно: 7 ходов")).toBeOnTheScreen();
-    expect(screen.getByText("1")).toBeOnTheScreen();
+    expect(screen.getByText("5")).toBeOnTheScreen();
   });
 
-  test("shows a guest the result without the streak (decision 0051 #4)", async () => {
+  test("keeps a lost attempt as not played: only a win counts (decision 0061 #1)", async () => {
     unlockDaily();
-    useDailyRecordStore.getState().recordCounted("2026-09-28", {
-      attemptId: "a",
-      result: "won",
-      movesUsed: 7,
-      stars: 3,
-      durationMs: 1,
-    });
+    serveDaily({ gameId: "daily-1", status: "lost", attempts: 1 });
     await renderCard();
 
-    expect(await screen.findByText("Сыграно: 7 ходов")).toBeOnTheScreen();
-    expect(screen.queryByText("1")).toBeNull();
+    expect(await screen.findByText("Сегодня ещё не сыгран")).toBeOnTheScreen();
   });
 
   test("opens the daily", async () => {

@@ -1,13 +1,24 @@
 export {
-  dailyDayQueryOptions,
-  dailyHistoryQueryOptions,
+  dailyGameKey,
+  dailyGameQueryOptions,
   dailyKeys,
-  useDailyDayQuery,
+  dailyQueryOptions,
+  invalidateDailyProgress,
+  useDailyGameQuery,
   useDailyHistoryQuery,
+  useDailyLeaderboardQuery,
+  useDailyQuery,
 } from "./api/daily-queries";
-export { dailyLevelOf } from "./model/daily-level";
-export { useDailyRecordStore } from "./model/daily-record-store";
-export type { DailyRecord } from "./model/daily-record-store";
+export { playDailyMutationOptions, tapDailyGameMutationOptions } from "./api/daily-game-mutations";
+export { dayResultOf, todayOf } from "./model/day-result";
+export type { DayPlace } from "./model/day-result";
+export type {
+  DailyDay,
+  DailyEntry,
+  DailyGame,
+  DailyGameResult,
+  DailyRewards,
+} from "./model/daily-types";
 export {
   dailyLevelId,
   dayKeyAfter,
@@ -15,3 +26,4 @@ export {
   dayKeyOfLevelId,
   nextDayStartOf,
 } from "./model/day-key";
+export { default as DailyRewardChips } from "./ui/daily-reward-chips";

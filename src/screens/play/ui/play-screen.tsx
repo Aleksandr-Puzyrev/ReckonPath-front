@@ -2,11 +2,14 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { RESUME_PARAM, useCampaignQuery } from "@entities/level";
-import { dailyUnlockOf } from "@features/daily-today";
+import { dailyUnlockOf, useDailyToday } from "@features/daily-today";
 import { Screen } from "@shared/ui/screen";
 
+import { resolveDailyRoute } from "../model/resolve-play-level";
+
 import CampaignLevel from "./campaign-level";
-import DailyPlay from "./daily-play";
+import DailyLevel from "./daily-level";
+import DayOver from "./day-over";
 import LevelUnavailable from "./level-unavailable";
 import { styles } from "./play-screen-styles";
 
@@ -29,6 +32,7 @@ interface IPlayMode {
 const PlayMode = ({ mode, id, isResuming }: IPlayMode) => {
   const { t } = useTranslation();
   const { data: overview, isLoading } = useCampaignQuery();
+  const { todayKey } = useDailyToday();
 
   if (mode === CAMPAIGN_MODE && LEVEL_NUMBER.test(id)) {
     return <CampaignLevel number={Number(id)} isResuming={isResuming} />;
@@ -37,7 +41,17 @@ const PlayMode = ({ mode, id, isResuming }: IPlayMode) => {
   // The daily opens by the server's unlock, so it waits for the first answer (дейли открывается по разрешению сервера, поэтому ждёт его первого ответа).
   if (isLoading) return <Screen style={styles.screen} />;
   const unlock = dailyUnlockOf(overview);
-  return <DailyPlay id={id} isUnlocked={unlock.isUnlocked} unlockLevel={unlock.unlockLevel} />;
+  const route = resolveDailyRoute(id, { isUnlocked: unlock.isUnlocked, todayKey });
+  if (route.kind === "missing") {
+    return <LevelUnavailable message={t("play.notFound")} onExit={exit} />;
+  }
+  if (route.kind === "dailyLocked") {
+    return (
+      <LevelUnavailable message={t("daily.locked", { n: unlock.unlockLevel })} onExit={exit} />
+    );
+  }
+  if (route.kind === "dayOver") return <DayOver todayKey={todayKey} />;
+  return <DailyLevel />;
 };
 
 // A new level gets fresh screen state even when the route is reused (новый уровень получает свежее состояние экрана, даже если маршрут переиспользуется).

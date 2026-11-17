@@ -5,21 +5,17 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { useDailyUnlock } from "@features/daily-today";
 import { IconButton } from "@shared/ui/icon-button";
+import { Dialog } from "@shared/ui/dialog";
 import { Screen } from "@shared/ui/screen";
 import { Toast } from "@shared/ui/toast";
-import { BoardPreview } from "@widgets/board";
-import { DailyCalendar } from "@widgets/daily-calendar";
-import { DailyTodayCard } from "@widgets/daily-today-card";
-import { DayLeaderboard } from "@widgets/day-leaderboard";
 import { EarnSheet } from "@widgets/earn-sheet";
-import { StreakCard } from "@widgets/streak-card";
 
 import ChevronLeftIcon from "@assets/icons/levels/chevron-left.svg";
 
 import { useDailyScreen } from "../model/use-daily-screen";
 
+import DailyBody from "./daily-body";
 import DailyLocked from "./daily-locked";
-import DailyStreakNotice from "./daily-streak-notice";
 import { styles } from "./daily-screen-styles";
 import DailyTitle from "./daily-title";
 
@@ -43,37 +39,23 @@ const DailyContent = () => {
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         <DailyTitle todayKey={daily.todayKey} />
-        <DailyStreakNotice
-          offer={daily.restoreOffer}
-          restoredDays={daily.restoredDays}
-          onRestored={daily.handleRestored}
-          onShortOfEmeralds={daily.handleShortOfEmeralds}
-          onError={daily.handleError}
-        />
-        <DailyTodayCard
-          level={daily.level}
-          preview={<BoardPreview level={daily.level} size={theme.sizes.daily.preview} />}
-          record={daily.record}
-          hasSavedGame={daily.hasSavedGame}
-          onPlay={daily.handlePlay}
-        />
-        {daily.hasLogin ? <StreakCard streak={daily.streak} /> : null}
-        <DailyCalendar todayKey={daily.todayKey} results={daily.results} />
-        {daily.hasLogin ? (
-          <DayLeaderboard
-            top={daily.top}
-            median={daily.median}
-            myPlace={daily.myPlace}
-            hasPlayed={daily.hasPlayed}
-          />
-        ) : null}
+        <DailyBody daily={daily} />
       </ScrollView>
       <EarnSheet
         isOpen={daily.earnShortBy !== null}
         shortBy={daily.earnShortBy}
         onDaily={daily.handleEarnClose}
-        onMessage={daily.handleError}
+        onMessage={daily.restoreCallbacks.onError}
         onClose={daily.handleEarnClose}
+      />
+      <Dialog
+        isOpen={daily.isRestoreFirstOpen}
+        title={t("daily.restoreFirst")}
+        onCancel={daily.handleRestoreFirstClose}
+        actions={[
+          { label: t("home.play"), variant: "secondary", onPress: daily.handlePlayAnyway },
+          { label: t("streak.restore"), variant: "primary", onPress: daily.handleRestoreFirst },
+        ]}
       />
       <Toast message={daily.toast} onHide={daily.handleToastHide} />
     </Screen>

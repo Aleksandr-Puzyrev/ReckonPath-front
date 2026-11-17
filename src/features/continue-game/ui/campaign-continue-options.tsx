@@ -9,7 +9,7 @@ import { Text } from "@shared/ui/text";
 import EmeraldIcon from "@assets/icons/play/emerald.svg";
 
 import { useContinueCampaignGame } from "../model/use-continue-campaign-game";
-import type { ContinueCallbacks } from "../model/use-continue-for-emeralds";
+import type { ContinueCallbacks } from "../model/use-continue-campaign-game";
 
 import { styles } from "./continue-options-styles";
 

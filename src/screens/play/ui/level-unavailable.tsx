@@ -10,9 +10,10 @@ interface ILevelUnavailable {
   message: string;
   onExit: () => void;
   onRetry?: () => void;
+  retryLabel?: string;
 }
 
-const LevelUnavailable = ({ message, onExit, onRetry }: ILevelUnavailable) => {
+const LevelUnavailable = ({ message, onExit, onRetry, retryLabel }: ILevelUnavailable) => {
   const { t } = useTranslation();
 
   return (
@@ -21,7 +22,7 @@ const LevelUnavailable = ({ message, onExit, onRetry }: ILevelUnavailable) => {
         {message}
       </Text>
       {onRetry === undefined ? null : (
-        <Button label={t("common.retry")} onPress={onRetry} variant="primary" />
+        <Button label={retryLabel ?? t("common.retry")} onPress={onRetry} variant="primary" />
       )}
       <Button
         label={t("play.pause.exit")}

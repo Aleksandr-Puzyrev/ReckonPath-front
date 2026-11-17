@@ -8,7 +8,7 @@ export const restoreStreakMutationOptions = () =>
     mutationFn: async (idempotencyKey: string) =>
       readData(
         await apiClient.POST("/streak/restore", {
-          body: { method: "emeralds" },
+          body: { method: "gems" },
           headers: { "Idempotency-Key": idempotencyKey },
         }),
       ),

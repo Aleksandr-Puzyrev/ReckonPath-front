@@ -2,8 +2,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { STREAK_MILESTONES } from "@entities/streak";
-import type { StreakForecast } from "@entities/streak";
+import type { StreakSummary } from "@entities/streak";
 import { Text } from "@shared/ui/text";
 
 import FlameIcon from "@assets/icons/daily/flame.svg";
@@ -14,7 +13,7 @@ import MilestoneBadge from "./milestone-badge";
 import { styles } from "./streak-card-styles";
 
 interface IStreakCard {
-  streak: StreakForecast;
+  streak: StreakSummary;
 }
 
 const PERCENT = 100;
@@ -23,8 +22,8 @@ const StreakCard = ({ streak }: IStreakCard) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const iconSize = theme.sizes.iconButton.size;
-  const states = milestoneStatesOf(streak.current, STREAK_MILESTONES);
-  const share = trackShareOf(streak.current, STREAK_MILESTONES);
+  const states = milestoneStatesOf(streak.milestones);
+  const share = trackShareOf(streak.current, streak.milestones);
 
   return (
     <View
@@ -47,7 +46,7 @@ const StreakCard = ({ streak }: IStreakCard) => {
         <View style={[styles.fill, { width: `${share * PERCENT}%` }]} />
       </View>
       <View style={styles.milestones}>
-        {STREAK_MILESTONES.map((milestone, index) => (
+        {streak.milestones.map((milestone, index) => (
           <MilestoneBadge
             key={milestone.days}
             milestone={milestone}

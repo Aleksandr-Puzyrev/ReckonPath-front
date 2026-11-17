@@ -30,7 +30,7 @@ const MilestoneBadge = ({ milestone, state }: IMilestoneBadge) => {
       <View style={styles.reward}>
         <EmeraldIcon width={iconSize} height={iconSize} color={theme.colors.currency.emerald} />
         <Text variant="caption" style={styles.secondary}>
-          {milestone.emeralds}
+          {milestone.gems}
         </Text>
       </View>
     </View>

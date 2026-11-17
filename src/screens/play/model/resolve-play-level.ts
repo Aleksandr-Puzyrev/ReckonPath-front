@@ -1,24 +1,24 @@
-import type { LevelInput } from "@reckon-path/engine";
+import { dayKeyOfLevelId } from "@entities/daily";
 
-import { dailyLevelOf, dayKeyOf, dayKeyOfLevelId } from "@entities/daily";
-
-export type DailyPlayLevel =
-  | { kind: "daily"; level: LevelInput; dayKey: string }
+export type DailyRoute =
+  | { kind: "daily"; dayKey: string }
   | { kind: "dailyLocked" }
+  | { kind: "dayOver" }
   | { kind: "missing" };
 
-interface PlayContext {
+interface RouteContext {
   isUnlocked: boolean;
-  now: number;
-  savedLevelId: string | null;
-  dailyOverride: (dayKey: string) => unknown;
+  todayKey: string;
 }
 
-// Only today's daily is played; a game started yesterday may still be finished (играется только сегодняшний дейли; начатую вчера партию можно доиграть).
-export const resolveDailyLevel = (id: string, context: PlayContext): DailyPlayLevel => {
+// Only today's daily can be played; a route of another day leads to today's (играется только сегодняшний дейли; маршрут другого дня ведёт к сегодняшнему).
+export const resolveDailyRoute = (
+  id: string,
+  { isUnlocked, todayKey }: RouteContext,
+): DailyRoute => {
   const dayKey = dayKeyOfLevelId(id);
   if (dayKey === null) return { kind: "missing" };
-  if (dayKey !== dayKeyOf(context.now) && context.savedLevelId !== id) return { kind: "missing" };
-  if (!context.isUnlocked) return { kind: "dailyLocked" };
-  return { kind: "daily", level: dailyLevelOf(dayKey, context.dailyOverride(dayKey)), dayKey };
+  if (!isUnlocked) return { kind: "dailyLocked" };
+  if (dayKey !== todayKey) return { kind: "dayOver" };
+  return { kind: "daily", dayKey };
 };

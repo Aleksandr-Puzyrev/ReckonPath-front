@@ -4,6 +4,7 @@ import type { Direction, GameStatus, Idx, ProbeMode, Reveal } from "@reckon-path
 import type { CampaignGame, CellView } from "./campaign-types";
 import type { PlayView } from "./play-view";
 import { campaignLevelId, levelOfPublicBoard } from "./public-board-level";
+import type { ServerGame } from "./server-game";
 
 const DIRECTIONS: Record<NonNullable<CellView["direction"]>, Direction> = {
   up: "N",
@@ -54,9 +55,9 @@ export const revealOfCell = (cell: CellView, mode: ProbeMode): Reveal => {
 export const cellIdxOf = (cols: number, { row, col }: Pick<CellView, "row" | "col">): Idx =>
   toIdx(cols, [row, col]);
 
-export const playViewOfCampaignGame = (game: CampaignGame): PlayView => {
+export const playViewOfServerGame = (game: ServerGame, levelId: string): PlayView => {
   const { board, rules } = createBoard(
-    levelOfPublicBoard(game.board, campaignLevelId(game.level), game.result?.secrets),
+    levelOfPublicBoard(game.board, levelId, game.result?.secrets),
   );
   const revealed = new Map(
     game.cells.map((cell) => [cellIdxOf(board.cols, cell), revealOfCell(cell, rules.probeMode)]),
@@ -72,7 +73,7 @@ export const playViewOfCampaignGame = (game: CampaignGame): PlayView => {
     epoch: game.epoch,
     status: STATUSES[game.status],
     movesUsed: game.moves,
-    continued: game.continues > 0,
+    continued: (game.continues ?? 0) > 0,
     moveLimit: game.limit === NO_LIMIT ? null : game.limit,
     targetCount: game.board.targets,
     foundCount: game.found,
@@ -83,3 +84,6 @@ export const playViewOfCampaignGame = (game: CampaignGame): PlayView => {
     lastCell: lastTap === undefined ? null : cellIdxOf(board.cols, lastTap),
   };
 };
+
+export const playViewOfCampaignGame = (game: CampaignGame) =>
+  playViewOfServerGame(game, campaignLevelId(game.level));

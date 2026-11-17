@@ -4,7 +4,7 @@ import { uuidv7 } from "uuidv7";
 import type { AdMessageKey } from "@entities/ad";
 import { dailyKeys } from "@entities/daily";
 import { streakKeys } from "@entities/streak";
-import { applyWallet, useWalletQuery } from "@entities/wallet";
+import { useWalletQuery, walletKeys } from "@entities/wallet";
 import { errorMessageKey, isApiError, isInsufficientFunds } from "@shared/api";
 
 import { restoreStreakMutationOptions } from "../api/restore-streak-mutation";
@@ -18,7 +18,7 @@ export interface RestoreCallbacks {
 const needOf = (details: Record<string, unknown>, fallback: number) =>
   typeof details.need === "number" ? details.need : fallback;
 
-// The restore is paid only after the server answers; nothing is charged on the device (восстановление оплачивается только после ответа сервера, на устройстве ничего не списывается).
+// The restore is paid only on the server; the streak comes in its answer, the balance with a fresh /wallet (восстановление оплачивается только на сервере; серия приходит в его ответе, баланс — со свежим /wallet).
 export const useRestoreStreak = (
   price: number,
   { onRestored, onShortOfEmeralds, onError }: RestoreCallbacks,
@@ -29,10 +29,10 @@ export const useRestoreStreak = (
 
   const { mutate, isPending } = useMutation({
     ...restoreStreakMutationOptions(),
-    onSuccess: ({ streak, wallet: next }) => {
-      applyWallet(queryClient, next);
-      queryClient.invalidateQueries({ queryKey: streakKeys.all });
-      queryClient.invalidateQueries({ queryKey: dailyKeys.all });
+    onSuccess: (streak) => {
+      queryClient.setQueryData(streakKeys.all, streak);
+      void queryClient.invalidateQueries({ queryKey: walletKeys.wallet() });
+      void queryClient.invalidateQueries({ queryKey: dailyKeys.overview() });
       onRestored(streak.current);
     },
     onError: (error) => {

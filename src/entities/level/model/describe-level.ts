@@ -1,5 +1,3 @@
-import type { TFunction } from "i18next";
-
 import type { LevelInput } from "@reckon-path/engine";
 
 import type { PublicBoard } from "./campaign-types";
@@ -23,17 +21,6 @@ export const levelElements = (level: LevelInput) =>
     const count = level[element]?.length ?? 0;
     return count > 0 ? [{ element, count }] : [];
   });
-
-export const describeLevelShape = (t: TFunction, level: LevelInput) =>
-  [
-    t("levels.size", { rows: level.rows, cols: level.cols }),
-    t("levels.targets", { count: level.targets.length }),
-  ].join(" · ");
-
-export const describeLevelElements = (t: TFunction, level: LevelInput) =>
-  levelElements(level)
-    .map(({ element, count }) => t(`levels.element.${element}`, { count }))
-    .join(", ");
 
 const TERRAIN_ELEMENTS: readonly [LevelElement, string][] = [
   ["streams", "sb"],

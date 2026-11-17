@@ -12,3 +12,4 @@ export {
   matchViewMock,
   playingMatchMock,
 } from "../api/mocks/mock-match";
+export { setMockDailyLevel, setMockStreak } from "../api/mocks/mock-daily";

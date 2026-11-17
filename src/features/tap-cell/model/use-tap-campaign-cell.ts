@@ -6,7 +6,7 @@ import type { GameEvent, Idx } from "@reckon-path/engine";
 
 import {
   campaignGameKey,
-  campaignTapEvents,
+  serverTapEvents,
   cellIdxOf,
   freshGameOf,
   invalidateCampaignProgress,
@@ -49,7 +49,7 @@ export const useTapCampaignCell = ({ onTapped, onError }: TapCallbacks) => {
       replaceGame(game);
       const view = playViewOfCampaignGame(game);
       const cell = cellIdxOf(view.board.cols, request);
-      const events = campaignTapEvents(cell, game, view);
+      const events = serverTapEvents(cell, game, view);
       haptic(...hapticsForEvents(events));
       useCampaignFlagsStore.getState().remove(game.id, cell);
       const wallet = game.result?.wallet;
@@ -59,7 +59,7 @@ export const useTapCampaignCell = ({ onTapped, onError }: TapCallbacks) => {
       onTapped(cell, events, game);
     },
     onError: (error, request) => {
-      const fresh = freshGameOf(error);
+      const fresh = freshGameOf<CampaignGame>(error);
       if (fresh !== null) {
         replaceGame(fresh);
         return;

@@ -15,10 +15,9 @@ interface IPauseSheet {
   onRestart: () => void;
   onRules: () => void;
   onExit: () => void;
-  note?: string;
 }
 
-const PauseSheet = ({ isOpen, onResume, onRestart, onRules, onExit, note }: IPauseSheet) => {
+const PauseSheet = ({ isOpen, onResume, onRestart, onRules, onExit }: IPauseSheet) => {
   const { t } = useTranslation();
   const isSoundOn = useSettingsStore((state) => state.volume.sound > 0);
   const isMusicOn = useSettingsStore((state) => state.volume.music > 0);
@@ -27,11 +26,6 @@ const PauseSheet = ({ isOpen, onResume, onRestart, onRules, onExit, note }: IPau
   return (
     <Sheet isOpen={isOpen} onDismiss={onResume}>
       <Text variant="display.m">{t("play.pause.title")}</Text>
-      {note === undefined ? null : (
-        <Text variant="body.s" style={styles.note}>
-          {note}
-        </Text>
-      )}
       <Button label={t("play.pause.resume")} onPress={onResume} variant="primary" size="l" />
       <View style={styles.row}>
         <View style={styles.cell}>

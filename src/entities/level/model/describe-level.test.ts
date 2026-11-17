@@ -1,13 +1,6 @@
 import type { LevelInput } from "@reckon-path/engine";
 
-import { i18n } from "@shared/i18n";
-
-import {
-  describeLevelElements,
-  describeLevelShape,
-  levelElements,
-  publicBoardElements,
-} from "./describe-level";
+import { levelElements, publicBoardElements } from "./describe-level";
 
 const LEVEL: LevelInput = {
   v: 2,
@@ -29,23 +22,6 @@ const LEVEL: LevelInput = {
   ],
   probeMode: "distance",
 };
-
-describe("describeLevelShape and describeLevelElements", () => {
-  beforeAll(async () => {
-    await i18n.changeLanguage("ru");
-  });
-
-  test("names the size and the targets, then lists each element", () => {
-    expect(describeLevelShape(i18n.t, LEVEL)).toBe("7×7 · 2 цели");
-    expect(describeLevelElements(i18n.t, LEVEL)).toBe("1 бомба, ручей, 2 моста");
-  });
-
-  test("has no elements to list on a plain level", () => {
-    expect(describeLevelElements(i18n.t, { ...LEVEL, bombs: [], streams: [], bridges: [] })).toBe(
-      "",
-    );
-  });
-});
 
 describe("levelElements", () => {
   test("counts only the elements a level has", () => {
