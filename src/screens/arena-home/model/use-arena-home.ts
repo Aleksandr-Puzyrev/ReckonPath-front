@@ -1,5 +1,5 @@
-import { router } from "expo-router";
-import { useEffect, useEffectEvent, useState } from "react";
+import { router, useSegments } from "expo-router";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { useArenaQuery } from "@entities/arena";
 import { arenaMapOf, useArenaMapsQuery } from "@entities/arena-map";
@@ -45,11 +45,16 @@ export const useArenaHome = (onError: (messageKey: ErrorMessageKey) => void) => 
     if (isOnboardingDue) router.push("/arena/onboarding");
   }, [isOnboardingDue]);
 
-  // An unfinished match or a running search reopens at once (незаконченный матч или идущий поиск открываются сразу).
+  const [section, screen] = useSegments();
+  const isMatchOpen = section === "arena" && screen === "match";
+  const openedMatchId = useRef<string | null>(null);
+
+  // An unfinished match or a running search reopens at once, but a match screen already open is not stacked again (незаконченный матч или идущий поиск открываются сразу, но уже открытый экран матча второй раз не кладётся).
   useEffect(() => {
-    if (runningId !== null)
-      router.push({ pathname: "/arena/match/[id]", params: { id: runningId } });
-  }, [runningId]);
+    if (runningId === null || isMatchOpen || openedMatchId.current === runningId) return;
+    openedMatchId.current = runningId;
+    router.push({ pathname: "/arena/match/[id]", params: { id: runningId } });
+  }, [runningId, isMatchOpen]);
 
   const openSearch = useEffectEvent(() => {
     if (queue === null) return;

@@ -75,6 +75,11 @@ export const BACKEND_ROUTES: readonly BackendRoute[] = [
   { method: "POST", path: "/friends/requests/{id}/decline" },
   { method: "DELETE", path: "/friends/requests/{id}" },
   { method: "DELETE", path: "/friends/{id}" },
+  { method: "POST", path: "/friends/{id}/challenge" },
+  { method: "GET", path: "/arena/challenges" },
+  { method: "POST", path: "/arena/challenges/{id}/accept" },
+  { method: "POST", path: "/arena/challenges/{id}/decline" },
+  { method: "DELETE", path: "/arena/challenges/{id}" },
   { method: "GET", path: "/me/invite" },
   { method: "POST", path: "/me/invite" },
 ];

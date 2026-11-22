@@ -13,9 +13,11 @@ export interface MatchEventSource {
 const store = () => useMatchStore.getState();
 
 // The socket is open while any arena screen uses it; after every reconnect the live match is re-read, because pushes may have been missed (сокет открыт, пока его использует хоть один экран арены; после каждого переподключения живой матч перечитывается — пуши могли потеряться).
+// A wake is the app coming back or the network returning: a socket that gave up is opened again while held (пробуждение — возврат в приложение или появление сети: сдавшийся сокет снова открывается, пока его держат).
 export const createMatchSession = (
   source: MatchEventSource,
   loadCurrent: () => Promise<MatchView | null>,
+  onWake: (listener: () => void) => () => void = () => () => undefined,
 ) => {
   let users = 0;
   let unbind: (() => void) | null = null;
@@ -42,10 +44,12 @@ export const createMatchSession = (
   const bind = () => {
     const offEvent = source.onEvent(handle);
     const offReconnect = source.onReconnect(() => void refresh());
+    const offWake = onWake(source.open);
     source.open();
     return () => {
       offEvent();
       offReconnect();
+      offWake();
       source.close();
     };
   };

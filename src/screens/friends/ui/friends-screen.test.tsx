@@ -21,7 +21,9 @@ jest.mock("expo-router", () => ({
   },
   useLocalSearchParams: () => mockParams,
   useIsFocused: () => true,
+  useNavigation: () => ({ dispatch: jest.fn(), canGoBack: () => true }),
 }));
+jest.mock("expo-router/react-navigation", () => ({ usePreventRemove: () => undefined }));
 jest.mock("@gorhom/bottom-sheet", () =>
   jest.requireActual("@shared/ui/sheet/test-utils/bottom-sheet-mock"),
 );

@@ -6,7 +6,10 @@ import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import ArenaHomeScreen from "./arena-home-screen";
 
-jest.mock("expo-router", () => ({ router: { push: jest.fn(), navigate: jest.fn() } }));
+jest.mock("expo-router", () => ({
+  router: { push: jest.fn(), navigate: jest.fn() },
+  useSegments: () => [],
+}));
 jest.mock("@shared/config", () => ({
   ...jest.requireActual("@shared/config"),
   HAS_ARENA_SERVER: false,

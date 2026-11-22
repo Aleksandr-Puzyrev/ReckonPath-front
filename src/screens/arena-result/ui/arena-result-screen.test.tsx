@@ -63,6 +63,33 @@ describe("ArenaResultScreen", () => {
     expect(screen.getByText("Карта Kira")).toBeOnTheScreen();
   });
 
+  test("shows a friendly match without trophies, rewards or another fight (decision 0062 #21)", async () => {
+    const done = doneMatchMock();
+    if (done.result === undefined) throw new Error("No result");
+    finished({
+      ...done,
+      friendly: true,
+      result: { ...done.result, trophies: 0, coins: 0, gems: 0, xp: 0, rp: 0 },
+    });
+    await renderResult();
+
+    expect(screen.getByText("Победа")).toBeOnTheScreen();
+    expect(screen.getByText("Дружеский матч — кубки не изменились")).toBeOnTheScreen();
+    expect(screen.queryByTestId("result-trophies")).toBeNull();
+    expect(screen.queryByTestId("result-again")).toBeNull();
+    expect(screen.getByTestId("result-arena")).toHaveTextContent("Назад");
+  });
+
+  test("counts a friendly match for the interstitial and goes back (decision 0062 #25)", async () => {
+    finished({ ...doneMatchMock(), friendly: true });
+    await renderResult();
+
+    await fireEvent.press(screen.getByTestId("result-arena"));
+
+    await waitFor(() => expect(mockRouter.back).toHaveBeenCalled());
+    expect(mockInterstitial.finishLevel).toHaveBeenCalled();
+  });
+
   test("names the new reasons of the backend", async () => {
     const done = doneMatchMock();
     if (done.result === undefined) throw new Error("No result");

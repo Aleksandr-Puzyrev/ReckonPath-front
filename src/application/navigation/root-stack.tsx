@@ -16,6 +16,8 @@ import { useSettingsStore } from "@entities/settings";
 import { isSystemLanguageSupported } from "@shared/i18n";
 
 import LinkOfferHost from "../account/link-offer-host";
+import ArenaSocketHost from "../arena/arena-socket-host";
+import ChallengeBannerHost from "../arena/challenge-banner-host";
 import AdsConsentHost from "../ads/ads-consent-host";
 import { useSystemSignalRefetch } from "../query/use-system-signal-refetch";
 import "../session/register-api-session";
@@ -50,6 +52,8 @@ const RootStack = () => {
   const isMaintenance = state.kind === "maintenance" && !isMaintenanceDismissed;
   const isSoftUpdateOpen =
     state.kind === "softUpdate" && !isSoftUpdateSnoozed(softUpdateDismissedAt, launchedAt);
+  const isSignedIn =
+    hasLogin && !isUpdateRequired && !isMaintenance && !isBanned && !isConsentRequired;
 
   return (
     <>
@@ -60,9 +64,7 @@ const RootStack = () => {
           <Stack.Screen name="onboarding/language" options={{ gestureEnabled: false }} />
         </Stack.Protected>
         {/* No guest mode for now: without an account only the sign-in screens are open (гостевого режима пока нет: без аккаунта открыты только экраны входа). */}
-        <Stack.Protected
-          guard={hasLogin && !isUpdateRequired && !isMaintenance && !isBanned && !isConsentRequired}
-        >
+        <Stack.Protected guard={isSignedIn}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
           <Stack.Screen name="friends" />
@@ -138,6 +140,12 @@ const RootStack = () => {
         />
       ) : null}
       <LinkOfferHost isSuspended={isSoftUpdateOpen} />
+      {isSignedIn ? (
+        <>
+          <ArenaSocketHost />
+          <ChallengeBannerHost />
+        </>
+      ) : null}
       <AdsConsentHost />
       <SplashGate />
     </>

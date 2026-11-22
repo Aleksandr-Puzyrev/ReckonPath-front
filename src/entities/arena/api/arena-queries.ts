@@ -19,8 +19,8 @@ export const arenaQueryOptions = () =>
     staleTime: ARENA_STALE_MS,
   });
 
-export const useArenaQuery = () =>
-  useQuery({ ...arenaQueryOptions(), enabled: useHasAccount() && HAS_ARENA_SERVER });
+export const useArenaQuery = (isEnabled = true) =>
+  useQuery({ ...arenaQueryOptions(), enabled: useHasAccount() && HAS_ARENA_SERVER && isEnabled });
 
 // A claim answers with the whole season, which replaces the home's season block (забор награды отвечает сезоном целиком, и он заменяет блок сезона на главной).
 export const applySeason = (queryClient: QueryClient, season: SeasonView) =>

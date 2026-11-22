@@ -65,15 +65,22 @@ export const createArenaSocket = ({
     attempt += 1;
   };
 
+  // No token after a refresh means the session is gone; a failed refresh (network, 5xx) is retried with the backoff (без токена после обновления сессии нет; неудачное обновление — сеть, 5xx — повторяется с отступом).
   const refreshThenConnect = async () => {
     isRefreshing = true;
+    let token: unknown;
     try {
-      await refreshToken();
+      token = await refreshToken();
     } catch {
+      isRefreshing = false;
+      isTokenRefreshed = false;
+      scheduleReconnect();
+      return;
+    }
+    isRefreshing = false;
+    if (token === null) {
       isWanted = false;
       return;
-    } finally {
-      isRefreshing = false;
     }
     connect();
   };

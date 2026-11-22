@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { ChallengeSheet, ChallengeWaiting } from "@features/challenge-friend";
 import { RemoveFriendFlow } from "@features/remove-friend";
 import { IconButton } from "@shared/ui/icon-button";
 import { Screen } from "@shared/ui/screen";
@@ -77,6 +78,7 @@ const FriendsScreen = () => {
       </View>
       <FlashList
         data={screen.rows}
+        extraData={screen.rowState}
         keyExtractor={(row) => row.key}
         getItemType={(row) => row.kind}
         contentContainerStyle={styles.content}
@@ -97,7 +99,9 @@ const FriendsScreen = () => {
           <FriendsListItem
             row={item}
             isDisabled={screen.isDisabled}
+            challengeLockReason={screen.challengeLockReason}
             removingId={screen.remove.removingId}
+            onChallenge={screen.challenge.handleChallenge}
             onMore={screen.handleMore}
             onAccept={screen.answer.accept}
             onDecline={screen.answer.decline}
@@ -115,6 +119,17 @@ const FriendsScreen = () => {
         friend={screen.menuFriend}
         remove={screen.remove}
         onClose={screen.handleMenuClose}
+      />
+      <ChallengeSheet
+        friend={screen.challenge.friend}
+        format={screen.challenge.format}
+        isSending={screen.challenge.isSending}
+        onSend={screen.challenge.handleSend}
+        onClose={screen.challenge.handleClose}
+      />
+      <ChallengeWaiting
+        waiting={screen.challenge.waiting}
+        onCancel={screen.challenge.handleCancel}
       />
       <Toast message={toast} onHide={() => setToast(null)} />
     </Screen>

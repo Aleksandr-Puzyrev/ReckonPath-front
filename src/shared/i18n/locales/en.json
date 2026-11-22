@@ -194,7 +194,9 @@
       "amount": "+{{n}}",
       "myMap": "My map",
       "theirMap": "{{name}}’s map",
-      "promotion": "New division: {{league}} {{division}}"
+      "promotion": "New division: {{league}} {{division}}",
+      "friendly": "Friendly match — trophies unchanged",
+      "back": "Back"
     }
   },
   "ads": {
@@ -373,7 +375,13 @@
     "invite_invalid": "No such code",
     "invite_used": "An invite code has already been used",
     "invite_expired": "The code can only be entered in your first 7 days",
-    "invite_self": "That’s your own code"
+    "invite_self": "That’s your own code",
+    "rival_busy": "Your friend is in a match — try later",
+    "challenge_not_found": "This challenge is no longer active",
+    "season_changing": "The season is changing. Try again in a couple of minutes",
+    "arena_locked": "The Arena unlocks after level {{level}}",
+    "arena_banned": "The Arena is closed for you",
+    "match_in_progress": "Finish your current match first"
   },
   "system": {
     "update": {
@@ -563,7 +571,23 @@
     "redeem": "Invite code",
     "redeemDone": "Code accepted — {{name}} is now your friend",
     "redeemAccepted": "Code accepted",
-    "inviteReward": "When your friend plays their first arena match, you get ◆ {{gems}}"
+    "inviteReward": "When your friend plays their first arena match, you get ◆ {{gems}}",
+    "challenge": {
+      "action": "Challenge",
+      "title": "Challenge · {{name}}",
+      "friendly": "friendly — no trophies at stake",
+      "send": "Send challenge",
+      "waiting": "Waiting for reply",
+      "waitingSub": "waiting for {{name}} · {{size}} · up to {{sec}} s",
+      "cancel": "Cancel",
+      "cantNow": "{{name}} can’t play right now",
+      "noAnswer": "No answer from {{name}}",
+      "incoming": "{{name}} challenges you",
+      "incomingSub": "{{size}} · friendly",
+      "accept": "Accept",
+      "decline": "Decline",
+      "declined": "{{name}} will see “can’t play right now”"
+    }
   },
   "account": {
     "benefits": {
@@ -856,7 +880,8 @@
       "async": "{{result}} · vs map",
       "resultWin": "Win",
       "resultLoss": "Loss",
-      "resultDraw": "Draw"
+      "resultDraw": "Draw",
+      "friendly": "friendly"
     },
     "lockedTitle": "Arena is locked",
     "locked": "Beat level 12 to unlock the Arena",
@@ -1029,7 +1054,8 @@
     "surrender": {
       "action": "Give up",
       "confirm": "Give up? You’ll lose {{count}} trophies",
-      "cancel": "Keep playing"
+      "cancel": "Keep playing",
+      "confirmFriendly": "Give up? Trophies won’t change"
     },
     "toast": {
       "myBomb": "Bomb! You skip your next move",

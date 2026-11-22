@@ -1202,6 +1202,86 @@ paths:
         "204": { description: Removed }
         default: { $ref: "#/components/responses/Error" }
 
+  /friends/{id}/challenge:
+    parameters:
+      - {
+          name: id,
+          in: path,
+          required: true,
+          schema: { type: string },
+          description: The friend's id,
+        }
+    post:
+      operationId: challengeFriend
+      description: >
+        A friendly duel without trophies or rewards (decision 0062 #5); the friend gets the challenge
+        push and the socket event. A new challenge silently cancels my previous pending one. Errors
+        not_friends, arena_locked (details.level), banned, match_in_progress (details {id, kind,
+        status}), rival_busy, season_changing, validation_failed (league).
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                league: { type: string, description: A league not above mine; empty — my own }
+      responses:
+        "200":
+          description: The pending challenge
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChallengeView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/challenges:
+    get:
+      operationId: listChallenges
+      description: My pending, unexpired challenges. The socket does not replay them, so the client re-reads them on every (re)connect.
+      responses:
+        "200":
+          description: Incoming and outgoing challenges
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChallengesResponse" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/challenges/{id}/accept:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: acceptChallenge
+      description: >
+        Creates the friendly match (friendly true) in the prepare phase. Errors challenge_not_found,
+        match_in_progress, rival_busy, season_changing, arena_locked, banned.
+      responses:
+        "200":
+          description: The friendly match
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MatchView" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/challenges/{id}/decline:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    post:
+      operationId: declineChallenge
+      description: Error challenge_not_found.
+      responses:
+        "204": { description: Declined }
+        default: { $ref: "#/components/responses/Error" }
+
+  /arena/challenges/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string } }
+    delete:
+      operationId: cancelChallenge
+      description: Cancels my own challenge; error challenge_not_found.
+      responses:
+        "204": { description: Cancelled }
+        default: { $ref: "#/components/responses/Error" }
+
   /me/invite:
     get:
       operationId: getInvite
@@ -1440,6 +1520,9 @@ components:
         - invite_used
         - invite_expired
         - invite_self
+        - rival_busy
+        - challenge_not_found
+        - season_changing
 
     VersionInfo:
       type: object
@@ -2559,7 +2642,42 @@ components:
           required: [id, status]
           properties:
             id: { type: string }
-            status: { type: string, enum: [pending, accepted, declined, cancelled, expired] }
+            status: { $ref: "#/components/schemas/ChallengeStatus" }
+
+    ChallengeStatus:
+      type: string
+      enum: [pending, accepted, declined, cancelled, expired]
+
+    ChallengeView:
+      type: object
+      required: [id, status, from, to, incoming, format, expiresAt]
+      properties:
+        id: { type: string }
+        status: { $ref: "#/components/schemas/ChallengeStatus" }
+        from: { $ref: "#/components/schemas/ChallengePlayer" }
+        to: { $ref: "#/components/schemas/ChallengePlayer" }
+        incoming: { type: boolean, description: The challenge is addressed to me }
+        format: { $ref: "#/components/schemas/MatchFormat" }
+        matchId: { type: string }
+        expiresAt: { type: string, format: date-time }
+
+    ChallengePlayer:
+      type: object
+      required: [name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+
+    ChallengesResponse:
+      type: object
+      required: [incoming, outgoing]
+      properties:
+        incoming:
+          type: array
+          items: { $ref: "#/components/schemas/ChallengeView" }
+        outgoing:
+          type: array
+          items: { $ref: "#/components/schemas/ChallengeView" }
 
     HistoryItem:
       type: object

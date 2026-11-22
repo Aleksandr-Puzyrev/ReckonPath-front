@@ -172,6 +172,14 @@ describe("ArenaMatchScreen", () => {
         }),
       );
     });
+
+    test("asks to give up a friendly match without trophies (decision 0062 #25)", async () => {
+      await renderMatch(matchViewMock({ friendly: true, surrenderLoss: 0 }));
+
+      await fireEvent.press(screen.getByTestId("prepare-surrender"));
+
+      expect(screen.getByText("Сдаться? Кубки не изменятся")).toBeOnTheScreen();
+    });
   });
 
   test("shows VS until startsAt with who goes first", async () => {

@@ -13,13 +13,18 @@ const matchSchema = z.looseObject({
   deadline: z.string(),
 });
 
-// Challenges belong to the friends task and are not read yet (вызовы относятся к задаче друзей и пока не читаются).
 const eventSchema = z.object({
-  type: z.enum(["hello", "match", "queue", "presence"]),
+  type: z.enum(["hello", "match", "queue", "presence", "challenge"]),
   time: z.string(),
   match: matchSchema.optional(),
   queue: z.looseObject({}).optional(),
   presence: z.object({ matchId: z.string(), online: z.boolean() }).optional(),
+  challenge: z
+    .object({
+      id: z.string(),
+      status: z.enum(["pending", "accepted", "declined", "cancelled", "expired"]),
+    })
+    .optional(),
 });
 
 const parseJson = (data: string): unknown => {

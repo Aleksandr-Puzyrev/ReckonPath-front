@@ -8,6 +8,7 @@ import { adsHandlers } from "./ads-handlers";
 import { arenaHandlers } from "./arena-handlers";
 import { arenaMapHandlers } from "./arena-map-handlers";
 import { authHandlers } from "./auth-handlers";
+import { challengeHandlers } from "./challenge-handlers";
 import { campaignHandlers } from "./campaign-handlers";
 import { customLevelHandlers } from "./custom-level-handlers";
 import { dailyHandlers } from "./daily-handlers";
@@ -75,4 +76,5 @@ export const handlers = [
   ...supportHandlers,
   ...customLevelHandlers,
   ...friendsHandlers,
+  ...challengeHandlers,
 ];

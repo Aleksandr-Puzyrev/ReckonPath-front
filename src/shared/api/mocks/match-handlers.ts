@@ -32,6 +32,8 @@ export const setMockMatch = (next: MatchView | null) => {
   match = next;
 };
 
+export const currentMockMatch = () => match;
+
 const errorResponse = (code: string, status: number) =>
   HttpResponse.json({ error: { code } }, { status });
 

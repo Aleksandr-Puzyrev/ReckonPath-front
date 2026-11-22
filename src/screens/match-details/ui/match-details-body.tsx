@@ -7,7 +7,7 @@ import type { MatchView } from "@entities/match";
 import { formatDateTime } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 import { BoardMapPreview } from "@widgets/board";
-import { formatTrophyDelta } from "@widgets/match-history";
+import { trophyTextOf } from "@widgets/match-history";
 
 import { tapsOfLog } from "../model/taps-of-log";
 
@@ -37,7 +37,7 @@ const MatchDetailsBody = ({ match }: IMatchDetailsBody) => {
       </Text>
       {result === undefined ? null : (
         <Text variant="title.s">
-          {`${t(RESULT_KEYS[result.outcome])} · ${formatTrophyDelta(result.trophies)}`}
+          {`${t(RESULT_KEYS[result.outcome])} · ${trophyTextOf({ friendly: match.friendly, trophies: result.trophies }, t)}`}
         </Text>
       )}
       <Text variant="body.s" style={styles.secondary}>

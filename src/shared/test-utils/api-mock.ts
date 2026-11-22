@@ -19,3 +19,9 @@ export {
   MOCK_PLAYERS,
   setMockFriends,
 } from "../api/mocks/mock-friends";
+export {
+  challengeViewMock,
+  incomingChallengeMock,
+  setMockChallenges,
+} from "../api/mocks/mock-challenges";
+export type { MockChallenge } from "../api/mocks/mock-challenges";

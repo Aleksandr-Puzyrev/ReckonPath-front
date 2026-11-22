@@ -10,7 +10,7 @@ export {
   useHasAccount,
 } from "./api-session";
 export type { ApiSession } from "./api-session";
-export { errorMessageKey } from "./error-message-key";
+export { errorMessageKey, errorMessageValues } from "./error-message-key";
 export type { ErrorMessageKey } from "./error-message-key";
 export type { components, operations } from "./generated/schema";
 export { readData } from "./read-data";

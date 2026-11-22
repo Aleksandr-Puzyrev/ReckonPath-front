@@ -13,6 +13,7 @@ import { resetMockCustomLevels } from "./custom-level-handlers";
 import { resetMockDaily } from "./mock-daily";
 import { resetMockDevices } from "./device-handlers";
 import { resetMockArena } from "./mock-arena";
+import { resetMockChallenges } from "./mock-challenges";
 import { resetMockFriends } from "./mock-friends";
 import { resetMockMatch } from "./match-handlers";
 import { resetMockPlayer } from "./mock-player";
@@ -61,6 +62,7 @@ export const mockServer = {
     resetMockMatch();
     resetMockPlayer();
     resetMockFriends();
+    resetMockChallenges();
   },
   fetch: serveBackendStyle(respond),
 };

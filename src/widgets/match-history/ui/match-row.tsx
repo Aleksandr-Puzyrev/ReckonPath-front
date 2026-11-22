@@ -6,8 +6,8 @@ import type { HistoryItem } from "@entities/match";
 import { Gradient } from "@shared/ui/gradient";
 import { Text } from "@shared/ui/text";
 
-import { formatTrophyDelta } from "../model/format-trophy-delta";
 import { matchLineOf } from "../model/match-line-of";
+import { trophyTextOf } from "../model/trophy-text-of";
 
 import { styles } from "./match-history-styles";
 
@@ -25,7 +25,7 @@ const MatchRow = ({ match, onOpen }: IMatchRow) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const line = matchLineOf(match, t);
-  const delta = formatTrophyDelta(match.trophies);
+  const delta = trophyTextOf(match, t);
   styles.useVariants({ tone: toneOf(match.trophies) });
 
   return (
@@ -59,7 +59,7 @@ const MatchRow = ({ match, onOpen }: IMatchRow) => {
           {line}
         </Text>
       </View>
-      <Text variant="number.counter" style={styles.delta}>
+      <Text variant={match.friendly === true ? "caption" : "number.counter"} style={styles.delta}>
         {delta}
       </Text>
     </Pressable>

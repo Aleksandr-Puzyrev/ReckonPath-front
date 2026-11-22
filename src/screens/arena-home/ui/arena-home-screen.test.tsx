@@ -20,11 +20,13 @@ import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 import ArenaHomeScreen from "./arena-home-screen";
 
 const mockRouter = { push: jest.fn(), navigate: jest.fn() };
+let mockSegments: string[] = ["(tabs)", "arena"];
 
 jest.mock("expo-router", () => ({
   get router() {
     return mockRouter;
   },
+  useSegments: () => mockSegments,
 }));
 jest.mock("@shared/config", () => ({
   ...jest.requireActual("@shared/config"),
@@ -260,6 +262,19 @@ describe("ArenaHomeScreen", () => {
         params: { id: "m7" },
       }),
     );
+  });
+
+  test("does not stack another match screen over an open one (decision 0062 #7)", async () => {
+    mockSegments = ["arena", "match", "[id]"];
+    withArena({ match: { id: "m7", kind: "duel", status: "play" } });
+    await renderOpenArena();
+    await act(async () => undefined);
+
+    expect(mockRouter.push).not.toHaveBeenCalledWith({
+      pathname: "/arena/match/[id]",
+      params: { id: "m7" },
+    });
+    mockSegments = ["(tabs)", "arena"];
   });
 
   test("reopens a running search at once", async () => {

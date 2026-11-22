@@ -11,6 +11,7 @@ interface IMatchSheets {
   isMenuOpen: boolean;
   isSurrenderOpen: boolean;
   surrenderLoss: number;
+  isFriendly: boolean;
   onSurrenderOpen: () => void;
   onSurrender: () => void;
   onClose: () => void;
@@ -20,6 +21,7 @@ const MatchSheets = ({
   isMenuOpen,
   isSurrenderOpen,
   surrenderLoss,
+  isFriendly,
   onSurrenderOpen,
   onSurrender,
   onClose,
@@ -40,7 +42,11 @@ const MatchSheets = ({
       </Sheet>
       <Dialog
         isOpen={isSurrenderOpen}
-        title={t("match.surrender.confirm", { count: surrenderLoss })}
+        title={
+          isFriendly
+            ? t("match.surrender.confirmFriendly")
+            : t("match.surrender.confirm", { count: surrenderLoss })
+        }
         onCancel={onClose}
         actions={[
           { label: t("match.surrender.cancel"), variant: "secondary", onPress: onClose },

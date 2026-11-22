@@ -16,10 +16,12 @@ interface IButton {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isDisabled?: boolean;
+  onDisabledPress?: () => void;
   isLabelDanger?: boolean;
   caption?: string;
   icon?: ReactNode;
   accessibilityLabel?: string;
+  accessibilityHint?: string;
   testID?: string;
 }
 
@@ -31,10 +33,12 @@ const Button = ({
   variant = "secondary",
   size = "m",
   isDisabled = false,
+  onDisabledPress,
   isLabelDanger = false,
   caption,
   icon,
   accessibilityLabel,
+  accessibilityHint,
   testID,
 }: IButton) => {
   const { theme } = useUnistyles();
@@ -46,10 +50,12 @@ const Button = ({
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={[accessibilityLabel ?? label, caption].filter(Boolean).join(", ")}
+      accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: isDisabled }}
-      disabled={isDisabled}
-      onPress={onPress}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+      // Pressable's own disabled would overwrite the announced state, so a button that explains itself leaves it unset (собственный disabled у Pressable перезаписал бы объявленное состояние, поэтому кнопка, объясняющая причину, его не задаёт).
+      disabled={onDisabledPress === undefined ? isDisabled : undefined}
+      onPress={isDisabled ? onDisabledPress : onPress}
+      style={({ pressed }) => [styles.button, pressed && !isDisabled && styles.pressed]}
     >
       {hasGradient ? <Gradient name="primary" radius={theme.radius.l} /> : null}
       <View style={styles.content}>

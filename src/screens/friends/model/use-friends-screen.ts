@@ -5,11 +5,14 @@ import { useTranslation } from "react-i18next";
 import { ADD_FRIEND_PARAM, useFriendsQuery, useRefreshFriendsOnFocus } from "@entities/friend";
 import type { Friend } from "@entities/friend";
 import { useAnswerFriendRequest } from "@features/answer-friend-request";
+import { useArenaAccess } from "@features/arena-access";
+import { useChallengeFriend } from "@features/challenge-friend";
 import { useRemoveFriend } from "@features/remove-friend";
 import type { ErrorMessageKey } from "@shared/api";
 import { useIsOnline } from "@shared/api";
 
 import { friendsRowsOf } from "./friends-rows";
+import { lockReasonOf } from "./lock-reason-of";
 import type { FriendsTab } from "./friends-rows";
 
 export const useFriendsScreen = (onToast: (text: string) => void) => {
@@ -28,6 +31,10 @@ export const useFriendsScreen = (onToast: (text: string) => void) => {
     onError: showError,
   });
   const remove = useRemoveFriend(showError);
+  const access = useArenaAccess();
+  const challenge = useChallengeFriend(access, onToast);
+  const isDisabled = !isOnline || answer.isPending;
+  const challengeLockReason = lockReasonOf(access, t);
   useRefreshFriendsOnFocus();
 
   return {
@@ -36,13 +43,16 @@ export const useFriendsScreen = (onToast: (text: string) => void) => {
     isPending: friends.isPending,
     error: friends.error,
     isOnline,
-    isDisabled: !isOnline || answer.isPending,
+    isDisabled,
     tab,
     isAddOpen,
     menuFriend,
     isRefreshing,
+    challengeLockReason,
+    rowState: { isDisabled, challengeLockReason, removingId: remove.removingId },
     answer,
     remove,
+    challenge,
     handleTabChange: setTab,
     handleAddOpen: () => setIsAddOpen(true),
     handleAddClose: () => setIsAddOpen(false),

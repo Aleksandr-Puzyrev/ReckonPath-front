@@ -116,6 +116,8 @@ const pendingBetween = (from: string, to: string) =>
 
 export const mockFriendIds = friendIds;
 
+export const mockFriendStatus = (id: string): FriendStatus | undefined => state.friends[id];
+
 // The backend's order: online, then in a match, then offline (порядок бэкенда: онлайн, затем в матче, затем не в сети).
 export const listMockFriends = (): FriendsList => {
   const friends = MOCK_PLAYERS.filter(({ id }) => isFriend(id))

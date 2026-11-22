@@ -47,6 +47,7 @@ const MatchBody = ({ view, onToast }: IMatchBody) => {
       isMenuOpen={overlay === "menu"}
       isSurrenderOpen={overlay === "surrender"}
       surrenderLoss={view.surrenderLoss ?? 0}
+      isFriendly={view.friendly === true}
       onSurrenderOpen={() => setOverlay("surrender")}
       onSurrender={() => {
         setOverlay(null);

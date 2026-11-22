@@ -23,7 +23,7 @@ describe("createArenaSocket", () => {
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
 
-  const setup = (refreshToken = jest.fn(async () => undefined)) => {
+  const setup = (refreshToken = jest.fn(async (): Promise<unknown> => undefined)) => {
     const transport = createTransport();
     const token = { isExpired: false };
     const socket = createArenaSocket({
@@ -74,7 +74,7 @@ describe("createArenaSocket", () => {
     ]);
   });
 
-  test("passes presence pushes and drops challenges, which are not read yet", () => {
+  test("passes presence and challenge pushes", () => {
     const { socket, last } = setup();
     const events: unknown[] = [];
     socket.onEvent((event) => events.push(event));
@@ -91,13 +91,31 @@ describe("createArenaSocket", () => {
       JSON.stringify({
         type: "challenge",
         time: "2026-11-02T12:00:00Z",
-        challenge: { id: "c1", status: "pending" },
+        challenge: { id: "c1", status: "declined" },
       }),
     );
 
     expect(events).toEqual([
       expect.objectContaining({ type: "presence", presence: { matchId: "m1", online: false } }),
+      expect.objectContaining({ type: "challenge", challenge: { id: "c1", status: "declined" } }),
     ]);
+  });
+
+  test("skips a challenge push with an unknown status", () => {
+    const { socket, last } = setup();
+    const events: unknown[] = [];
+    socket.onEvent((event) => events.push(event));
+    socket.open();
+
+    last()?.handlers.onMessage(
+      JSON.stringify({
+        type: "challenge",
+        time: "2026-11-02T12:00:00Z",
+        challenge: { id: "c1", status: "maybe" },
+      }),
+    );
+
+    expect(events).toEqual([]);
   });
 
   test("refreshes the token on 4001 and connects again", async () => {
@@ -130,6 +148,39 @@ describe("createArenaSocket", () => {
     expect(reconnected).toHaveBeenCalledTimes(1);
   });
 
+  test("retries a failed token refresh with the backoff instead of giving up", async () => {
+    const refreshToken = jest.fn(async (): Promise<unknown> => {
+      throw new TypeError("Network request failed");
+    });
+    const { socket, opened, token } = setup(refreshToken);
+    socket.open();
+    token.isExpired = true;
+    opened[0]?.handlers.onClose(WS_CLOSE_TOKEN);
+    await settle();
+
+    refreshToken.mockImplementation(async () => {
+      token.isExpired = false;
+      return "fresh";
+    });
+    jest.advanceTimersByTime(10_000);
+    await settle();
+
+    expect(refreshToken).toHaveBeenCalledTimes(2);
+    expect(opened).toHaveLength(2);
+  });
+
+  test("stops when the refresh finds the session gone", async () => {
+    const refreshToken = jest.fn(async (): Promise<unknown> => null);
+    const { socket, opened } = setup(refreshToken);
+    socket.open();
+
+    opened[0]?.handlers.onClose(WS_CLOSE_TOKEN);
+    await settle();
+    jest.advanceTimersByTime(10_000);
+
+    expect(opened).toHaveLength(1);
+  });
+
   test("stays closed after close", () => {
     const { socket, opened } = setup();
     socket.open();
@@ -142,7 +193,7 @@ describe("createArenaSocket", () => {
   });
 
   test("refreshes an expired token before connecting", async () => {
-    const refreshToken = jest.fn(async () => undefined);
+    const refreshToken = jest.fn(async (): Promise<unknown> => undefined);
     const { socket, opened, token } = setup(refreshToken);
     token.isExpired = true;
     refreshToken.mockImplementation(async () => {

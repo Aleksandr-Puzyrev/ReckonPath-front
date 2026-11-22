@@ -30,3 +30,24 @@ The rule of 0060 holds: where the backend and the spec, design or earlier decisi
 * `contracts/openapi.yaml` gets the backend's friends and invite paths (MR 1) and challenge paths (MR 2) with their error codes.
 * `docs/backend-handoff/backend-todo.md` gets: a permanent friend code, an https invite link, last seen, app-wide presence, a league list for the challenge format.
 * `POST /me/invite` returns no data: after it the client refetches `GET /me/invite` (`invited_by` id) and `GET /friends` and takes the name for `friends.redeemDone` from the friend with that id.
+
+## Round 2: friend challenges (MR 2)
+
+Date: 2026-11-17. Asked by: clarify-task for challenges (Part 4 §10.5, Part 5 §5, FRN-07…10, design 24.4–24.6) against backend `a709480` (`internal/features/arena/challenge.go`). Answered by: developer.
+
+| # | Question | Decision | Supersedes |
+| --- | --- | --- | --- |
+| 19 | Decline and timeout for the challenger | `declined` → toast `friends.challenge.cantNow`; `expired` → toast `friends.challenge.noAnswer` «Нет ответа от {{name}}». | Part 5 `friends.challenge.noAnswer` («Друг не ответил»), Part 4 §10.5 (one text) |
+| 20 | Waiting screen | Modal: back, the gesture and «Отменить» cancel the challenge (`DELETE /arena/challenges/{id}`). On `accepted` the challenger goes to the match from the `match` push. | — |
+| 21 | Friendly result | No trophies, league progress or rewards; the line `result.pvp.friendly`; «В арену» → `result.pvp.back`; no «Ещё бой» or re-challenge. | — |
+| 22 | Locked or banned arena | «Вызвать» is disabled and a tap shows the reason toast; the incoming banner is not shown to such a player; the arena socket is not opened for an arena-banned player. | — |
+| 23 | Banner | Design 24.6: «{name} вызывает на дуэль» and `friends.challenge.incomingSub`; a bar by `expires_at`; the newest pending challenge first, the next one after it closes. Hidden on `play/*`, `editor/tryout`, the arena match, search and onboarding; shown on the arena result. | Part 5 one-line `friends.challenge.incoming` |
+| 24 | Challenge sheet | «Вызов · {name}», `friends.challenge.friendly`, the league format line `arena.format`, «Отправить вызов». | design 24.4 format and map pickers (#5) |
+| 25 | Friendly surrender and history | Surrender confirm `match.surrender.confirmFriendly`; history row `history.friendly` instead of «0». The ad interstitial counts a friendly match like any other. | — |
+| 26 | Receiver's decline | Toast `friends.challenge.declined`; a cancelled or expired challenge just hides the banner. | — |
+| 27 | Key clash | `friends.challenge` («Вызвать») becomes `friends.challenge.action`: i18next cannot hold a string and a namespace under one key. | Part 5 key name |
+| 28 | Texts | Design texts as written: `friends.challenge.title`, `friendly`, `send`, `waiting`, `waitingSub`, `cantNow`, `incomingSub`, `declined`. New (RU / EN): `friends.challenge.noAnswer` «Нет ответа от {{name}}» / "No answer from {{name}}"; `errors.rival_busy` «Друг сейчас в матче — попробуй позже» / "Your friend is in a match — try later"; `errors.challenge_not_found` «Вызов уже неактуален» / "This challenge is no longer active"; `errors.season_changing` «Сезон сменяется. Попробуй через пару минут» / "The season is changing. Try again in a couple of minutes"; `errors.arena_locked` «Арена откроется после уровня {{level}}» / "The Arena unlocks after level {{level}}"; `errors.arena_banned` «Арена для тебя закрыта» / "The Arena is closed for you"; `errors.match_in_progress` «Сначала доиграй текущий матч» / "Finish your current match first"; `result.pvp.friendly` «Дружеский матч — кубки не изменились» / "Friendly match — trophies unchanged"; `result.pvp.back` «Назад» / "Back"; `match.surrender.confirmFriendly` «Сдаться? Кубки не изменятся» / "Give up? Trophies won’t change"; `history.friendly` «дружеский» / "friendly". | — |
+
+### Consequences of round 2
+
+* The backend to-do gets: events for silent cancels (a new challenge, unfriend, block), a way to read an accepted challenge's `match_id`, swagger `in_match` → `match_in_progress`; the app-wide presence item is resolved on the client by #7.

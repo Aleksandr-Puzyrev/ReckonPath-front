@@ -206,7 +206,9 @@
       "amount": "+{{n}}",
       "myMap": "Моя карта",
       "theirMap": "Карта {{name}}",
-      "promotion": "Новый дивизион: {{league}} {{division}}"
+      "promotion": "Новый дивизион: {{league}} {{division}}",
+      "friendly": "Дружеский матч — кубки не изменились",
+      "back": "Назад"
     }
   },
   "ads": {
@@ -407,7 +409,13 @@
     "invite_invalid": "Такого кода нет",
     "invite_used": "Код приглашения уже введён",
     "invite_expired": "Код можно ввести только в первые 7 дней",
-    "invite_self": "Это твой собственный код"
+    "invite_self": "Это твой собственный код",
+    "rival_busy": "Друг сейчас в матче — попробуй позже",
+    "challenge_not_found": "Вызов уже неактуален",
+    "season_changing": "Сезон сменяется. Попробуй через пару минут",
+    "arena_locked": "Арена откроется после уровня {{level}}",
+    "arena_banned": "Арена для тебя закрыта",
+    "match_in_progress": "Сначала доиграй текущий матч"
   },
   "system": {
     "update": {
@@ -611,7 +619,23 @@
     "redeem": "Код приглашения",
     "redeemDone": "Код принят — {{name}} теперь в друзьях",
     "redeemAccepted": "Код принят",
-    "inviteReward": "Друг сыграет первый матч на арене — тебе ◆ {{gems}}"
+    "inviteReward": "Друг сыграет первый матч на арене — тебе ◆ {{gems}}",
+    "challenge": {
+      "action": "Вызвать",
+      "title": "Вызов · {{name}}",
+      "friendly": "дружеский матч — кубки не меняются",
+      "send": "Отправить вызов",
+      "waiting": "Ждём ответа",
+      "waitingSub": "ждём {{name}} · {{size}} · до {{sec}} с",
+      "cancel": "Отменить",
+      "cantNow": "{{name}} не может сейчас",
+      "noAnswer": "Нет ответа от {{name}}",
+      "incoming": "{{name}} вызывает на дуэль",
+      "incomingSub": "{{size}} · дружеский",
+      "accept": "Принять",
+      "decline": "Отклонить",
+      "declined": "{{name}} увидит «не может сейчас»"
+    }
   },
   "account": {
     "benefits": {
@@ -920,7 +944,8 @@
       "async": "{{result}} · против карты",
       "resultWin": "Победа",
       "resultLoss": "Поражение",
-      "resultDraw": "Ничья"
+      "resultDraw": "Ничья",
+      "friendly": "дружеский"
     },
     "lockedTitle": "Арена закрыта",
     "locked": "Пройди уровень 12, чтобы открыть арену",
@@ -1099,7 +1124,8 @@
     "surrender": {
       "action": "Сдаться",
       "confirm": "Сдаться? Ты потеряешь {{count}} кубков",
-      "cancel": "Играть дальше"
+      "cancel": "Играть дальше",
+      "confirmFriendly": "Сдаться? Кубки не изменятся"
     },
     "toast": {
       "myBomb": "Бомба! Ты пропускаешь следующий ход",

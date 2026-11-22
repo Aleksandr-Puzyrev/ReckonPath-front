@@ -67,7 +67,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0059 | [`0059-nickname-change.md`](0059-nickname-change.md) | Nickname change screen (23.4): Latin only like the backend, live check of length and characters, «занято» after save, no confirm for the paid change, cooldown date |
 | 0060 | [`0060-backend-first-campaign-and-arena.md`](0060-backend-first-campaign-and-arena.md) | The backend wins: server campaign games, no guest, no offline campaign for now, arena on the backend's push + REST protocol and rules, prepare phase, rectangular boards |
 | 0061 | [`0061-daily-on-backend.md`](0061-daily-on-backend.md) | Daily and streak on the backend: server games needing the network, preview without a board, no replay after a win, no ads, «место R из P», won days in the calendar, restore for ◆ before the win, generator kept as an admin tool |
-| 0062 | [`0062-friends-on-backend.md`](0062-friends-on-backend.md) | Friends on the backend in two MRs (friends, daily Friends tab, profile row; then challenges), invite code instead of a friend code, code shared as text, inviter-only reward, challenges without a format picker, app-wide arena socket, new texts |
+| 0062 | [`0062-friends-on-backend.md`](0062-friends-on-backend.md) | Friends on the backend in two MRs (friends, daily Friends tab, profile row; then challenges), invite code instead of a friend code, code shared as text, inviter-only reward, challenges without a format picker, app-wide arena socket, new texts; round 2: challenge texts, modal waiting, friendly result |
 
 ## Template
 

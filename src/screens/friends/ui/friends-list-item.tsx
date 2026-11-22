@@ -13,14 +13,22 @@ import { styles } from "./friends-screen-styles";
 interface IFriendsListItem {
   row: FriendsRow;
   isDisabled: boolean;
+  challengeLockReason: string | null;
   removingId: string | null;
+  onChallenge: (friend: Friend) => void;
   onMore: (friend: Friend) => void;
   onAccept: (request: FriendRequest) => void;
   onDecline: (request: FriendRequest) => void;
   onWithdraw: (request: FriendRequest) => void;
 }
 
-const FriendsListItem = ({ row, isDisabled, removingId, ...handlers }: IFriendsListItem) => {
+const FriendsListItem = ({
+  row,
+  isDisabled,
+  challengeLockReason,
+  removingId,
+  ...handlers
+}: IFriendsListItem) => {
   const { t } = useTranslation();
 
   if (row.kind === "outgoingTitle") {
@@ -36,6 +44,8 @@ const FriendsListItem = ({ row, isDisabled, removingId, ...handlers }: IFriendsL
         <FriendRow
           friend={row.friend}
           isDisabled={isDisabled || removingId === row.friend.id}
+          challengeLockReason={challengeLockReason}
+          onChallenge={handlers.onChallenge}
           onMore={handlers.onMore}
         />
       </View>

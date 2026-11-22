@@ -65,4 +65,16 @@ describe("MatchDetailsScreen", () => {
     expect(await screen.findByTestId("details-their-map")).toBeOnTheScreen();
     expect(screen.queryByTestId("details-my-map")).toBeNull();
   });
+
+  test("marks a friendly match instead of a zero (decision 0062 #25)", async () => {
+    const done = doneMatchMock({ id: "m1" });
+    serve({
+      ...done,
+      friendly: true,
+      result: done.result === undefined ? undefined : { ...done.result, trophies: 0 },
+    });
+    await render(<MatchDetailsScreen />, { wrapper: createQueryWrapper() });
+
+    expect(await screen.findByText("Победа · дружеский")).toBeOnTheScreen();
+  });
 });

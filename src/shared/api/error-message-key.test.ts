@@ -1,5 +1,5 @@
 import { ApiError } from "./api-error";
-import { errorMessageKey } from "./error-message-key";
+import { errorMessageKey, errorMessageValues } from "./error-message-key";
 
 describe("errorMessageKey", () => {
   test("maps a server code with a text to its key", () => {
@@ -22,5 +22,16 @@ describe("errorMessageKey", () => {
 
   test("treats a failed request without a response as a network error", () => {
     expect(errorMessageKey(new TypeError("Network request failed"))).toBe("errors.NETWORK");
+  });
+
+  test("reads a ban met by an arena action as the arena ban (decision 0062 #22)", () => {
+    expect(errorMessageKey(new ApiError(403, "banned"), "arena")).toBe("errors.arena_banned");
+  });
+
+  test("passes the unlock level of a locked arena to the text", () => {
+    const error = new ApiError(403, "arena_locked", { level: 12 });
+
+    expect(errorMessageKey(error)).toBe("errors.arena_locked");
+    expect(errorMessageValues(error)).toEqual({ level: 12 });
   });
 });

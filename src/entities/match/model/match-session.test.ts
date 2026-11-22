@@ -52,6 +52,27 @@ describe("createMatchSession", () => {
     expect(source.isOpen).toBe(false);
   });
 
+  test("opens a socket that gave up again on a wake while held, and not after the release", () => {
+    const { source } = createSource();
+    const wakes = new Set<() => void>();
+    const session = createMatchSession(
+      source,
+      async () => null,
+      (listener) => {
+        wakes.add(listener);
+        return () => wakes.delete(listener);
+      },
+    );
+    const release = session.retain();
+    source.isOpen = false;
+
+    wakes.forEach((wake) => wake());
+    expect(source.isOpen).toBe(true);
+
+    release();
+    expect(wakes.size).toBe(0);
+  });
+
   test("stores pushed matches by seq", () => {
     const { source, push } = createSource();
     const release = createMatchSession(source, async () => null).retain();

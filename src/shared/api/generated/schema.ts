@@ -1222,6 +1222,100 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/friends/{id}/challenge": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The friend's id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A friendly duel without trophies or rewards (decision 0062 #5); the friend gets the challenge push and the socket event. A new challenge silently cancels my previous pending one. Errors not_friends, arena_locked (details.level), banned, match_in_progress (details {id, kind, status}), rival_busy, season_changing, validation_failed (league). */
+    post: operations["challengeFriend"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/challenges": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description My pending, unexpired challenges. The socket does not replay them, so the client re-reads them on every (re)connect. */
+    get: operations["listChallenges"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/challenges/{id}/accept": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Creates the friendly match (friendly true) in the prepare phase. Errors challenge_not_found, match_in_progress, rival_busy, season_changing, arena_locked, banned. */
+    post: operations["acceptChallenge"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/challenges/{id}/decline": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Error challenge_not_found. */
+    post: operations["declineChallenge"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/arena/challenges/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** @description Cancels my own challenge; error challenge_not_found. */
+    delete: operations["cancelChallenge"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/me/invite": {
     parameters: {
       query?: never;
@@ -1407,7 +1501,10 @@ export interface components {
       | "invite_invalid"
       | "invite_used"
       | "invite_expired"
-      | "invite_self";
+      | "invite_self"
+      | "rival_busy"
+      | "challenge_not_found"
+      | "season_changing";
     VersionInfo: {
       /** @description Soft update is offered */
       showModal: boolean;
@@ -2180,9 +2277,30 @@ export interface components {
       };
       challenge?: {
         id: string;
-        /** @enum {string} */
-        status: "pending" | "accepted" | "declined" | "cancelled" | "expired";
+        status: components["schemas"]["ChallengeStatus"];
       };
+    };
+    /** @enum {string} */
+    ChallengeStatus: "pending" | "accepted" | "declined" | "cancelled" | "expired";
+    ChallengeView: {
+      id: string;
+      status: components["schemas"]["ChallengeStatus"];
+      from: components["schemas"]["ChallengePlayer"];
+      to: components["schemas"]["ChallengePlayer"];
+      /** @description The challenge is addressed to me */
+      incoming: boolean;
+      format: components["schemas"]["MatchFormat"];
+      matchId?: string;
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    ChallengePlayer: {
+      id?: string;
+      name: string;
+    };
+    ChallengesResponse: {
+      incoming: components["schemas"]["ChallengeView"][];
+      outgoing: components["schemas"]["ChallengeView"][];
     };
     HistoryItem: {
       matchId: string;
@@ -4263,6 +4381,123 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  challengeFriend: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The friend's id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": {
+          /** @description A league not above mine; empty — my own */
+          league?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The pending challenge */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChallengeView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  listChallenges: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Incoming and outgoing challenges */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ChallengesResponse"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  acceptChallenge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The friendly match */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["MatchView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  declineChallenge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Declined */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  cancelChallenge: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cancelled */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
   getInvite: {
     parameters: {
       query?: never;
@@ -4544,6 +4779,9 @@ export const errorCodeValues: ReadonlyArray<
   "invite_used",
   "invite_expired",
   "invite_self",
+  "rival_busy",
+  "challenge_not_found",
+  "season_changing",
 ];
 export const meLocaleValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Me"]["locale"]
@@ -4676,8 +4914,8 @@ export const matchViewFirstValues: ReadonlyArray<
 export const arenaEventTypeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["ArenaEvent"]["type"]
 > = ["hello", "match", "queue", "presence", "challenge"];
-export const arenaEventChallengeStatusValues: ReadonlyArray<
-  FlattenedDeepRequired<components>["schemas"]["ArenaEvent"]["challenge"]["status"]
+export const challengeStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ChallengeStatus"]
 > = ["pending", "accepted", "declined", "cancelled", "expired"];
 export const historyItemOutcomeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["HistoryItem"]["outcome"]
