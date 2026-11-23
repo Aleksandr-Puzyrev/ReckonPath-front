@@ -4,13 +4,15 @@ import type { LevelInput } from "./level-schema";
 
 export type BackendLevelMode = "number" | "hot_cold" | "course";
 
-type BackendCell = readonly [number, number];
+type Point = [number, number];
+// Answers read through openapi-fetch widen cell tuples to arrays (ответы, прочитанные через openapi-fetch, расширяют кортежи клеток до массивов).
+type BackendCell = readonly number[];
 
 export interface BackendLevel {
   rows: number;
   cols: number;
   terrain: readonly string[];
-  fences?: readonly (readonly [BackendCell, BackendCell])[];
+  fences?: readonly (readonly BackendCell[])[];
   beacons?: readonly BackendCell[];
   targets: readonly BackendCell[];
   bombs?: readonly BackendCell[];
@@ -21,6 +23,23 @@ export interface BackendLevel {
   noBombHint?: boolean;
   limit: number;
   stars: readonly number[];
+}
+
+export interface PlainBackendLevel {
+  rows: number;
+  cols: number;
+  terrain: string[];
+  fences: [Point, Point][];
+  beacons: Point[];
+  targets: Point[];
+  bombs: Point[];
+  buoys: Point[];
+  mode: BackendLevelMode;
+  fog: number;
+  order: boolean;
+  noBombHint: boolean;
+  limit: number;
+  stars: number[];
 }
 
 const PLAIN = ".";
@@ -41,11 +60,14 @@ const MODE_TO_BACKEND: Record<ProbeMode, BackendLevelMode> = {
   direction: "course",
 };
 
-type Point = [number, number];
+export const pointOf = ([row = 0, col = 0]: BackendCell): Point => [row, col];
 
-const point = ([row, col]: BackendCell): Point => [row, col];
+const pointsOf = (cells: readonly BackendCell[] | undefined) => (cells ?? []).map(pointOf);
 
-const pointsOf = (cells: readonly BackendCell[] | undefined) => (cells ?? []).map(point);
+const fenceOf = ([from = [], to = []]: readonly BackendCell[]): [Point, Point] => [
+  pointOf(from),
+  pointOf(to),
+];
 
 const cellsWith = (terrain: readonly string[], chars: string) =>
   terrain.flatMap((line, row) =>
@@ -69,7 +91,7 @@ export const levelFromBackend = (level: BackendLevel, id: string): LevelInput =>
   bridges: cellsWith(level.terrain, BRIDGE),
   heavy: cellsWith(level.terrain, HEAVY),
   rocks: cellsWith(level.terrain, ROCK),
-  fences: (level.fences ?? []).map(([from, to]) => [point(from), point(to)]),
+  fences: (level.fences ?? []).map(fenceOf),
   beacons: pointsOf(level.beacons),
   buoys: pointsOf(level.buoys),
   targetOrder: level.order ?? false,
@@ -95,19 +117,19 @@ const terrainOf = (level: LevelInput) => {
   );
 };
 
-export const levelToBackend = (level: LevelInput): BackendLevel => ({
+export const levelToBackend = (level: LevelInput): PlainBackendLevel => ({
   rows: level.rows,
   cols: level.cols,
   terrain: terrainOf(level),
-  fences: level.fences ?? [],
-  beacons: level.beacons ?? [],
-  targets: level.targets,
-  bombs: level.bombs ?? [],
-  buoys: level.buoys ?? [],
+  fences: (level.fences ?? []).map(fenceOf),
+  beacons: pointsOf(level.beacons),
+  targets: pointsOf(level.targets),
+  bombs: pointsOf(level.bombs),
+  buoys: pointsOf(level.buoys),
   mode: MODE_TO_BACKEND[level.probeMode],
   fog: level.fog ?? 0,
   order: level.targetOrder ?? false,
   noBombHint: level.bombHint === false,
   limit: level.moveLimit ?? 0,
-  stars: level.stars ?? [0, 0],
+  stars: [...(level.stars ?? [0, 0])],
 });

@@ -19,6 +19,7 @@ describe("custom level conversion", () => {
 
   test("takes the bot estimate + 50 % as the default limit (Part 1 §7.4)", () => {
     expect(defaultMoveLimit(8)).toBe(12);
+    expect(defaultMoveLimit(80)).toBe(99);
     const draft = {
       ...emptyDraft("A", 5, 5, "distance"),
       map: { rows: 5, cols: 5, targets: [[2, 2]] as [number, number][] },
@@ -49,7 +50,7 @@ describe("custom level conversion", () => {
 
     expect(levelSchema.safeParse(level).success).toBe(true);
     expect(level.id).toBe("u-custom-3");
-    expect(draftOfLevel(level)).toMatchObject({
+    expect(draftOfLevel(level, "Маяк")).toMatchObject({
       title: "Маяк",
       params: draft.params,
       map: draft.map,

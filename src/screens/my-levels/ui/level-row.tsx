@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { customLevelTitleOf } from "@entities/custom-level";
 import type { SavedCustomLevel } from "@entities/custom-level";
 import { formatDayMonth } from "@shared/lib";
 import { Button } from "@shared/ui/button";
@@ -22,7 +21,7 @@ const LevelRow = ({ entry, isDeleteDisabled, onOpen, onDelete }: ILevelRow) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
   const { level } = entry;
-  const title = customLevelTitleOf(level, i18n.language);
+  const title = entry.title === "" ? t("editor.list.untitled") : entry.title;
   const details = [
     t("editor.list.size", { rows: level.rows, cols: level.cols }),
     formatDayMonth(entry.updatedAt, i18n.language),

@@ -1,4 +1,4 @@
-import { MAX_ROCK_SHARE } from "@reckon-path/engine";
+import { MAX_ROCK_SHARE, pointOf } from "@reckon-path/engine";
 
 import type { MapProblem, MatchFormat, PvpMap } from "./arena-map-type";
 import type { MapStatus } from "./check-editor-map";
@@ -15,8 +15,6 @@ const overCap = (map: PvpMap, format: MatchFormat) => {
 };
 
 // The server's problem codes get the editor's own texts (коды проблем сервера получают собственные тексты редактора).
-const pointOf = ([row = 0, col = 0]: readonly number[]): [number, number] => [row, col];
-
 export const statusOfProblem = (
   problem: MapProblem,
   map: PvpMap,

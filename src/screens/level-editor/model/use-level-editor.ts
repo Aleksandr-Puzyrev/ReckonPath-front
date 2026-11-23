@@ -2,13 +2,15 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { toCell, toIdx } from "@reckon-path/engine";
+import { countEditorElements, toCell, toIdx } from "@reckon-path/engine";
 import type { Idx } from "@reckon-path/engine";
 
 import { useSaveCustomLevel } from "@features/manage-custom-level";
 import { addFence, toggleFence } from "@entities/arena-map";
 import {
   checkCustomLevel,
+  customLimitsOf,
+  customStatusOfProblem,
   defaultMoveLimit,
   draftOfLevel,
   editFormatOf,
@@ -20,18 +22,23 @@ import {
   useCustomLevelsQuery,
   useLevelEditorStore,
 } from "@entities/custom-level";
-import type { CustomMap, CustomParams } from "@entities/custom-level";
-import { useAccountStore } from "@entities/session";
+import type { CustomDraft, CustomMap, CustomParams, LevelProblem } from "@entities/custom-level";
 import { useIsOnline } from "@shared/api";
 import { useBoardFx } from "@widgets/board";
 
 import { applyCellEdit } from "./apply-edit";
 import type { LevelEditResult, LevelRefusal } from "./apply-edit";
 import type { LevelEditorTool } from "./editor-tool";
+import { useRestoredLevelCheck } from "./use-restored-level-check";
 
-export type LevelEditorDialog = "unsaved" | "share" | "link" | null;
+export type LevelEditorDialog = "unsaved" | "share" | null;
 
-export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
+interface ServerProblem {
+  problem: LevelProblem;
+  draft: CustomDraft;
+}
+
+export const useLevelEditor = (routeId: string, onToast: (text: string) => void) => {
   const { t } = useTranslation();
   const levels = useCustomLevelsQuery();
   const isOnline = useIsOnline();
@@ -41,10 +48,15 @@ export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
   const [tool, setTool] = useState<LevelEditorTool>("target");
   const [dialog, setDialog] = useState<LevelEditorDialog>(null);
   const [hasLeft, setHasLeft] = useState(false);
-  const existing = levels.data?.find((entry) => entry.id === id);
-  const newTitle = t("editor.defaultName", { n: (levels.data?.length ?? 0) + 1 });
+  const [flash, setFlash] = useState({ tool: null as LevelEditorTool | null, key: 0 });
+  const [serverProblem, setServerProblem] = useState<ServerProblem | null>(null);
+  // A level deleted elsewhere goes on as a new one before the route catches up (уровень, удалённый в другом месте, продолжается как новый, пока маршрут не догнал).
+  const [forgottenId, setForgottenId] = useState<string | null>(null);
+  const id = forgottenId === routeId ? NEW_LEVEL_ID : routeId;
+  const existing = levels.data?.levels.find((entry) => entry.id === id);
+  const newTitle = t("editor.defaultName", { n: (levels.data?.levels.length ?? 0) + 1 });
 
-  // A saved level opens from the server copy; a new one keeps the draft started in «Мои уровни», so a session that exists is never replaced by an empty one (сохранённый уровень открывается из серверной копии, новый — с черновика из «Моих уровней», поэтому существующая сессия не заменяется пустой).
+  // A saved level opens from the list; a new one keeps the draft started in «Мои уровни», so a session that exists is never replaced by an empty one (сохранённый уровень открывается из списка, новый — с черновика из «Моих уровней», поэтому существующая сессия не заменяется пустой).
   useEffect(() => {
     if (hasLeft) return;
     const store = useLevelEditorStore.getState();
@@ -54,9 +66,25 @@ export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
       return;
     }
     if (existing === undefined) return;
-    const draft = draftOfLevel(existing.level);
+    const draft = draftOfLevel(existing.level, existing.title);
     store.open(id, draft, draft);
   }, [id, existing, hasLeft, newTitle]);
+
+  const forgetLevel = () => {
+    useLevelEditorStore.getState().forgetSaved();
+    setForgottenId(routeId);
+    onToast(t("editor.deletedElsewhere"));
+    router.setParams({ id: NEW_LEVEL_ID });
+  };
+
+  useRestoredLevelCheck(
+    id,
+    id !== NEW_LEVEL_ID &&
+      session?.levelId === id &&
+      levels.data !== undefined &&
+      existing === undefined,
+    forgetLevel,
+  );
 
   const leave = () => {
     setHasLeft(true);
@@ -65,12 +93,14 @@ export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
   };
 
   const saving = useSaveCustomLevel({
-    onSaved: (savedId) => {
-      useLevelEditorStore.getState().markSaved(savedId);
+    onSaved: (savedId, savedDraft) => {
+      useLevelEditorStore.getState().markSaved(savedId, savedDraft);
       onToast(t("editor.saved"));
-      if (savedId !== id) router.setParams({ id: savedId });
+      if (savedId !== routeId) router.setParams({ id: savedId });
     },
-    onLimit: () => onToast(t("editor.limitReached")),
+    onLimit: (max) => onToast(t("editor.limitReached", { max: max ?? levels.data?.max })),
+    onInvalid: (problem, draft) => setServerProblem({ problem, draft }),
+    onDeletedElsewhere: forgetLevel,
     onError: (messageKey) => onToast(t(messageKey)),
   });
 
@@ -87,17 +117,18 @@ export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
   const { draft } = session;
   const { map } = draft;
   const savedId = session.levelId === NEW_LEVEL_ID ? null : session.levelId;
-  // The norm runs a solver, so a drag keeps the status of the map it started from (норма запускает решатель, поэтому протяжка держит статус карты, с которой началась).
-  const status = checkCustomLevel(
-    strokeBase === null ? draft : { ...draft, map: strokeBase },
-    savedId,
-  );
+  // The norm runs a solver, so a drag keeps the status of the map it started from; a server problem holds until the draft changes (норма запускает решатель, поэтому протяжка держит статус карты, с которой началась; проблема сервера держится, пока черновик не изменится).
+  const status =
+    serverProblem?.draft === draft
+      ? customStatusOfProblem(serverProblem.problem, map)
+      : checkCustomLevel(strokeBase === null ? draft : { ...draft, map: strokeBase }, savedId);
   const norm = status.kind === "valid" ? status.norm : null;
   const moveLimit = draft.params.moveLimit ?? (norm === null ? null : defaultMoveLimit(norm));
   const errorCells = "cells" in status ? status.cells.map((cell) => toIdx(map.cols, cell)) : [];
 
   const refuse = (refusal: LevelRefusal, idx: Idx | null) => {
     if (refusal.kind === "limit") {
+      setFlash((current) => ({ tool, key: current.key + 1 }));
       onToast(t("map.err.limit", { max: refusal.max }));
       return;
     }
@@ -120,6 +151,9 @@ export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
     draft,
     savedId,
     tool,
+    counts: countEditorElements(map),
+    limits: customLimitsOf(map),
+    flash,
     status,
     norm,
     moveLimit,
@@ -161,18 +195,7 @@ export const useLevelEditor = (id: string, onToast: (text: string) => void) => {
       useLevelEditorStore.getState().setParams(params),
     handleMoveLimit: (limit: number) =>
       useLevelEditorStore.getState().setParams({ moveLimit: limit }),
-    // My levels live on the server, so a guest is offered an account instead (мои уровни хранятся на сервере, поэтому гостю предлагается аккаунт).
-    handleSave: () => {
-      if (!useAccountStore.getState().hasLogin) {
-        setDialog("link");
-        return;
-      }
-      saving.save(savedId, levelOfDraft(draft, savedId, norm));
-    },
-    handleAccountForm: (form: "/account/sign-up" | "/account/sign-in") => {
-      setDialog(null);
-      router.push(form);
-    },
+    handleSave: () => saving.save(savedId, draft, norm),
     handleTryout: () => router.push("/editor/tryout"),
     handleBack: () => {
       if (isDraftDirty(session)) setDialog("unsaved");

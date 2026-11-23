@@ -16,6 +16,8 @@ const CODES_WITH_TEXT = [
   "price_changed",
   "limit_reached",
   "map_invalid",
+  "level_invalid",
+  "level_not_found",
   "in_match",
   "friends_limit",
   "already_friends",

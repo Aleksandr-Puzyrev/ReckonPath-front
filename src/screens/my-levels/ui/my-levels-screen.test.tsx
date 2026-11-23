@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
-import { emptyDraft, levelOfDraft, useLevelEditorStore } from "@entities/custom-level";
+import { customLevelRequestOf, emptyDraft, useLevelEditorStore } from "@entities/custom-level";
 import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
 import { mockServer } from "@shared/test-utils/api-mock";
@@ -27,7 +27,7 @@ const saveLevel = async (title: string) => {
     ...emptyDraft(title, 5, 5, "distance"),
     map: { rows: 5, cols: 5, targets: [[2, 2]] as [number, number][] },
   };
-  await apiClient.POST("/levels/custom", { body: { level: levelOfDraft(draft, null, 6) } });
+  await apiClient.POST("/levels/custom", { body: customLevelRequestOf(draft, 6) });
 };
 
 const renderScreen = async () => {
@@ -53,12 +53,33 @@ describe("MyLevelsScreen", () => {
     ).toBeOnTheScreen();
   });
 
-  test("lists saved levels with their size", async () => {
+  test("lists saved levels with their size and the server's limit", async () => {
     await saveLevel("Бухта");
     await renderScreen();
 
     expect(await screen.findByText("Бухта")).toBeOnTheScreen();
     expect(screen.getByText(/^5×5 · /)).toBeOnTheScreen();
+    expect(screen.getByText("Удалить — кнопкой в строке. До 20 уровней.")).toBeOnTheScreen();
+  });
+
+  test("names a level without a title (decision 0063 #9)", async () => {
+    await saveLevel("  ");
+    await renderScreen();
+
+    expect(await screen.findByText("Без названия")).toBeOnTheScreen();
+  });
+
+  test("tells about the limit instead of opening a new level (decision 0063 #7)", async () => {
+    for (let index = 0; index < 20; index += 1) await saveLevel("Бухта");
+    await renderScreen();
+    await screen.findAllByText("Бухта");
+
+    await fireEvent.press(screen.getByTestId("my-levels-new"));
+
+    expect(
+      await screen.findByText("Уже 20 уровней — удали один, чтобы сохранить новый"),
+    ).toBeOnTheScreen();
+    expect(screen.queryByTestId("new-create")).toBeNull();
   });
 
   test("creates a level of the chosen size and mode (design 27.4)", async () => {
@@ -80,13 +101,15 @@ describe("MyLevelsScreen", () => {
     });
   });
 
-  test("deletes a level after the warning about its code", async () => {
+  test("deletes a level after the note that its codes keep working (decision 0063 #5)", async () => {
     await saveLevel("Бухта");
     await renderScreen();
 
-    await fireEvent.press(await screen.findByTestId("level-delete-custom-1"));
+    await fireEvent.press(await screen.findByTestId("level-delete-level-1"));
     expect(
-      screen.getByText("Код уровня перестанет работать у всех, кому ты его отправил."),
+      screen.getByText(
+        "Уровень пропадёт из «Моих уровней». Коды, которые ты уже отправил, продолжат работать.",
+      ),
     ).toBeOnTheScreen();
     await fireEvent.press(
       screen.getAllByText("Удалить").at(-1) ?? screen.getByTestId("my-levels-new"),
@@ -95,15 +118,30 @@ describe("MyLevelsScreen", () => {
     await waitFor(() => expect(screen.queryByText("Бухта")).toBeNull());
   });
 
+  test("takes a level deleted elsewhere as deleted (decision 0063 #8)", async () => {
+    await saveLevel("Бухта");
+    await renderScreen();
+    await screen.findByText("Бухта");
+    await apiClient.DELETE("/levels/custom/{id}", { params: { path: { id: "level-1" } } });
+
+    await fireEvent.press(screen.getByTestId("level-delete-level-1"));
+    await fireEvent.press(
+      screen.getAllByText("Удалить").at(-1) ?? screen.getByTestId("my-levels-new"),
+    );
+
+    await waitFor(() => expect(screen.queryByText("Бухта")).toBeNull());
+    expect(screen.queryByText("Уровень не найден")).toBeNull();
+  });
+
   test("opens a saved level in the editor", async () => {
     await saveLevel("Бухта");
     await renderScreen();
 
-    await fireEvent.press(await screen.findByTestId("level-row-custom-1"));
+    await fireEvent.press(await screen.findByTestId("level-row-level-1"));
 
     expect(mockRouter.push).toHaveBeenCalledWith({
       pathname: "/editor/[id]",
-      params: { id: "custom-1" },
+      params: { id: "level-1" },
     });
   });
 });

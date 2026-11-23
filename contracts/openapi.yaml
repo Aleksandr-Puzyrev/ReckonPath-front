@@ -1314,34 +1314,31 @@ paths:
   /levels/custom:
     get:
       operationId: listCustomLevels
-      description: The player's own levels (Part 7 §4), newest first.
+      description: The player's own levels, newest first (decision 0063 #1).
       responses:
         "200":
-          description: Up to 20 levels
+          description: The levels and the account limit
           content:
             application/json:
-              schema:
-                type: object
-                required: [items]
-                properties:
-                  items:
-                    type: array
-                    items: { $ref: "#/components/schemas/CustomLevel" }
+              schema: { $ref: "#/components/schemas/CustomLevelsList" }
         default: { $ref: "#/components/responses/Error" }
     post:
       operationId: createCustomLevel
-      description: Saves a new level; limit_reached at 20, map_invalid when the validator refuses it.
+      description: >-
+        Saves a new level. Errors 409 limit_reached (details.max), 422 level_invalid
+        (details.problems — LevelProblem[]), 422 validation_failed (title over 40 characters,
+        rows or cols outside 4–9).
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CustomLevelInput" }
+            schema: { $ref: "#/components/schemas/CustomLevelRequest" }
       responses:
-        "201":
+        "200":
           description: The saved level
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/CustomLevel" }
+              schema: { $ref: "#/components/schemas/CustomLevelView" }
         default: { $ref: "#/components/responses/Error" }
 
   /levels/custom/{id}:
@@ -1350,24 +1347,36 @@ paths:
         in: path
         required: true
         schema: { type: string }
+    get:
+      operationId: getCustomLevel
+      description: One own level; 404 level_not_found for an unknown id or another player's level.
+      responses:
+        "200":
+          description: The level
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CustomLevelView" }
+        default: { $ref: "#/components/responses/Error" }
     put:
       operationId: updateCustomLevel
+      description: Replaces the level; errors as on create, plus 404 level_not_found.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/CustomLevelInput" }
+            schema: { $ref: "#/components/schemas/CustomLevelRequest" }
       responses:
         "200":
           description: The saved level
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/CustomLevel" }
+              schema: { $ref: "#/components/schemas/CustomLevelView" }
         default: { $ref: "#/components/responses/Error" }
     delete:
       operationId: deleteCustomLevel
+      description: 404 level_not_found for an unknown id.
       responses:
-        "204": { description: Deleted }
+        "200": { description: Deleted (an empty success) }
         default: { $ref: "#/components/responses/Error" }
 
 components:
@@ -1431,6 +1440,7 @@ components:
         - price_changed
         - limit_reached
         - map_invalid
+        - level_invalid
         - attempt_rejected
         - streak_not_restorable
         - friends_limit
@@ -2826,25 +2836,43 @@ components:
           items: { $ref: "#/components/schemas/ArenaMapView" }
         max: { type: integer }
 
-    CustomLevelInput:
+    CustomLevelRequest:
       type: object
-      required: [level]
+      required: [title, level]
       properties:
-        level:
-          description: Level v2 (contracts/schemas/level.schema.json)
-          type: object
-          additionalProperties: true
+        title: { type: string, maxLength: 40, description: Trimmed by the server; may be empty }
+        level: { $ref: "#/components/schemas/GameLevel" }
 
-    CustomLevel:
+    CustomLevelView:
       type: object
-      required: [id, level, updatedAt]
+      required: [id, title, level, updatedAt]
       properties:
         id: { type: string }
-        level:
-          description: Level v2 (contracts/schemas/level.schema.json)
-          type: object
-          additionalProperties: true
+        title: { type: string }
+        level: { $ref: "#/components/schemas/GameLevel" }
         updatedAt: { type: string, format: date-time }
+
+    CustomLevelsList:
+      type: object
+      required: [levels, max]
+      properties:
+        levels:
+          type: array
+          items: { $ref: "#/components/schemas/CustomLevelView" }
+        max: { type: integer }
+
+    LevelProblem:
+      type: object
+      description: One item of details.problems of 422 level_invalid (game.Problem)
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        cells: { $ref: "#/components/schemas/Cells" }
+        element: { type: string }
+        min: { type: integer }
+        max: { type: integer }
+        count: { type: integer }
 
     SupportTicket:
       type: object

@@ -1,21 +1,27 @@
-import { MAX_ROCK_SHARE, MAX_TARGETS } from "@reckon-path/engine";
+import { defaultEditorCapsOf, editorLimitsOf } from "@reckon-path/engine";
+import type { EditorCounts } from "@reckon-path/engine";
 
 import type { components } from "@shared/api";
 
+import type { CustomMap } from "./custom-level-type";
+
 type EditFormat = Pick<components["schemas"]["MatchFormat"], "targets" | "caps">;
 
-// Part 1 §7.4: user levels have no format limits, only the bomb (§2.5), target and rock (§2.7) rules; other elements are bounded by the board (Часть 1 §7.4: у пользовательских уровней нет лимитов формата, только правила бомб (§2.5), целей и скал (§2.7); остальное ограничено полем).
+// The arena edits take the backend default caps in the arena format shape (правки арены получают лимиты бэкенда по умолчанию в форме формата арены).
 export const editFormatOf = (rows: number, cols: number): EditFormat => {
-  const cells = rows * cols;
+  const caps = defaultEditorCapsOf(rows, cols);
   return {
-    targets: MAX_TARGETS,
+    targets: caps.targets,
     caps: {
-      fences: cells * 2,
-      stream: cells,
-      heavy: cells,
-      rock: Math.floor(cells * MAX_ROCK_SHARE),
-      bridge: cells,
-      bombs: cells,
+      fences: caps.fences,
+      stream: caps.streams,
+      heavy: caps.heavy,
+      rock: caps.rocks,
+      bridge: caps.bridges,
+      bombs: caps.bombs,
     },
   };
 };
+
+export const customLimitsOf = (map: CustomMap): EditorCounts =>
+  editorLimitsOf(map, defaultEditorCapsOf(map.rows, map.cols));

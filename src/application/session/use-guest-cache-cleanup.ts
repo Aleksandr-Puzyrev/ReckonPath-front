@@ -3,6 +3,7 @@ import type { Query } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { appConfigKeys } from "@entities/app-config";
+import { useLevelEditorStore, useTryoutBestStore } from "@entities/custom-level";
 import { useAccountStore } from "@entities/session";
 
 const isAccountData = ({ queryKey }: Query) => queryKey[0] !== appConfigKeys.all[0];
@@ -21,9 +22,11 @@ export const useGuestCacheCleanup = () => {
   useEffect(
     () =>
       useAccountStore.subscribe((account, previous) => {
-        if (previous.hasLogin && !account.hasLogin) {
-          queryClient.removeQueries({ predicate: isAccountData });
-        }
+        if (!previous.hasLogin || account.hasLogin) return;
+        queryClient.removeQueries({ predicate: isAccountData });
+        // The level editor draft and the tryout bests belong to the account too (черновик редактора уровней и лучшие результаты пробных игр тоже принадлежат аккаунту).
+        useLevelEditorStore.getState().reset();
+        useTryoutBestStore.getState().reset();
       }),
     [queryClient],
   );

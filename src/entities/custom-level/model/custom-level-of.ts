@@ -1,3 +1,4 @@
+import { MAX_MOVE_LIMIT } from "@reckon-path/engine";
 import type { LevelInput } from "@reckon-path/engine";
 
 import type { CustomDraft, CustomMap, CustomParams } from "./custom-level-type";
@@ -13,7 +14,8 @@ const DEFAULT_LIMIT_SHARE = 1.5;
 
 export const levelIdOf = (savedId: string | null) => `u-${savedId ?? NEW_LEVEL_ID}`;
 
-export const defaultMoveLimit = (norm: number) => Math.ceil(norm * DEFAULT_LIMIT_SHARE);
+export const defaultMoveLimit = (norm: number) =>
+  Math.min(MAX_MOVE_LIMIT, Math.ceil(norm * DEFAULT_LIMIT_SHARE));
 
 export const levelOfDraft = (
   { title, map, params }: CustomDraft,
@@ -50,8 +52,8 @@ export const emptyDraft = (
   params: { ...DEFAULT_PARAMS, probeMode },
 });
 
-// The server keeps the level; the editor works on its map, parameters and title (сервер хранит уровень; редактор работает с его картой, параметрами и названием).
-export const draftOfLevel = (level: LevelInput): CustomDraft => {
+// The server keeps the level and its title apart; the editor works on its map, parameters and title (сервер хранит уровень и название отдельно; редактор работает с его картой, параметрами и названием).
+export const draftOfLevel = (level: LevelInput, title: string): CustomDraft => {
   const { rows, cols, targets, bombs, streams, bridges, heavy, rocks, fences, beacons, buoys } =
     level;
   const map: CustomMap = {
@@ -68,7 +70,7 @@ export const draftOfLevel = (level: LevelInput): CustomDraft => {
     buoys,
   };
   return {
-    title: level.title?.ru ?? level.title?.en ?? "",
+    title,
     map,
     params: {
       probeMode: level.probeMode,

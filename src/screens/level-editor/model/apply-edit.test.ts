@@ -26,12 +26,14 @@ describe("applyCellEdit", () => {
     expect(applyCellEdit(MAP, "erase", [1, 1], true)).toMatchObject({ map: { beacons: [] } });
   });
 
-  test("has no format limit for elements other than bombs and rocks (Part 1 §7.4)", () => {
-    const streams = Array.from({ length: 10 }, (_, col): [number, number] => [
-      col % 5,
-      Math.floor(col / 5),
+  test("stops at the backend stream cap (decision 0063 #3)", () => {
+    const streams = Array.from({ length: 12 }, (_, index): [number, number] => [
+      Math.floor(index / 5),
+      index % 5,
     ]);
 
-    expect(applyCellEdit({ ...MAP, streams }, "stream", [4, 4], true)).toHaveProperty("map");
+    expect(applyCellEdit({ ...MAP, streams }, "stream", [4, 4], true)).toEqual({
+      refusal: { kind: "limit", max: 12 },
+    });
   });
 });

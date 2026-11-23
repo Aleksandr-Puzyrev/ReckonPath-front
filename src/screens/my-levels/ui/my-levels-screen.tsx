@@ -41,9 +41,11 @@ const MyLevelsScreen = () => {
         </Text>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="body.s" style={styles.secondary}>
-          {t("editor.list.hint")}
-        </Text>
+        {screen.max === null ? null : (
+          <Text variant="body.s" style={styles.secondary}>
+            {t("editor.list.hint", { max: screen.max })}
+          </Text>
+        )}
         <MyLevelsStatus
           isPending={screen.isPending}
           isError={screen.isError}

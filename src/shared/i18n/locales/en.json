@@ -353,6 +353,8 @@
     "price_changed": "The price changed — check and confirm again",
     "limit_reached": "That’s all for today. Come back tomorrow",
     "map_invalid": "Fix your map before the match",
+    "level_invalid": "The level fails the check",
+    "level_not_found": "Level not found",
     "in_match": "You have a match running on another device",
     "queue_unavailable": "Matchmaking is temporarily unavailable",
     "CODE_INVALID": "Invalid code",
@@ -1105,12 +1107,13 @@
   "editor": {
     "list": {
       "title": "My levels",
-      "hint": "Delete with the button in a row. Up to 20 levels.",
+      "hint": "Delete with the button in a row. Up to {{max}} levels.",
       "new": "+ New level",
       "delete": "Delete",
-      "deleteBody": "The level code will stop working for everyone you sent it to.",
+      "deleteBody": "The level will be removed from My levels. Codes you’ve already shared will keep working.",
       "empty": "No levels yet. Build one and play it.",
-      "size": "{{rows}}×{{cols}}"
+      "size": "{{rows}}×{{cols}}",
+      "untitled": "Untitled"
     },
     "new": {
       "title": "New level",
@@ -1130,7 +1133,8 @@
     "order": "Targets in order",
     "bombHint": "“Bomb nearby” mark",
     "saved": "Level saved",
-    "limitReached": "You already have 20 levels — delete one to save a new one",
+    "limitReached": "You already have {{max}} levels — delete one to save a new one",
+    "deletedElsewhere": "This level was deleted on another device — save it as a new one",
     "backToEditor": "Back to editor",
     "decrease": "Fewer",
     "increase": "More",

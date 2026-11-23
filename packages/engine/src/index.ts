@@ -37,8 +37,23 @@ export { edgeKey, gridNeighbors, toCell, toIdx } from "./grid/grid";
 export { levelSchema } from "./level/level-schema";
 export type { LevelInput } from "./level/level-schema";
 export { createBoard } from "./level/create-board";
-export { levelFromBackend, levelToBackend } from "./level/backend-level";
-export type { BackendLevel, BackendLevelMode } from "./level/backend-level";
+export { levelFromBackend, levelToBackend, pointOf } from "./level/backend-level";
+export type { BackendLevel, BackendLevelMode, PlainBackendLevel } from "./level/backend-level";
+export {
+  countEditorElements,
+  DEFAULT_EDITOR_CAPS,
+  defaultEditorCapsOf,
+  EDITOR_ELEMENTS,
+  editorLimitsOf,
+  findDryBridges,
+  overEditorCap,
+} from "./validator/editor-rules";
+export type {
+  EditorCapProblem,
+  EditorCounts,
+  EditorElement,
+  EditorMap,
+} from "./validator/editor-rules";
 export {
   applyTap,
   bombNear,

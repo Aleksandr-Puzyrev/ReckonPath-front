@@ -1,4 +1,12 @@
-import { computeNorm, createBoard, validateLevel } from "@reckon-path/engine";
+import {
+  computeNorm,
+  createBoard,
+  defaultEditorCapsOf,
+  findDryBridges,
+  MAX_MOVE_LIMIT,
+  overEditorCap,
+  validateLevel,
+} from "@reckon-path/engine";
 import type { ValidationError } from "@reckon-path/engine";
 
 import { levelOfDraft } from "./custom-level-of";
@@ -22,7 +30,13 @@ const statusOf = (error: ValidationError, draft: CustomDraft): CustomStatus => {
   }
   if (error.code === "TOO_MANY_BOMBS")
     return { kind: "limit", max: error.max, cells: draft.map.bombs ?? [] };
-  if (error.code === "TOO_MANY_ROCKS") return { kind: "limit", max: error.max, cells: [] };
+  if (
+    error.code === "TOO_MANY_ROCKS" ||
+    error.code === "BEACON_LIMIT" ||
+    error.code === "BUOY_LIMIT"
+  ) {
+    return { kind: "limit", max: error.max, cells: [] };
+  }
   if (error.code === "BRIDGE_NOT_ON_STREAM") return { kind: "bridge", cells: error.cells };
   return { kind: "invalid", cells: "cells" in error ? error.cells : [] };
 };
@@ -32,6 +46,14 @@ export const checkCustomLevel = (draft: CustomDraft, savedId: string | null): Cu
   const level = levelOfDraft(draft, savedId, null);
   const [error] = validateLevel(level, { kind: "custom" });
   if (error !== undefined) return statusOf(error, draft);
+  const { map, params } = draft;
+  if (params.moveLimit !== null && params.moveLimit > MAX_MOVE_LIMIT) {
+    return { kind: "limit", max: MAX_MOVE_LIMIT, cells: [] };
+  }
+  const overCap = overEditorCap(map, defaultEditorCapsOf(map.rows, map.cols));
+  if (overCap !== null) return { kind: "limit", max: overCap.max, cells: [] };
+  const dry = findDryBridges(map);
+  if (dry.length > 0) return { kind: "bridge", cells: dry };
   const { board, rules } = createBoard(level);
   return { kind: "valid", norm: Math.round(computeNorm(board, rules, level.id).norm) };
 };

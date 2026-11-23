@@ -1341,10 +1341,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** @description The player's own levels (Part 7 §4), newest first. */
+    /** @description The player's own levels, newest first (decision 0063 */
     get: operations["listCustomLevels"];
     put?: never;
-    /** @description Saves a new level; limit_reached at 20, map_invalid when the validator refuses it. */
+    /** @description Saves a new level. Errors 409 limit_reached (details.max), 422 level_invalid (details.problems — LevelProblem[]), 422 validation_failed (title over 40 characters, rows or cols outside 4–9). */
     post: operations["createCustomLevel"];
     delete?: never;
     options?: never;
@@ -1361,9 +1361,12 @@ export interface paths {
       };
       cookie?: never;
     };
-    get?: never;
+    /** @description One own level; 404 level_not_found for an unknown id or another player's level. */
+    get: operations["getCustomLevel"];
+    /** @description Replaces the level; errors as on create, plus 404 level_not_found. */
     put: operations["updateCustomLevel"];
     post?: never;
+    /** @description 404 level_not_found for an unknown id. */
     delete: operations["deleteCustomLevel"];
     options?: never;
     head?: never;
@@ -1413,6 +1416,7 @@ export interface components {
       | "price_changed"
       | "limit_reached"
       | "map_invalid"
+      | "level_invalid"
       | "attempt_rejected"
       | "streak_not_restorable"
       | "friends_limit"
@@ -2404,20 +2408,31 @@ export interface components {
       maps: components["schemas"]["ArenaMapView"][];
       max: number;
     };
-    CustomLevelInput: {
-      /** @description Level v2 (contracts/schemas/level.schema.json) */
-      level: {
-        [key: string]: unknown;
-      };
+    CustomLevelRequest: {
+      /** @description Trimmed by the server; may be empty */
+      title: string;
+      level: components["schemas"]["GameLevel"];
     };
-    CustomLevel: {
+    CustomLevelView: {
       id: string;
-      /** @description Level v2 (contracts/schemas/level.schema.json) */
-      level: {
-        [key: string]: unknown;
-      };
+      title: string;
+      level: components["schemas"]["GameLevel"];
       /** Format: date-time */
       updatedAt: string;
+    };
+    CustomLevelsList: {
+      levels: components["schemas"]["CustomLevelView"][];
+      max: number;
+    };
+    /** @description One item of details.problems of 422 level_invalid (game.Problem) */
+    LevelProblem: {
+      code: string;
+      message: string;
+      cells?: components["schemas"]["Cells"];
+      element?: string;
+      min?: number;
+      max?: number;
+      count?: number;
     };
     SupportTicket: {
       topic: string;
@@ -4553,15 +4568,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Up to 20 levels */
+      /** @description The levels and the account limit */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": {
-            items: components["schemas"]["CustomLevel"][];
-          };
+          "application/json": components["schemas"]["CustomLevelsList"];
         };
       };
       default: components["responses"]["Error"];
@@ -4576,17 +4589,40 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CustomLevelInput"];
+        "application/json": components["schemas"]["CustomLevelRequest"];
       };
     };
     responses: {
       /** @description The saved level */
-      201: {
+      200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["CustomLevel"];
+          "application/json": components["schemas"]["CustomLevelView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getCustomLevel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The level */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CustomLevelView"];
         };
       };
       default: components["responses"]["Error"];
@@ -4603,7 +4639,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CustomLevelInput"];
+        "application/json": components["schemas"]["CustomLevelRequest"];
       };
     };
     responses: {
@@ -4613,7 +4649,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "application/json": components["schemas"]["CustomLevel"];
+          "application/json": components["schemas"]["CustomLevelView"];
         };
       };
       default: components["responses"]["Error"];
@@ -4630,8 +4666,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Deleted */
-      204: {
+      /** @description Deleted (an empty success) */
+      200: {
         headers: {
           [name: string]: unknown;
         };
@@ -4690,6 +4726,7 @@ export const errorCodeValues: ReadonlyArray<
   "price_changed",
   "limit_reached",
   "map_invalid",
+  "level_invalid",
   "attempt_rejected",
   "streak_not_restorable",
   "friends_limit",

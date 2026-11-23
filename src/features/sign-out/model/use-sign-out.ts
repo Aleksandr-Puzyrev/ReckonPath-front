@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useEditorStore } from "@entities/arena-map";
+import { useLevelEditorStore, useTryoutBestStore } from "@entities/custom-level";
 import { useCampaignFlagsStore } from "@entities/level";
 import { endEverySession, endSession } from "@entities/session";
 import { errorMessageKey } from "@shared/api";
@@ -17,6 +18,8 @@ const signOut = async (isEverywhere: boolean) => {
   await (isEverywhere ? endEverySession() : endSession());
   useCampaignFlagsStore.getState().reset();
   useEditorStore.getState().reset();
+  useLevelEditorStore.getState().reset();
+  useTryoutBestStore.getState().reset();
 };
 
 export const useSignOut = ({ isEverywhere = false, onSignedOut, onError }: SignOutOptions) => {

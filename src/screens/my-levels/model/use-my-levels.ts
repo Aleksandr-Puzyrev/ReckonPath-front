@@ -24,12 +24,14 @@ export const useMyLevels = () => {
   const { remove, isPending: isDeleting } = useDeleteCustomLevel((messageKey) =>
     showToast(t(messageKey)),
   );
-  const items = levels.data ?? [];
+  const items = levels.data?.levels ?? [];
+  const max = levels.data?.max ?? null;
 
   const openEditor = (id: string) => router.push({ pathname: "/editor/[id]", params: { id } });
 
   return {
     items,
+    max,
     isPending: levels.isPending,
     isError: levels.isError,
     isOnline,
@@ -39,7 +41,10 @@ export const useMyLevels = () => {
     toast,
     handleToastHide: () => setToast(null),
     handleRetry: () => void levels.refetch(),
-    handleNewOpen: () => setIsNewOpen(true),
+    handleNewOpen: () => {
+      if (max !== null && items.length >= max) showToast(t("editor.limitReached", { max }));
+      else setIsNewOpen(true);
+    },
     handleNewClose: () => setIsNewOpen(false),
     handleCreate: (rows: number, cols: number, probeMode: CustomParams["probeMode"]) => {
       setIsNewOpen(false);

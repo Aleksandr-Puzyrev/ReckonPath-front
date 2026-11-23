@@ -3,6 +3,7 @@ import { act, renderHook } from "@testing-library/react-native";
 import type { ReactNode } from "react";
 
 import { appConfigKeys } from "@entities/app-config";
+import { emptyDraft, useLevelEditorStore, useTryoutBestStore } from "@entities/custom-level";
 import { useAccountStore } from "@entities/session";
 
 import { useGuestCacheCleanup } from "./use-guest-cache-cleanup";
@@ -61,5 +62,17 @@ describe("useGuestCacheCleanup (decision 0051)", () => {
     await act(async () => useAccountStore.getState().loseSignIn());
 
     expect(queryClient.getQueryData(ME_KEY)).toBeUndefined();
+  });
+
+  test("drops the level editor draft and the tryout bests with a lost sign-in (decision 0063 #12)", async () => {
+    useAccountStore.getState().markSignedIn();
+    useLevelEditorStore.getState().open("new", emptyDraft("Бухта", 5, 5, "distance"), null);
+    useTryoutBestStore.getState().record("RP2-a", 7);
+    await renderCleanup(filledClient());
+
+    await act(async () => useAccountStore.getState().loseSignIn());
+
+    expect(useLevelEditorStore.getState().session).toBeNull();
+    expect(useTryoutBestStore.getState().best).toEqual({});
   });
 });

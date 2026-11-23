@@ -1,4 +1,8 @@
+import { countEditorElements, editorLimitsOf } from "@reckon-path/engine";
+import type { EditorCounts } from "@reckon-path/engine";
+
 import type { MapFormat, PvpMap } from "./arena-map-type";
+
 type Cell = [number, number];
 type Fence = [Cell, Cell];
 
@@ -25,8 +29,6 @@ const TERRAIN_OF: Partial<Record<CellTool, Terrain>> = {
   rock: "rocks",
 };
 const TERRAINS: readonly Terrain[] = ["streams", "heavy", "rocks"];
-const MAX_BOMBS = 5;
-const PASSABLE_PER_BOMB = 12;
 
 const isSame = ([a, b]: readonly number[], [c, d]: readonly number[]) => a === c && b === d;
 const has = (cells: readonly Cell[] | undefined, cell: Cell) =>
@@ -37,29 +39,33 @@ const isSameFence = ([a, b]: Fence, [c, d]: Fence) =>
   (isSame(a, c) && isSame(b, d)) || (isSame(a, d) && isSame(b, c));
 const touches = ([a, b]: Fence, cell: Cell) => isSame(a, cell) || isSame(b, cell);
 
-// A bridge lies on a stream in the engine model, but the format counts it apart from the water (в модели движка мост лежит на ручье, но формат считает его отдельно от воды).
-export const countElements = (map: PvpMap): ElementCounts => ({
-  targets: map.targets.length,
-  fences: map.fences?.length ?? 0,
-  streams: (map.streams ?? []).filter((cell) => !has(map.bridges, cell)).length,
-  heavy: map.heavy?.length ?? 0,
-  rocks: map.rocks?.length ?? 0,
-  bridges: map.bridges?.length ?? 0,
-  bombs: map.bombs?.length ?? 0,
-});
+// Beacons and buoys never appear on an arena map (маяков и буёв на карте арены не бывает).
+const pvpCountsOf = ({
+  targets,
+  fences,
+  streams,
+  heavy,
+  rocks,
+  bridges,
+  bombs,
+}: EditorCounts): ElementCounts => ({ targets, fences, streams, heavy, rocks, bridges, bombs });
 
-export const limitsOf = ({ targets, caps }: MapFormat, map: PvpMap): ElementCounts => {
-  const passable = map.rows * map.cols - countElements(map).rocks;
-  return {
-    targets,
-    fences: caps.fences,
-    streams: caps.stream,
-    heavy: caps.heavy,
-    rocks: caps.rock,
-    bridges: caps.bridge,
-    bombs: Math.min(caps.bombs, MAX_BOMBS, Math.floor(passable / PASSABLE_PER_BOMB)),
-  };
-};
+export const countElements = (map: PvpMap): ElementCounts => pvpCountsOf(countEditorElements(map));
+
+export const limitsOf = ({ targets, caps }: MapFormat, map: PvpMap): ElementCounts =>
+  pvpCountsOf(
+    editorLimitsOf(map, {
+      targets,
+      fences: caps.fences,
+      streams: caps.stream,
+      heavy: caps.heavy,
+      rocks: caps.rock,
+      bridges: caps.bridge,
+      bombs: caps.bombs,
+      beacons: 0,
+      buoys: 0,
+    }),
+  );
 
 const terrainOf = (map: PvpMap, cell: Cell) => TERRAINS.find((terrain) => has(map[terrain], cell));
 

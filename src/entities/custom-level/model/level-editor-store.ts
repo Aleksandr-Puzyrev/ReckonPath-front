@@ -4,10 +4,13 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import { zustandStorage } from "@shared/storage";
 
+import { NEW_LEVEL_ID } from "./custom-level-of";
 import type { CustomDraft, CustomMap, CustomParams } from "./custom-level-type";
 
-const STORE_VERSION = 1;
+const STORE_VERSION = 2;
 const HISTORY_STEPS = 30;
+// Version 1 could keep a level of the dev mocks, which the backend never knew (версия 1 могла хранить уровень дев-моков, которого бэкенд не знал).
+const MOCK_LEVEL_ID = /^custom-\d+$/;
 
 export interface LevelEditorSession {
   levelId: string;
@@ -29,7 +32,8 @@ interface LevelEditorState {
   redo: () => void;
   setTitle: (title: string) => void;
   setParams: (params: Partial<CustomParams>) => void;
-  markSaved: (levelId: string) => void;
+  markSaved: (levelId: string, saved: CustomDraft) => void;
+  forgetSaved: () => void;
   reset: () => void;
 }
 
@@ -153,7 +157,10 @@ export const useLevelEditorStore = create<LevelEditorState>()(
             draft: { ...session.draft, params: { ...session.draft.params, ...params } },
           })),
 
-        markSaved: (levelId) => update((session) => ({ levelId, saved: session.draft })),
+        markSaved: (levelId, saved) => update(() => ({ levelId, saved })),
+
+        // A level deleted elsewhere stays as a draft that saves as a new level (уровень, удалённый в другом месте, остаётся черновиком, который сохраняется как новый).
+        forgetSaved: () => update(() => ({ levelId: NEW_LEVEL_ID, saved: null })),
 
         reset: () => set({ session: null, strokeBase: null }),
       };
@@ -163,16 +170,18 @@ export const useLevelEditorStore = create<LevelEditorState>()(
       version: STORE_VERSION,
       storage: createJSONStorage(() => zustandStorage),
       partialize: ({ session }) => ({ session }),
-      migrate: (persisted) => ({
-        session: sessionSchema
+      migrate: (persisted, version) => {
+        const session = sessionSchema
           .nullable()
           .catch(null)
           .parse(
             typeof persisted === "object" && persisted !== null && "session" in persisted
               ? persisted.session
               : null,
-          ),
-      }),
+          );
+        const isMock = version < STORE_VERSION && MOCK_LEVEL_ID.test(session?.levelId ?? "");
+        return { session: isMock ? null : session };
+      },
     },
   ),
 );

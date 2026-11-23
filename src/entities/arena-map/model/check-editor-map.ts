@@ -1,4 +1,4 @@
-import { validateLevel } from "@reckon-path/engine";
+import { findDryBridges, validateLevel } from "@reckon-path/engine";
 import type { PvpFormat, ValidationError } from "@reckon-path/engine";
 
 import type { MatchFormat, PvpMap } from "./arena-map-type";
@@ -14,15 +14,6 @@ export type MapStatus =
   | { kind: "bridge"; cells: readonly Cell[] }
   | { kind: "invalid"; cells: readonly Cell[] };
 
-const NEIGHBOURS = [
-  [-1, 0],
-  [1, 0],
-  [0, -1],
-  [0, 1],
-] as const;
-
-const isSame = ([a, b]: Cell, [c, d]: Cell) => a === c && b === d;
-
 const pvpFormatOf = ({ rows, cols, targets, caps }: MatchFormat): PvpFormat => ({
   rows,
   cols,
@@ -36,15 +27,6 @@ const pvpFormatOf = ({ rows, cols, targets, caps }: MatchFormat): PvpFormat => (
     bombs: caps.bombs,
   },
 });
-
-// The backend wants water next to a bridge: in the engine model that is a stream cell without a bridge of its own (бэкенд требует воду рядом с мостом: в модели движка это клетка ручья без своего моста).
-const dryBridges = ({ streams = [], bridges = [] }: PvpMap) => {
-  const water = streams.filter((cell) => !bridges.some((bridge) => isSame(bridge, cell)));
-  return bridges.filter(
-    ([row, col]) =>
-      !NEIGHBOURS.some(([dr, dc]) => water.some((cell) => isSame(cell, [row + dr, col + dc]))),
-  );
-};
 
 const statusOf = (error: ValidationError, map: PvpMap): MapStatus => {
   if (error.code === "NOT_CONNECTED") return { kind: "isolated", cells: error.cells };
@@ -65,6 +47,6 @@ const statusOf = (error: ValidationError, map: PvpMap): MapStatus => {
 export const checkEditorMap = (map: PvpMap, format: MatchFormat): MapStatus => {
   const [error] = validateLevel(levelOfMap(map), { kind: "pvp", format: pvpFormatOf(format) });
   if (error !== undefined) return statusOf(error, map);
-  const dry = dryBridges(map);
+  const dry = findDryBridges(map);
   return dry.length > 0 ? { kind: "bridge", cells: dry } : { kind: "valid" };
 };

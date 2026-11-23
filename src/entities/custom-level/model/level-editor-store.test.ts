@@ -37,12 +37,38 @@ describe("useLevelEditorStore", () => {
     const session = store().session;
     expect(session === null ? false : isDraftDirty(session)).toBe(true);
 
-    store().markSaved("custom-1");
+    store().markSaved("custom-1", store().session?.draft ?? DRAFT);
 
     const saved = store().session;
     expect(saved?.levelId).toBe("custom-1");
     expect(saved === null ? true : isDraftDirty(saved)).toBe(false);
     expect(saved?.draft).toMatchObject({ title: "Бухта", params: { moveLimit: 9 } });
+  });
+
+  test("keeps a level deleted elsewhere as a new draft (decision 0063 #8)", () => {
+    store().open("level-1", { ...DRAFT, map: withTarget }, { ...DRAFT, map: withTarget });
+
+    store().forgetSaved();
+
+    expect(store().session).toMatchObject({
+      levelId: "new",
+      saved: null,
+      draft: { map: withTarget },
+    });
+  });
+
+  test("drops a draft of the old dev mocks (decision 0063 #15)", () => {
+    const { migrate } = useLevelEditorStore.persist.getOptions();
+    const session = (levelId: string) => ({
+      levelId,
+      draft: DRAFT,
+      saved: null,
+      past: [],
+      future: [],
+    });
+
+    expect(migrate?.({ session: session("custom-3") }, 1)).toEqual({ session: null });
+    expect(migrate?.({ session: session("new") }, 1)).toEqual({ session: session("new") });
   });
 
   test("falls back to no session on corrupt data", () => {

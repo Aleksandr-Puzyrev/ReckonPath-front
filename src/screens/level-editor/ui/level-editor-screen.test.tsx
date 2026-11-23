@@ -1,18 +1,30 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { http, HttpResponse } from "msw/http";
 import type { ReactNode } from "react";
 import { Share } from "react-native";
 
 import { useAccountStore } from "@entities/session";
-import { emptyDraft, useLevelEditorStore, useTryoutBestStore } from "@entities/custom-level";
+import {
+  customLevelRequestOf,
+  emptyDraft,
+  isDraftDirty,
+  useLevelEditorStore,
+  useTryoutBestStore,
+} from "@entities/custom-level";
+import type { CustomDraft } from "@entities/custom-level";
 import { apiClient } from "@shared/api";
 import { i18n } from "@shared/i18n";
-import { mockServer } from "@shared/test-utils/api-mock";
+import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import LevelEditorScreen from "./level-editor-screen";
 
 const mockRouter = { back: jest.fn(), push: jest.fn(), setParams: jest.fn() };
 const mockParams = { id: "new" };
+const VALID_DRAFT: CustomDraft = {
+  ...emptyDraft("Бухта", 5, 5, "distance"),
+  map: { rows: 5, cols: 5, targets: [[4, 4]] },
+};
 
 jest.mock("expo-router", () => ({
   get router() {
@@ -62,12 +74,29 @@ jest.mock("@widgets/board", () => ({
   },
 }));
 
-const renderEditor = async () => {
-  useLevelEditorStore.getState().open("new", emptyDraft("Уровень 1", 5, 5, "distance"), null);
+const renderScreen = async () => {
   await render(<LevelEditorScreen />, { wrapper: createQueryWrapper() });
-  await fireEvent(screen.getByTestId("editor-board-area"), "layout", {
+  await fireEvent(await screen.findByTestId("editor-board-area"), "layout", {
     nativeEvent: { layout: { width: 320 } },
   });
+};
+
+const renderEditor = async () => {
+  useLevelEditorStore.getState().open("new", emptyDraft("Уровень 1", 5, 5, "distance"), null);
+  await renderScreen();
+};
+
+// The route params follow router.setParams, as in the app (параметры маршрута следуют router.setParams, как в приложении).
+const followRouteParams = () =>
+  mockRouter.setParams.mockImplementation((params: { id: string }) => {
+    mockParams.id = params.id;
+  });
+
+const saveOnServer = async () => {
+  const { data } = await apiClient.POST("/levels/custom", {
+    body: customLevelRequestOf(VALID_DRAFT, 6),
+  });
+  return data?.id ?? "";
 };
 
 const tap = (cell: number) => fireEvent.press(screen.getByTestId(`cell-${cell}`));
@@ -83,6 +112,8 @@ describe("LevelEditorScreen", () => {
     await cleanup();
     useLevelEditorStore.getState().reset();
     mockServer.reset();
+    mockParams.id = "new";
+    mockRouter.setParams.mockReset();
   });
 
   test("asks for a target and keeps saving and the tryout off until the level is valid", async () => {
@@ -137,20 +168,176 @@ describe("LevelEditorScreen", () => {
     await fireEvent.press(screen.getByTestId("editor-save"));
 
     expect(await screen.findByText("Уровень сохранён")).toBeOnTheScreen();
-    expect(mockRouter.setParams).toHaveBeenCalledWith({ id: "custom-1" });
+    expect(mockRouter.setParams).toHaveBeenCalledWith({ id: "level-1" });
     const { data } = await apiClient.GET("/levels/custom");
-    expect(data?.items).toMatchObject([{ level: { title: { ru: "Бухта" } } }]);
+    expect(data?.levels).toMatchObject([{ title: "Бухта", level: { targets: [[4, 4]] } }]);
   });
 
-  test("offers a guest an account instead of saving to «Мои уровни» (decision 0051 #5)", async () => {
+  test("saves without offering an account (decision 0063 #6)", async () => {
     await renderEditor();
     await tap(24);
 
     await fireEvent.press(screen.getByTestId("editor-save"));
 
-    expect(screen.getByTestId("link-sign-in")).toBeOnTheScreen();
-    await fireEvent.press(screen.getByTestId("link-sign-in"));
-    expect(mockRouter.push).toHaveBeenCalledWith("/account/sign-in");
+    expect(await screen.findByText("Уровень сохранён")).toBeOnTheScreen();
+    expect(screen.queryByTestId("link-sign-in")).toBeNull();
+  });
+
+  test("replaces a saved level on the server", async () => {
+    mockParams.id = await saveOnServer();
+    await renderScreen();
+    await fireEvent.changeText(screen.getByTestId("editor-title"), "Риф");
+
+    await fireEvent.press(screen.getByTestId("editor-save"));
+
+    expect(await screen.findByText("Уровень сохранён")).toBeOnTheScreen();
+    const { data } = await apiClient.GET("/levels/custom");
+    expect(data?.levels).toMatchObject([{ id: mockParams.id, title: "Риф" }]);
+  });
+
+  test("tells about the level limit instead of saving (decision 0063 #7)", async () => {
+    for (let index = 0; index < 20; index += 1) await saveOnServer();
+    await renderEditor();
+    await tap(24);
+
+    await fireEvent.press(screen.getByTestId("editor-save"));
+
+    expect(
+      await screen.findByText("Уже 20 уровней — удали один, чтобы сохранить новый"),
+    ).toBeOnTheScreen();
+  });
+
+  test("shows the server's problem in the status line until the level changes (decision 0063 #10)", async () => {
+    mockServer.use(
+      http.post(mockUrl("/levels/custom"), () =>
+        HttpResponse.json(
+          {
+            error: {
+              code: "level_invalid",
+              details: { problems: [{ code: "bridge", message: "", cells: [[4, 4]] }] },
+            },
+          },
+          { status: 422 },
+        ),
+      ),
+    );
+    await renderEditor();
+    await tap(24);
+
+    await fireEvent.press(screen.getByTestId("editor-save"));
+
+    await waitFor(() =>
+      expect(screen.getByTestId("editor-status")).toHaveTextContent("Мост ставится на ручей"),
+    );
+    expect(screen.getByTestId("editor-save")).toBeDisabled();
+    await tap(0);
+    expect(screen.getByTestId("editor-status")).toHaveTextContent(/Бот решает/);
+  });
+
+  test("saves a level deleted elsewhere as a new one (decision 0063 #8)", async () => {
+    mockParams.id = await saveOnServer();
+    await renderScreen();
+    await apiClient.DELETE("/levels/custom/{id}", { params: { path: { id: mockParams.id } } });
+    await tap(0);
+
+    await fireEvent.press(screen.getByTestId("editor-save"));
+    expect(
+      await screen.findByText("Уровень удалён на другом устройстве — сохрани его как новый"),
+    ).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("editor-save"));
+
+    expect(await screen.findByText("Уровень сохранён")).toBeOnTheScreen();
+    expect(mockRouter.setParams).toHaveBeenLastCalledWith({ id: "level-2" });
+  });
+
+  test("moves to the new level without asking the server for it again", async () => {
+    const getOne = jest.fn();
+    mockServer.use(
+      http.get(mockUrl("/levels/custom/:id"), () => {
+        getOne();
+        return HttpResponse.json({ error: { code: "level_not_found" } }, { status: 404 });
+      }),
+    );
+    followRouteParams();
+    await renderEditor();
+    await tap(24);
+
+    await fireEvent.press(screen.getByTestId("editor-save"));
+    await screen.findByText("Уровень сохранён");
+    await screen.rerender(<LevelEditorScreen />);
+
+    expect(mockParams.id).toBe("level-1");
+    expect(screen.getByTestId("editor-share")).toBeEnabled();
+    expect(getOne).not.toHaveBeenCalled();
+  });
+
+  test("goes on as a new level on its route after a 404 save", async () => {
+    mockParams.id = await saveOnServer();
+    followRouteParams();
+    await renderScreen();
+    await apiClient.DELETE("/levels/custom/{id}", { params: { path: { id: mockParams.id } } });
+    await tap(0);
+
+    await fireEvent.press(screen.getByTestId("editor-save"));
+    await screen.findByText("Уровень удалён на другом устройстве — сохрани его как новый");
+    await screen.rerender(<LevelEditorScreen />);
+
+    expect(mockParams.id).toBe("new");
+    expect(screen.getByTestId("editor-save")).toBeEnabled();
+  });
+
+  test("keeps changes made while saving unsaved (regression)", async () => {
+    mockParams.id = await saveOnServer();
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    mockServer.use(
+      http.put(mockUrl("/levels/custom/:id"), async ({ params }) => {
+        await gate;
+        const { level } = customLevelRequestOf(VALID_DRAFT, 6);
+        return HttpResponse.json({
+          id: params.id,
+          title: "Риф",
+          level,
+          updatedAt: "2026-11-22T10:00:00Z",
+        });
+      }),
+    );
+    await renderScreen();
+    await fireEvent.changeText(screen.getByTestId("editor-title"), "Риф");
+
+    await fireEvent.press(screen.getByTestId("editor-save"));
+    await fireEvent.changeText(screen.getByTestId("editor-title"), "Риф 2");
+    release();
+
+    await screen.findByText("Уровень сохранён");
+    const session = useLevelEditorStore.getState().session;
+    expect(session?.saved?.title).toBe("Риф");
+    expect(session === null ? false : isDraftDirty(session)).toBe(true);
+  });
+
+  test("checks a restored draft missing from the list (decision 0063 #11)", async () => {
+    mockParams.id = "level-5";
+    useLevelEditorStore.getState().open("level-5", VALID_DRAFT, VALID_DRAFT);
+
+    await renderScreen();
+
+    expect(
+      await screen.findByText("Уровень удалён на другом устройстве — сохрани его как новый"),
+    ).toBeOnTheScreen();
+    expect(useLevelEditorStore.getState().session).toMatchObject({ levelId: "new", saved: null });
+    expect(screen.getByTestId("editor-share")).toBeDisabled();
+  });
+
+  test("counts the elements against the backend caps (decision 0063 #3)", async () => {
+    await renderEditor();
+
+    await tap(24);
+
+    expect(screen.getByTestId("tool-target")).toHaveTextContent(/1\/5$/);
+    expect(screen.getByTestId("tool-stream")).toHaveTextContent(/0\/12$/);
+    expect(screen.getByTestId("tool-buoy")).toHaveTextContent(/0\/2$/);
   });
 
   test("keeps the saved draft while the route still says «new» (regression)", async () => {
@@ -162,7 +349,7 @@ describe("LevelEditorScreen", () => {
     await screen.findByText("Уровень сохранён");
 
     expect(useLevelEditorStore.getState().session).toMatchObject({
-      levelId: "custom-1",
+      levelId: "level-1",
       draft: { map: { targets: [[4, 4]] } },
     });
   });
