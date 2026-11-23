@@ -185,15 +185,34 @@ describe("SettingsScreen", () => {
     expect(mockRouter.push).toHaveBeenCalledWith("/settings/deletion");
   });
 
-  test("sends a support request", async () => {
-    await renderSettings();
-
+  const sendSupportMessage = async () => {
     await fireEvent.press(screen.getByTestId("settings-support"));
     await fireEvent.changeText(screen.getByTestId("support-message"), "Не грузится дейли");
     await waitFor(() => expect(screen.getByTestId("support-send")).toBeEnabled());
     await fireEvent.press(screen.getByTestId("support-send"));
+  };
 
-    expect(await screen.findByText("Обращение отправлено")).toBeOnTheScreen();
+  test("sends a support request (decision 0064 #3)", async () => {
+    await renderSettings();
+
+    await sendSupportMessage();
+
+    expect(await screen.findByText("Сообщение отправлено")).toBeOnTheScreen();
+    expect(screen.queryByTestId("support-message")).toBeNull();
+  });
+
+  test("tells about the daily ticket limit and keeps the message (decision 0064 #2)", async () => {
+    mockServer.use(
+      http.post(mockUrl("/support/tickets"), () =>
+        HttpResponse.json({ error: { code: "tickets_limit" } }, { status: 429 }),
+      ),
+    );
+    await renderSettings();
+
+    await sendSupportMessage();
+
+    expect(await screen.findByText("Обращений сегодня уже много. Напиши завтра")).toBeOnTheScreen();
+    expect(screen.getByDisplayValue("Не грузится дейли")).toBeOnTheScreen();
   });
 
   test("opens the game rules", async () => {

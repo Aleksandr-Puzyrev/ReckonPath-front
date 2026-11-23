@@ -1085,7 +1085,11 @@ paths:
   /support/tickets:
     post:
       operationId: createSupportTicket
-      description: A support request (Part 7 §6); the ban appeal uses topic ban_appeal (decision 0038 #5).
+      description: >
+        A support request from an account; it passes under a full ban (decision 0064 #1). The ban
+        appeal uses topic ban_appeal (decision 0038 #5). The answer comes by email (decision 0064 #4).
+        Errors validation_failed (also for unknown fields), tickets_limit (5 per rolling 24 h),
+        too_many_requests, rate_limit_unavailable.
       requestBody:
         required: true
         content:
@@ -1101,6 +1105,9 @@ paths:
                 required: [ticketId]
                 properties:
                   ticketId: { type: string }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "503": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
 
   /friends:
@@ -1533,6 +1540,8 @@ components:
         - rival_busy
         - challenge_not_found
         - season_changing
+        - tickets_limit
+        - rate_limit_unavailable
 
     VersionInfo:
       type: object
@@ -2878,15 +2887,21 @@ components:
       type: object
       required: [topic, message, diagnostics]
       properties:
-        topic: { type: string }
-        message: { type: string, maxLength: 1000 }
+        topic: { type: string, enum: [ban_appeal, support] }
+        message:
+          { type: string, minLength: 1, maxLength: 1000, description: "Trimmed by the server" }
         diagnostics:
           type: object
           required: [appVersion, device]
           properties:
-            appVersion: { type: string }
-            device: { type: string }
-            userId: { type: string, description: "Absent for a guest (decision 0051 #10)" }
+            appVersion: { type: string, maxLength: 40 }
+            device: { type: string, maxLength: 120 }
+            userId:
+              {
+                type: string,
+                maxLength: 64,
+                description: "Ignored by the server (decision 0064 #5)",
+              }
 
     BanDetails:
       description: The banned error details (Part 7 §2)

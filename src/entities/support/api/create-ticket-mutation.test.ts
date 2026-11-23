@@ -1,26 +1,73 @@
-import { MutationObserver, QueryClient } from "@tanstack/react-query";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
+import { useMutation } from "@tanstack/react-query";
+import { http } from "msw/http";
 
-import { mockServer } from "@shared/test-utils/api-mock";
+import { setApiSession } from "@shared/api";
+import { ACCOUNT_SESSION } from "@shared/test-utils/account-session";
+import { mockServer, mockUrl } from "@shared/test-utils/api-mock";
+import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import { createTicketMutationOptions } from "./create-ticket-mutation";
 
-const queryClient = new QueryClient({ defaultOptions: { mutations: { gcTime: Infinity } } });
+const TICKET = {
+  topic: "support",
+  message: "Не приходит код",
+  diagnostics: { appVersion: "1.4.2", device: "ios 18.1 iPhone 15" },
+} as const;
 
-const send = (message: string) =>
-  new MutationObserver(queryClient, createTicketMutationOptions()).mutate({
-    topic: "ban_appeal",
-    message,
-    diagnostics: { appVersion: "1.0.0", device: "ios", userId: "u1" },
-  });
+const watchTickets = () => {
+  const requests: Request[] = [];
+  mockServer.use(
+    http.post(mockUrl("/support/tickets"), ({ request }) => {
+      requests.push(request.clone());
+      return undefined;
+    }),
+  );
+  return requests;
+};
 
 describe("createTicketMutationOptions", () => {
-  afterEach(() => mockServer.reset());
-
-  test("creates a support ticket (Part 7 §6)", async () => {
-    expect(await send("Not me")).toEqual({ ticketId: "ticket_1" });
+  afterEach(() => {
+    setApiSession(null);
+    mockServer.reset();
   });
 
-  test("refuses an empty message", async () => {
-    await expect(send("")).rejects.toMatchObject({ code: "validation_failed" });
+  test("sends the ticket with the token and the action's idempotency key (decision 0064 #1, #6)", async () => {
+    setApiSession({ ...ACCOUNT_SESSION, getAccessToken: () => "token-1" });
+    const requests = watchTickets();
+    const { result } = await renderHook(() => useMutation(createTicketMutationOptions()), {
+      wrapper: createQueryWrapper(),
+    });
+
+    await act(async () => result.current.mutate({ ticket: TICKET, idempotencyKey: "key-0001" }));
+
+    await waitFor(() => expect(result.current.data?.ticketId).toEqual(expect.any(String)));
+    expect(requests[0]?.headers.get("Authorization")).toBe("Bearer token-1");
+    expect(requests[0]?.headers.get("Idempotency-Key")).toBe("key-0001");
+  });
+
+  test("never leaves the device without an account (decision 0064 #1)", async () => {
+    setApiSession({ ...ACCOUNT_SESSION, hasAccount: () => false });
+    const requests = watchTickets();
+    const { result } = await renderHook(() => useMutation(createTicketMutationOptions()), {
+      wrapper: createQueryWrapper(),
+    });
+
+    await act(async () => result.current.mutate({ ticket: TICKET, idempotencyKey: "key-0002" }));
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(requests).toHaveLength(0);
+  });
+
+  test("refuses a blank message like the backend (decision 0064 #1)", async () => {
+    const { result } = await renderHook(() => useMutation(createTicketMutationOptions()), {
+      wrapper: createQueryWrapper(),
+    });
+
+    await act(async () =>
+      result.current.mutate({ ticket: { ...TICKET, message: "   " }, idempotencyKey: "key-0003" }),
+    );
+
+    await waitFor(() => expect(result.current.error).toMatchObject({ code: "validation_failed" }));
   });
 });

@@ -1,30 +1,34 @@
 import { useMutation } from "@tanstack/react-query";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
+import { uuidv7 } from "uuidv7";
 
-import { useAccountStore } from "@entities/session";
 import { createTicketMutationOptions } from "@entities/support";
+import type { SupportTopic } from "@entities/support";
 import { useMeQuery } from "@entities/wallet";
 import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 import { APP_VERSION } from "@shared/config";
 
-export type SupportTopic = "ban_appeal" | "support";
+import { SUPPORT_TEXTS } from "./support-texts";
+import type { SupportSentKey } from "./support-texts";
 
-interface SupportCallbacks {
-  onSent: () => void;
+export interface SupportCallbacks {
+  onSent: (messageKey: SupportSentKey) => void;
   onError: (messageKey: ErrorMessageKey) => void;
 }
+
+const APP_VERSION_MAX = 40;
+const DEVICE_MAX = 120;
 
 const deviceOf = () =>
   [Platform.OS, Device.osVersion, Device.modelName].filter((part) => part !== null).join(" ");
 
 export const useContactSupport = (topic: SupportTopic, { onSent, onError }: SupportCallbacks) => {
   const { data: me } = useMeQuery();
-  const hasLogin = useAccountStore((state) => state.hasLogin);
   const { mutate, isPending } = useMutation({
     ...createTicketMutationOptions(),
-    onSuccess: onSent,
+    onSuccess: () => onSent(SUPPORT_TEXTS[topic].sent),
     onError: (error) => onError(errorMessageKey(error)),
   });
 
@@ -32,13 +36,16 @@ export const useContactSupport = (topic: SupportTopic, { onSent, onError }: Supp
     isPending,
     submit: (message: string) =>
       mutate({
-        topic,
-        message,
-        diagnostics: {
-          appVersion: APP_VERSION,
-          device: deviceOf(),
-          ...(hasLogin && me !== undefined ? { userId: me.id } : {}),
+        ticket: {
+          topic,
+          message,
+          diagnostics: {
+            appVersion: APP_VERSION.slice(0, APP_VERSION_MAX),
+            device: deviceOf().slice(0, DEVICE_MAX),
+            ...(me === undefined ? {} : { userId: me.id }),
+          },
         },
+        idempotencyKey: uuidv7(),
       }),
   };
 };

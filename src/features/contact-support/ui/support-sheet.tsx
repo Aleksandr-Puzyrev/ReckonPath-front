@@ -1,16 +1,14 @@
-import type { ErrorMessageKey } from "@shared/api";
+import type { SupportTopic } from "@entities/support";
 import { Sheet } from "@shared/ui/sheet";
 
-import type { SupportTopic } from "../model/use-contact-support";
+import type { SupportCallbacks } from "../model/use-contact-support";
 
 import SupportForm from "./support-form";
 
-interface ISupportSheet {
+interface ISupportSheet extends SupportCallbacks {
   isOpen: boolean;
   topic: SupportTopic;
   title: string;
-  onSent: () => void;
-  onError: (messageKey: ErrorMessageKey) => void;
   onClose: () => void;
 }
 

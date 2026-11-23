@@ -3,23 +3,22 @@ import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import type { ErrorMessageKey } from "@shared/api";
+import type { SupportTopic } from "@entities/support";
 import { Button } from "@shared/ui/button";
 import { Text } from "@shared/ui/text";
 import { TextField } from "@shared/ui/text-field";
 
 import { SUPPORT_MESSAGE_MAX, supportSchema } from "../model/support-schema";
 import type { SupportSchema } from "../model/support-schema";
+import { SUPPORT_TEXTS } from "../model/support-texts";
 import { useContactSupport } from "../model/use-contact-support";
-import type { SupportTopic } from "../model/use-contact-support";
+import type { SupportCallbacks } from "../model/use-contact-support";
 
 import { styles } from "./support-sheet-styles";
 
-interface ISupportForm {
+interface ISupportForm extends SupportCallbacks {
   topic: SupportTopic;
   title: string;
-  onSent: () => void;
-  onError: (messageKey: ErrorMessageKey) => void;
 }
 
 const DEFAULTS: SupportSchema = { message: "" };
@@ -44,7 +43,7 @@ const SupportForm = ({ topic, title, onSent, onError }: ISupportForm) => {
         render={({ field }) => (
           <TextField
             testID="support-message"
-            label={t("system.appeal.field")}
+            label={t(SUPPORT_TEXTS[topic].field)}
             counter={`${field.value.length} / ${SUPPORT_MESSAGE_MAX}`}
             maxLength={SUPPORT_MESSAGE_MAX}
             multiline

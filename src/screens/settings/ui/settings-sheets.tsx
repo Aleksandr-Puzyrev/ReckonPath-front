@@ -56,9 +56,9 @@ const SettingsSheets = ({ screen, onToast }: ISettingsSheets) => {
         isOpen={screen.sheet === "support"}
         topic="support"
         title={t("settings.support")}
-        onSent={() => {
+        onSent={(messageKey) => {
           close();
-          onToast(t("system.appeal.sent"));
+          onToast(t(messageKey));
         }}
         onError={screen.handleError}
         onClose={close}

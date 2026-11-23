@@ -1086,7 +1086,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** @description A support request (Part 7 §6); the ban appeal uses topic ban_appeal (decision 0038 */
+    /** @description A support request from an account; it passes under a full ban (decision 0064 #1). The ban appeal uses topic ban_appeal (decision 0038 #5). The answer comes by email (decision 0064 #4). Errors validation_failed (also for unknown fields), tickets_limit (5 per rolling 24 h), too_many_requests, rate_limit_unavailable. */
     post: operations["createSupportTicket"];
     delete?: never;
     options?: never;
@@ -1508,7 +1508,9 @@ export interface components {
       | "invite_self"
       | "rival_busy"
       | "challenge_not_found"
-      | "season_changing";
+      | "season_changing"
+      | "tickets_limit"
+      | "rate_limit_unavailable";
     VersionInfo: {
       /** @description Soft update is offered */
       showModal: boolean;
@@ -2435,12 +2437,14 @@ export interface components {
       count?: number;
     };
     SupportTicket: {
-      topic: string;
+      /** @enum {string} */
+      topic: "ban_appeal" | "support";
+      /** @description Trimmed by the server */
       message: string;
       diagnostics: {
         appVersion: string;
         device: string;
-        /** @description Absent for a guest (decision 0051 #10) */
+        /** @description Ignored by the server (decision 0064 #5) */
         userId?: string;
       };
     };
@@ -4235,6 +4239,9 @@ export interface operations {
           };
         };
       };
+      422: components["responses"]["Error"];
+      429: components["responses"]["Error"];
+      503: components["responses"]["Error"];
       default: components["responses"]["Error"];
     };
   };
@@ -4819,6 +4826,8 @@ export const errorCodeValues: ReadonlyArray<
   "rival_busy",
   "challenge_not_found",
   "season_changing",
+  "tickets_limit",
+  "rate_limit_unavailable",
 ];
 export const meLocaleValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Me"]["locale"]
@@ -4960,6 +4969,9 @@ export const historyItemOutcomeValues: ReadonlyArray<
 export const trackStepViewStateValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["TrackStepView"]["state"]
 > = ["locked", "ready", "claimed"];
+export const supportTicketTopicValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["SupportTicket"]["topic"]
+> = ["ban_appeal", "support"];
 export const banDetailsScopeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["BanDetails"]["scope"]
 > = ["all", "arena"];

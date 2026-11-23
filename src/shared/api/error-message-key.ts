@@ -36,6 +36,8 @@ const CODES_WITH_TEXT = [
   "season_changing",
   "arena_locked",
   "match_in_progress",
+  "tickets_limit",
+  "rate_limit_unavailable",
 ] as const satisfies readonly ApiErrorCode[];
 
 type CodeWithText = (typeof CODES_WITH_TEXT)[number];

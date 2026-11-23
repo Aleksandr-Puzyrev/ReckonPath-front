@@ -383,7 +383,9 @@
     "season_changing": "The season is changing. Try again in a couple of minutes",
     "arena_locked": "The Arena unlocks after level {{level}}",
     "arena_banned": "The Arena is closed for you",
-    "match_in_progress": "Finish your current match first"
+    "match_in_progress": "Finish your current match first",
+    "tickets_limit": "You’ve sent a lot of messages today. Write again tomorrow",
+    "rate_limit_unavailable": "Service temporarily unavailable. Try again later"
   },
   "system": {
     "update": {
@@ -804,6 +806,8 @@
     },
     "rules": "Game rules",
     "support": "Contact support",
+    "supportField": "Describe your question or problem",
+    "supportSent": "Message sent",
     "version": "Version",
     "playerId": "Player ID",
     "copied": "ID copied",

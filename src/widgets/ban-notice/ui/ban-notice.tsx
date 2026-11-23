@@ -58,9 +58,9 @@ const BanNotice = ({ ban, onCampaign, onMessage }: IBanNotice) => {
         isOpen={isAppealOpen}
         topic="ban_appeal"
         title={t("system.banned.appeal")}
-        onSent={() => {
+        onSent={(messageKey) => {
           setIsAppealOpen(false);
-          onMessage(t("system.appeal.sent"));
+          onMessage(t(messageKey));
         }}
         onError={(messageKey) => onMessage(t(messageKey))}
         onClose={() => setIsAppealOpen(false)}

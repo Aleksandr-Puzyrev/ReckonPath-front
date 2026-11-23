@@ -4,13 +4,7 @@ export type Transport = (request: Request) => Promise<Response>;
 
 export const REQUEST_TIMEOUT_MS = 10_000;
 const HTTP_UNAUTHORIZED = 401;
-const PUBLIC_PATHS = [
-  "/v1/bootstrap",
-  "/v1/version",
-  "/v1/maintenance",
-  "/v1/auth/",
-  "/v1/support/tickets",
-];
+const PUBLIC_PATHS = ["/v1/bootstrap", "/v1/version", "/v1/maintenance", "/v1/auth/"];
 const SESSION_PATHS = [
   "/v1/auth/refresh",
   "/v1/auth/login",
