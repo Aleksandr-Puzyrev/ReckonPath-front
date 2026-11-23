@@ -7,7 +7,7 @@ import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import MatchDetailsScreen from "./match-details-screen";
 
-const mockRouter = { back: jest.fn() };
+const mockRouter = { back: jest.fn(), push: jest.fn() };
 const mockParams = { id: "m1" };
 
 jest.mock("expo-router", () => ({
@@ -76,5 +76,27 @@ describe("MatchDetailsScreen", () => {
     await render(<MatchDetailsScreen />, { wrapper: createQueryWrapper() });
 
     expect(await screen.findByText("Победа · дружеский")).toBeOnTheScreen();
+  });
+
+  test("opens the rival's profile from his name (decision 0066 #9)", async () => {
+    const done = doneMatchMock({ id: "m1" });
+    serve({ ...done, rival: { ...done.rival, id: "player-7", name: "Miron" } });
+    await render(<MatchDetailsScreen />, { wrapper: createQueryWrapper() });
+
+    await fireEvent.press(await screen.findByLabelText("Открыть профиль Miron"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: "/user/[id]",
+      params: { id: "player-7" },
+    });
+  });
+
+  test("never opens a profile for a bot (decision 0066 #9)", async () => {
+    const done = doneMatchMock({ id: "m1" });
+    serve({ ...done, kind: "bot", rival: { ...done.rival, id: undefined, bot: true } });
+    await render(<MatchDetailsScreen />, { wrapper: createQueryWrapper() });
+
+    expect(await screen.findByText("Матч с Kira")).toBeOnTheScreen();
+    expect(screen.queryByTestId("details-rival")).toBeNull();
   });
 });

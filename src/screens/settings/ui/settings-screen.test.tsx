@@ -223,6 +223,14 @@ describe("SettingsScreen", () => {
     expect(screen.getAllByText("Правила игры").length).toBeGreaterThan(0);
   });
 
+  test("opens the blocked players from the privacy group (decision 0066 #8)", async () => {
+    await renderSettings();
+
+    await fireEvent.press(screen.getByText("Заблокированные игроки"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/settings/blocked-players");
+  });
+
   test("opens the privacy policy from the privacy group (decision 0056 #5)", async () => {
     await renderSettings();
 

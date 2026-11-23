@@ -27,6 +27,7 @@ const renderBoard = (props: Partial<Props>) =>
       isOnline
       onScopeChange={jest.fn()}
       onAddFriends={jest.fn()}
+      onOpenProfile={jest.fn()}
       {...props}
     />,
   );
@@ -79,6 +80,17 @@ describe("DayLeaderboard", () => {
     });
 
     expect(screen.getByLabelText("Ты, 9 ходов")).toBeOnTheScreen();
+  });
+
+  test("opens another player's profile from his row, never from mine (decision 0066 #9)", async () => {
+    const onOpenProfile = jest.fn();
+    const entries = ENTRIES.map((entry) => (entry.rank === 2 ? { ...entry, me: true } : entry));
+    await renderBoard({ entries, hasWon: true, onOpenProfile });
+
+    await fireEvent.press(screen.getByLabelText("Открыть профиль Player 1"));
+
+    expect(onOpenProfile).toHaveBeenCalledWith("u1");
+    expect(screen.queryByLabelText("Открыть профиль Ты")).toBeNull();
   });
 
   test("offers to add friends on an empty friends tab", async () => {

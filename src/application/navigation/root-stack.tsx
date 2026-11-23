@@ -77,6 +77,8 @@ const RootStack = () => {
           <Stack.Screen name="settings/index" />
           <Stack.Screen name="settings/deletion" />
           <Stack.Screen name="settings/devices" />
+          <Stack.Screen name="settings/blocked-players" />
+          <Stack.Screen name="user/[id]" />
           <Stack.Screen name="profile/nickname" />
           <Stack.Screen name="arena/history/[id]" />
           <Stack.Screen name="arena/map/[id]" options={{ gestureEnabled: false }} />

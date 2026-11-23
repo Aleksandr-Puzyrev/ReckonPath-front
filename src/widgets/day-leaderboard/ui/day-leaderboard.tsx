@@ -18,12 +18,13 @@ interface IDayLeaderboard {
   isOnline: boolean;
   onScopeChange: (scope: DailyLeaderboardScope) => void;
   onAddFriends: () => void;
+  onOpenProfile: (playerId: string) => void;
 }
 
 const TOP_BEFORE_WIN = 3;
 const TOP_AFTER_WIN = 10;
 
-// Before their own win the player sees only the top, no spoilers; outside the friends list my row has no rank (до своей победы игрок видит только верх топа, без спойлеров; вне списка друзей у моей строки нет места).
+// Before their own win the player sees only the top, no spoilers; outside the friends list my row has no rank; only other players' rows open a profile (до своей победы игрок видит только верх топа, без спойлеров; вне списка друзей у моей строки нет места; профиль открывают только чужие строки).
 const DayLeaderboard = ({
   entries,
   mine,
@@ -33,6 +34,7 @@ const DayLeaderboard = ({
   isOnline,
   onScopeChange,
   onAddFriends,
+  onOpenProfile,
 }: IDayLeaderboard) => {
   const { t } = useTranslation();
   const rows = entries.slice(0, hasWon ? TOP_AFTER_WIN : TOP_BEFORE_WIN);
@@ -54,15 +56,20 @@ const DayLeaderboard = ({
       {isEmpty ? <LeaderboardNoFriends isDisabled={!isOnline} onAddFriends={onAddFriends} /> : null}
       {isEmpty
         ? null
-        : rows.map((entry) => (
-            <LeaderboardRow
-              key={entry.id ?? entry.rank}
-              rank={entry.rank ?? null}
-              name={entry.me === true ? t("daily.you") : (entry.name ?? "")}
-              moves={entry.moves}
-              isMine={entry.me === true}
-            />
-          ))}
+        : rows.map((entry) => {
+            const playerId = entry.me === true ? undefined : entry.id;
+            return (
+              <LeaderboardRow
+                key={entry.id ?? entry.rank}
+                rank={entry.rank ?? null}
+                name={entry.me === true ? t("daily.you") : (entry.name ?? "")}
+                moves={entry.moves}
+                isMine={entry.me === true}
+                testID={`leaderboard-row-${entry.id ?? entry.rank}`}
+                onPress={playerId === undefined ? undefined : () => onOpenProfile(playerId)}
+              />
+            );
+          })}
       {isEmpty || mine === null || isMineShown ? null : (
         <LeaderboardRow rank={mine.rank ?? null} name={t("daily.you")} moves={mine.moves} isMine />
       )}

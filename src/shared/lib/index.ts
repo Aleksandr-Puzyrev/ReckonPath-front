@@ -8,3 +8,5 @@ export { cellsRange } from "./cells-range";
 export { toCamelKeys } from "./to-camel-keys";
 export { toSnakeKeys } from "./to-snake-keys";
 export { useDebouncedValue } from "./use-debounced-value";
+export { formatPercent } from "./format-percent";
+export { formatRelativeDay } from "./format-relative-day";

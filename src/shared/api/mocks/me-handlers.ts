@@ -77,6 +77,8 @@ const consentsStateOf = () => ({
 
 export const mockLocale = () => locale;
 
+export const mockNickname = () => nickname;
+
 const purgeAfterOf = (scheduledAt: string) =>
   new Date(Date.parse(scheduledAt) + DELETION_DAYS * DAY_MS).toISOString();
 

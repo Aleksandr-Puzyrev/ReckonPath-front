@@ -15,17 +15,11 @@ interface IFriendsStatus {
   onRetry: () => void;
 }
 
-// Offline a query pauses instead of failing, so the network is checked before loading (без сети запрос ставится на паузу, а не падает, поэтому сеть проверяется раньше загрузки).
+// Offline a query pauses instead of failing, so the network is checked before loading; the screen's bar already says there is no network (без сети запрос ставится на паузу, а не падает, поэтому сеть проверяется раньше загрузки; о том, что сети нет, уже говорит полоса экрана).
 const FriendsStatus = ({ isPending, isOnline, error, onRetry }: IFriendsStatus) => {
   const { t } = useTranslation();
 
-  if (!isOnline) {
-    return (
-      <Text variant="body.m" style={styles.message}>
-        {t("friends.offlineBar")}
-      </Text>
-    );
-  }
+  if (!isOnline) return null;
   if (isPending) return <FriendsSkeleton />;
   return (
     <View style={styles.status}>

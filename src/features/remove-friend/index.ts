@@ -1,2 +1,2 @@
 export { useRemoveFriend } from "./model/use-remove-friend";
-export { default as RemoveFriendFlow } from "./ui/remove-friend-flow";
+export { default as RemoveFriendDialog } from "./ui/remove-friend-dialog";

@@ -8,6 +8,7 @@ type FriendRelation = components["schemas"]["FriendRelation"];
 type FriendsList = components["schemas"]["FriendsList"];
 type FoundPlayer = components["schemas"]["FoundPlayer"];
 type Invite = components["schemas"]["Invite"];
+type ReportReason = components["schemas"]["ReportReason"];
 
 interface MockPlayer {
   id: string;
@@ -28,6 +29,7 @@ interface MockFriendsState {
   friends: Record<string, FriendStatus>;
   requests: MockRequest[];
   blocked: string[];
+  reported: string[];
   invitedBy: string | null;
   isInviteExpired: boolean;
 }
@@ -66,6 +68,7 @@ const initialState = (): MockFriendsState => ({
     { id: "request-3", from: MOCK_ME_ID, to: "player-6", createdAt: CREATED_AT },
   ],
   blocked: [],
+  reported: [],
   invitedBy: null,
   isInviteExpired: false,
 });
@@ -90,7 +93,7 @@ const fail = (
 
 const ok = <T>(data: T): MockReply<T> => ({ data });
 
-const playerOf = (id: string) => MOCK_PLAYERS.find((player) => player.id === id);
+export const mockPlayerOf = (id: string) => MOCK_PLAYERS.find((player) => player.id === id);
 
 const viewOf = ({ id, name, trophies, league }: MockPlayer, status?: FriendStatus): FriendView => ({
   id,
@@ -103,7 +106,7 @@ const viewOf = ({ id, name, trophies, league }: MockPlayer, status?: FriendStatu
 const STATUS_ORDER: Record<FriendStatus, number> = { online: 0, in_match: 1, offline: 2 };
 
 const requestViewOf = (request: MockRequest, userId: string) => {
-  const player = playerOf(userId);
+  const player = mockPlayerOf(userId);
   return player === undefined
     ? []
     : [{ id: request.id, user: viewOf(player), createdAt: request.createdAt }];
@@ -144,7 +147,8 @@ export const listMockFriends = (): FriendsList => {
   };
 };
 
-const relationOf = (id: string): FriendRelation => {
+export const mockRelationOf = (id: string): FriendRelation => {
+  if (state.blocked.includes(id)) return "blocked";
   if (isFriend(id)) return "friend";
   if (pendingBetween(id, MOCK_ME_ID) !== undefined) return "incoming";
   if (pendingBetween(MOCK_ME_ID, id) !== undefined) return "outgoing";
@@ -167,7 +171,7 @@ export const searchMockPlayers = (nickname: string): MockReply<{ users: FoundPla
         Number(right.name.toLowerCase() === text) - Number(left.name.toLowerCase() === text),
     )
     .slice(0, SEARCH_LIMIT)
-    .map((player) => ({ ...viewOf(player), relation: relationOf(player.id) }));
+    .map((player) => ({ ...viewOf(player), relation: mockRelationOf(player.id) }));
   return ok({ users });
 };
 
@@ -189,7 +193,7 @@ export const sendMockFriendRequest = (
   userId: string,
 ): MockReply<{ status: "sent" | "accepted"; requestId: string }> => {
   if (userId === MOCK_ME_ID) return fail("friend_self", HTTP_UNPROCESSABLE);
-  if (playerOf(userId) === undefined || state.blocked.includes(userId)) {
+  if (mockPlayerOf(userId) === undefined || state.blocked.includes(userId)) {
     return fail("user_not_found", HTTP_NOT_FOUND);
   }
   if (isFriend(userId)) return fail("already_friends", HTTP_CONFLICT);
@@ -261,5 +265,55 @@ export const redeemMockInvite = (code: string): MockReply<null> => {
   if (state.invitedBy !== null) return fail("invite_used", HTTP_CONFLICT);
   state = { ...state, invitedBy: inviter.id };
   if (!isFriend(inviter.id)) befriend(inviter.id);
+  return ok(null);
+};
+
+const REPORT_REASONS: readonly string[] = [
+  "cheating",
+  "nickname",
+  "abuse",
+  "other",
+] satisfies ReportReason[];
+
+const checkTarget = (userId: string) => {
+  if (userId === MOCK_ME_ID) return fail("friend_self", HTTP_UNPROCESSABLE);
+  return mockPlayerOf(userId) === undefined ? fail("user_not_found", HTTP_NOT_FOUND) : null;
+};
+
+// Like the backend: a block ends the friendship and the requests both ways, and repeats are fine (как у бэкенда: блокировка завершает дружбу и заявки в обе стороны, повтор не ошибка).
+export const blockMockPlayer = (userId: string): MockReply<null> => {
+  const invalid = checkTarget(userId);
+  if (invalid !== null) return invalid;
+  const friends = Object.entries(state.friends).filter(([id]) => id !== userId);
+  state = {
+    ...state,
+    friends: Object.fromEntries(friends),
+    requests: state.requests.filter(({ from, to }) => from !== userId && to !== userId),
+    blocked: state.blocked.includes(userId) ? state.blocked : [...state.blocked, userId],
+  };
+  return ok(null);
+};
+
+export const unblockMockPlayer = (userId: string): MockReply<null> => {
+  state = { ...state, blocked: state.blocked.filter((id) => id !== userId) };
+  return ok(null);
+};
+
+export const listMockBlocks = (): { users: FriendView[] } => ({
+  users: state.blocked
+    .flatMap((id) => {
+      const player = mockPlayerOf(id);
+      return player === undefined ? [] : [{ ...viewOf(player), since: CREATED_AT }];
+    })
+    .reverse(),
+});
+
+// Like the backend: one report per player a day (как у бэкенда: одна жалоба на игрока в сутки).
+export const reportMockPlayer = (userId: string, reason: string): MockReply<null> => {
+  if (!REPORT_REASONS.includes(reason)) return fail("validation_failed", HTTP_UNPROCESSABLE);
+  const invalid = checkTarget(userId);
+  if (invalid !== null) return invalid;
+  if (state.reported.includes(userId)) return fail("report_duplicate", HTTP_CONFLICT);
+  state = { ...state, reported: [...state.reported, userId] };
   return ok(null);
 };

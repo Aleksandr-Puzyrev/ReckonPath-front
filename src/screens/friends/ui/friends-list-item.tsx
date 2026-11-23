@@ -17,6 +17,7 @@ interface IFriendsListItem {
   removingId: string | null;
   onChallenge: (friend: Friend) => void;
   onMore: (friend: Friend) => void;
+  onOpenProfile: (friend: Friend) => void;
   onAccept: (request: FriendRequest) => void;
   onDecline: (request: FriendRequest) => void;
   onWithdraw: (request: FriendRequest) => void;
@@ -47,6 +48,7 @@ const FriendsListItem = ({
           challengeLockReason={challengeLockReason}
           onChallenge={handlers.onChallenge}
           onMore={handlers.onMore}
+          onOpenProfile={handlers.onOpenProfile}
         />
       </View>
     );

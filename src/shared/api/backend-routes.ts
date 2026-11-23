@@ -88,4 +88,9 @@ export const BACKEND_ROUTES: readonly BackendRoute[] = [
   { method: "PUT", path: "/levels/custom/{id}" },
   { method: "DELETE", path: "/levels/custom/{id}" },
   { method: "POST", path: "/support/tickets" },
+  { method: "GET", path: "/arena/players/{id}" },
+  { method: "POST", path: "/users/{id}/block" },
+  { method: "DELETE", path: "/users/{id}/block" },
+  { method: "POST", path: "/users/{id}/report" },
+  { method: "GET", path: "/me/blocks" },
 ];

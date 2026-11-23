@@ -5,7 +5,8 @@ import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { ChallengeSheet, ChallengeWaiting } from "@features/challenge-friend";
-import { RemoveFriendFlow } from "@features/remove-friend";
+import { BlockPlayerDialog } from "@features/block-player";
+import { RemoveFriendDialog } from "@features/remove-friend";
 import { IconButton } from "@shared/ui/icon-button";
 import { Screen } from "@shared/ui/screen";
 import { Segmented } from "@shared/ui/segmented";
@@ -19,6 +20,7 @@ import ChevronLeftIcon from "@assets/icons/levels/chevron-left.svg";
 
 import { useFriendsScreen } from "../model/use-friends-screen";
 
+import FriendMenu from "./friend-menu";
 import FriendsListEmpty from "./friends-list-empty";
 import FriendsListItem from "./friends-list-item";
 import { styles } from "./friends-screen-styles";
@@ -103,6 +105,7 @@ const FriendsScreen = () => {
             removingId={screen.remove.removingId}
             onChallenge={screen.challenge.handleChallenge}
             onMore={screen.handleMore}
+            onOpenProfile={screen.handleOpenProfile}
             onAccept={screen.answer.accept}
             onDecline={screen.answer.decline}
             onWithdraw={screen.answer.withdraw}
@@ -114,12 +117,16 @@ const FriendsScreen = () => {
         isOnline={screen.isOnline}
         onToast={showToast}
         onClose={screen.handleAddClose}
+        onOpenProfile={screen.handleOpenFoundProfile}
       />
-      <RemoveFriendFlow
+      <FriendMenu
         friend={screen.menuFriend}
-        remove={screen.remove}
+        onBlock={screen.block.ask}
+        onRemove={screen.remove.ask}
         onClose={screen.handleMenuClose}
       />
+      <RemoveFriendDialog remove={screen.remove} />
+      <BlockPlayerDialog block={screen.block} />
       <ChallengeSheet
         friend={screen.challenge.friend}
         format={screen.challenge.format}

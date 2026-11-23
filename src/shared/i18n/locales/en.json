@@ -385,7 +385,10 @@
     "arena_banned": "The Arena is closed for you",
     "match_in_progress": "Finish your current match first",
     "tickets_limit": "You’ve sent a lot of messages today. Write again tomorrow",
-    "rate_limit_unavailable": "Service temporarily unavailable. Try again later"
+    "rate_limit_unavailable": "Service temporarily unavailable. Try again later",
+    "report_duplicate": "You’ve already reported this player today",
+    "player_not_found": "Player not found",
+    "friend_self": "That’s your own profile"
   },
   "system": {
     "update": {
@@ -592,6 +595,46 @@
       "decline": "Decline",
       "declined": "{{name}} will see “can’t play right now”"
     }
+  },
+  "player": {
+    "title": "Player profile",
+    "rank": "#{{rank}} worldwide",
+    "headToHead": "Head to head",
+    "lastMatch": "you · {{name}} · last match {{when}}",
+    "notMet": "You haven’t met yet",
+    "wins": "Wins",
+    "peak": "Peak",
+    "streak": "Streak",
+    "addFriend": "Add friend",
+    "requestSent": "Request sent",
+    "requestHint": "{{name}} will see it in Friends → Requests",
+    "challenge": "Challenge",
+    "onlineHint": "{{name}} is online · friendly, no trophies",
+    "friendlyHint": "Friendly, no trophies",
+    "addShort": "+ Friend",
+    "sentShort": "Sent ✓",
+    "open": "Open {{name}}’s profile",
+    "more": "More"
+  },
+  "report": {
+    "action": "Report",
+    "title": "Report {{name}}",
+    "reason": {
+      "nickname": "Offensive nickname",
+      "cheating": "Suspected cheating"
+    },
+    "sent": "Report sent",
+    "done": "Sent ✓"
+  },
+  "block": {
+    "action": "Block",
+    "confirmTitle": "Block {{name}}?",
+    "confirmBody": "Your friendship and requests will be removed. You won’t be able to find or challenge each other.",
+    "blocked": "{{name}} is blocked",
+    "unblocked": "{{name}} is unblocked",
+    "isBlocked": "This player is blocked",
+    "unblock": "Unblock",
+    "done": "Blocked"
   },
   "account": {
     "benefits": {
@@ -835,7 +878,9 @@
       "passwordLabel": "Account password",
       "passwordHint": "Enter your password to confirm"
     },
-    "privacyPolicy": "Privacy policy"
+    "privacyPolicy": "Privacy policy",
+    "blockedPlayers": "Blocked players",
+    "blockedEmpty": "No blocked players"
   },
   "arena": {
     "eyebrow": "ARENA",

@@ -1,6 +1,7 @@
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react-native";
 
 import { useDailyLeaderboardQuery } from "@entities/daily";
+import { usePlayerProfileQuery } from "@entities/player";
 import { useAccountStore } from "@entities/session";
 import { MOCK_ME_ID, mockServer, setMockFriends } from "@shared/test-utils/api-mock";
 import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
@@ -43,5 +44,25 @@ describe("useAnswerFriendRequest", () => {
       expect(result.current.board.data?.entries.map(({ name }) => name)).toEqual(["Nova"]),
     );
     expect(onAccepted).toHaveBeenCalledWith("Nova");
+  });
+
+  test("refreshes the player's profile with the new relation (decision 0066 #11)", async () => {
+    useAccountStore.getState().markSignedIn();
+    setMockFriends({
+      friends: {},
+      requests: [{ id: REQUEST.id, from: REQUEST.user.id, to: MOCK_ME_ID, createdAt: CREATED_AT }],
+    });
+    const { result } = await renderHook(
+      () => ({
+        profile: usePlayerProfileQuery(REQUEST.user.id),
+        answer: useAnswerFriendRequest({ onAccepted: jest.fn(), onError: jest.fn() }),
+      }),
+      { wrapper: createQueryWrapper() },
+    );
+    await waitFor(() => expect(result.current.profile.data?.relation).toBe("incoming"));
+
+    await act(async () => result.current.answer.decline(REQUEST));
+
+    await waitFor(() => expect(result.current.profile.data?.relation).toBe("none"));
   });
 });

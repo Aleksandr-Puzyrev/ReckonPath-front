@@ -4,6 +4,7 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { levelOfBoard } from "@entities/match";
 import type { MatchView } from "@entities/match";
+import { openPlayerProfile, PlayerLink } from "@entities/player";
 import { formatDateTime } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 import { BoardMapPreview } from "@widgets/board";
@@ -29,12 +30,22 @@ const MatchDetailsBody = ({ match }: IMatchDetailsBody) => {
   const { rival, myMap, rivalMap, result, format, log } = match;
   const name = rival.name;
   const size = theme.sizes.arena.detailsMap;
+  const rivalId = rival.bot === true ? undefined : rival.id;
+  const title = (
+    <Text variant="title.l" accessibilityRole="header">
+      {t("arena.details.title", { name })}
+    </Text>
+  );
 
   return (
     <>
-      <Text variant="title.l" accessibilityRole="header">
-        {t("arena.details.title", { name })}
-      </Text>
+      {rivalId === undefined ? (
+        title
+      ) : (
+        <PlayerLink testID="details-rival" name={name} onPress={() => openPlayerProfile(rivalId)}>
+          {title}
+        </PlayerLink>
+      )}
       {result === undefined ? null : (
         <Text variant="title.s">
           {`${t(RESULT_KEYS[result.outcome])} · ${trophyTextOf({ friendly: match.friendly, trophies: result.trophies }, t)}`}

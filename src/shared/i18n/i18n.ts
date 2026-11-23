@@ -1,4 +1,5 @@
 import "./plural-rules-polyfill";
+import "./relative-time-format-polyfill";
 
 import { getLocales } from "expo-localization";
 import { createInstance } from "i18next";

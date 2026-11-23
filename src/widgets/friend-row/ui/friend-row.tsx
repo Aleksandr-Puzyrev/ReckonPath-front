@@ -4,6 +4,7 @@ import { useUnistyles } from "react-native-unistyles";
 
 import { FRIEND_STATUS_TEXT_KEY, FriendAvatar, friendStatusOf } from "@entities/friend";
 import type { Friend } from "@entities/friend";
+import { PlayerLink } from "@entities/player";
 import { formatNumber } from "@shared/lib";
 import { Button } from "@shared/ui/button";
 import { IconButton } from "@shared/ui/icon-button";
@@ -19,6 +20,7 @@ interface IFriendRow {
   challengeLockReason: string | null;
   onChallenge: (friend: Friend) => void;
   onMore: (friend: Friend) => void;
+  onOpenProfile: (friend: Friend) => void;
 }
 
 // A locked or banned arena keeps «Вызвать» disabled, and a tap explains why (decision 0062 #22) (закрытая арена или бан оставляют «Вызвать» неактивной, а нажатие объясняет причину).
@@ -28,6 +30,7 @@ const FriendRow = ({
   challengeLockReason,
   onChallenge,
   onMore,
+  onOpenProfile,
 }: IFriendRow) => {
   const { t, i18n } = useTranslation();
   const { theme } = useUnistyles();
@@ -44,15 +47,22 @@ const FriendRow = ({
 
   return (
     <View style={styles.row} testID={`friend-${friend.id}`}>
-      <FriendAvatar name={friend.name} size="match" status={status} />
-      <View style={styles.texts}>
-        <Text variant="title.s" numberOfLines={1}>
-          {friend.name}
-        </Text>
-        <Text variant="body.s" style={styles.meta} numberOfLines={1}>
-          {meta}
-        </Text>
-      </View>
+      <PlayerLink
+        testID={`friend-profile-${friend.id}`}
+        name={friend.name}
+        style={styles.person}
+        onPress={() => onOpenProfile(friend)}
+      >
+        <FriendAvatar name={friend.name} size="match" status={status} />
+        <View style={styles.texts}>
+          <Text variant="title.s" numberOfLines={1}>
+            {friend.name}
+          </Text>
+          <Text variant="body.s" style={styles.meta} numberOfLines={1}>
+            {meta}
+          </Text>
+        </View>
+      </PlayerLink>
       <Button
         testID={`friend-challenge-${friend.id}`}
         label={t("friends.challenge.action")}
@@ -66,7 +76,7 @@ const FriendRow = ({
       />
       <IconButton
         testID={`friend-more-${friend.id}`}
-        accessibilityLabel={`${t("friends.remove")}, ${friend.name}`}
+        accessibilityLabel={`${t("player.more")}, ${friend.name}`}
         isDisabled={isDisabled}
         onPress={() => onMore(friend)}
         icon={<MoreIcon width={iconSize} height={iconSize} color={theme.colors.text.secondary} />}

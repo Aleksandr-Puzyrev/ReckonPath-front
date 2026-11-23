@@ -38,6 +38,9 @@ const CODES_WITH_TEXT = [
   "match_in_progress",
   "tickets_limit",
   "rate_limit_unavailable",
+  "report_duplicate",
+  "player_not_found",
+  "friend_self",
 ] as const satisfies readonly ApiErrorCode[];
 
 type CodeWithText = (typeof CODES_WITH_TEXT)[number];

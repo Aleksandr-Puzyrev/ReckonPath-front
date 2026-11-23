@@ -12,7 +12,7 @@ import { createQueryWrapper } from "@shared/test-utils/query-wrapper";
 
 import FriendsScreen from "./friends-screen";
 
-const mockRouter = { back: jest.fn(), replace: jest.fn(), canGoBack: () => true };
+const mockRouter = { back: jest.fn(), replace: jest.fn(), push: jest.fn(), canGoBack: () => true };
 let mockParams: { add?: string } = {};
 
 jest.mock("expo-router", () => ({
@@ -164,6 +164,31 @@ describe("FriendsScreen (decision 0062)", () => {
     await waitFor(() => expect(screen.queryByText("Kira")).toBeNull());
   });
 
+  test("blocks a friend from the row menu after the confirmation (decision 0066 #17, FRN-11)", async () => {
+    await renderFriends();
+    await screen.findByText("Kira");
+
+    await fireEvent.press(screen.getByTestId("friend-more-mock-2"));
+    await fireEvent.press(screen.getByTestId("friend-block"));
+    expect(screen.getByText("Заблокировать Kira?")).toBeOnTheScreen();
+    await act(async () => fireEvent.press(screen.getByTestId("block-confirm")));
+
+    expect(await screen.findByText("Игрок Kira заблокирован")).toBeOnTheScreen();
+    await waitFor(() => expect(screen.queryByTestId("friend-mock-2")).toBeNull());
+  });
+
+  test("opens a friend's profile from his name (decision 0066 #9)", async () => {
+    await renderFriends();
+    await screen.findByText("Kira");
+
+    await fireEvent.press(screen.getByLabelText("Открыть профиль Kira"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      pathname: "/user/[id]",
+      params: { id: "mock-2" },
+    });
+  });
+
   test("keeps the cached list with the offline bar and the actions off (decision 0062 #14)", async () => {
     await renderFriends();
     await screen.findByText("Kira");
@@ -171,12 +196,19 @@ describe("FriendsScreen (decision 0062)", () => {
     await act(async () => onlineManager.setOnline(false));
 
     expect(screen.getByTestId("friends-offline")).toHaveTextContent("Нет сети");
-    expect(screen.getByLabelText("Удалить из друзей, Kira")).toBeDisabled();
+    expect(screen.getByLabelText("Ещё, Kira")).toBeDisabled();
     expect(screen.getByText("Kira")).toBeOnTheScreen();
     expect(screen.getByTestId("friend-more-mock-2")).toBeDisabled();
     expect(screen.getByTestId("friends-add")).toBeDisabled();
     await fireEvent.press(screen.getByTestId("friends-tab-requests"));
     expect(screen.getByTestId("request-accept-request-1")).toBeDisabled();
+  });
+
+  test("shows the offline bar once when there is no cache", async () => {
+    await act(async () => onlineManager.setOnline(false));
+    await renderFriends();
+
+    expect(screen.getAllByText("Нет сети")).toHaveLength(1);
   });
 
   test("offers to try again after an error", async () => {

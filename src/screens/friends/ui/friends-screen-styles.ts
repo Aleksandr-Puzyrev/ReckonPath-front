@@ -53,6 +53,9 @@ export const styles = StyleSheet.create((theme, runtime) => ({
   emptyTitle: {
     textAlign: "center",
   },
+  menu: {
+    gap: theme.space[4],
+  },
   skeletonRow: {
     height: theme.sizes.avatar.match + theme.space[3] * 2,
     marginBottom: theme.space[3],

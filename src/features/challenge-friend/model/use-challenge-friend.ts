@@ -9,6 +9,7 @@ import { invalidateChallenges, onChallengeNotice } from "@entities/challenge";
 import type { Challenge, ChallengeStatus } from "@entities/challenge";
 import { invalidateFriends } from "@entities/friend";
 import type { Friend } from "@entities/friend";
+import { invalidatePlayers } from "@entities/player";
 import { matchSession, useMatchStore } from "@entities/match";
 import { errorMessageKey, errorMessageValues, isApiError } from "@shared/api";
 
@@ -64,7 +65,10 @@ export const useChallengeFriend = (access: ArenaAccess, onToast: (text: string) 
         router.push({ pathname: "/arena/match/[id]", params: { id: runningId } });
         return;
       }
-      if (isApiError(error) && error.code === "not_friends") void invalidateFriends(queryClient);
+      if (isApiError(error) && error.code === "not_friends") {
+        void invalidateFriends(queryClient);
+        void invalidatePlayers(queryClient);
+      }
       showError(error);
     },
     onSettled: () => {

@@ -41,6 +41,17 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     borderRadius: theme.radius.m,
     backgroundColor: theme.colors.bg.sunken,
   },
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.space[2],
+  },
+  action: {
+    flex: 1,
+  },
+  menu: {
+    gap: theme.space[4],
+  },
   zoom: {
     alignItems: "center",
     paddingBottom: theme.space[5],

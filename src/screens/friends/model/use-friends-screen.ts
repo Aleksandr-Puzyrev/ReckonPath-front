@@ -4,15 +4,17 @@ import { useTranslation } from "react-i18next";
 
 import { ADD_FRIEND_PARAM, useFriendsQuery, useRefreshFriendsOnFocus } from "@entities/friend";
 import type { Friend } from "@entities/friend";
+import { openPlayerProfile } from "@entities/player";
+import type { PlayerRef } from "@entities/player";
 import { useAnswerFriendRequest } from "@features/answer-friend-request";
 import { useArenaAccess } from "@features/arena-access";
-import { useChallengeFriend } from "@features/challenge-friend";
+import { useBlockPlayer } from "@features/block-player";
+import { lockReasonOf, useChallengeFriend } from "@features/challenge-friend";
 import { useRemoveFriend } from "@features/remove-friend";
 import type { ErrorMessageKey } from "@shared/api";
 import { useIsOnline } from "@shared/api";
 
 import { friendsRowsOf } from "./friends-rows";
-import { lockReasonOf } from "./lock-reason-of";
 import type { FriendsTab } from "./friends-rows";
 
 export const useFriendsScreen = (onToast: (text: string) => void) => {
@@ -31,9 +33,10 @@ export const useFriendsScreen = (onToast: (text: string) => void) => {
     onError: showError,
   });
   const remove = useRemoveFriend(showError);
+  const block = useBlockPlayer(onToast);
   const access = useArenaAccess();
   const challenge = useChallengeFriend(access, onToast);
-  const isDisabled = !isOnline || answer.isPending;
+  const isDisabled = !isOnline || answer.isPending || block.isPending;
   const challengeLockReason = lockReasonOf(access, t);
   useRefreshFriendsOnFocus();
 
@@ -52,12 +55,18 @@ export const useFriendsScreen = (onToast: (text: string) => void) => {
     rowState: { isDisabled, challengeLockReason, removingId: remove.removingId },
     answer,
     remove,
+    block,
     challenge,
     handleTabChange: setTab,
     handleAddOpen: () => setIsAddOpen(true),
     handleAddClose: () => setIsAddOpen(false),
     handleMore: setMenuFriend,
     handleMenuClose: () => setMenuFriend(null),
+    handleOpenProfile: (player: PlayerRef) => openPlayerProfile(player.id),
+    handleOpenFoundProfile: (player: PlayerRef) => {
+      setIsAddOpen(false);
+      openPlayerProfile(player.id);
+    },
     handleRetry: () => void friends.refetch(),
     handleRefresh: async () => {
       setIsRefreshing(true);

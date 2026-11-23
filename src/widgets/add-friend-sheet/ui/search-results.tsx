@@ -15,6 +15,7 @@ interface ISearchResults {
   pendingUserId: string | null;
   isDisabled: boolean;
   onSend: (player: FoundPlayer) => void;
+  onOpenProfile: (player: FoundPlayer) => void;
 }
 
 const SearchResults = ({
@@ -24,6 +25,7 @@ const SearchResults = ({
   pendingUserId,
   isDisabled,
   onSend,
+  onOpenProfile,
 }: ISearchResults) => {
   const { t } = useTranslation();
 
@@ -57,6 +59,7 @@ const SearchResults = ({
           player={player}
           isDisabled={isDisabled || pendingUserId === player.id}
           onSend={onSend}
+          onOpenProfile={onOpenProfile}
         />
       ))}
     </View>

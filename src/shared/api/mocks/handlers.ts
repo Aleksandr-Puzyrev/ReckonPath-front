@@ -17,6 +17,7 @@ import { friendsHandlers } from "./friends-handlers";
 import { matchHandlers } from "./match-handlers";
 import { meHandlers } from "./me-handlers";
 import { mockUrl } from "./mock-url";
+import { playerHandlers } from "./player-handlers";
 import { shopHandlers } from "./shop-handlers";
 import { supportHandlers } from "./support-handlers";
 import { walletHandlers } from "./wallet-handlers";
@@ -77,4 +78,5 @@ export const handlers = [
   ...customLevelHandlers,
   ...friendsHandlers,
   ...challengeHandlers,
+  ...playerHandlers,
 ];

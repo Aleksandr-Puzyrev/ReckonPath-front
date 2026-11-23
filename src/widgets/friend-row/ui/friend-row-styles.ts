@@ -12,6 +12,12 @@ export const styles = StyleSheet.create((theme) => ({
     borderColor: theme.colors.border.default,
     backgroundColor: theme.colors.bg.surface,
   },
+  person: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.space[4],
+  },
   texts: {
     flex: 1,
     gap: theme.space[1],

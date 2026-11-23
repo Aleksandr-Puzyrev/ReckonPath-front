@@ -12,7 +12,7 @@ export type ButtonSize = "l" | "m" | "s";
 
 interface IButton {
   label: string;
-  onPress: () => void;
+  onPress?: () => void;
   variant?: ButtonVariant;
   size?: ButtonSize;
   isDisabled?: boolean;

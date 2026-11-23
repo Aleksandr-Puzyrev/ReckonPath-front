@@ -71,6 +71,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0063 | [`0063-custom-levels-on-backend.md`](0063-custom-levels-on-backend.md) | My levels on the backend: backend contract with a separate title, stars = limit, backend editor caps and bridge rule, limit from the server, deleted-elsewhere save as new, untitled, sign-out clears the draft, new texts |
 | 0064 | [`0064-support-on-backend.md`](0064-support-on-backend.md) | Support on the backend: account only, passes under a ban, `tickets_limit` text, own settings sheet texts, answers by email, idempotency key, `rate_limit_unavailable` text |
 | 0065 | [`0065-backend-resync-283c87e.md`](0065-backend-resync-283c87e.md) | Backend re-sync to 283c87e: no reveal after declining the continue, a repeat win gives nothing, no XP for a surrender at 0, events and achievements later |
+| 0066 | [`0066-player-profile-and-leaderboards.md`](0066-player-profile-and-leaderboards.md) | Another player's profile, block, report and arena leaderboards on the backend in two MRs: backend-only profile fields, block with confirmation, two report reasons, blocked list in settings, «+ В друзья» on the result, week/season × all/friends leaderboards, «Лидеры» on the arena home |
 
 ## Template
 

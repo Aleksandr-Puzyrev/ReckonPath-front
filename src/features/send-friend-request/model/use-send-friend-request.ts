@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateFriendsLeaderboard } from "@entities/daily";
 import { invalidateFriends } from "@entities/friend";
-import type { FoundPlayer } from "@entities/friend";
+import { invalidatePlayers } from "@entities/player";
+import type { PlayerRef } from "@entities/player";
 import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 
@@ -18,13 +19,13 @@ export const useSendFriendRequest = ({ onBefriended, onError }: SendCallbacks) =
   const queryClient = useQueryClient();
   const { mutate, isPending, variables } = useMutation({
     ...sendFriendRequestMutationOptions(),
-    onSettled: () => invalidateFriends(queryClient),
+    onSettled: () => Promise.all([invalidateFriends(queryClient), invalidatePlayers(queryClient)]),
     onError: (error) => onError(errorMessageKey(error)),
   });
 
   return {
     pendingUserId: isPending ? variables : null,
-    send: (player: FoundPlayer) =>
+    send: (player: PlayerRef) =>
       mutate(player.id, {
         onSuccess: ({ status }) => {
           if (status !== "accepted") return;

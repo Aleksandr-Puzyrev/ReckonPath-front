@@ -1318,6 +1318,83 @@ paths:
         "204": { description: Redeemed }
         default: { $ref: "#/components/responses/Error" }
 
+  /arena/players/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: The player id }
+    get:
+      operationId: getPlayerProfile
+      description: >
+        Another player's arena profile (decision 0066): trophies, league, world place, stats, head to
+        head with me (absent for myself and for a player I blocked), my relation to the player and,
+        for a friend only, whether he is online. Error player_not_found.
+      responses:
+        "200":
+          description: The player profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PlayerProfile" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /users/{id}/block:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: The player id }
+    post:
+      operationId: blockUser
+      description: >
+        Idempotent. Removes the friendship, cancels the requests both ways and the pair's challenges;
+        afterwards neither finds the other in search, sends a request or challenges. Errors
+        friend_self, user_not_found.
+      responses:
+        "204": { description: Blocked }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: unblockUser
+      description: Idempotent.
+      responses:
+        "204": { description: Unblocked }
+        default: { $ref: "#/components/responses/Error" }
+
+  /users/{id}/report:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: The player id }
+    post:
+      operationId: reportUser
+      description: >
+        A report to the moderators; one per player per UTC day. matchId is kept only when both played
+        that match. Errors report_duplicate, friend_self, user_not_found, too_many_requests.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { $ref: "#/components/schemas/ReportReason" }
+                comment: { type: string, maxLength: 500 }
+                matchId: { type: string }
+      responses:
+        "204": { description: Reported }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/blocks:
+    get:
+      operationId: listBlocks
+      description: The players I blocked, newest first (since is the block time), up to 500.
+      responses:
+        "200":
+          description: The blocked players
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [users]
+                properties:
+                  users:
+                    type: array
+                    items: { $ref: "#/components/schemas/FriendView" }
+        default: { $ref: "#/components/responses/Error" }
+
   /levels/custom:
     get:
       operationId: listCustomLevels
@@ -1542,6 +1619,8 @@ components:
         - season_changing
         - tickets_limit
         - rate_limit_unavailable
+        - player_not_found
+        - report_duplicate
 
     VersionInfo:
       type: object
@@ -2975,6 +3054,41 @@ components:
       properties:
         status: { type: string, enum: [sent, accepted] }
         requestId: { type: string }
+
+    PlayerRelation:
+      type: string
+      enum: [self, friend, incoming, outgoing, blocked, none]
+
+    HeadToHead:
+      type: object
+      required: [wins, losses, draws, last]
+      properties:
+        wins: { type: integer, description: My wins over this player }
+        losses: { type: integer }
+        draws: { type: integer }
+        last:
+          type: array
+          description: Up to 10 last meetings, newest first
+          items: { $ref: "#/components/schemas/HistoryItem" }
+
+    PlayerProfile:
+      type: object
+      required: [id, name, trophies, rank, league, look, stats, relation]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        trophies: { type: integer }
+        rank: { type: integer, description: The world place by trophies }
+        league: { $ref: "#/components/schemas/LeagueStep" }
+        look: { $ref: "#/components/schemas/Look" }
+        stats: { $ref: "#/components/schemas/ArenaStats" }
+        headToHead: { $ref: "#/components/schemas/HeadToHead" }
+        relation: { $ref: "#/components/schemas/PlayerRelation" }
+        online: { type: boolean, description: For a friend only }
+
+    ReportReason:
+      type: string
+      enum: [cheating, nickname, abuse, other]
 
     Invite:
       type: object

@@ -4,6 +4,7 @@ import { useForm, useWatch } from "react-hook-form";
 
 import { invalidateFriendsLeaderboard } from "@entities/daily";
 import { friendsQueryOptions, invalidateFriends, inviteQueryOptions } from "@entities/friend";
+import { invalidatePlayers } from "@entities/player";
 import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 
@@ -33,6 +34,7 @@ export const useRedeemInvite = ({ onRedeemed, onError }: RedeemCallbacks) => {
       await Promise.all([
         invalidateFriends(queryClient),
         invalidateFriendsLeaderboard(queryClient),
+        invalidatePlayers(queryClient),
       ]);
       const invite = await queryClient.fetchQuery(inviteQueryOptions());
       const { friends } = await queryClient.fetchQuery(friendsQueryOptions());

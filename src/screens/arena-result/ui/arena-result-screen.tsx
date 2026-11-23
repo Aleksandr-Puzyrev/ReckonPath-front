@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 
 import { levelOfBoard, tapIdxOfBoard } from "@entities/match";
+import { BlockPlayerDialog } from "@features/block-player";
 import { Button } from "@shared/ui/button";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
@@ -11,11 +12,14 @@ import type { ToastMessage } from "@shared/ui/toast";
 
 import { resultReasonOf } from "../model/result-reason";
 import { useArenaResult } from "../model/use-arena-result";
+import { useResultRival } from "../model/use-result-rival";
 
 import { styles } from "./arena-result-styles";
 import LeagueMoment from "./league-moment";
+import ResultActions from "./result-actions";
 import ResultMaps from "./result-maps";
 import ResultStanding from "./result-standing";
+import RivalMenu from "./rival-menu";
 
 const TITLES = {
   win: "result.pvp.win",
@@ -29,6 +33,7 @@ const ArenaResultScreen = () => {
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
   const view = useArenaResult(showToast);
   const { match } = view;
+  const rivalActions = useResultRival(match, showToast);
 
   if (match === null || match.result === undefined || match.rivalMap === undefined) {
     return (
@@ -93,16 +98,17 @@ const ArenaResultScreen = () => {
         {isFriendly ? null : (
           <Button testID="result-again" label={t("result.pvp.again")} onPress={view.handleAgain} />
         )}
-        <Button
-          testID="result-arena"
-          label={isFriendly ? t("result.pvp.back") : t("search.toArena")}
-          variant="ghost"
-          onPress={view.handleArena}
+        <ResultActions
+          arenaLabel={isFriendly ? t("result.pvp.back") : t("search.toArena")}
+          rival={rivalActions}
+          onArena={view.handleArena}
         />
       </ScrollView>
       {view.promotion === null ? null : (
         <LeagueMoment promotion={view.promotion} onNext={view.handlePromotionClose} />
       )}
+      <RivalMenu rival={rivalActions} />
+      <BlockPlayerDialog block={rivalActions.block} />
       <Toast message={toast} onHide={() => setToast(null)} />
     </Screen>
   );

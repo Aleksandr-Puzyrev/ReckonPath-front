@@ -22,6 +22,12 @@ export const styles = StyleSheet.create((theme) => ({
     borderRadius: theme.radius.m,
     backgroundColor: theme.colors.bg.sunken,
   },
+  playerLink: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.space[3],
+  },
   playerName: {
     flex: 1,
   },

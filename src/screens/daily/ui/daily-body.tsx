@@ -47,6 +47,7 @@ const DailyBody = ({ daily }: IDailyBody) => {
           isOnline={daily.isOnline}
           onScopeChange={daily.handleScopeChange}
           onAddFriends={daily.handleAddFriends}
+          onOpenProfile={daily.handleOpenProfile}
         />
       ) : null}
     </>

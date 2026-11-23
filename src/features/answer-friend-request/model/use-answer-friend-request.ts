@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { invalidateFriendsLeaderboard } from "@entities/daily";
 import { invalidateFriends } from "@entities/friend";
 import type { FriendRequest } from "@entities/friend";
+import { invalidatePlayers } from "@entities/player";
 import { errorMessageKey } from "@shared/api";
 import type { ErrorMessageKey } from "@shared/api";
 
@@ -14,12 +15,12 @@ interface AnswerCallbacks {
   onError: (messageKey: ErrorMessageKey) => void;
 }
 
-// The answers return no data, so the list is re-read after each of them (ответы не несут данных, поэтому после каждого список перечитывается).
+// The answers return no data and change the relation, so the list and the profiles are re-read after each of them (ответы не несут данных и меняют отношение, поэтому после каждого перечитываются список и профили).
 export const useAnswerFriendRequest = ({ onAccepted, onError }: AnswerCallbacks) => {
   const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     ...answerFriendRequestMutationOptions(),
-    onSettled: () => invalidateFriends(queryClient),
+    onSettled: () => Promise.all([invalidateFriends(queryClient), invalidatePlayers(queryClient)]),
     onError: (error) => onError(errorMessageKey(error)),
   });
 

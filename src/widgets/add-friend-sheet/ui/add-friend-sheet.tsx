@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { canRedeemInvite } from "@entities/friend";
+import type { FoundPlayer } from "@entities/friend";
 import { NICKNAME_MAX_LENGTH } from "@entities/wallet";
 import { MyInviteCode, RedeemInviteForm } from "@features/invite-code";
 import { Sheet } from "@shared/ui/sheet";
@@ -18,9 +19,10 @@ interface IAddFriendSheet {
   isOnline: boolean;
   onToast: (text: string) => void;
   onClose: () => void;
+  onOpenProfile: (player: FoundPlayer) => void;
 }
 
-const AddFriendSheet = ({ isOpen, isOnline, onToast, onClose }: IAddFriendSheet) => {
+const AddFriendSheet = ({ isOpen, isOnline, onToast, onClose, onOpenProfile }: IAddFriendSheet) => {
   const { t } = useTranslation();
   const sheet = useAddFriendSheet(onToast);
 
@@ -52,6 +54,7 @@ const AddFriendSheet = ({ isOpen, isOnline, onToast, onClose }: IAddFriendSheet)
           pendingUserId={sheet.pendingUserId}
           isDisabled={!isOnline}
           onSend={sheet.handleSend}
+          onOpenProfile={onOpenProfile}
         />
         {sheet.invite === undefined ? null : <MyInviteCode invite={sheet.invite} />}
         {canRedeemInvite(sheet.invite) ? (

@@ -27,12 +27,22 @@ const FRIENDS_LIMIT = 200;
 const HTTP_SERVER_ERROR = 500;
 const DEBOUNCE_MS = 300;
 const onToast = jest.fn();
+const onOpenProfile = jest.fn();
 
 const renderSheet = async () => {
   useAccountStore.getState().markSignedIn();
-  await render(<AddFriendSheet isOpen isOnline onToast={onToast} onClose={jest.fn()} />, {
-    wrapper: createQueryWrapper(),
-  });
+  await render(
+    <AddFriendSheet
+      isOpen
+      isOnline
+      onToast={onToast}
+      onClose={jest.fn()}
+      onOpenProfile={onOpenProfile}
+    />,
+    {
+      wrapper: createQueryWrapper(),
+    },
+  );
   await screen.findByText(MOCK_INVITE_CODE);
 };
 
@@ -115,6 +125,15 @@ describe("AddFriendSheet (design 24.2, decision 0062)", () => {
     expect(await screen.findByTestId("found-action-mock-5")).toHaveTextContent("В друзьях");
     expect(screen.getByTestId("found-action-player-6")).toHaveTextContent("Отправлено ✓");
     expect(screen.getByTestId("found-action-player-6")).toBeDisabled();
+  });
+
+  test("opens a found player's profile from his name (decision 0066 #9)", async () => {
+    await renderSheet();
+    await search("Mir");
+
+    await fireEvent.press(await screen.findByLabelText("Открыть профиль Miron"));
+
+    expect(onOpenProfile).toHaveBeenCalledWith(expect.objectContaining({ id: "player-7" }));
   });
 
   test("sends a request and marks it sent (decision 0062 #11)", async () => {

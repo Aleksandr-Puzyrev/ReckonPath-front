@@ -1,0 +1,33 @@
+# 0066. Another player's profile, block, report and arena leaderboards on the backend
+
+Date: 2026-11-23. Asked by: clarify-task for the player profile, block and report, and the arena leaderboards (Part 1 §5.9, §5.10, §7.1–7.2; Part 4 §8.1 п.5, §8.6 п.5, §8.8, §10.3; Part 7 §3, §5, §7; FRN-02, FRN-11, ARN-09, NET-06, E5-2; design 13.1, 17.6, 18.1–18.2, 23.6) against backend `283c87e` (`GET /arena/leaderboard`, `GET /arena/players/{id}`, `POST/DELETE /users/{id}/block`, `POST /users/{id}/report`, `GET /me/blocks`; `docs/backend-discrepancies.md` L1–L14). Answered by: developer.
+
+The rule of 0060 holds: where the backend and the spec, design or earlier decisions differ, the client follows the backend.
+
+| # | Question | Decision | Supersedes |
+| --- | --- | --- | --- |
+| 1 | Scope | Two MRs. MR 1: another player's profile, block, report, the blocked list, «+ В друзья» and «⋯» on the arena result. MR 2: the leaderboards screen and the arena home «Лидеры» block. | 0060 #16, 0062 #10 and #15, 0031 #13, 0035 #6 |
+| 2 | Leaderboard tabs (MR 2) | «Неделя / Сезон» × «Все / Друзья»; «Страна» hidden (0062 #12), no «Дейли» tab: the daily top stays on the daily screen. | Part 4 §8.8 (three boards × three scopes) |
+| 3 | My row (MR 2) | Pinned when the server sends `me`; otherwise a hint to play a match this period (text in MR 2). No neighbours. | E5-2, Part 1 §5.9 (±2 neighbours), design 18.1 |
+| 4 | Arena home «Лидеры» (MR 2) | Built: top 3 and my row, «Неделя / Сезон», «Все лидерборды»; no neighbours. | 0031 #13, design 13.1 (±1 neighbours) |
+| 5 | Profile content | Only what the backend sends: name, title from `look.title`, league and trophies, world place, head to head with the last match, arena stats «Победы» (wins · win rate), «Пик», «Серия» (current / best arena win streak). Account level, «Защита», «Уровни», «Звёзды» and badges go to the backend to-do. The avatar is the letter avatar used everywhere. | design 23.6, Part 4 §10.3 |
+| 6 | Block | A confirmation dialog, then a toast. Offered in the profile «⋯», the arena result «⋯» and the friend row «⋯» (next to «Удалить из друзей»). | design 17.6 (instant toggle) |
+| 7 | Report reasons | «Оскорбительный ник» (`nickname`) and «Подозрение на чит» (`cheating`), no comment; `match_id` from the arena result. The profile «Пожаловаться» opens the same choice. `abuse` and `other` are not used. | — |
+| 8 | Blocked list | Settings → «Конфиденциальность» → «Заблокированные игроки»: rows with «Разблокировать». A blocked player's profile can also unblock. | — |
+| 9 | Where the profile opens | Daily top rows, the friend row, friend search rows, the rival name in match details and on the arena result; leaderboard rows (MR 2). History rows keep opening match details; the challenge banner does not open it; a bot never. | Part 1 §7.1 |
+| 10 | «+ В друзья» on the arena result | For a live rival who is not a friend, outside a friendly match; turns into «Заявка ✓». | 0035 #6 |
+| 11 | Profile states | `incoming` → accept the request; `blocked` → no head to head, «Разблокировать»; `self` → the Profile tab; 404 → «Игрок не найден»; a player who blocked me (L7) → the server error on «Добавить в друзья». | — |
+| 12 | Challenge from the profile | The friend row rules (0062 #5, #6, #22); a friend in a match → the server's `rival_busy`. | — |
+| 13 | Weekly value (MR 2) | The server's net change, with a minus when negative. | — |
+| 14 | Timers (MR 2) | Design formats «обнуление через {d}д {h}ч», «сезон: ещё {n} дн.»; under a day «{h}ч {m}м». | — |
+| 15 | Offline | Cache with the «Нет сети» bar, actions disabled (0062 #14). | — |
+| 16 | Home weekly place | Not now. | 0041 #1 (stage 5 «Место») |
+| 17 | Friend row «⋯» | Adds «Заблокировать»; no «Пожаловаться». | — |
+| 18 | Design texts (MR 1) | Used as written (RU / EN): «Профиль игрока» / "Player profile"; «Личные встречи» / "Head to head"; «ты · {{name}} · последний матч {{when}}» / "you · {{name}} · last match {{when}}" (`when` is a relative date); «Победы» / "Wins", «Пик» / "Peak", «Серия» / "Streak"; «Место #{{rank}} в мире» / "#{{rank}} worldwide"; «Вызвать на дуэль» / "Challenge", «Заявка отправлена» / "Request sent", «Добавить в друзья» / "Add friend"; «{{name}} в сети · дружеский матч без кубков» / "{{name}} is online · friendly, no trophies"; «{{name}} увидит заявку в «Друзья → Заявки»» / "{{name}} will see it in Friends → Requests"; «Пожаловаться» / "Report", «Заблокировать» / "Block"; «+ В друзья» / "+ Friend", «Заявка ✓» / "Sent ✓"; «Оскорбительный ник» / "Offensive nickname", «Подозрение на чит» / "Suspected cheating", «Отправлено ✓» / "Sent ✓", «Заблокирован» / "Blocked". Existing keys reused: `friends.accept`, `friends.remove`, `errors.user_not_found`, `errors.too_many_requests`. | — |
+| 19 | New texts (MR 1) | RU / EN: friend hint «Дружеский матч без кубков» / "Friendly, no trophies"; no duels yet «Ещё не встречались» / "You haven’t met yet"; blocked profile «Игрок заблокирован» / "This player is blocked" and «Разблокировать» / "Unblock"; block confirm «Заблокировать {{name}}?» / "Block {{name}}?" with «Дружба и заявки удалятся. Вы не сможете найти друг друга и вызвать на дуэль.» / "Your friendship and requests will be removed. You won’t be able to find or challenge each other." and the button «Заблокировать»; toasts «Игрок {{name}} заблокирован» / "{{name}} is blocked" and «Игрок {{name}} разблокирован» / "{{name}} is unblocked" (unblock has no confirmation); report sheet «Пожаловаться на {{name}}» / "Report {{name}}", toast «Жалоба отправлена» / "Report sent"; `errors.report_duplicate` «Жалоба на этого игрока уже отправлена сегодня» / "You’ve already reported this player today"; `errors.player_not_found` «Игрок не найден» / "Player not found"; `errors.friend_self` «Это твой профиль» / "That’s your own profile"; «Заблокированные игроки» / "Blocked players", empty «Заблокированных игроков нет» / "No blocked players"; a11y «Открыть профиль {{name}}» / "Open {{name}}’s profile", «Ещё» / "More". | Part 5 (no keys for these screens) |
+| 20 | Relative dates | `@formatjs/intl-relativetimeformat` is added as a forced polyfill next to the plural rules one: Hermes has no `Intl.RelativeTimeFormat`, and «последний матч {{when}}» reads «вчера» / "yesterday" on every platform. | — |
+
+## Consequences
+
+* `contracts/openapi.yaml` gets the five backend operations; `BACKEND_ROUTES` gets them with their MR.
+* `docs/backend-handoff/backend-todo.md` gets: blocks in matchmaking and «против карты» (L11, ARN-09), `me` always present and neighbours on the leaderboard (L1, L4), the missing profile fields (L6), the «he blocked me» relation (L7).

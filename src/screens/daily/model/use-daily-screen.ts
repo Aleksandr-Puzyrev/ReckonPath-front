@@ -13,6 +13,7 @@ import {
 } from "@entities/daily";
 import type { DailyLeaderboardScope } from "@entities/daily";
 import { ADD_FRIEND_PARAM, useFriendsQuery } from "@entities/friend";
+import { openPlayerProfile } from "@entities/player";
 import { useAccountStore } from "@entities/session";
 import { streakSummaryOf, useStreakQuery } from "@entities/streak";
 import { useDailyToday } from "@features/daily-today";
@@ -115,6 +116,7 @@ export const useDailyScreen = () => {
     handleScopeChange: setScope,
     handleAddFriends: () =>
       router.push({ pathname: "/friends", params: { add: ADD_FRIEND_PARAM } }),
+    handleOpenProfile: openPlayerProfile,
     handleBack: () => (router.canGoBack() ? router.back() : router.replace("/")),
   };
 };

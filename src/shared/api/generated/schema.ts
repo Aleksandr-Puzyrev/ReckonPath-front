@@ -1334,6 +1334,84 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/arena/players/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    /** @description Another player's arena profile (decision 0066): trophies, league, world place, stats, head to head with me (absent for myself and for a player I blocked), my relation to the player and, for a friend only, whether he is online. Error player_not_found. */
+    get: operations["getPlayerProfile"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/{id}/block": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description Idempotent. Removes the friendship, cancels the requests both ways and the pair's challenges; afterwards neither finds the other in search, sends a request or challenges. Errors friend_self, user_not_found. */
+    post: operations["blockUser"];
+    /** @description Idempotent. */
+    delete: operations["unblockUser"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/users/{id}/report": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** @description A report to the moderators; one per player per UTC day. matchId is kept only when both played that match. Errors report_duplicate, friend_self, user_not_found, too_many_requests. */
+    post: operations["reportUser"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/blocks": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The players I blocked, newest first (since is the block time), up to 500. */
+    get: operations["listBlocks"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/levels/custom": {
     parameters: {
       query?: never;
@@ -1510,7 +1588,9 @@ export interface components {
       | "challenge_not_found"
       | "season_changing"
       | "tickets_limit"
-      | "rate_limit_unavailable";
+      | "rate_limit_unavailable"
+      | "player_not_found"
+      | "report_duplicate";
     VersionInfo: {
       /** @description Soft update is offered */
       showModal: boolean;
@@ -2496,6 +2576,32 @@ export interface components {
       status: "sent" | "accepted";
       requestId: string;
     };
+    /** @enum {string} */
+    PlayerRelation: "self" | "friend" | "incoming" | "outgoing" | "blocked" | "none";
+    HeadToHead: {
+      /** @description My wins over this player */
+      wins: number;
+      losses: number;
+      draws: number;
+      /** @description Up to 10 last meetings, newest first */
+      last: components["schemas"]["HistoryItem"][];
+    };
+    PlayerProfile: {
+      id: string;
+      name: string;
+      trophies: number;
+      /** @description The world place by trophies */
+      rank: number;
+      league: components["schemas"]["LeagueStep"];
+      look: components["schemas"]["Look"];
+      stats: components["schemas"]["ArenaStats"];
+      headToHead?: components["schemas"]["HeadToHead"];
+      relation: components["schemas"]["PlayerRelation"];
+      /** @description For a friend only */
+      online?: boolean;
+    };
+    /** @enum {string} */
+    ReportReason: "cheating" | "nickname" | "abuse" | "other";
     Invite: {
       code: string;
       invited: number;
@@ -4566,6 +4672,127 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  getPlayerProfile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The player profile */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["PlayerProfile"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  blockUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Blocked */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  unblockUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Unblocked */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  reportUser: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description The player id */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          reason: components["schemas"]["ReportReason"];
+          comment?: string;
+          matchId?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Reported */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  listBlocks: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The blocked players */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            users: components["schemas"]["FriendView"][];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
   listCustomLevels: {
     parameters: {
       query?: never;
@@ -4828,6 +5055,8 @@ export const errorCodeValues: ReadonlyArray<
   "season_changing",
   "tickets_limit",
   "rate_limit_unavailable",
+  "player_not_found",
+  "report_duplicate",
 ];
 export const meLocaleValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Me"]["locale"]
@@ -4984,3 +5213,9 @@ export const friendRelationValues: ReadonlyArray<
 export const friendRequestSentStatusValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["FriendRequestSent"]["status"]
 > = ["sent", "accepted"];
+export const playerRelationValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["PlayerRelation"]
+> = ["self", "friend", "incoming", "outgoing", "blocked", "none"];
+export const reportReasonValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ReportReason"]
+> = ["cheating", "nickname", "abuse", "other"];
