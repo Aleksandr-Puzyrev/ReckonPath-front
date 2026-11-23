@@ -35,9 +35,7 @@ const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
 const HTTP_CONFLICT = 409;
 const HTTP_UNPROCESSABLE = 422;
-const REPLAY_COINS = 5;
 const XP_FIRST = 10;
-const XP_REPEAT = 2;
 const WORLD_GEMS = 10;
 const WORLD_PERFECT_GEMS = 25;
 const FULL_STARS = 3;
@@ -116,11 +114,9 @@ const recordWin = (level: MockCampaignLevel, stars: number, moves: number): Camp
   });
   const already = earned[level.number] ?? 0;
   const forStars = Math.max(0, (LEVEL_REWARDS[stars - 1] ?? 0) - already);
-  const isRepeat = previous !== undefined && stars <= previous.stars;
-  const reward = forStars + (isRepeat ? REPLAY_COINS : 0);
-  creditCoins(reward);
+  creditCoins(forStars);
   updateMockCampaign({ earned: { ...earned, [level.number]: already + forStars } });
-  const xp = previous === undefined ? XP_FIRST : XP_REPEAT;
+  const xp = previous === undefined ? XP_FIRST : 0;
   creditXp(xp);
   const worldGems = payWorld(level);
   const next = MOCK_CAMPAIGN_LEVELS.find(({ number }) => number > level.number);
@@ -129,7 +125,7 @@ const recordWin = (level: MockCampaignLevel, stars: number, moves: number): Camp
     moves,
     bestMoves,
     newRecord: previous === undefined || moves < previous.bestMoves,
-    reward,
+    reward: forStars,
     xp,
     ...(worldGems > 0 ? { worldGems } : {}),
     canContinue: false,
@@ -209,7 +205,6 @@ export const giveUpMockGame = (id: string): MockReply<CampaignGame> => {
     xp: 0,
     canContinue: false,
     continueCost: CONTINUE_COST,
-    secrets: secretsOf(level.level),
   };
   const next: MockGame = { ...game, isAbandoned: true, isFinished: true, result };
   saveGame(next);

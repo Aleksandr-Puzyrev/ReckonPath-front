@@ -206,12 +206,13 @@ describe("PlayScreen in the campaign", () => {
     expect(screen.getByText("Где получить изумруды:")).toBeOnTheScreen();
   });
 
-  test("shows the server's secrets after declining to continue", async () => {
+  test("offers to restart or leave after declining to continue (decision 0065 #1)", async () => {
     await renderScreen();
     await loseByMoves();
     await fireEvent.press(screen.getByText("Не продолжать"));
     await flushRequests();
-    expect(screen.getByTestId("hidden-shown")).toBeOnTheScreen();
+    expect(screen.getByText("Начать заново")).toBeOnTheScreen();
+    expect(screen.getByText("К уровням")).toBeOnTheScreen();
   });
 
   test("wins with the server's stars, moves and reward and moves to the next level (LVL-11, LVL-12)", async () => {

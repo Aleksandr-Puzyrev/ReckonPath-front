@@ -67,7 +67,7 @@ describe("campaign mocks", () => {
     expect((await play(3)).error).toMatchObject({ error: { code: "level_locked" } });
   });
 
-  test("continues a lost game for gems once and shows the secrets on giving up", async () => {
+  test("continues a lost game for gems once and keeps the secrets on giving up", async () => {
     passMockLevels(1);
     const game = (await play(2)).data;
     const id = game?.id ?? "";
@@ -99,10 +99,8 @@ describe("campaign mocks", () => {
     const given = await apiClient.POST("/campaign/games/{id}/give-up", {
       params: { path: { id } },
     });
-    expect(given.data).toMatchObject({
-      status: "abandoned",
-      result: { secrets: { targets: [[2, 3]] } },
-    });
+    expect(given.data).toMatchObject({ status: "abandoned" });
+    expect(given.data?.result?.secrets).toBeUndefined();
   });
 
   test("keeps the tutorials the levels name and the app's hints, and refuses the rest", async () => {

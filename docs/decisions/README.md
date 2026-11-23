@@ -70,6 +70,7 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0062 | [`0062-friends-on-backend.md`](0062-friends-on-backend.md) | Friends on the backend in two MRs (friends, daily Friends tab, profile row; then challenges), invite code instead of a friend code, code shared as text, inviter-only reward, challenges without a format picker, app-wide arena socket, new texts; round 2: challenge texts, modal waiting, friendly result |
 | 0063 | [`0063-custom-levels-on-backend.md`](0063-custom-levels-on-backend.md) | My levels on the backend: backend contract with a separate title, stars = limit, backend editor caps and bridge rule, limit from the server, deleted-elsewhere save as new, untitled, sign-out clears the draft, new texts |
 | 0064 | [`0064-support-on-backend.md`](0064-support-on-backend.md) | Support on the backend: account only, passes under a ban, `tickets_limit` text, own settings sheet texts, answers by email, idempotency key, `rate_limit_unavailable` text |
+| 0065 | [`0065-backend-resync-283c87e.md`](0065-backend-resync-283c87e.md) | Backend re-sync to 283c87e: no reveal after declining the continue, a repeat win gives nothing, no XP for a surrender at 0, events and achievements later |
 
 ## Template
 
