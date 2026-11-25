@@ -305,6 +305,15 @@ describe("ArenaHomeScreen", () => {
     });
   });
 
+  test("shows the leaders block and opens all leaderboards (decision 0066 #4)", async () => {
+    await renderOpenArena();
+
+    expect(await screen.findByText("Nova")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("leaders-all"));
+
+    expect(mockRouter.push).toHaveBeenCalledWith("/leaderboards");
+  });
+
   test("keeps the cached arena offline and disables the fight", async () => {
     await renderOpenArena();
 

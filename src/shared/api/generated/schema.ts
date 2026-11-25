@@ -1354,6 +1354,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/arena/leaderboard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** @description The arena leaderboard (decision 0066): week is the net trophy change since Monday (may be zero or negative), season the trophies this season. Only players with a match in the period are listed; friends is my friends and me; me is absent when I have not played this period. Error validation_failed. */
+    get: operations["getArenaLeaderboard"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/users/{id}/block": {
     parameters: {
       query?: never;
@@ -2602,6 +2619,33 @@ export interface components {
     };
     /** @enum {string} */
     ReportReason: "cheating" | "nickname" | "abuse" | "other";
+    /** @enum {string} */
+    LeaderboardPeriod: "week" | "season";
+    /** @enum {string} */
+    LeaderboardScope: "all" | "country" | "friends";
+    LeaderboardRow: {
+      rank: number;
+      id: string;
+      name: string;
+      country?: string;
+      /** @description Week — the net trophy change */
+      value: number;
+      /** @description The league key */
+      league: string;
+    };
+    Leaderboard: {
+      period: components["schemas"]["LeaderboardPeriod"];
+      scope: components["schemas"]["LeaderboardScope"];
+      /** @description For scope country; absent when my profile has none */
+      country?: string;
+      /**
+       * Format: date-time
+       * @description The end of the week or the season
+       */
+      endsAt: string;
+      items: components["schemas"]["LeaderboardRow"][];
+      me?: components["schemas"]["LeaderboardRow"];
+    };
     Invite: {
       code: string;
       invited: number;
@@ -4696,6 +4740,31 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  getArenaLeaderboard: {
+    parameters: {
+      query?: {
+        period?: components["schemas"]["LeaderboardPeriod"];
+        scope?: components["schemas"]["LeaderboardScope"];
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The top of the period and my row */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Leaderboard"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
   blockUser: {
     parameters: {
       query?: never;
@@ -5219,3 +5288,9 @@ export const playerRelationValues: ReadonlyArray<
 export const reportReasonValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["ReportReason"]
 > = ["cheating", "nickname", "abuse", "other"];
+export const leaderboardPeriodValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["LeaderboardPeriod"]
+> = ["week", "season"];
+export const leaderboardScopeValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["LeaderboardScope"]
+> = ["all", "country", "friends"];

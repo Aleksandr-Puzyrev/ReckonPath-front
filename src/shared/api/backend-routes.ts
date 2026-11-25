@@ -93,4 +93,5 @@ export const BACKEND_ROUTES: readonly BackendRoute[] = [
   { method: "DELETE", path: "/users/{id}/block" },
   { method: "POST", path: "/users/{id}/report" },
   { method: "GET", path: "/me/blocks" },
+  { method: "GET", path: "/arena/leaderboard" },
 ];

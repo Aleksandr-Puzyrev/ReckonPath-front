@@ -1335,6 +1335,35 @@ paths:
               schema: { $ref: "#/components/schemas/PlayerProfile" }
         default: { $ref: "#/components/responses/Error" }
 
+  /arena/leaderboard:
+    get:
+      operationId: getArenaLeaderboard
+      description: >
+        The arena leaderboard (decision 0066): week is the net trophy change since Monday (may be
+        zero or negative), season the trophies this season. Only players with a match in the period
+        are listed; friends is my friends and me; me is absent when I have not played this period.
+        Error validation_failed.
+      parameters:
+        - name: period
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/LeaderboardPeriod" }
+        - name: scope
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/LeaderboardScope" }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        "200":
+          description: The top of the period and my row
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Leaderboard" }
+        default: { $ref: "#/components/responses/Error" }
+
   /users/{id}/block:
     parameters:
       - { name: id, in: path, required: true, schema: { type: string }, description: The player id }
@@ -3089,6 +3118,38 @@ components:
     ReportReason:
       type: string
       enum: [cheating, nickname, abuse, other]
+
+    LeaderboardPeriod:
+      type: string
+      enum: [week, season]
+
+    LeaderboardScope:
+      type: string
+      enum: [all, country, friends]
+
+    LeaderboardRow:
+      type: object
+      required: [rank, id, name, value, league]
+      properties:
+        rank: { type: integer }
+        id: { type: string }
+        name: { type: string }
+        country: { type: string }
+        value: { type: integer, description: Week — the net trophy change, season — the trophies }
+        league: { type: string, description: The league key }
+
+    Leaderboard:
+      type: object
+      required: [period, scope, endsAt, items]
+      properties:
+        period: { $ref: "#/components/schemas/LeaderboardPeriod" }
+        scope: { $ref: "#/components/schemas/LeaderboardScope" }
+        country: { type: string, description: For scope country; absent when my profile has none }
+        endsAt: { type: string, format: date-time, description: The end of the week or the season }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/LeaderboardRow" }
+        me: { $ref: "#/components/schemas/LeaderboardRow" }
 
     Invite:
       type: object

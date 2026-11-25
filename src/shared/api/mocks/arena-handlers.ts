@@ -8,11 +8,13 @@ import {
   markMockRulesSeen,
   mockSeason,
 } from "./mock-arena";
+import { mockLeaderboard } from "./mock-leaderboard";
 import { mockUrl } from "./mock-url";
 
 const HTTP_NO_CONTENT = 204;
 const HTTP_NOT_FOUND = 404;
 const HTTP_CONFLICT = 409;
+const BOARD_LIMIT = 100;
 
 const errorResponse = (code: string, status: number) =>
   HttpResponse.json({ error: { code } }, { status });
@@ -24,6 +26,17 @@ export const arenaHandlers = [
     return new HttpResponse(null, { status: HTTP_NO_CONTENT });
   }),
   http.get(mockUrl("/arena/season"), () => HttpResponse.json(mockSeason())),
+  http.get(mockUrl("/arena/leaderboard"), ({ request }) => {
+    const query = new URL(request.url).searchParams;
+    const board = mockLeaderboard(
+      query.get("period") ?? "week",
+      query.get("scope") ?? "all",
+      Number(query.get("limit") ?? BOARD_LIMIT),
+    );
+    return "data" in board
+      ? HttpResponse.json(board.data)
+      : errorResponse(board.error, board.status);
+  }),
   http.post(mockUrl("/arena/season/track/:step/claim"), ({ params }) => {
     const claimed = claimMockStep(Number(params.step));
     if (claimed === "step_not_found") return errorResponse(claimed, HTTP_NOT_FOUND);

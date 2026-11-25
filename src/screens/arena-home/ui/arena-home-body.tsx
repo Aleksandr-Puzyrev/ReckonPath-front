@@ -4,10 +4,12 @@ import { useTranslation } from "react-i18next";
 
 import { NEW_MAP_ID } from "@entities/arena-map";
 import type { ArenaMap } from "@entities/arena-map";
+import { openPlayerProfile } from "@entities/player";
 import { HAS_ARENA_SERVER } from "@shared/config";
 import { formatClockTime } from "@shared/lib";
 import { Text } from "@shared/ui/text";
 import { ArenaHero } from "@widgets/arena-hero";
+import { ArenaLeaders } from "@widgets/arena-leaders";
 import { BanNotice } from "@widgets/ban-notice";
 import { MatchHistory } from "@widgets/match-history";
 import { MyMapCard } from "@widgets/my-arena-map";
@@ -99,6 +101,11 @@ const ArenaHomeBody = ({ home, renderMap, onMessage }: IArenaHomeBody) => {
           onClaim={home.handleClaim}
         />
       )}
+      <ArenaLeaders
+        isOnline={home.isOnline}
+        onOpenAll={() => router.push("/leaderboards")}
+        onOpenProfile={openPlayerProfile}
+      />
       {arena.history.length === 0 ? null : (
         <MatchHistory
           matches={arena.history}

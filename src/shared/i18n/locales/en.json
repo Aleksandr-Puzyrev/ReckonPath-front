@@ -616,6 +616,23 @@
     "open": "Open {{name}}’s profile",
     "more": "More"
   },
+  "leaderboard": {
+    "title": "Leaderboards",
+    "leaders": "Leaders",
+    "all": "All leaderboards",
+    "week": "Week",
+    "season": "Season",
+    "weekResets": "resets in {{d}}d {{h}}h",
+    "weekResetsSoon": "resets in {{h}}h {{m}}m",
+    "seasonLeft_one": "season: {{count}} day left",
+    "seasonLeft_other": "season: {{count}} days left",
+    "seasonLeftSoon": "season: {{h}}h {{m}}m left",
+    "noMeWeek": "Play a match this week to get on the board",
+    "noMeSeason": "Play a match this season to get on the board",
+    "empty": "No one has played yet — be the first",
+    "noFriends": "Friends and their trophies will show up here. Competing with friends is more fun.",
+    "rowLabel": "Place {{rank}}, {{name}}, {{trophies}}"
+  },
   "report": {
     "action": "Report",
     "title": "Report {{name}}",
