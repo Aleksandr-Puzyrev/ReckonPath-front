@@ -6,6 +6,7 @@ import type { BoardScene } from "../model/board-scene";
 import {
   diagonalGradient,
   drawCenteredText,
+  drawTexture,
   glowPaint,
   roundRect,
   solidPaint,
@@ -30,6 +31,21 @@ const cellColors = (scene: BoardScene, idx: number) => {
   return { top: scene.skin.cell, side: scene.skin.cellSide };
 };
 
+const cellTexture = (scene: BoardScene, idx: number) => {
+  "worklet";
+  const textures = scene.textures;
+  switch (scene.kinds[idx]) {
+    case "rock":
+      return textures?.rock;
+    case "heavy":
+      return textures?.heavy;
+    case "stream":
+      return scene.bridges[idx] ? textures?.bridge : textures?.water;
+    default:
+      return textures?.cell;
+  }
+};
+
 const drawCell = (canvas: SkCanvas, scene: BoardScene, idx: number) => {
   "worklet";
   const { cell, radius } = scene.geometry;
@@ -39,7 +55,13 @@ const drawCell = (canvas: SkCanvas, scene: BoardScene, idx: number) => {
   canvas.drawRRect(roundRect(x, y + CELL_THICKNESS, cell, cell, radius), solidPaint(side));
   canvas.drawRRect(roundRect(x, y, cell, cell, radius), diagonalGradient(x, y, cell, top));
 
-  if (scene.kinds[idx] === "stream" && scene.bridges[idx] === true) {
+  const hasTexture = drawTexture(
+    canvas,
+    cellTexture(scene, idx),
+    { x, y, width: cell, height: cell },
+    radius,
+  );
+  if (!hasTexture && scene.kinds[idx] === "stream" && scene.bridges[idx] === true) {
     const border = solidPaint(scene.skin.elements.bridgeBorder);
     canvas.drawRect({ x, y, width: cell, height: BRIDGE_BORDER }, border);
     canvas.drawRect({ x, y: y + cell - BRIDGE_BORDER, width: cell, height: BRIDGE_BORDER }, border);
@@ -64,11 +86,13 @@ export const drawStaticLayer = (canvas: SkCanvas, scene: BoardScene) => {
     roundRect(0, 0, width, height, frameRadius),
     diagonalGradient(0, 0, Math.max(width, height), scene.skin.frame),
   );
+  drawTexture(canvas, scene.textures?.bg, { x: 0, y: 0, width, height }, frameRadius);
   scene.kinds.forEach((_, idx) => drawCell(canvas, scene, idx));
 
   const glow = glowPaint(scene.skin.elements.fence, FENCE_GLOW);
   const bar = solidPaint(scene.skin.elements.fence);
   scene.fences.forEach((fence) => {
+    if (drawTexture(canvas, scene.textures?.fence, fence)) return;
     const rect = roundRect(
       fence.x,
       fence.y,

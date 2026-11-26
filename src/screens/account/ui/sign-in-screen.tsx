@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
+import { isEventCode } from "@entities/competition";
 import { SignIn } from "@features/link-account";
 import type { ErrorMessageKey } from "@shared/api";
 import { Screen } from "@shared/ui/screen";
@@ -13,7 +14,11 @@ import { styles } from "./account-screen-styles";
 
 const SignInScreen = () => {
   const { t } = useTranslation();
-  const { email = "", reset } = useLocalSearchParams<{ email?: string; reset?: string }>();
+  const {
+    email = "",
+    reset,
+    eventCode = "",
+  } = useLocalSearchParams<{ email?: string; reset?: string; eventCode?: string }>();
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [notice, setNotice] = useState<ToastMessage | null>(null);
   const [noticedReset, setNoticedReset] = useState<string | undefined>(undefined);
@@ -37,7 +42,13 @@ const SignInScreen = () => {
           key={email}
           initialEmail={email}
           onBack={router.canGoBack() ? () => router.back() : undefined}
-          onSignedIn={() => router.dismissTo("/")}
+          onSignedIn={() =>
+            router.dismissTo(
+              isEventCode(eventCode)
+                ? { pathname: "/event-preview/[code]", params: { code: eventCode } }
+                : "/",
+            )
+          }
           onNeedsCode={(email, resendAfter) =>
             router.push({
               pathname: "/account/code",

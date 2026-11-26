@@ -15,6 +15,8 @@ const HISTORY_DAYS = 30;
 export const dailyKeys = {
   all: ["daily"] as const,
   overview: () => [...dailyKeys.all, "overview"] as const,
+  days: () => [...dailyKeys.all, "day"] as const,
+  day: (date: string) => [...dailyKeys.days(), date] as const,
   history: () => [...dailyKeys.all, "history"] as const,
   leaderboards: () => [...dailyKeys.all, "leaderboard"] as const,
   leaderboard: (scope: DailyLeaderboardScope) => [...dailyKeys.leaderboards(), scope] as const,
@@ -34,6 +36,17 @@ export const fetchDailyLeaderboard = async (scope: DailyLeaderboardScope) =>
 
 export const dailyQueryOptions = () =>
   queryOptions({ queryKey: dailyKeys.overview(), queryFn: fetchDaily, staleTime: DAILY_STALE_MS });
+
+export const dailyDayOptions = (date: string) =>
+  queryOptions({
+    queryKey: dailyKeys.day(date),
+    queryFn: async ({ signal }) =>
+      readData(await apiClient.GET("/daily/{date}", { params: { path: { date } }, signal })),
+    staleTime: DAILY_STALE_MS,
+  });
+
+export const useDailyDay = (date: string) =>
+  useQuery({ ...dailyDayOptions(date), enabled: useHasAccount() });
 
 export const dailyHistoryQueryOptions = () =>
   queryOptions({
@@ -64,6 +77,7 @@ export const invalidateDailyProgress = (queryClient: QueryClient) =>
   Promise.all([
     queryClient.invalidateQueries({ queryKey: dailyKeys.overview() }),
     queryClient.invalidateQueries({ queryKey: dailyKeys.history() }),
+    queryClient.invalidateQueries({ queryKey: dailyKeys.days() }),
     queryClient.invalidateQueries({ queryKey: dailyKeys.leaderboards() }),
   ]);
 

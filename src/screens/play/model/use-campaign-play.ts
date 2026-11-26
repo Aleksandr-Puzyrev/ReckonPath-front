@@ -150,6 +150,7 @@ export const useCampaignPlay = ({ level, game, isResuming, onRestart }: Campaign
       haptic(...hapticsForEvents(blocked));
       return;
     }
+    fx.tap(cell);
     tapper.tap(game, cell);
   };
 

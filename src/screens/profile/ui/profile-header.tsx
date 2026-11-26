@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
-import { Gradient } from "@shared/ui/gradient";
+import { ProfilePortrait } from "@entities/item";
+import type { ProfileTextures } from "@entities/item";
 import { Text } from "@shared/ui/text";
 
 import { styles } from "./profile-header-styles";
@@ -16,10 +17,12 @@ interface ProfileLevel {
 interface IProfileHeader {
   nickname: string;
   progress: ProfileLevel | null;
+  avatar?: ProfileTextures | undefined;
+  frame?: ProfileTextures | undefined;
   onNicknamePress?: () => void;
 }
 
-const ProfileHeader = ({ nickname, progress, onNicknamePress }: IProfileHeader) => {
+const ProfileHeader = ({ nickname, progress, avatar, frame, onNicknamePress }: IProfileHeader) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const fillShare =
@@ -27,12 +30,12 @@ const ProfileHeader = ({ nickname, progress, onNicknamePress }: IProfileHeader) 
 
   return (
     <View style={styles.header}>
-      <View style={styles.avatar}>
-        <Gradient name="primary" radius={theme.sizes.avatar.profile / 2} />
-        <Text variant="display.m" style={styles.letter}>
-          {nickname.slice(0, 1).toUpperCase()}
-        </Text>
-      </View>
+      <ProfilePortrait
+        name={nickname}
+        avatar={avatar}
+        frame={frame}
+        radius={theme.sizes.avatar.profile / 2}
+      />
       <View style={styles.texts}>
         {onNicknamePress === undefined ? (
           <Text variant="title.l" numberOfLines={1} accessibilityRole="header">

@@ -9,6 +9,8 @@ Where every requirement for Reckon Path lives. Agents start here to locate the o
 | Design (screens, both themes) | [`../design/README.md`](../design/README.md) | Visual reference; the spec wins on conflict |
 | Decisions and answers to clarifying questions | [`decisions/`](decisions/) | Binding; extends the spec |
 | Backend (outside the repo, read-only, partly implemented) | `../reckon-path-backend` (Go; contract in `docs/swagger.yaml`) | Not a requirement source: checked against the sources above; mismatches with how it should be in [`backend-discrepancies.md`](backend-discrepancies.md) (`check-backend` skill) |
+| Backend integration inventory | [`backend-handoff/client-integration-audit.md`](backend-handoff/client-integration-audit.md) | Client adoption status, deferred operations, and open decisions |
+| Backend integration requirements | [`backend-handoff/integration-requirements.md`](backend-handoff/integration-requirements.md) | Credentials, test data, and remaining backend work |
 | Prototypes (outside the repo, read-only) | `../peleng/src/game/` (campaign, daily, editor, level codes); `../arena` is a different game and is not used (0007) | Advisory only: consulted where the design has gaps; the developer decides |
 
 ## Source priority

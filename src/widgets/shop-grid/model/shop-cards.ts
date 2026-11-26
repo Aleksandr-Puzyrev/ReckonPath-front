@@ -27,7 +27,7 @@ const cardsOfTab = (shop: Shop, tabId: ShopTabId): ShopOffer[] => {
   if (tabId === "bundles") return shop.bundles.map(bundleOfferOf);
   const items = shop.tabs.find(({ id }) => id === tabId)?.items ?? [];
   return items
-    .filter(({ slot }) => !EFFECT_SLOTS.has(slot))
+    .filter(({ slot, animation }) => !EFFECT_SLOTS.has(slot) || animation !== undefined)
     .map((item) => ({ kind: "item", item }));
 };
 

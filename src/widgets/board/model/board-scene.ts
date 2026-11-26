@@ -6,6 +6,7 @@ import type { BoardGeometry } from "./board-geometry";
 import { cellOrigin } from "./board-geometry";
 import type { BoardPaths } from "./board-paths";
 import type { BoardSkin } from "./board-skin";
+import type { BoardTextures } from "./use-board-textures";
 
 const EDGE_KEY_BASE = 128;
 
@@ -22,6 +23,7 @@ export interface BoardScene {
   bridges: readonly boolean[];
   fences: readonly FenceRect[];
   skin: BoardSkin;
+  textures?: BoardTextures;
   paths: BoardPaths;
   font: SkFont | null;
   labelFont: SkFont | null;
@@ -49,7 +51,7 @@ const fenceRect = (geometry: BoardGeometry, key: number): FenceRect => {
 export const createBoardScene = (
   board: Board,
   geometry: BoardGeometry,
-  assets: Pick<BoardScene, "skin" | "paths" | "font" | "labelFont">,
+  assets: Pick<BoardScene, "skin" | "textures" | "paths" | "font" | "labelFont">,
 ): BoardScene => ({
   geometry,
   kinds: board.kinds,

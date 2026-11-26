@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import {
   ReduceMotion,
   useReducedMotion,
@@ -11,6 +12,10 @@ import { useUnistyles } from "react-native-unistyles";
 
 import type { GameEvent, Idx } from "@reckon-path/engine";
 
+import type { EffectSlot } from "@entities/item";
+
+type EffectListener = (cell: Idx, effects: readonly EffectSlot[]) => void;
+
 const POP_FROM = 0.4;
 const NO_CELL = -1;
 const ANSWER_EVENTS: ReadonlySet<GameEvent["type"]> = new Set([
@@ -22,6 +27,14 @@ const ANSWER_EVENTS: ReadonlySet<GameEvent["type"]> = new Set([
 const BLOCKED_EVENTS: ReadonlySet<GameEvent["type"]> = new Set(["blocked", "alreadyRevealed"]);
 
 export const useBoardFx = () => {
+  const listener = useRef<EffectListener | null>(null);
+  const subscribeEffects = (next: EffectListener) => {
+    listener.current = next;
+    return () => {
+      if (listener.current === next) listener.current = null;
+    };
+  };
+  const tap = (cell: Idx) => listener.current?.(cell, ["fxClick"]);
   const { theme } = useUnistyles();
   const { animation, shake, spring } = theme.motion;
   const isReducedMotion = useReducedMotion();
@@ -47,6 +60,11 @@ export const useBoardFx = () => {
   };
 
   const play = (cell: Idx, events: readonly GameEvent[]) => {
+    if (listener.current !== null && events.some(({ type }) => type === "targetFound")) {
+      const effects: EffectSlot[] = ["fxReveal"];
+      if (events.some(({ type }) => type === "win")) effects.push("fxVictory");
+      listener.current(cell, effects);
+    }
     if (events.some(({ type }) => ANSWER_EVENTS.has(type))) {
       popCell.set(cell);
       pop.set(isReducedMotion ? 1 : POP_FROM);
@@ -62,7 +80,17 @@ export const useBoardFx = () => {
     }
   };
 
-  return { popCell, pop, shakeCell, cellShake, boardShake, pressedCell, play };
+  return {
+    popCell,
+    pop,
+    shakeCell,
+    cellShake,
+    boardShake,
+    pressedCell,
+    play,
+    tap,
+    subscribeEffects,
+  };
 };
 
 export type BoardFx = ReturnType<typeof useBoardFx>;

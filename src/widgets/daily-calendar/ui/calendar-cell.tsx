@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { Text } from "@shared/ui/text";
@@ -12,6 +12,7 @@ import { styles } from "./calendar-cell-styles";
 interface ICalendarCell {
   cell: CalendarCellData;
   label: string;
+  onPress?: () => void;
 }
 
 const DAY_OF_MONTH_START = 8;
@@ -21,7 +22,7 @@ const variantOf = (cell: CalendarCellData) => {
   return cell.isWon ? "won" : "none";
 };
 
-const CalendarCell = ({ cell, label }: ICalendarCell) => {
+const CalendarCell = ({ cell, label, onPress }: ICalendarCell) => {
   const { theme } = useUnistyles();
   styles.useVariants({
     result: variantOf(cell),
@@ -31,15 +32,29 @@ const CalendarCell = ({ cell, label }: ICalendarCell) => {
 
   if (cell === null) return <View style={styles.cell} />;
 
-  return (
-    <View style={styles.cell} accessible accessibilityLabel={label}>
+  const content = (
+    <>
       {cell.isWon ? (
         <StarIcon width={iconSize} height={iconSize} color={theme.colors.text.onAccent} />
       ) : null}
       {cell.isToday && !cell.isWon ? (
         <Text variant="caption">{Number(cell.dayKey.slice(DAY_OF_MONTH_START))}</Text>
       ) : null}
+    </>
+  );
+  return onPress === undefined ? (
+    <View style={styles.cell} accessible accessibilityLabel={label}>
+      {content}
     </View>
+  ) : (
+    <Pressable
+      style={styles.cell}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+    >
+      {content}
+    </Pressable>
   );
 };
 

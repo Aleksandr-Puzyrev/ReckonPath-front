@@ -485,6 +485,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/shop/files/{file}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getShopAsset"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/shop": {
     parameters: {
       query?: never;
@@ -1084,7 +1100,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    get: operations["listSupportTickets"];
     put?: never;
     /** @description A support request from an account; it passes under a full ban (decision 0064 #1). The ban appeal uses topic ban_appeal (decision 0038 #5). The answer comes by email (decision 0064 #4). Errors validation_failed (also for unknown fields), tickets_limit (5 per rolling 24 h), too_many_requests, rate_limit_unavailable. */
     post: operations["createSupportTicket"];
@@ -1468,6 +1484,376 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/events": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["listEvents"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{code}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getEvent"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{code}/share": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getEventPreview"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{code}/join": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["joinEvent"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{code}/maps/{id}/play": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["playEventMap"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{code}/attempts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getEventAttempt"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{code}/attempts/{id}/tap": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["tapEventAttempt"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{code}/leaderboard": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getEventLeaderboard"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/events/{code}/claim": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["claimEventPrize"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/achievements": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getAchievements"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/achievements/{id}/claim": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["claimAchievement"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/stats": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getCampaignStats"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/nickname/check": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["checkNickname"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/devices/current/notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getDeviceNotificationSettings"];
+    put: operations["updateDeviceNotificationSettings"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/devices/current/push-tokens": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["registerDevicePushToken"];
+    post?: never;
+    delete: operations["clearDevicePushTokens"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/devices/current/push-tokens/{provider}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete: operations["clearDevicePushTokenByProvider"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/devices/current/test-push": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["testDevicePush"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/notifications": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["getNotificationHistory"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/notifications/{id}/read": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put: operations["markNotificationRead"];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/auth/oauth/{provider}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["signInWithProvider"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/me/identities/{provider}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: components["schemas"]["OAuthProvider"];
+      };
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["linkProvider"];
+    delete: operations["unlinkProvider"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/offline/pack": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["downloadCampaignPack"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/campaign/offline/sync": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["syncOfflineCampaign"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1591,6 +1977,8 @@ export interface components {
       | "step_claimed"
       | "no_season_result"
       | "friend_self"
+      | "competition_not_found"
+      | "competition_unavailable"
       | "already_friends"
       | "request_exists"
       | "requests_limit"
@@ -1651,6 +2039,25 @@ export interface components {
       dayKey: string;
       /** Format: date-time */
       nextDayAt: string;
+    };
+    /** @enum {string} */
+    OAuthProvider: "vkid" | "yandex";
+    OAuthCode: {
+      code: string;
+      codeVerifier: string;
+      redirectUri?: string;
+      vkDeviceId?: string;
+      state?: string;
+    };
+    OAuthPassword: {
+      password?: string;
+    };
+    LinkedIdentity: {
+      provider: components["schemas"]["OAuthProvider"];
+      email?: string;
+      name?: string;
+      /** Format: date-time */
+      linkedAt: string;
     };
     TokenPair: {
       accessToken: string;
@@ -1766,6 +2173,8 @@ export interface components {
         /** @description Active bans (decision 0060 */
         bans?: components["schemas"]["BanDetails"][];
       };
+      hasPassword?: boolean;
+      identities?: components["schemas"]["LinkedIdentity"][];
       consents: components["schemas"]["Consent"][];
       consentsRequired: components["schemas"]["ConsentType"][];
     };
@@ -1931,6 +2340,12 @@ export interface components {
       coins: number;
       gems: number;
     };
+    ShopPalette: {
+      [key: string]: string[];
+    };
+    ShopTexturePaths: {
+      [key: string]: string;
+    };
     ShopItemView: {
       key: string;
       tab: components["schemas"]["ShopTabKey"];
@@ -1947,6 +2362,24 @@ export interface components {
       /** Format: date-time */
       endsAt?: string;
       image?: string;
+      style?: components["schemas"]["ShopPalette"];
+      /** @enum {string} */
+      render?: "colors" | "textures" | "lottie";
+      textures?: components["schemas"]["ShopTexturePaths"];
+      animation?: string;
+      loop?: boolean;
+      layerColors?: {
+        [key: string]: string;
+      };
+      singleTheme?: boolean;
+      dark?: {
+        style?: components["schemas"]["ShopPalette"];
+        textures?: components["schemas"]["ShopTexturePaths"];
+        animation?: string;
+        layerColors?: {
+          [key: string]: string;
+        };
+      };
       parts?: string[];
       partsOwned?: string[];
     };
@@ -2026,6 +2459,76 @@ export interface components {
       limit: number;
       stars: number[];
     };
+    EventSummary: {
+      id: string;
+      code: string;
+      title: string;
+      description: string;
+      /** @enum {string} */
+      status: "scheduled" | "running" | "finished";
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+    };
+    CompetitiveEvent: {
+      id: string;
+      title: string;
+      description: string;
+      /** @enum {string} */
+      status: "scheduled" | "running" | "finished";
+      /** Format: date-time */
+      startsAt: string;
+      /** Format: date-time */
+      endsAt: string;
+      attemptsPerMap: number;
+      maps: string[];
+      prizes: components["schemas"]["CompetitionReward"][] | null;
+    };
+    EventAttempt: {
+      id: string;
+      board: components["schemas"]["PublicBoard"];
+      cells: components["schemas"]["CellView"][];
+      seq: number;
+      /** @enum {string} */
+      status: "play" | "won" | "lost";
+      moves: number;
+      score: number;
+    };
+    EventStanding: {
+      rank: number;
+      nickname: string;
+      score: number;
+      moves: number;
+    };
+    CompetitionReward: {
+      coins: number;
+      gems: number;
+      xp: number;
+      item?: string;
+    };
+    AchievementCondition: {
+      /** @enum {string} */
+      metric: "level_stars" | "arena_wins" | "trophies" | "daily_wins" | "event_maps_won";
+      minimum: number;
+    };
+    Achievement: {
+      id: string;
+      title: string;
+      description: string;
+      badge: string;
+      conditions: components["schemas"]["AchievementCondition"][];
+      reward: components["schemas"]["CompetitionReward"];
+      /** Format: date-time */
+      startsAt?: string;
+      /** Format: date-time */
+      endsAt?: string;
+      claimed: boolean;
+      eligible: boolean;
+      progress: {
+        [key: string]: number;
+      };
+    };
     PublicBoard: {
       rows: number;
       cols: number;
@@ -2069,6 +2572,50 @@ export interface components {
     };
     /** @enum {string} */
     LevelState: "locked" | "current" | "done" | "perfect";
+    OfflineCampaignPack: {
+      packId: string;
+      /** Format: date-time */
+      expiresAt: string;
+      /** @enum {string} */
+      alg: "A256GCM";
+      key: string;
+      levels: {
+        number: number;
+        version: number;
+        nonce: string;
+        data: string;
+      }[];
+    };
+    OfflineCampaignResult: {
+      id: string;
+      packId: string;
+      level: number;
+      version: number;
+      taps: components["schemas"]["Cells"];
+      /** Format: date-time */
+      startedAt: string;
+      /** Format: date-time */
+      finishedAt: string;
+    };
+    OfflineCampaignSync: {
+      results: {
+        id: string;
+        /** @enum {string} */
+        status: "won" | "lost" | "rejected";
+        reason?: string;
+        stars: number;
+        reward: number;
+      }[];
+      wallet: components["schemas"]["BackendWallet"];
+    };
+    CampaignStats: {
+      levelsDone: number;
+      levelsTotal: number;
+      stars: number;
+      starsMax: number;
+      perfect: number;
+      coinsEarned: number;
+    };
     CampaignLevel: {
       number: number;
       title: string;
@@ -2533,6 +3080,47 @@ export interface components {
       max?: number;
       count?: number;
     };
+    /** @enum {string} */
+    PushProvider: "fcm" | "apns" | "rustore" | "hms" | "webpush";
+    DevicePushResult: {
+      sent: number;
+      failed: number;
+      removed: number;
+      unsupported: number;
+    };
+    /** @enum {string} */
+    NotificationChannel: "daily" | "friends" | "arena" | "events";
+    DeviceNotificationSettings: {
+      tz: string;
+      /** @enum {string} */
+      locale: "ru" | "en";
+      channels: components["schemas"]["NotificationChannel"][];
+    };
+    NotificationHistoryItem: {
+      id: string;
+      type: string;
+      title: string;
+      body: string;
+      userId?: string;
+      ref?: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      readAt: string | null;
+    };
+    SupportTicketView: {
+      id: string;
+      /** @enum {string} */
+      topic: "ban_appeal" | "support";
+      /** @enum {string} */
+      status: "open" | "answered" | "closed";
+      message: string;
+      answer?: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      answeredAt?: string;
+    };
     SupportTicket: {
       /** @enum {string} */
       topic: "ban_appeal" | "support";
@@ -2657,6 +3245,15 @@ export interface components {
     };
   };
   responses: {
+    /** @description Settings for the current device */
+    DeviceNotificationSettings: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": components["schemas"]["DeviceNotificationSettings"];
+      };
+    };
     /** @description Error envelope (Part 7 §1, codes in §2) */
     Error: {
       headers: {
@@ -3419,6 +4016,33 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["StreakView"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getShopAsset: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        file: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Immutable shop asset */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            [key: string]: unknown;
+          };
+          "image/png": string;
+          "image/jpeg": string;
         };
       };
       default: components["responses"]["Error"];
@@ -4365,6 +4989,29 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  listSupportTickets: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Support tickets */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            tickets: components["schemas"]["SupportTicketView"][];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
   createSupportTicket: {
     parameters: {
       query?: never;
@@ -4979,6 +5626,613 @@ export interface operations {
       default: components["responses"]["Error"];
     };
   };
+  listEvents: {
+    parameters: {
+      query?: {
+        page?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventSummary"][];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompetitiveEvent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getEventPreview: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Public event preview */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompetitiveEvent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  joinEvent: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CompetitiveEvent"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  playEventMap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventAttempt"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getEventAttempt: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventAttempt"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  tapEventAttempt: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          seq: number;
+          cell: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventAttempt"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getEventLeaderboard: {
+    parameters: {
+      query?: {
+        page?: number;
+      };
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EventStanding"][];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  claimEventPrize: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        code: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reward claimed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getAchievements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Success */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["Achievement"][];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  claimAchievement: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Reward claimed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getCampaignStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Campaign statistics for the current player */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["CampaignStats"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  checkNickname: {
+    parameters: {
+      query: {
+        nickname: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Nickname availability */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            available: boolean;
+            /** @enum {string} */
+            reason?: "invalid" | "taken" | "forbidden";
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getDeviceNotificationSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components["responses"]["DeviceNotificationSettings"];
+      default: components["responses"]["Error"];
+    };
+  };
+  updateDeviceNotificationSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DeviceNotificationSettings"];
+      };
+    };
+    responses: {
+      200: components["responses"]["DeviceNotificationSettings"];
+      default: components["responses"]["Error"];
+    };
+  };
+  registerDevicePushToken: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          provider: components["schemas"]["PushProvider"];
+          token: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Token registered */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  clearDevicePushTokens: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Tokens removed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  clearDevicePushTokenByProvider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: components["schemas"]["PushProvider"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Token removed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  testDevicePush: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Test dispatch result */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["DevicePushResult"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  getNotificationHistory: {
+    parameters: {
+      query?: {
+        cursor?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification history page */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": {
+            items: components["schemas"]["NotificationHistoryItem"][];
+            nextCursor?: string;
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  markNotificationRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification marked as read */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  signInWithProvider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: components["schemas"]["OAuthProvider"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OAuthCode"] & {
+          device: components["schemas"]["DeviceInfo"];
+          acceptTerms?: boolean;
+          acceptPrivacy?: boolean;
+          acceptMarketing?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Session created */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["TokenPair"] & {
+            isNewUser: boolean;
+            consentsRequired: components["schemas"]["ConsentType"][];
+          };
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  linkProvider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: components["schemas"]["OAuthProvider"];
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OAuthCode"] &
+          components["schemas"]["OAuthPassword"];
+      };
+    };
+    responses: {
+      /** @description Provider linked */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["LinkedIdentity"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  unlinkProvider: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        provider: components["schemas"]["OAuthProvider"];
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "application/json": components["schemas"]["OAuthPassword"];
+      };
+    };
+    responses: {
+      /** @description Provider unlinked */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  downloadCampaignPack: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Encrypted campaign levels */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OfflineCampaignPack"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
+  syncOfflineCampaign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": {
+          results: components["schemas"]["OfflineCampaignResult"][];
+        };
+      };
+    };
+    responses: {
+      /** @description Server-verified attempts and wallet */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["OfflineCampaignSync"];
+        };
+      };
+      default: components["responses"]["Error"];
+    };
+  };
 }
 type FlattenedDeepRequired<T> = {
   [K in keyof T]-?: FlattenedDeepRequired<
@@ -4997,6 +6251,9 @@ export const pathsDailyLeaderboardGetParametersQueryScopeValues: ReadonlyArray<
 export const pathsStreakRestorePostRequestBodyContentApplicationJsonMethodValues: ReadonlyArray<
   FlattenedDeepRequired<paths>["/streak/restore"]["post"]["requestBody"]["content"]["application/json"]["method"]
 > = ["gems"];
+export const pathsMeNicknameCheckGetResponses200ContentApplicationJsonReasonValues: ReadonlyArray<
+  FlattenedDeepRequired<paths>["/me/nickname/check"]["get"]["responses"]["200"]["content"]["application/json"]["reason"]
+> = ["invalid", "taken", "forbidden"];
 export const platformValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Platform"]
 > = ["ios", "android"];
@@ -5109,6 +6366,8 @@ export const errorCodeValues: ReadonlyArray<
   "step_claimed",
   "no_season_result",
   "friend_self",
+  "competition_not_found",
+  "competition_unavailable",
   "already_friends",
   "request_exists",
   "requests_limit",
@@ -5127,6 +6386,9 @@ export const errorCodeValues: ReadonlyArray<
   "player_not_found",
   "report_duplicate",
 ];
+export const oAuthProviderValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["OAuthProvider"]
+> = ["vkid", "yandex"];
 export const meLocaleValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["Me"]["locale"]
 > = ["ru", "en"];
@@ -5173,6 +6435,9 @@ export const shopTabKeyValues: ReadonlyArray<
 export const shopCurrencyValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["ShopCurrency"]
 > = ["coins", "gems"];
+export const shopItemViewRenderValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["ShopItemView"]["render"]
+> = ["colors", "textures", "lottie"];
 export const adPlacementValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["AdPlacement"]
 > = ["gems", "continue", "double", "streak", "event"];
@@ -5185,6 +6450,18 @@ export const adIntentStatusRewardCurrencyValues: ReadonlyArray<
 export const levelModeValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["LevelMode"]
 > = ["number", "hot_cold", "course"];
+export const eventSummaryStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["EventSummary"]["status"]
+> = ["scheduled", "running", "finished"];
+export const competitiveEventStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["CompetitiveEvent"]["status"]
+> = ["scheduled", "running", "finished"];
+export const eventAttemptStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["EventAttempt"]["status"]
+> = ["play", "won", "lost"];
+export const achievementConditionMetricValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["AchievementCondition"]["metric"]
+> = ["level_stars", "arena_wins", "trophies", "daily_wins", "event_maps_won"];
 export const cellViewKindValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["CellView"]["kind"]
 > = ["number", "target", "bomb", "buoy", "beacon"];
@@ -5200,6 +6477,12 @@ export const cellViewCompareValues: ReadonlyArray<
 export const levelStateValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["LevelState"]
 > = ["locked", "current", "done", "perfect"];
+export const offlineCampaignPackAlgValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["OfflineCampaignPack"]["alg"]
+> = ["A256GCM"];
+export const offlineCampaignSyncResultsStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["OfflineCampaignSync"]["results"]["status"]
+> = ["won", "lost", "rejected"];
 export const campaignGameStatusValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["CampaignGame"]["status"]
 > = ["play", "lost", "won", "abandoned"];
@@ -5267,6 +6550,21 @@ export const historyItemOutcomeValues: ReadonlyArray<
 export const trackStepViewStateValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["TrackStepView"]["state"]
 > = ["locked", "ready", "claimed"];
+export const pushProviderValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["PushProvider"]
+> = ["fcm", "apns", "rustore", "hms", "webpush"];
+export const notificationChannelValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["NotificationChannel"]
+> = ["daily", "friends", "arena", "events"];
+export const deviceNotificationSettingsLocaleValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["DeviceNotificationSettings"]["locale"]
+> = ["ru", "en"];
+export const supportTicketViewTopicValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["SupportTicketView"]["topic"]
+> = ["ban_appeal", "support"];
+export const supportTicketViewStatusValues: ReadonlyArray<
+  FlattenedDeepRequired<components>["schemas"]["SupportTicketView"]["status"]
+> = ["open", "answered", "closed"];
 export const supportTicketTopicValues: ReadonlyArray<
   FlattenedDeepRequired<components>["schemas"]["SupportTicket"]["topic"]
 > = ["ban_appeal", "support"];

@@ -16,7 +16,7 @@ export type { Currency } from "./model/price-parts";
 export { rarityLookOf } from "./model/rarity-look";
 export { bundleOfferOf, offerKeyOf, offerViewOf } from "./model/shop-offer";
 export type { OfferMark, OfferView, ShopOffer } from "./model/shop-offer";
-export type { SkinData, ThemeSkin } from "./model/skin-data";
+export type { BoardTexture, BoardTextureUrls, SkinData, ThemeSkin } from "./model/skin-data";
 export { default as OfferPreview } from "./ui/offer-preview";
 export type {
   Bundle,
@@ -30,3 +30,12 @@ export type {
   ShopTab,
   Slot,
 } from "./model/item-type";
+export { profileTexturesOf } from "./model/shop-texture";
+export type { ProfileTextures } from "./model/shop-texture";
+export { default as ProfilePortrait } from "./ui/profile-portrait";
+export { shopAnimationOptions, useShopAnimation } from "./api/animation-query";
+export type { AnimationTheme } from "./model/shop-animation";
+export { LottieView } from "./ui/lottie-view";
+export { equippedAnimationsOf } from "./model/equipped-animations";
+export type { EffectSlot } from "./model/equipped-animations";
+export type { ShopAnimationSource } from "./api/animation-query";

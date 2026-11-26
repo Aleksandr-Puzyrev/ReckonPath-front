@@ -18,3 +18,4 @@ export type { ConsentType } from "./api/consents-mutation";
 export { mapMe } from "./model/map-me";
 export type { Me } from "./model/map-me";
 export { NICKNAME_CHARS, NICKNAME_MAX_LENGTH, NICKNAME_MIN_LENGTH } from "./model/nickname-rules";
+export { useNicknameCheck } from "./api/nickname-query";

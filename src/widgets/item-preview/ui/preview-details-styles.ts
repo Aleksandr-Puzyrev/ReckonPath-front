@@ -23,6 +23,7 @@ export const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     gap: theme.space[3],
   },
+  animation: { width: theme.sizes.shop.previewVisual, aspectRatio: 1 },
   placeholder: {
     width: theme.sizes.shop.previewVisual,
   },

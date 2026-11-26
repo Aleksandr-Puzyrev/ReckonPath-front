@@ -2,6 +2,7 @@ import { useQueries } from "@tanstack/react-query";
 import { useUnistyles } from "react-native-unistyles";
 
 import { BOARD_SLOTS, skinQueryOptions, useInventoryQuery } from "@entities/item";
+import type { SkinData } from "@entities/item";
 
 import { boardSkinFor } from "./board-skin";
 import type { BoardTheme } from "./board-skin";
@@ -9,29 +10,32 @@ import type { BoardTheme } from "./board-skin";
 export interface BoardLook {
   packageUrl: string | null;
   theme: BoardTheme;
+  skin?: SkinData;
 }
 
-const useEquippedSkinUrls = () => {
+const useEquippedSkins = () => {
   const { data: inventory } = useInventoryQuery();
   return BOARD_SLOTS.flatMap((slot) => {
     const id = inventory?.loadout[slot];
-    const url = inventory?.items.find(({ itemId }) => itemId === id)?.item.skinUrl;
-    return url === undefined || url === "" ? [] : [url];
+    const entry = inventory?.items.find(({ itemId }) => itemId === id);
+    return entry === undefined ? [] : [entry.item];
   });
 };
 
-// Without a look the board wears the player's equipped skin in the app theme; a skin not loaded yet leaves the default (без заданного вида поле носит надетый скин в теме приложения; ещё не загруженный скин оставляет стандартный).
 export const useBoardSkin = (look?: BoardLook) => {
   const { rt } = useUnistyles();
-  const equippedUrls = useEquippedSkinUrls();
-  const lookUrl = look?.packageUrl ?? "";
-  const urls = look === undefined ? equippedUrls : [lookUrl].filter((url) => url !== "");
+  const equipped = useEquippedSkins();
+  const sources =
+    look === undefined ? equipped : [{ skinUrl: look.packageUrl ?? "", skin: look.skin }];
   const theme = look?.theme ?? (rt.themeName === "light" ? "light" : "dark");
+  const urls = sources.flatMap(({ skinUrl }) => (skinUrl === "" ? [] : [skinUrl]));
   const skins = useQueries({ queries: urls.map(skinQueryOptions) });
+  const packages = new Map(urls.map((url, index) => [url, skins[index]?.data]));
+
   return boardSkinFor(
     theme,
-    skins.flatMap(({ data }) => {
-      const part = data?.[theme];
+    sources.flatMap(({ skin, skinUrl }) => {
+      const part = skin?.[theme] ?? packages.get(skinUrl)?.[theme];
       return part === undefined ? [] : [part];
     }),
   );

@@ -1,9 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 import { uuidv7 } from "uuidv7";
 
-import { createTicketMutationOptions } from "@entities/support";
+import { createTicketMutationOptions, supportTicketKeys } from "@entities/support";
 import type { SupportTopic } from "@entities/support";
 import { useMeQuery } from "@entities/wallet";
 import { errorMessageKey } from "@shared/api";
@@ -25,10 +25,14 @@ const deviceOf = () =>
   [Platform.OS, Device.osVersion, Device.modelName].filter((part) => part !== null).join(" ");
 
 export const useContactSupport = (topic: SupportTopic, { onSent, onError }: SupportCallbacks) => {
+  const client = useQueryClient();
   const { data: me } = useMeQuery();
   const { mutate, isPending } = useMutation({
     ...createTicketMutationOptions(),
-    onSuccess: () => onSent(SUPPORT_TEXTS[topic].sent),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: supportTicketKeys.all });
+      onSent(SUPPORT_TEXTS[topic].sent);
+    },
     onError: (error) => onError(errorMessageKey(error)),
   });
 

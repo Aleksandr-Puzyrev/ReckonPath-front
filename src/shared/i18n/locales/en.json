@@ -344,6 +344,19 @@
     }
   },
   "errors": {
+    "no_push_tokens": "No push token is registered on this device.",
+    "no_device": "This session has no device. Sign in again to update notification settings.",
+    "account_exists": "An account with this email already exists. Sign in with email and link this provider in settings.",
+    "already_linked": "This sign-in method is already linked.",
+    "not_linked": "This sign-in method is no longer linked.",
+    "oauth_rejected": "Sign-in could not be verified. Try again.",
+    "provider_not_supported": "This sign-in method is unavailable.",
+    "provider_unavailable": "The sign-in provider is unavailable. Try again later.",
+    "last_login_method": "Add another sign-in method before unlinking this one.",
+    "identity_taken": "This sign-in provider account is already linked to another player.",
+    "provider_already_linked": "Unlink the existing account for this provider first.",
+    "reauth_required": "Sign in again to confirm this change.",
+    "password_required": "Enter your current password.",
     "generic": "Something went wrong. Please try again",
     "NETWORK": "Can’t reach the server",
     "insufficient_funds": "Not enough currency",
@@ -388,7 +401,9 @@
     "rate_limit_unavailable": "Service temporarily unavailable. Try again later",
     "report_duplicate": "You’ve already reported this player today",
     "player_not_found": "Player not found",
-    "friend_self": "That’s your own profile"
+    "friend_self": "That’s your own profile",
+    "competition_not_found": "Event or achievement not found.",
+    "competition_unavailable": "This action is currently unavailable."
   },
   "system": {
     "update": {
@@ -500,6 +515,7 @@
     "coins": "Coins: {{count}}"
   },
   "nick": {
+    "forbidden": "This nickname is not allowed",
     "title": "Nickname",
     "rules": "3–16 characters: letters, digits, _",
     "short": "At least 3 characters",
@@ -513,6 +529,13 @@
     "saved": "Nickname changed"
   },
   "profile": {
+    "campaignStats": {
+      "title": "Campaign statistics",
+      "levels": "Levels completed",
+      "stars": "Stars",
+      "perfect": "Levels with 3 stars",
+      "coins": "Coins earned"
+    },
     "saveProgress": "Save your progress",
     "collection": "Collection",
     "moreInShop": "More in the showroom",
@@ -1255,5 +1278,124 @@
     "title": "We've updated our documents",
     "body": "Read and accept the new terms and privacy policy to continue.",
     "accept": "Accept"
+  },
+  "competition": {
+    "signIn": "Sign in",
+    "events": "Events",
+    "code": "Event code",
+    "find": "Find event",
+    "eventCode": "Code: {{code}}",
+    "invalidCode": "Enter a valid event code.",
+    "details": "Details",
+    "openEvent": "Open {{title}}",
+    "noEvents": "The next event is coming soon.",
+    "join": "Join event",
+    "joined": "You’ve joined the event.",
+    "maps": "Event maps",
+    "map": "Map {{value}}",
+    "attemptLimit": "Attempts per map: {{value}}",
+    "noStandings": "No results yet.",
+    "standing": "{{score}} points · {{moves}} moves",
+    "prizes": "Prizes by place",
+    "place": "Place {{value}}",
+    "claimed": "Reward claimed",
+    "locked": "Locked",
+    "starts": "Starts {{date}}",
+    "ends": "Ends {{date}}",
+    "more": "Show more",
+    "loading": "Loading…",
+    "offline": "You’re offline. Connect to the internet to continue.",
+    "unavailable": "This section is currently unavailable.",
+    "achievements": "Achievements",
+    "noAchievements": "No achievements yet.",
+    "progress": "{{condition}}: {{current}} / {{minimum}}",
+    "coins": "{{value}} coins",
+    "gems": "{{value}} gems",
+    "xp": "{{value}} XP",
+    "item": "Collection item",
+    "won": "Map completed · {{score}} points",
+    "lost": "Attempt ended · {{score}} points",
+    "status": {
+      "scheduled": "Upcoming",
+      "running": "In progress",
+      "finished": "Finished"
+    },
+    "metrics": {
+      "level_stars": "Campaign stars",
+      "arena_wins": "Arena wins",
+      "trophies": "Trophies",
+      "daily_wins": "Daily wins",
+      "event_maps_won": "Event maps completed"
+    },
+    "modes": {
+      "number": "The number shows the shortest distance to a hidden target.",
+      "hot_cold": "The clue compares this move with your previous move.",
+      "course": "The arrow points towards a hidden target."
+    }
+  },
+  "history": {
+    "tickets": "My support requests",
+    "noTickets": "No support requests yet.",
+    "notifications": "Notifications",
+    "noNotifications": "No notifications yet.",
+    "markRead": "Mark as read",
+    "markTitleRead": "Mark as read: {{title}}",
+    "answer": "Support reply",
+    "topic": {
+      "ban_appeal": "Ban appeal",
+      "support": "Support request"
+    },
+    "status": {
+      "open": "Open",
+      "answered": "Answered",
+      "closed": "Closed"
+    }
+  },
+  "oauth": {
+    "confirm": "Confirm",
+    "provider": {
+      "vkid": "VK ID",
+      "yandex": "Yandex ID"
+    },
+    "signIn": {
+      "vkid": "Sign in with VK ID",
+      "yandex": "Sign in with Yandex ID"
+    },
+    "link": "Link {{provider}}",
+    "unlink": "Unlink {{provider}}",
+    "linked": "Sign-in provider linked",
+    "unlinked": "Sign-in provider unlinked"
+  },
+  "offlineCampaign": {
+    "syncBlocked": "Sync could not finish. Your attempts are saved on this device.",
+    "title": "Offline campaign",
+    "readyUntil": "Downloaded until {{date}}",
+    "unavailable": "No offline levels available. Connect to the internet to download them.",
+    "expired": "The offline pack has expired. Connect to download a new one.",
+    "playLevel": "Play level {{level}} offline",
+    "finished": "All downloaded levels are cleared.",
+    "pendingReward": "Rewards are confirmed after sync.",
+    "toLevels": "Back to levels",
+    "awaiting_one": "{{count}} attempt waiting to sync",
+    "awaiting_other": "{{count}} attempts waiting to sync",
+    "rejected_one": "The server rejected {{count}} offline attempt.",
+    "rejected_other": "The server rejected {{count}} offline attempts."
+  },
+  "deviceNotifications": {
+    "enablePush": "Enable push delivery",
+    "disablePush": "Disable push delivery",
+    "systemDisabled": "Push notifications are disabled in system settings.",
+    "openSettings": "Open system settings",
+    "testPush": "Send test notification",
+    "testSent": "The server accepted the test dispatch.",
+    "testNotSent": "The server could not send the test notification.",
+    "title": "Device notifications",
+    "offline": "Connect to the internet to change notification settings.",
+    "channels": {
+      "daily": "Daily bearing and streak",
+      "friends": "Friends and challenges",
+      "arena": "Arena",
+      "events": "Events"
+    }
   }
 }

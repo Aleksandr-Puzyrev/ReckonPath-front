@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { useSystemState } from "@entities/app-config";
 import {
   campaignLevelId,
   levelOfPublicBoard,
@@ -12,6 +13,7 @@ import {
 } from "@entities/level";
 import type { CampaignLevel, CampaignWorld } from "@entities/level";
 import { useIsOnline } from "@shared/api";
+import { HAS_BACKEND } from "@shared/config";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
@@ -25,6 +27,7 @@ import { TopBar } from "@widgets/top-bar";
 
 import LevelsHeader from "./levels-header";
 import { styles } from "./levels-screen-styles";
+import OfflineCampaignPanel from "./offline-campaign-panel";
 
 const PREVIEW_SHARE = 0.36;
 
@@ -40,6 +43,7 @@ const LevelsScreen = () => {
   const { t } = useTranslation();
   const { rt } = useUnistyles();
   const isOnline = useIsOnline();
+  const { state: system } = useSystemState();
   const { data: overview, isError } = useCampaignQuery();
   const [sheet, setSheet] = useState<SheetLevel | null>(null);
   const { data: detail } = useCampaignLevelQuery(sheet?.level.number ?? null);
@@ -86,7 +90,10 @@ const LevelsScreen = () => {
               onEditor={() => router.push("/editor")}
               onPlayCode={() => router.push("/play")}
             />
-            {isUnavailable ? (
+            {HAS_BACKEND && (
+              <OfflineCampaignPanel isOffline={!isOnline || system.kind === "maintenance"} />
+            )}
+            {isUnavailable && !HAS_BACKEND ? (
               <Text variant="body.s" style={styles.offline} testID="campaign-offline">
                 {t("campaign.offline")}
               </Text>

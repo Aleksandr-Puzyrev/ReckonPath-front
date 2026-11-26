@@ -1,8 +1,13 @@
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useSystemState } from "@entities/app-config";
 import { RESUME_PARAM, useCampaignQuery } from "@entities/level";
 import { dailyUnlockOf, useDailyToday } from "@features/daily-today";
+import { isPackCurrent, useOfflineCampaign } from "@entities/offline-campaign";
+import { useIsOnline } from "@shared/api";
+import { HAS_BACKEND } from "@shared/config";
 import { Screen } from "@shared/ui/screen";
 
 import { resolveDailyRoute } from "../model/resolve-play-level";
@@ -11,6 +16,7 @@ import CampaignLevel from "./campaign-level";
 import DailyLevel from "./daily-level";
 import DayOver from "./day-over";
 import LevelUnavailable from "./level-unavailable";
+import OfflineCampaignLevel from "./offline-campaign-level";
 import { styles } from "./play-screen-styles";
 
 const CAMPAIGN_MODE = "campaign";
@@ -33,6 +39,22 @@ const PlayMode = ({ mode, id, isResuming }: IPlayMode) => {
   const { t } = useTranslation();
   const { data: overview, isLoading } = useCampaignQuery();
   const { todayKey } = useDailyToday();
+  const online = useIsOnline();
+  const { state: system } = useSystemState();
+  const maintenance = system.kind === "maintenance";
+  const [isOfflineCampaign] = useState(() => {
+    const pack = useOfflineCampaign.getState().pack;
+    return (
+      mode === "offline" ||
+      (HAS_BACKEND &&
+        mode === CAMPAIGN_MODE &&
+        (!online || maintenance) &&
+        pack !== null &&
+        isPackCurrent(pack))
+    );
+  });
+  if (isOfflineCampaign && LEVEL_NUMBER.test(id))
+    return <OfflineCampaignLevel number={Number(id)} />;
 
   if (mode === CAMPAIGN_MODE && LEVEL_NUMBER.test(id)) {
     return <CampaignLevel number={Number(id)} isResuming={isResuming} />;

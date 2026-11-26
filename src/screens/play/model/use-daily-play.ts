@@ -91,6 +91,7 @@ export const useDailyPlay = ({ game, onRestart }: DailyPlayInput) => {
       haptic(...hapticsForEvents(blocked));
       return;
     }
+    fx.tap(cell);
     tapper.tap(game, cell);
   };
 

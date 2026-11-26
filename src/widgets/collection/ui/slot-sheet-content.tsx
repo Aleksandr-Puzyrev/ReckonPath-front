@@ -21,7 +21,7 @@ interface ISlotSheetContent {
   loadout: Loadout;
   inventory: readonly InventoryEntry[];
   isOnline: boolean;
-  renderBoard: (packageUrl: string | null) => ReactNode;
+  renderBoard: (item: InventoryEntry["item"] | null) => ReactNode;
   onOpenShop: () => void;
   onToast: (text: string) => void;
 }
@@ -53,7 +53,7 @@ const SlotSheetContent = ({
         {t(`profile.slots.${slot}`)}
       </Text>
       {isBoardSlot(slot) ? (
-        <View style={styles.visual}>{renderBoard(equipped?.item.skinUrl ?? null)}</View>
+        <View style={styles.visual}>{renderBoard(equipped?.item ?? null)}</View>
       ) : null}
       <Pressable
         testID="slot-default"
@@ -83,7 +83,12 @@ const SlotSheetContent = ({
           style={[styles.option, isEquipped ? styles.selected : null]}
         >
           <View style={styles.thumb}>
-            <OfferPreview preview={entry.item.preview} rarity={entry.item.rarity} slot={slot} />
+            <OfferPreview
+              preview={entry.item.preview}
+              profileTextures={entry.item.profileTextures}
+              rarity={entry.item.rarity}
+              slot={slot}
+            />
           </View>
           <Text variant="body.m" style={styles.name} numberOfLines={1}>
             {entry.item.name}

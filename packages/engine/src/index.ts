@@ -20,6 +20,7 @@ export type {
 } from "./model/types";
 export {
   BOMB_PENALTY_MOVES,
+  BUOY_BONUS_MOVES,
   DEFAULT_ENGINE_CONFIG,
   FOG_MAX,
   FOG_MIN,

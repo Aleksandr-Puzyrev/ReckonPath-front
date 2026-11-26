@@ -19,6 +19,7 @@ import { Text } from "@shared/ui/text";
 
 import type { PreviewLook, PreviewTheme } from "../model/preview-look";
 
+import AnimationPreview from "./animation-preview";
 import BundleParts from "./bundle-parts";
 import { styles } from "./preview-details-styles";
 import ThemeSwitch from "./theme-switch";
@@ -35,6 +36,15 @@ const PreviewDetails = ({ offer, items, renderBoard, now }: IPreviewDetails) => 
   const { rt } = useUnistyles();
   const [theme, setTheme] = useState<PreviewTheme>(rt.themeName === "light" ? "light" : "dark");
   const view = offerViewOf(offer);
+  const animation = offer.kind === "item" ? offer.item.animation : undefined;
+  const still = (
+    <OfferPreview
+      preview={view.preview}
+      profileTextures={view.profileTextures}
+      rarity={view.rarity}
+      slot={view.slot}
+    />
+  );
   const description = offer.kind === "item" ? offer.item.description : offer.bundle.description;
   const isDiscounted =
     offer.kind === "bundle" && amountOf(offer.bundle.basePrice) > amountOf(offer.bundle.price);
@@ -59,15 +69,27 @@ const PreviewDetails = ({ offer, items, renderBoard, now }: IPreviewDetails) => 
         </Text>
       )}
       <View style={styles.visual}>
-        {isBoardSlot(view.slot) && offer.kind === "item" ? (
+        {animation !== undefined ? (
           <>
-            {renderBoard({ packageUrl: offer.item.skinUrl, theme })}
+            <AnimationPreview
+              key={`${theme}:${animation[theme].url}`}
+              animation={animation[theme]}
+              loop={animation.loop}
+              fallback={<View style={styles.placeholder}>{still}</View>}
+            />
+            <ThemeSwitch theme={theme} onChange={setTheme} />
+          </>
+        ) : isBoardSlot(view.slot) && offer.kind === "item" ? (
+          <>
+            {renderBoard({
+              packageUrl: offer.item.skinUrl,
+              theme,
+              ...(offer.item.skin === undefined ? {} : { skin: offer.item.skin }),
+            })}
             <ThemeSwitch theme={theme} onChange={setTheme} />
           </>
         ) : (
-          <View style={styles.placeholder}>
-            <OfferPreview preview={view.preview} rarity={view.rarity} slot={view.slot} />
-          </View>
+          <View style={styles.placeholder}>{still}</View>
         )}
       </View>
       {offer.kind === "bundle" ? <BundleParts bundle={offer.bundle} items={items} /> : null}

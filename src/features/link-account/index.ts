@@ -7,3 +7,5 @@ export { default as LinkSheet } from "./ui/link-sheet";
 export { default as PasswordReset } from "./ui/password-reset";
 export { default as SignIn } from "./ui/sign-in";
 export { default as SignUp } from "./ui/sign-up";
+
+export { default as OAuthIdentities } from "./ui/oauth-identities";

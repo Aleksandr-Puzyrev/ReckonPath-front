@@ -509,6 +509,24 @@ paths:
               schema: { $ref: "#/components/schemas/StreakView" }
         default: { $ref: "#/components/responses/Error" }
 
+  /shop/files/{file}:
+    get:
+      operationId: getShopAsset
+      security: [{}]
+      parameters:
+        - { name: file, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Immutable shop asset
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+            image/png:
+              schema: { type: string, format: binary }
+            image/jpeg:
+              schema: { type: string, format: binary }
+        default: { $ref: "#/components/responses/Error" }
+
   /shop:
     get:
       operationId: getShop
@@ -1083,6 +1101,21 @@ paths:
         default: { $ref: "#/components/responses/Error" }
 
   /support/tickets:
+    get:
+      operationId: listSupportTickets
+      responses:
+        "200":
+          description: Support tickets
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [tickets]
+                properties:
+                  tickets:
+                    type: array
+                    items: { $ref: "#/components/schemas/SupportTicketView" }
+        default: { $ref: "#/components/responses/Error" }
     post:
       operationId: createSupportTicket
       description: >
@@ -1492,6 +1525,394 @@ paths:
         "200": { description: Deleted (an empty success) }
         default: { $ref: "#/components/responses/Error" }
 
+  /events:
+    get:
+      operationId: listEvents
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 0, maximum: 199 } }
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EventSummary" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /events/{code}:
+    get:
+      operationId: getEvent
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompetitiveEvent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /events/{code}/share:
+    get:
+      operationId: getEventPreview
+      security: [{}]
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Public event preview
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompetitiveEvent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /events/{code}/join:
+    post:
+      operationId: joinEvent
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompetitiveEvent" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /events/{code}/maps/{id}/play:
+    post:
+      operationId: playEventMap
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventAttempt" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /events/{code}/attempts/{id}:
+    get:
+      operationId: getEventAttempt
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventAttempt" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /events/{code}/attempts/{id}/tap:
+    post:
+      operationId: tapEventAttempt
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [seq, cell]
+              properties:
+                seq: { type: integer, minimum: 0 }
+                cell: { type: integer, minimum: 0 }
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventAttempt" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /events/{code}/leaderboard:
+    get:
+      operationId: getEventLeaderboard
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, minimum: 0, maximum: 199 } }
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/EventStanding" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /events/{code}/claim:
+    post:
+      operationId: claimEventPrize
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Reward claimed }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/achievements:
+    get:
+      operationId: getAchievements
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Achievement" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/achievements/{id}/claim:
+    post:
+      operationId: claimAchievement
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Reward claimed }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/stats:
+    get:
+      operationId: getCampaignStats
+      responses:
+        "200":
+          description: Campaign statistics for the current player
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CampaignStats" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/nickname/check:
+    get:
+      operationId: checkNickname
+      parameters:
+        - { name: nickname, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Nickname availability
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [available]
+                properties:
+                  available: { type: boolean }
+                  reason: { type: string, enum: [invalid, taken, forbidden] }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/devices/current/notifications:
+    get:
+      operationId: getDeviceNotificationSettings
+      responses:
+        "200": { $ref: "#/components/responses/DeviceNotificationSettings" }
+        default: { $ref: "#/components/responses/Error" }
+    put:
+      operationId: updateDeviceNotificationSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DeviceNotificationSettings" }
+      responses:
+        "200": { $ref: "#/components/responses/DeviceNotificationSettings" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/devices/current/push-tokens:
+    put:
+      operationId: registerDevicePushToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, token]
+              properties:
+                provider: { $ref: "#/components/schemas/PushProvider" }
+                token: { type: string, minLength: 16, maxLength: 4096 }
+      responses:
+        "204": { description: Token registered }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: clearDevicePushTokens
+      responses:
+        "204": { description: Tokens removed }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/devices/current/push-tokens/{provider}:
+    delete:
+      operationId: clearDevicePushTokenByProvider
+      parameters:
+        - {
+            name: provider,
+            in: path,
+            required: true,
+            schema: { $ref: "#/components/schemas/PushProvider" },
+          }
+      responses:
+        "204": { description: Token removed }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/devices/current/test-push:
+    post:
+      operationId: testDevicePush
+      responses:
+        "200":
+          description: Test dispatch result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DevicePushResult" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/notifications:
+    get:
+      operationId: getNotificationHistory
+      parameters:
+        - { name: cursor, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Notification history page
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/NotificationHistoryItem" }
+                  nextCursor: { type: string }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/notifications/{id}/read:
+    put:
+      operationId: markNotificationRead
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Notification marked as read }
+        default: { $ref: "#/components/responses/Error" }
+
+  /auth/oauth/{provider}:
+    post:
+      operationId: signInWithProvider
+      security: [{}]
+      parameters:
+        - {
+            name: provider,
+            in: path,
+            required: true,
+            schema: { $ref: "#/components/schemas/OAuthProvider" },
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/OAuthCode"
+                - type: object
+                  required: [device]
+                  properties:
+                    device: { $ref: "#/components/schemas/DeviceInfo" }
+                    acceptTerms: { type: boolean }
+                    acceptPrivacy: { type: boolean }
+                    acceptMarketing: { type: boolean }
+      responses:
+        "200":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/TokenPair"
+                  - type: object
+                    required: [isNewUser, consentsRequired]
+                    properties:
+                      isNewUser: { type: boolean }
+                      consentsRequired:
+                        type: array
+                        items: { $ref: "#/components/schemas/ConsentType" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /me/identities/{provider}:
+    parameters:
+      - {
+          name: provider,
+          in: path,
+          required: true,
+          schema: { $ref: "#/components/schemas/OAuthProvider" },
+        }
+    post:
+      operationId: linkProvider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/OAuthCode"
+                - $ref: "#/components/schemas/OAuthPassword"
+      responses:
+        "201":
+          description: Provider linked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LinkedIdentity" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      operationId: unlinkProvider
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OAuthPassword" }
+      responses:
+        "204": { description: Provider unlinked }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/offline/pack:
+    post:
+      operationId: downloadCampaignPack
+      responses:
+        "200":
+          description: Encrypted campaign levels
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OfflineCampaignPack" }
+        default: { $ref: "#/components/responses/Error" }
+
+  /campaign/offline/sync:
+    post:
+      operationId: syncOfflineCampaign
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [results]
+              properties:
+                results:
+                  type: array
+                  minItems: 1
+                  maxItems: 30
+                  items: { $ref: "#/components/schemas/OfflineCampaignResult" }
+      responses:
+        "200":
+          description: Server-verified attempts and wallet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OfflineCampaignSync" }
+        default: { $ref: "#/components/responses/Error" }
+
 components:
   securitySchemes:
     bearer:
@@ -1499,6 +1920,11 @@ components:
       scheme: bearer
 
   responses:
+    DeviceNotificationSettings:
+      description: Settings for the current device
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/DeviceNotificationSettings" }
     Error:
       description: Error envelope (Part 7 §1, codes in §2)
       content:
@@ -1633,6 +2059,8 @@ components:
         - step_claimed
         - no_season_result
         - friend_self
+        - competition_not_found
+        - competition_unavailable
         - already_friends
         - request_exists
         - requests_limit
@@ -1688,6 +2116,34 @@ components:
         adsNetwork: { type: string, description: Empty when ads are off }
         dayKey: { type: string, format: date }
         nextDayAt: { type: string, format: date-time }
+
+    OAuthProvider:
+      type: string
+      enum: [vkid, yandex]
+
+    OAuthCode:
+      type: object
+      required: [code, codeVerifier]
+      properties:
+        code: { type: string }
+        codeVerifier: { type: string }
+        redirectUri: { type: string }
+        vkDeviceId: { type: string }
+        state: { type: string }
+
+    OAuthPassword:
+      type: object
+      properties:
+        password: { type: string }
+
+    LinkedIdentity:
+      type: object
+      required: [provider, linkedAt]
+      properties:
+        provider: { $ref: "#/components/schemas/OAuthProvider" }
+        email: { type: string }
+        name: { type: string }
+        linkedAt: { type: string, format: date-time }
 
     TokenPair:
       type: object
@@ -1844,6 +2300,10 @@ components:
               type: array
               description: Active bans (decision 0060 #14)
               items: { $ref: "#/components/schemas/BanDetails" }
+        hasPassword: { type: boolean }
+        identities:
+          type: array
+          items: { $ref: "#/components/schemas/LinkedIdentity" }
         consents:
           type: array
           items: { $ref: "#/components/schemas/Consent" }
@@ -2084,6 +2544,16 @@ components:
         coins: { type: integer }
         gems: { type: integer }
 
+    ShopPalette:
+      type: object
+      additionalProperties:
+        type: array
+        items: { type: string }
+
+    ShopTexturePaths:
+      type: object
+      additionalProperties: { type: string }
+
     ShopItemView:
       type: object
       required: [key, tab, kind, title, description, rarity, currency, price, owned, equipped]
@@ -2102,6 +2572,24 @@ components:
         default: { type: boolean }
         endsAt: { type: string, format: date-time }
         image: { type: string }
+        style: { $ref: "#/components/schemas/ShopPalette" }
+        render: { type: string, enum: [colors, textures, lottie] }
+        textures: { $ref: "#/components/schemas/ShopTexturePaths" }
+        animation: { type: string }
+        loop: { type: boolean }
+        layerColors:
+          type: object
+          additionalProperties: { type: string }
+        singleTheme: { type: boolean }
+        dark:
+          type: object
+          properties:
+            style: { $ref: "#/components/schemas/ShopPalette" }
+            textures: { $ref: "#/components/schemas/ShopTexturePaths" }
+            animation: { type: string }
+            layerColors:
+              type: object
+              additionalProperties: { type: string }
         parts:
           type: array
           items: { type: string }
@@ -2238,6 +2726,94 @@ components:
           minItems: 2
           maxItems: 2
 
+    EventSummary:
+      type: object
+      required: [id, code, title, description, status, startsAt, endsAt]
+      properties:
+        id: { type: string }
+        code: { type: string }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [scheduled, running, finished] }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+
+    CompetitiveEvent:
+      type: object
+      required: [id, title, description, status, startsAt, endsAt, attemptsPerMap, maps, prizes]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        status: { type: string, enum: [scheduled, running, finished] }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        attemptsPerMap: { type: integer }
+        maps:
+          type: array
+          items: { type: string }
+        prizes:
+          type: [array, "null"]
+          items: { $ref: "#/components/schemas/CompetitionReward" }
+
+    EventAttempt:
+      type: object
+      required: [id, board, cells, seq, status, moves, score]
+      properties:
+        id: { type: string }
+        board: { $ref: "#/components/schemas/PublicBoard" }
+        cells:
+          type: array
+          items: { $ref: "#/components/schemas/CellView" }
+        seq: { type: integer }
+        status: { type: string, enum: [play, won, lost] }
+        moves: { type: integer }
+        score: { type: integer }
+
+    EventStanding:
+      type: object
+      required: [rank, nickname, score, moves]
+      properties:
+        rank: { type: integer }
+        nickname: { type: string }
+        score: { type: integer }
+        moves: { type: integer }
+
+    CompetitionReward:
+      type: object
+      required: [coins, gems, xp]
+      properties:
+        coins: { type: integer }
+        gems: { type: integer }
+        xp: { type: integer }
+        item: { type: string }
+
+    AchievementCondition:
+      type: object
+      required: [metric, minimum]
+      properties:
+        metric:
+          { type: string, enum: [level_stars, arena_wins, trophies, daily_wins, event_maps_won] }
+        minimum: { type: integer }
+
+    Achievement:
+      type: object
+      required: [id, title, description, badge, conditions, reward, claimed, eligible, progress]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        description: { type: string }
+        badge: { type: string }
+        conditions:
+          type: array
+          items: { $ref: "#/components/schemas/AchievementCondition" }
+        reward: { $ref: "#/components/schemas/CompetitionReward" }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        claimed: { type: boolean }
+        eligible: { type: boolean }
+        progress: { type: object, additionalProperties: { type: integer } }
+
     PublicBoard:
       type: object
       required:
@@ -2313,6 +2889,65 @@ components:
     LevelState:
       type: string
       enum: [locked, current, done, perfect]
+
+    OfflineCampaignPack:
+      type: object
+      required: [packId, expiresAt, alg, key, levels]
+      properties:
+        packId: { type: string }
+        expiresAt: { type: string, format: date-time }
+        alg: { type: string, enum: [A256GCM] }
+        key: { type: string }
+        levels:
+          type: array
+          items:
+            type: object
+            required: [number, version, nonce, data]
+            properties:
+              number: { type: integer }
+              version: { type: integer }
+              nonce: { type: string }
+              data: { type: string }
+
+    OfflineCampaignResult:
+      type: object
+      required: [id, packId, level, version, taps, startedAt, finishedAt]
+      properties:
+        id: { type: string }
+        packId: { type: string }
+        level: { type: integer }
+        version: { type: integer }
+        taps: { $ref: "#/components/schemas/Cells" }
+        startedAt: { type: string, format: date-time }
+        finishedAt: { type: string, format: date-time }
+
+    OfflineCampaignSync:
+      type: object
+      required: [results, wallet]
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required: [id, status, stars, reward]
+            properties:
+              id: { type: string }
+              status: { type: string, enum: [won, lost, rejected] }
+              reason: { type: string }
+              stars: { type: integer }
+              reward: { type: integer }
+        wallet: { $ref: "#/components/schemas/BackendWallet" }
+
+    CampaignStats:
+      type: object
+      required: [levelsDone, levelsTotal, stars, starsMax, perfect, coinsEarned]
+      properties:
+        levelsDone: { type: integer }
+        levelsTotal: { type: integer }
+        stars: { type: integer }
+        starsMax: { type: integer }
+        perfect: { type: integer }
+        coinsEarned: { type: integer }
 
     CampaignLevel:
       type: object
@@ -2990,6 +3625,59 @@ components:
         min: { type: integer }
         max: { type: integer }
         count: { type: integer }
+
+    PushProvider:
+      type: string
+      enum: [fcm, apns, rustore, hms, webpush]
+
+    DevicePushResult:
+      type: object
+      required: [sent, failed, removed, unsupported]
+      properties:
+        sent: { type: integer }
+        failed: { type: integer }
+        removed: { type: integer }
+        unsupported: { type: integer }
+
+    NotificationChannel:
+      type: string
+      enum: [daily, friends, arena, events]
+
+    DeviceNotificationSettings:
+      type: object
+      required: [tz, locale, channels]
+      properties:
+        tz: { type: string, maxLength: 64 }
+        locale: { type: string, enum: [ru, en] }
+        channels:
+          type: array
+          maxItems: 4
+          items: { $ref: "#/components/schemas/NotificationChannel" }
+
+    NotificationHistoryItem:
+      type: object
+      required: [id, type, title, body, createdAt, readAt]
+      properties:
+        id: { type: string }
+        type: { type: string }
+        title: { type: string }
+        body: { type: string }
+        userId: { type: string }
+        ref: { type: string }
+        createdAt: { type: string, format: date-time }
+        readAt: { type: [string, "null"], format: date-time }
+
+    SupportTicketView:
+      type: object
+      required: [id, topic, status, message, createdAt]
+      properties:
+        id: { type: string }
+        topic: { type: string, enum: [ban_appeal, support] }
+        status: { type: string, enum: [open, answered, closed] }
+        message: { type: string }
+        answer: { type: string }
+        createdAt: { type: string, format: date-time }
+        answeredAt: { type: string, format: date-time }
 
     SupportTicket:
       type: object

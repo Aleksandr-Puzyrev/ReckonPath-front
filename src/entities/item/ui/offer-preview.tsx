@@ -10,12 +10,14 @@ import ProfileIcon from "@assets/icons/tabs/profile.svg";
 import ShopIcon from "@assets/icons/tabs/shop.svg";
 
 import type { Rarity, Slot } from "../model/item-type";
+import type { ProfileTextures } from "../model/shop-texture";
 import { rarityLookOf } from "../model/rarity-look";
 
 import { styles } from "./offer-preview-styles";
 
 interface IOfferPreview {
   preview: string;
+  profileTextures?: ProfileTextures | undefined;
   rarity: Rarity;
   slot: Slot | "bundle";
 }
@@ -41,15 +43,24 @@ const ICONS = {
   bundle: ShopIcon,
 } satisfies Record<Slot | "bundle", unknown>;
 
-const OfferPreview = ({ preview, rarity, slot }: IOfferPreview) => {
-  const { theme } = useUnistyles();
+const OfferPreview = ({ preview, profileTextures, rarity, slot }: IOfferPreview) => {
+  const { theme, rt } = useUnistyles();
+  const texture = profileTextures?.[rt.themeName === "light" ? "light" : "dark"];
   const look = rarityLookOf(rarity);
   styles.useVariants({ rarity: look });
   const Icon = ICONS[slot];
   const iconSize = theme.sizes.icon.xl;
 
-  if (preview !== "") {
-    return <Image source={preview} style={styles.preview} contentFit="cover" />;
+  const source = texture ?? preview;
+  if (source !== "") {
+    return (
+      <Image
+        source={source}
+        recyclingKey={source}
+        style={styles.preview}
+        contentFit={slot === "frame" ? "contain" : "cover"}
+      />
+    );
   }
 
   return (

@@ -40,12 +40,6 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     borderRadius: theme.radius.xl,
     overflow: "hidden",
   },
-  avatar: {
-    width: theme.sizes.avatar.profile,
-    height: theme.sizes.avatar.profile,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   onHero: {
     color: theme.colors.text.onAccent,
   },

@@ -6,15 +6,6 @@ export const styles = StyleSheet.create((theme) => ({
     alignItems: "center",
     gap: theme.space[5],
   },
-  avatar: {
-    width: theme.sizes.avatar.profile,
-    height: theme.sizes.avatar.profile,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  letter: {
-    color: theme.colors.text.onAccent,
-  },
   texts: {
     flex: 1,
     gap: theme.space[2],

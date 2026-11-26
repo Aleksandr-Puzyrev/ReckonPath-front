@@ -1,5 +1,9 @@
 import type { components } from "@shared/api";
 
+import type { ShopAnimation } from "./shop-animation";
+import type { ProfileTextures } from "./shop-texture";
+import type { SkinData } from "./skin-data";
+
 export type ShopCatalog = components["schemas"]["ShopCatalog"];
 export type ShopItemView = components["schemas"]["ShopItemView"];
 export type BackendInventory = components["schemas"]["Inventory"];
@@ -37,6 +41,9 @@ export interface ShopItem {
   description: string;
   preview: string;
   skinUrl: string;
+  skin?: SkinData;
+  profileTextures?: ProfileTextures;
+  animation?: ShopAnimation;
   price: Price;
   availableTo: string | null;
   owned: boolean;
@@ -82,7 +89,17 @@ export interface Shop {
 export interface InventoryEntry {
   itemId: string;
   slot: Slot;
-  item: Pick<ShopItem, "name" | "description" | "rarity" | "preview" | "skinUrl">;
+  item: Pick<
+    ShopItem,
+    | "name"
+    | "description"
+    | "rarity"
+    | "preview"
+    | "skinUrl"
+    | "skin"
+    | "profileTextures"
+    | "animation"
+  >;
 }
 
 export interface Inventory {

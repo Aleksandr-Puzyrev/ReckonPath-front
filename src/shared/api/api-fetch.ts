@@ -5,6 +5,7 @@ export type Transport = (request: Request) => Promise<Response>;
 export const REQUEST_TIMEOUT_MS = 10_000;
 const HTTP_UNAUTHORIZED = 401;
 const PUBLIC_PATHS = ["/v1/bootstrap", "/v1/version", "/v1/maintenance", "/v1/auth/"];
+const EVENT_PREVIEW = /\/v1\/events\/[A-Z2-9]{8}\/share$/i;
 const SESSION_PATHS = [
   "/v1/auth/refresh",
   "/v1/auth/login",
@@ -27,7 +28,9 @@ const isSessionRequest = (request: Request) =>
 
 // A guest has no account on the server, so its private requests never leave the device (у гостя нет аккаунта на сервере, поэтому его закрытые запросы не уходят с устройства).
 const isHeldForGuest = (request: Request) =>
-  !hasAccount() && !PUBLIC_PATHS.some((path) => pathOf(request).includes(path));
+  !hasAccount() &&
+  !(request.method === "GET" && EVENT_PREVIEW.test(pathOf(request))) &&
+  !PUBLIC_PATHS.some((path) => pathOf(request).includes(path));
 
 const guestResponse = () =>
   new Response(JSON.stringify({ error: { code: "unauthenticated" } }), {

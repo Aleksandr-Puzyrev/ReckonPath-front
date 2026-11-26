@@ -5,6 +5,7 @@ export {
   dailyQueryOptions,
   invalidateDailyProgress,
   invalidateFriendsLeaderboard,
+  useDailyDay,
   useDailyGameQuery,
   useDailyHistoryQuery,
   useDailyLeaderboardQuery,

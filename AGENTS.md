@@ -14,6 +14,8 @@ Always communicate with the developer in Russian — questions, plans, reports. 
 
 Mandatory rules live in `.claude/rules/` (index: `.claude/rules/README.md`). General rules load every session; layer rules (engine, data, state, forms, UI, animations, i18n, tests) load when their files are touched — read them explicitly when planning. Project skills: `.claude/skills/README.md`. Review agent: `.claude/agents/code-reviewer.md`.
 
+In Codex, read the project rules, the applicable project `SKILL.md` files, and the reviewer checklist directly. `.claude/settings.json` configures Claude Code. Use the explicit checks below in Codex. Keep the shared project instructions in this file and the existing `.claude/` sources.
+
 ## Expo has changed — do not trust your training data
 
 The project runs Expo SDK 57. Expo ships breaking changes every SDK release. Before writing code that touches an Expo, EAS, or React Native API:
@@ -57,7 +59,7 @@ Run lint, typecheck, format check, and tests before declaring any task done. The
 The backend (`../reckon-path-backend`, read-only for agents) runs locally at `http://127.0.0.1:8080` (decision 0048 #4).
 
 * Copy `.env.example` to `.env.local` (git-ignored): `EXPO_PUBLIC_API_URL=http://127.0.0.1:8080/api`. Restart `npm start` after changing it.
-* Hybrid routing (decision 0048 #1): a dev build sends only the routes listed in `src/shared/api/backend-routes.ts` to the backend; everything else, the WebSocket and the CDN assets stay on the mocks. An empty URL means mocks only. Release builds send everything to the backend.
+* Hybrid REST routing (decision 0048 #1): a dev build sends the routes listed in `src/shared/api/backend-routes.ts` to the backend and sends other REST requests to the mocks. An empty URL selects the REST mocks and disables the server arena in development. Release REST requests go to the backend. The arena WebSocket uses the configured backend separately (decision 0060 #8). See `docs/backend-handoff/client-integration-audit.md` for the route inventory and asset paths.
 * iOS simulator: `127.0.0.1` is the Mac. Android emulator: run `adb reverse tcp:8080 tcp:8080` once per emulator start, so `127.0.0.1` reaches the Mac.
 * A route joins `BACKEND_ROUTES` only together with the client changes for that endpoint (the task that adopts it).
 

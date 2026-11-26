@@ -14,6 +14,7 @@ import { useSignIn } from "../model/use-sign-in";
 
 import FormFooter from "./form-footer";
 import FormHeader from "./form-header";
+import OAuthSignIn from "./oauth-sign-in";
 import { styles } from "./sign-in-styles";
 
 interface ISignIn {
@@ -106,6 +107,7 @@ const SignIn = ({
         size="l"
         isDisabled={signIn.isPending}
       />
+      <OAuthSignIn onSignedIn={onSignedIn} onError={onError} isDisabled={signIn.isPending} />
       <FormFooter
         question={t("account.signIn.noAccount")}
         action={t("account.signUpAction")}

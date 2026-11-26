@@ -6,9 +6,10 @@ interface IToggle {
   isOn: boolean;
   onToggle: () => void;
   testID?: string;
+  isDisabled?: boolean;
 }
 
-const Toggle = ({ label, isOn, onToggle, testID }: IToggle) => {
+const Toggle = ({ label, isOn, onToggle, testID, isDisabled = false }: IToggle) => {
   const { theme } = useUnistyles();
 
   return (
@@ -16,6 +17,7 @@ const Toggle = ({ label, isOn, onToggle, testID }: IToggle) => {
       testID={testID}
       accessibilityLabel={label}
       value={isOn}
+      disabled={isDisabled}
       onValueChange={onToggle}
       trackColor={{ true: theme.colors.accent.cyan, false: theme.colors.border.strong }}
       thumbColor={theme.colors.bg.surface}

@@ -57,7 +57,7 @@ describe("visibleTabsOf", () => {
     expect(visibleTabsOf(shop)).toEqual(["fields", "bundles", "profile"]);
   });
 
-  test("hides a tab that has only effects (decision 0022 #6)", () => {
+  test("hides effect cards without a supported animation", () => {
     const shop = shopOf({
       tabs: [
         { id: "effects", items: [shopItem({ slot: "fxClick" })] },
@@ -66,6 +66,20 @@ describe("visibleTabsOf", () => {
     });
 
     expect(visibleTabsOf(shop)).toEqual([]);
+  });
+  test("shows playable effects in their server-assigned tabs", () => {
+    const theme = { url: "https://example.test/spark.json", colorFilters: [] };
+    const animation = { light: theme, dark: theme, loop: false };
+    const effect = shopItem({ slot: "fxClick", animation, visibleInMatch: false });
+    const shop = shopOf({
+      tabs: [
+        { id: "effects", items: [effect, shopItem({ id: "legacy", slot: "fxReveal" })] },
+        { id: "holiday", items: [shopItem({ id: "holiday-fx", slot: "fxVictory", animation })] },
+      ],
+    });
+
+    expect(visibleTabsOf(shop)).toEqual(["holiday", "effects"]);
+    expect(shopCardsOf(shop, "effects", false)).toEqual([{ kind: "item", item: effect }]);
   });
 });
 

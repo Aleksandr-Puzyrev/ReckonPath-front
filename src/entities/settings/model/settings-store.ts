@@ -6,7 +6,7 @@ import type { AppLanguage } from "@shared/i18n";
 import { zustandStorage } from "@shared/storage";
 import type { ThemeChoice } from "@shared/theme";
 
-const STORE_VERSION = 2;
+const STORE_VERSION = 3;
 export const VOLUME_MAX = 100;
 export const VOLUME_STEP = 5;
 // The design 25.1 levels a switched-on channel comes back to (уровни дизайна 25.1, к которым возвращается включённый канал).
@@ -24,6 +24,7 @@ const settingsSchema = z.object({
   isCoordinatesOn: z.boolean(),
   isPvpTapConfirmOn: z.boolean(),
   isRivalSkinsOn: z.boolean(),
+  isPushDeliveryEnabled: z.boolean().default(false),
   theme: z.enum(["light", "dark", "system"]),
   language: z.enum(["ru", "en"]).nullable(),
 });
@@ -37,6 +38,7 @@ const DEFAULTS: Settings = {
   isCoordinatesOn: true,
   isPvpTapConfirmOn: false,
   isRivalSkinsOn: true,
+  isPushDeliveryEnabled: false,
   theme: "system",
   language: null,
 };
@@ -66,6 +68,7 @@ interface SettingsState extends Settings {
   togglePvpTapConfirm: () => void;
   toggleRivalSkins: () => void;
   setTheme: (theme: ThemeChoice) => void;
+  setPushDelivery: (enabled: boolean) => void;
   setLanguage: (language: AppLanguage) => void;
   reset: () => void;
 }
@@ -90,6 +93,7 @@ export const useSettingsStore = create<SettingsState>()(
       togglePvpTapConfirm: () => set({ isPvpTapConfirmOn: !get().isPvpTapConfirmOn }),
       toggleRivalSkins: () => set({ isRivalSkinsOn: !get().isRivalSkinsOn }),
       setTheme: (theme) => set({ theme }),
+      setPushDelivery: (isPushDeliveryEnabled) => set({ isPushDeliveryEnabled }),
       setLanguage: (language) => set({ language }),
       reset: () => set(DEFAULTS),
     }),
@@ -104,6 +108,7 @@ export const useSettingsStore = create<SettingsState>()(
         isCoordinatesOn,
         isPvpTapConfirmOn,
         isRivalSkinsOn,
+        isPushDeliveryEnabled,
         theme,
         language,
       }): Settings => ({
@@ -113,13 +118,12 @@ export const useSettingsStore = create<SettingsState>()(
         isCoordinatesOn,
         isPvpTapConfirmOn,
         isRivalSkinsOn,
+        isPushDeliveryEnabled,
         theme,
         language,
       }),
       migrate: (persisted, version) =>
-        version < STORE_VERSION
-          ? migrateV1(persisted)
-          : settingsSchema.catch(DEFAULTS).parse(persisted),
+        version < 2 ? migrateV1(persisted) : settingsSchema.catch(DEFAULTS).parse(persisted),
     },
   ),
 );

@@ -13,6 +13,7 @@ export const motion = {
     accelerate: [0.3, 0, 0.8, 0.15],
   },
   animation: {
+    equippedTap: 600,
     targetFound: 900,
     targetInputLock: 300,
     bomb: 700,

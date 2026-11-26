@@ -1,9 +1,18 @@
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 
-import { apiClient, isSessionRevoked, readData, readEmpty, readErrorEnvelope } from "@shared/api";
+import {
+  apiClient,
+  clearCurrentPushTokens,
+  isApiError,
+  isSessionRevoked,
+  readData,
+  readEmpty,
+  readErrorEnvelope,
+  runCurrentPushOperation,
+} from "@shared/api";
 import type { ApiSession, components } from "@shared/api";
-import { APP_VERSION } from "@shared/config";
+import { APP_VERSION, HAS_FCM } from "@shared/config";
 
 import { useAccountStore } from "../model/account-store";
 import {
@@ -65,16 +74,25 @@ export const leaveAccount = async () => {
   useAccountStore.getState().reset();
 };
 
-// The server session ends first, so a failed sign-out leaves the account as it was (сначала завершается серверная сессия, поэтому неудачный выход оставляет аккаунт как есть).
-export const endSession = async () => {
-  readEmpty(await apiClient.POST("/auth/logout"));
-  await leaveAccount();
+const endAccountSession = (route: "/auth/logout" | "/auth/logout-all") => {
+  const revoke = async () => {
+    readEmpty(await apiClient.POST(route));
+    await leaveAccount();
+  };
+  if (!HAS_FCM) return revoke();
+  return runCurrentPushOperation(async () => {
+    try {
+      await clearCurrentPushTokens();
+    } catch (error) {
+      if (!isApiError(error) || error.code !== "no_device") throw error;
+    }
+    await revoke();
+  });
 };
 
-export const endEverySession = async () => {
-  readEmpty(await apiClient.POST("/auth/logout-all"));
-  await leaveAccount();
-};
+export const endSession = () => endAccountSession("/auth/logout");
+
+export const endEverySession = () => endAccountSession("/auth/logout-all");
 
 export const apiSession: ApiSession = {
   getAccessToken: () => useSessionStore.getState().accessToken,

@@ -29,7 +29,12 @@ const PurchaseSuccess = ({ view, canEquip, onLater, onEquip }: IPurchaseSuccess)
   return (
     <View style={styles.success}>
       <Animated.View entering={ZoomIn.duration(theme.motion.duration.base)} style={styles.preview}>
-        <OfferPreview preview={view.preview} rarity={view.rarity} slot={view.slot} />
+        <OfferPreview
+          preview={view.preview}
+          profileTextures={view.profileTextures}
+          rarity={view.rarity}
+          slot={view.slot}
+        />
       </Animated.View>
       <Text variant="eyebrow" style={styles.title} accessibilityLiveRegion="polite">
         {t("shop.success.title")}

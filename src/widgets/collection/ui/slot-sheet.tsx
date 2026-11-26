@@ -12,7 +12,7 @@ interface ISlotSheet {
   loadout: Loadout;
   inventory: readonly InventoryEntry[];
   isOnline: boolean;
-  renderBoard: (packageUrl: string | null) => ReactNode;
+  renderBoard: (item: InventoryEntry["item"] | null) => ReactNode;
   onOpenShop: () => void;
   onToast: (text: string) => void;
   onClose: () => void;

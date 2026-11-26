@@ -38,6 +38,7 @@ const CollectionGrid = ({ loadout, inventory, onSlotPress }: ICollectionGrid) =>
           >
             <OfferPreview
               preview={equipped?.item.preview ?? ""}
+              profileTextures={equipped?.item.profileTextures}
               rarity={equipped?.item.rarity ?? "common"}
               slot={slot}
             />

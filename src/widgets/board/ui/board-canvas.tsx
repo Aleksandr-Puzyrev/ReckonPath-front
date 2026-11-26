@@ -9,6 +9,7 @@ import type { BoardGeometry } from "../model/board-geometry";
 import { hitTest } from "../model/board-geometry";
 import { createBoardPaths } from "../model/board-paths";
 import { createBoardScene } from "../model/board-scene";
+import { useBoardTextures } from "../model/use-board-textures";
 import { useBoardSkin } from "../model/use-board-skin";
 import type { BoardLook } from "../model/use-board-skin";
 import type { CellVisual } from "../model/cell-visuals";
@@ -49,10 +50,12 @@ const BoardCanvas = ({
   look,
 }: IBoardCanvas) => {
   const skin = useBoardSkin(look);
+  const textures = useBoardTextures(skin.textures);
   const numberFont = useFont(numberFontSource, geometry.fontSize);
   const labelFont = useFont(labelFontSource, geometry.fontSize * LABEL_FONT_SHARE);
   const scene = createBoardScene(board, geometry, {
     skin,
+    textures,
     paths,
     font: numberFont,
     labelFont,

@@ -83,6 +83,7 @@ const PlayField = ({
             flags={flags}
             size={boardSize}
             fx={fx}
+            hasEquippedEffects
             showHidden={isDeclined}
             highlight={guides.highlight}
             onCellPress={onCellPress}

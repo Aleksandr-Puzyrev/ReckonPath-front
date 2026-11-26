@@ -1,6 +1,11 @@
 import NetInfo from "@react-native-community/netinfo";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
-import { focusManager, onlineManager, QueryClient } from "@tanstack/react-query";
+import {
+  defaultShouldDehydrateQuery,
+  focusManager,
+  onlineManager,
+  QueryClient,
+} from "@tanstack/react-query";
 import { AppState } from "react-native";
 
 import { APP_VERSION } from "@shared/config";
@@ -20,6 +25,10 @@ export const persistOptions = {
   persister: createAsyncStoragePersister({ storage: keyValueStorage, key: "query-cache" }),
   maxAge: CACHE_MAX_AGE_MS,
   buster: APP_VERSION,
+  dehydrateOptions: {
+    shouldDehydrateQuery: (query: Parameters<typeof defaultShouldDehydrateQuery>[0]) =>
+      query.meta?.persist !== false && defaultShouldDehydrateQuery(query),
+  },
 };
 
 onlineManager.setEventListener((setOnline) =>

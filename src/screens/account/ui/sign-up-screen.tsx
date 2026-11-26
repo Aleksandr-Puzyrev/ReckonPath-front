@@ -32,6 +32,7 @@ const SignUpScreen = () => {
               params: { email, resendAfter: String(resendAfter) },
             })
           }
+          onSignedIn={() => router.dismissTo("/")}
           onSignIn={() => router.replace("/account/sign-in")}
           onError={showError}
         />

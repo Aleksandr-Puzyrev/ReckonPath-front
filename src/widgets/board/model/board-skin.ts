@@ -1,14 +1,17 @@
-import type { ThemeSkin } from "@entities/item";
+import type { BoardTextureUrls, ThemeSkin } from "@entities/item";
 
 import skin from "./default-skin.json";
 
 export type BoardTheme = "light" | "dark";
-export type BoardSkin = (typeof skin)["dark"] & { elements: (typeof skin)["elements"] };
+export type BoardSkin = (typeof skin)["dark"] & {
+  elements: (typeof skin)["elements"];
+  textures?: BoardTextureUrls;
+};
 type SkinElements = BoardSkin["elements"];
 
 const isSameShape = (base: unknown, value: string | string[]) =>
   Array.isArray(base)
-    ? Array.isArray(value) && value.length === base.length
+    ? Array.isArray(value) && value.length > 0
     : typeof base === "string" && typeof value === "string";
 
 // Only known element colours of the same shape are taken, so a wrong skin cannot break drawing; the cast follows the `in` check (берутся только известные цвета элементов той же формы, чтобы неверный скин не сломал отрисовку; приведение идёт после проверки `in`).
@@ -26,6 +29,8 @@ const applySkin = (base: BoardSkin, part: ThemeSkin): BoardSkin => ({
   frame: part.frame?.gradient ?? base.frame,
   cell: part.cell?.stops ?? base.cell,
   number: part.number ?? base.number,
+  revealedTint: part.revealedTint ?? base.revealedTint,
+  ...(part.textures === undefined ? {} : { textures: { ...base.textures, ...part.textures } }),
   elements: mergeElements(base.elements, part.elements),
 });
 

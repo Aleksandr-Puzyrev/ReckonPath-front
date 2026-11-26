@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { HAS_BACKEND } from "@shared/config";
 import { IconButton } from "@shared/ui/icon-button";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
@@ -16,6 +17,7 @@ import { useSettingsScreen } from "../model/use-settings-screen";
 
 import AboutGroup from "./about-group";
 import AccountGroup from "./account-group";
+import DeviceNotificationGroup from "./device-notification-group";
 import GameGroup from "./game-group";
 import HelpGroup from "./help-group";
 import LookGroup from "./look-group";
@@ -63,6 +65,14 @@ const SettingsScreen = () => {
   const versionLabel =
     screen.build === null ? screen.version : `${screen.version} (${screen.build})`;
 
+  const historyActions =
+    HAS_BACKEND && screen.hasLogin
+      ? {
+          onSupportHistory: () => router.push("/settings/support-history"),
+          onNotifications: () => router.push("/settings/notifications"),
+        }
+      : {};
+
   return (
     <Screen style={styles.screen}>
       <View style={styles.top}>
@@ -82,8 +92,10 @@ const SettingsScreen = () => {
       <ScrollView contentContainerStyle={styles.content}>
         <GameGroup />
         <LookGroup onLanguage={screen.handleLanguage} />
+        {HAS_BACKEND && screen.hasLogin && <DeviceNotificationGroup />}
         <AccountGroup
           nickname={screen.me?.nickname ?? null}
+          me={screen.me}
           hasLogin={screen.hasLogin}
           deletionAt={screen.deletionAt}
           isSigningOut={screen.isSigningOut}
@@ -101,6 +113,7 @@ const SettingsScreen = () => {
         <HelpGroup
           onRules={() => screen.handleSheet("rules")}
           onSupport={() => screen.handleSheet("support")}
+          {...historyActions}
         />
         <AboutGroup
           versionLabel={versionLabel}

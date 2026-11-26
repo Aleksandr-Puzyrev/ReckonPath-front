@@ -33,6 +33,7 @@ export {
   useCampaignGameQuery,
   useCampaignLevelQuery,
   useCampaignQuery,
+  useCampaignStats,
 } from "./api/campaign-queries";
 export {
   continueCampaignGameMutationOptions,

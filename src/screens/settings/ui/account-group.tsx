@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { useUnistyles } from "react-native-unistyles";
 
+import { OAuthIdentities } from "@features/link-account";
+import type { Me } from "@entities/wallet";
 import { formatDayMonth } from "@shared/lib";
 import { SettingsRow } from "@shared/ui/settings-row";
 import { Text } from "@shared/ui/text";
@@ -17,6 +19,7 @@ import { styles } from "./settings-styles";
 
 interface IAccountGroup {
   nickname: string | null;
+  me?: Me | undefined;
   hasLogin: boolean;
   deletionAt: string | null;
   isSigningOut: boolean;
@@ -33,6 +36,7 @@ interface IAccountGroup {
 
 const AccountGroup = ({
   nickname,
+  me,
   hasLogin,
   deletionAt,
   isSigningOut,
@@ -92,6 +96,7 @@ const AccountGroup = ({
               />
             }
           />
+          {me && <OAuthIdentities me={me} />}
           <SettingsRow
             testID="settings-devices"
             Icon={AccountIcon}

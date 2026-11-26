@@ -1,5 +1,12 @@
-import { BlurStyle, PaintStyle, Skia, TileMode, vec } from "@shopify/react-native-skia";
-import type { SkCanvas, SkFont, SkPaint, SkPath } from "@shopify/react-native-skia";
+import { ClipOp, BlurStyle, PaintStyle, Skia, TileMode, vec } from "@shopify/react-native-skia";
+import type {
+  SkCanvas,
+  SkFont,
+  SkImage,
+  SkPaint,
+  SkPath,
+  SkRect,
+} from "@shopify/react-native-skia";
 
 export const roundRect = (x: number, y: number, width: number, height: number, radius: number) => {
   "worklet";
@@ -41,6 +48,7 @@ export const diagonalGradient = (
 ) => {
   "worklet";
   const paint = solidPaint(colors[0] ?? "", alpha);
+  if (colors.length < 2) return paint;
   paint.setShader(
     Skia.Shader.MakeLinearGradient(
       vec(x, y),
@@ -102,4 +110,33 @@ export const drawCenteredText = (
   const width = font.measureText(text).width;
   const { ascent, descent } = font.getMetrics();
   canvas.drawText(text, cx - width / 2, cy - (ascent + descent) / 2, paint, font);
+};
+
+export const drawTexture = (
+  canvas: SkCanvas,
+  image: SkImage | null | undefined,
+  rect: SkRect,
+  radius = 0,
+  alpha = 1,
+) => {
+  "worklet";
+  if (image == null) return false;
+  const paint = Skia.Paint();
+  paint.setAntiAlias(true);
+  paint.setAlphaf(alpha);
+  canvas.save();
+  if (radius > 0)
+    canvas.clipRRect(
+      roundRect(rect.x, rect.y, rect.width, rect.height, radius),
+      ClipOp.Intersect,
+      true,
+    );
+  canvas.drawImageRect(
+    image,
+    { x: 0, y: 0, width: image.width(), height: image.height() },
+    rect,
+    paint,
+  );
+  canvas.restore();
+  return true;
 };

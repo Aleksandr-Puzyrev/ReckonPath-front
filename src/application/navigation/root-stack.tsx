@@ -13,9 +13,13 @@ import {
 } from "@entities/app-config";
 import { useAccountStore } from "@entities/session";
 import { useSettingsStore } from "@entities/settings";
+import { HAS_FCM, HAS_BACKEND } from "@shared/config";
 import { isSystemLanguageSupported } from "@shared/i18n";
 
 import LinkOfferHost from "../account/link-offer-host";
+import PushHost from "../notifications/push-host";
+import DeviceNotificationHost from "../notifications/device-notification-host";
+import OfflineCampaignHost from "../offline/offline-campaign-host";
 import ArenaSocketHost from "../arena/arena-socket-host";
 import ChallengeBannerHost from "../arena/challenge-banner-host";
 import AdsConsentHost from "../ads/ads-consent-host";
@@ -67,6 +71,9 @@ const RootStack = () => {
         <Stack.Protected guard={isSignedIn}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="daily" />
+          <Stack.Screen name="events/index" />
+          <Stack.Screen name="events/[code]/index" />
+          <Stack.Screen name="events/[code]/attempt/[id]" />
           <Stack.Screen name="friends" />
           <Stack.Screen name="editor/index" />
           <Stack.Screen name="editor/[id]" options={{ gestureEnabled: false }} />
@@ -75,6 +82,8 @@ const RootStack = () => {
             options={{ presentation: "fullScreenModal", gestureEnabled: false }}
           />
           <Stack.Screen name="settings/index" />
+          <Stack.Screen name="settings/support-history" />
+          <Stack.Screen name="settings/notifications" />
           <Stack.Screen name="settings/deletion" />
           <Stack.Screen name="settings/devices" />
           <Stack.Screen name="settings/blocked-players" />
@@ -119,6 +128,17 @@ const RootStack = () => {
           <Stack.Screen name="account/code" />
           <Stack.Screen name="account/forgot" />
         </Stack.Protected>
+        <Stack.Protected
+          guard={
+            !isLanguageNeeded &&
+            !isBanned &&
+            !isUpdateRequired &&
+            !isMaintenance &&
+            !isConsentRequired
+          }
+        >
+          <Stack.Screen name="event-preview/[code]" />
+        </Stack.Protected>
         <Stack.Protected guard={isUpdateRequired}>
           <Stack.Screen name="system/update" options={{ gestureEnabled: false }} />
         </Stack.Protected>
@@ -142,9 +162,12 @@ const RootStack = () => {
           onDismiss={useSystemNoticeStore.getState().dismissSoftUpdate}
         />
       ) : null}
+      {HAS_BACKEND && <OfflineCampaignHost canSync={isSignedIn && state.kind !== "maintenance"} />}
       <LinkOfferHost isSuspended={isSoftUpdateOpen} />
       {isSignedIn ? (
         <>
+          {HAS_BACKEND && <DeviceNotificationHost />}
+          {HAS_FCM && <PushHost />}
           <ArenaSocketHost />
           <ChallengeBannerHost />
         </>

@@ -41,7 +41,12 @@ const ProductCard = ({ card, now, onPress }: IProductCard) => {
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
       <View>
-        <OfferPreview preview={view.preview} rarity={view.rarity} slot={view.slot} />
+        <OfferPreview
+          preview={view.preview}
+          profileTextures={view.profileTextures}
+          rarity={view.rarity}
+          slot={view.slot}
+        />
         {timer === null ? null : (
           <View style={styles.timer}>
             <Text variant="caption" style={styles.timerText}>

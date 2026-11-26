@@ -13,9 +13,10 @@ import { styles } from "./daily-calendar-styles";
 interface IDailyCalendar {
   todayKey: string;
   wonDays: ReadonlySet<string>;
+  onOpenDay?: (date: string) => void;
 }
 
-const DailyCalendar = ({ todayKey, wonDays }: IDailyCalendar) => {
+const DailyCalendar = ({ todayKey, wonDays, onOpenDay }: IDailyCalendar) => {
   const { t, i18n } = useTranslation();
   const weeks = calendarWeeksOf(todayKey, wonDays);
   const weekdays = mondayFirstWeekdays(i18n.language);
@@ -55,6 +56,9 @@ const DailyCalendar = ({ todayKey, wonDays }: IDailyCalendar) => {
                 key={cell?.dayKey ?? `padding-${index}`}
                 cell={cell}
                 label={labelOf(cell)}
+                {...(onOpenDay && cell?.isWon && !cell.isToday
+                  ? { onPress: () => onOpenDay(cell.dayKey) }
+                  : {})}
               />
             ))}
           </View>

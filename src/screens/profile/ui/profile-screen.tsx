@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { useCompetitionAvailable } from "@entities/competition";
 import { PREVIEW_LEVEL } from "@entities/level";
 import { AccountGate } from "@features/link-account";
 import { Button } from "@shared/ui/button";
@@ -11,6 +12,7 @@ import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
 import type { ToastMessage } from "@shared/ui/toast";
+import { AchievementList } from "@widgets/achievements";
 import { BoardTryout } from "@widgets/board";
 import { CollectionGrid, SlotSheet } from "@widgets/collection";
 import { EarnSheet } from "@widgets/earn-sheet";
@@ -20,6 +22,7 @@ import { TopBar } from "@widgets/top-bar";
 import { NICKNAME_CHANGED_NOTICE } from "../model/profile-notice";
 import { useProfileScreen } from "../model/use-profile-screen";
 
+import CampaignStats from "./campaign-stats";
 import ProfileHeader from "./profile-header";
 import ProfileStatus from "./profile-status";
 import { styles } from "./profile-screen-styles";
@@ -28,6 +31,7 @@ const ProfileScreen = () => {
   const { t } = useTranslation();
   const { theme, rt } = useUnistyles();
   const profile = useProfileScreen();
+  const competitionAvailable = useCompetitionAvailable();
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const showToast = (text: string) => setToast((current) => ({ id: (current?.id ?? 0) + 1, text }));
   const { notice } = useLocalSearchParams<{ notice?: string }>();
@@ -63,8 +67,19 @@ const ProfileScreen = () => {
             <ProfileHeader
               nickname={profile.me.nickname}
               progress={profile.me}
+              avatar={
+                profile.inventory.find(
+                  ({ itemId, slot }) => slot === "avatar" && itemId === profile.loadout.avatar,
+                )?.item.profileTextures
+              }
+              frame={
+                profile.inventory.find(
+                  ({ itemId, slot }) => slot === "frame" && itemId === profile.loadout.frame,
+                )?.item.profileTextures
+              }
               onNicknamePress={() => router.push("/profile/nickname")}
             />
+            {competitionAvailable && <CampaignStats />}
             {profile.friendCounts === undefined ? null : (
               <ProfileFriendsRow
                 counts={profile.friendCounts}
@@ -81,6 +96,7 @@ const ProfileScreen = () => {
             />
           </>
         )}
+        {!profile.isGuest && competitionAvailable && <AchievementList />}
         <Button
           testID="profile-settings"
           label={t("settings.title")}
@@ -94,12 +110,16 @@ const ProfileScreen = () => {
         loadout={profile.loadout}
         inventory={profile.inventory}
         isOnline={profile.isOnline}
-        renderBoard={(packageUrl) =>
+        renderBoard={(item) =>
           PREVIEW_LEVEL === undefined ? null : (
             <BoardTryout
               level={PREVIEW_LEVEL}
               size={theme.sizes.shop.previewVisual}
-              look={{ packageUrl, theme: rt.themeName === "light" ? "light" : "dark" }}
+              look={{
+                packageUrl: item?.skinUrl ?? null,
+                theme: rt.themeName === "light" ? "light" : "dark",
+                ...(item?.skin === undefined ? {} : { skin: item.skin }),
+              }}
             />
           )
         }

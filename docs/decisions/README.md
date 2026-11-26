@@ -72,6 +72,11 @@ Agents record every answer to a clarifying question here (see the `clarify-task`
 | 0064 | [`0064-support-on-backend.md`](0064-support-on-backend.md) | Support on the backend: account only, passes under a ban, `tickets_limit` text, own settings sheet texts, answers by email, idempotency key, `rate_limit_unavailable` text |
 | 0065 | [`0065-backend-resync-283c87e.md`](0065-backend-resync-283c87e.md) | Backend re-sync to 283c87e: no reveal after declining the continue, a repeat win gives nothing, no XP for a surrender at 0, events and achievements later |
 | 0066 | [`0066-player-profile-and-leaderboards.md`](0066-player-profile-and-leaderboards.md) | Another player's profile, block, report and arena leaderboards on the backend in two MRs: backend-only profile fields, block with confirmation, two report reasons, blocked list in settings, «+ В друзья» on the result, week/season × all/friends leaderboards, «Лидеры» on the arena home |
+| 0067 | [`0067-events-and-achievements-api.md`](0067-events-and-achievements-api.md) | Use the current backend API for competitive events and achievement reward claims. Event screens and profile claims confirmed. Badge selection deferred. |
+| 0068 | [`0068-remaining-backend-integration.md`](0068-remaining-backend-integration.md) | Remaining backend integration scope and order. |
+| 0069 | [`0069-offline-campaign.md`](0069-offline-campaign.md) | Automatic encrypted campaign packs, offline play without continue, and server-verified synchronization. |
+| 0070 | [`0070-equipped-solo-effects.md`](0070-equipped-solo-effects.md) | Equipped Lottie effects in online and offline campaign and daily challenges. |
+| 0071 | [`0071-ios-push-provider.md`](0071-ios-push-provider.md) | FCM for iOS push delivery. |
 
 ## Template
 

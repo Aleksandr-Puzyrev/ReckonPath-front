@@ -41,6 +41,21 @@ const CODES_WITH_TEXT = [
   "report_duplicate",
   "player_not_found",
   "friend_self",
+  "competition_not_found",
+  "competition_unavailable",
+  "oauth_rejected",
+  "account_exists",
+  "already_linked",
+  "not_linked",
+  "provider_not_supported",
+  "provider_unavailable",
+  "last_login_method",
+  "identity_taken",
+  "provider_already_linked",
+  "reauth_required",
+  "password_required",
+  "no_device",
+  "no_push_tokens",
 ] as const satisfies readonly ApiErrorCode[];
 
 type CodeWithText = (typeof CODES_WITH_TEXT)[number];

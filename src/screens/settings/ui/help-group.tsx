@@ -11,9 +11,11 @@ import SettingsGroup from "./settings-group";
 interface IHelpGroup {
   onRules: () => void;
   onSupport: () => void;
+  onSupportHistory?: () => void;
+  onNotifications?: () => void;
 }
 
-const HelpGroup = ({ onRules, onSupport }: IHelpGroup) => {
+const HelpGroup = ({ onRules, onSupport, onSupportHistory, onNotifications }: IHelpGroup) => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
 
@@ -34,6 +36,22 @@ const HelpGroup = ({ onRules, onSupport }: IHelpGroup) => {
         label={t("settings.support")}
         onPress={onSupport}
       />
+      {onSupportHistory && (
+        <SettingsRow
+          Icon={SupportIcon}
+          iconColor={theme.colors.status.success}
+          label={t("history.tickets")}
+          onPress={onSupportHistory}
+        />
+      )}
+      {onNotifications && (
+        <SettingsRow
+          Icon={SupportIcon}
+          iconColor={theme.colors.accent.cyan}
+          label={t("history.notifications")}
+          onPress={onNotifications}
+        />
+      )}
     </SettingsGroup>
   );
 };

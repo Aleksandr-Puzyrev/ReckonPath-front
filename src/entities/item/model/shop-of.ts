@@ -11,6 +11,9 @@ import type {
   ShopTabId,
 } from "./item-type";
 import { isVisibleInMatch, slotOfKind } from "./kind-slots";
+import { shopAnimationOf } from "./shop-animation";
+import { shopSkinOf } from "./shop-skin";
+import { profileTexturesOf } from "./shop-texture";
 
 const TAB_OF = {
   exclusive: "exclusive",
@@ -33,6 +36,9 @@ const TAB_ORDER: readonly ShopTabId[] = [
 export const shopItemOf = (view: ShopItemView): ShopItem | null => {
   const slot = slotOfKind(view.kind);
   if (slot === null) return null;
+  const skin = shopSkinOf(view);
+  const animation = shopAnimationOf(view);
+  const profileTextures = profileTexturesOf(view);
   return {
     id: view.key,
     slot,
@@ -41,6 +47,9 @@ export const shopItemOf = (view: ShopItemView): ShopItem | null => {
     description: view.description,
     preview: apiAssetUrl(view.image ?? ""),
     skinUrl: "",
+    ...(skin === undefined ? {} : { skin }),
+    ...(animation === undefined ? {} : { animation }),
+    ...(profileTextures === undefined ? {} : { profileTextures }),
     price: priceOf(view.price, view.currency),
     availableTo: view.endsAt ?? null,
     owned: view.owned,

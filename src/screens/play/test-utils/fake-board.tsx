@@ -22,6 +22,6 @@ export const Board = ({ onCellPress, onCellLongPress, showHidden }: IFakeBoard) 
   </View>
 );
 
-export const useBoardFx = () => ({ play: () => undefined });
+export const useBoardFx = () => ({ play: () => undefined, tap: () => undefined });
 
 export const BoardDemo = () => null;

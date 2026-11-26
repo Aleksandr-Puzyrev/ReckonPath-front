@@ -1,3 +1,6 @@
+import { toCamelKeys } from "@shared/lib";
+import { darkTheme, lightTheme } from "@shared/theme";
+
 import type { ShopCatalog, ShopItemView } from "./item-type";
 import { shopItemOf, shopOf } from "./shop-of";
 
@@ -81,6 +84,99 @@ describe("shopItemOf", () => {
     expect(shopItemOf(view({ image: "/shop/images/ab.png" }))?.preview).toMatch(
       /\/v1\/shop\/images\/ab\.png$/,
     );
+  });
+
+  test("uses the server Lottie file and preserves the exact layer names for each theme", () => {
+    const animation = `/shop/files/${"a".repeat(64)}.json`;
+    const light = lightTheme.colors.bg.base;
+    const dark = darkTheme.colors.bg.base;
+    const fields = toCamelKeys({
+      render: "lottie",
+      animation,
+      loop: true,
+      layer_colors: { color_glow: light },
+      dark: { animation, layer_colors: { color_glow: dark } },
+    }) as Partial<ShopItemView>;
+    const effect = shopItemOf(view({ kind: "tap", ...fields }))?.animation;
+
+    expect(effect).toEqual({
+      loop: true,
+      light: {
+        url: expect.stringContaining(animation),
+        colorFilters: [{ keypath: "color_glow", color: light }],
+      },
+      dark: {
+        url: expect.stringContaining(animation),
+        colorFilters: [{ keypath: "color_glow", color: dark }],
+      },
+    });
+  });
+
+  test("uses the server palette per theme and keeps every gradient stop", () => {
+    const item = shopItemOf(
+      view({
+        style: {
+          bg: [lightTheme.colors.bg.base],
+          cell: [...lightTheme.gradients.primary.colors, ...darkTheme.gradients.hot.colors],
+        },
+        dark: { style: { bg: [darkTheme.colors.bg.base] } },
+      }),
+    );
+
+    expect(item?.skin?.light).toEqual({
+      frame: { gradient: [lightTheme.colors.bg.base] },
+      cell: { stops: [...lightTheme.gradients.primary.colors, ...darkTheme.gradients.hot.colors] },
+    });
+    expect(item?.skin?.dark).toEqual({ frame: { gradient: [darkTheme.colors.bg.base] } });
+  });
+
+  test("reuses a one-theme texture without accepting external asset URLs", () => {
+    const file = "a".repeat(64) + ".png";
+    const item = shopItemOf(
+      view({
+        render: "textures",
+        singleTheme: true,
+        textures: { cell: "/shop/files/" + file, bg: "https://example.com/background.png" },
+      }),
+    );
+
+    expect(item?.skin?.dark).toEqual(item?.skin?.light);
+    expect(item?.skin?.dark?.textures).toEqual({
+      cell: expect.stringContaining("/v1/shop/files/" + file),
+    });
+  });
+
+  test("uses the built-in dark skin when the server has no dark palette", () => {
+    const item = shopItemOf(view({ style: { bg: [lightTheme.colors.bg.base] } }));
+
+    expect(item?.skin?.light).toBeDefined();
+    expect(item?.skin?.dark).toBeUndefined();
+  });
+
+  test("uses the matching portrait textures and does not borrow the light frame in dark mode", () => {
+    const light = "b".repeat(64) + ".png";
+    const dark = "c".repeat(64) + ".png";
+    const avatar = shopItemOf(
+      view({
+        kind: "avatar",
+        render: "textures",
+        textures: { avatar: "/shop/files/" + light },
+        dark: { textures: { avatar: "/shop/files/" + dark } },
+      }),
+    );
+    const frame = shopItemOf(
+      view({
+        kind: "frame",
+        render: "textures",
+        textures: { frame: "/shop/files/" + light },
+      }),
+    );
+
+    expect(avatar?.profileTextures).toEqual({
+      light: expect.stringContaining(light),
+      dark: expect.stringContaining(dark),
+    });
+    expect(frame?.profileTextures?.dark).toBeUndefined();
   });
 
   test("leaves a bundle out of the items", () => {

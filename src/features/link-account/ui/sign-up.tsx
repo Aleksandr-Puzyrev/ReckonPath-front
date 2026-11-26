@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Trans, useTranslation } from "react-i18next";
 import { View } from "react-native";
 
@@ -18,6 +18,7 @@ import { useSignUp } from "../model/use-sign-up";
 
 import FormFooter from "./form-footer";
 import FormHeader from "./form-header";
+import OAuthSignIn from "./oauth-sign-in";
 import PasswordStrengthBar from "./password-strength-bar";
 import { styles } from "./sign-up-styles";
 
@@ -25,6 +26,7 @@ interface ISignUp {
   onBack?: () => void;
   onCodeSent: (email: string, resendAfter: number) => void;
   onSignIn: () => void;
+  onSignedIn?: () => void;
   onError: (messageKey: ErrorMessageKey) => void;
 }
 
@@ -36,11 +38,15 @@ const DEFAULTS: SignUpSchema = {
   isMarketingAllowed: false,
 };
 
-const SignUp = ({ onBack, onCodeSent, onSignIn, onError }: ISignUp) => {
+const SignUp = ({ onBack, onCodeSent, onSignIn, onSignedIn, onError }: ISignUp) => {
   const { t } = useTranslation();
   const { control, handleSubmit, setError } = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
     defaultValues: DEFAULTS,
+  });
+  const [isConsentGiven, isMarketingAllowed] = useWatch({
+    control,
+    name: ["isConsentGiven", "isMarketingAllowed"],
   });
   const signUp = useSignUp({
     onCodeSent,
@@ -159,6 +165,18 @@ const SignUp = ({ onBack, onCodeSent, onSignIn, onError }: ISignUp) => {
         size="l"
         isDisabled={signUp.isPending}
       />
+      {onSignedIn && (
+        <OAuthSignIn
+          onSignedIn={onSignedIn}
+          onError={onError}
+          consents={{
+            acceptTerms: isConsentGiven,
+            acceptPrivacy: isConsentGiven,
+            acceptMarketing: isMarketingAllowed,
+          }}
+          isDisabled={signUp.isPending}
+        />
+      )}
       <FormFooter
         question={t("account.signUp.hasAccount")}
         action={t("account.signInAction")}

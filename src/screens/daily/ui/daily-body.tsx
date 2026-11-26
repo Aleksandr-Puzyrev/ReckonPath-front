@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { HAS_BACKEND } from "@shared/config";
 import { DailyCalendar } from "@widgets/daily-calendar";
 import { DailyTodayCard } from "@widgets/daily-today-card";
 import { DayLeaderboard } from "@widgets/day-leaderboard";
@@ -7,6 +9,7 @@ import { StreakCard } from "@widgets/streak-card";
 
 import type { useDailyScreen } from "../model/use-daily-screen";
 
+import DailyHistoryResult from "./daily-history-result";
 import DailyMessage from "./daily-message";
 import DailyStreakNotice from "./daily-streak-notice";
 
@@ -15,6 +18,7 @@ interface IDailyBody {
 }
 
 const DailyBody = ({ daily }: IDailyBody) => {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const { t } = useTranslation();
   const { state, day, rewards, leaderboard } = daily;
 
@@ -36,7 +40,14 @@ const DailyBody = ({ daily }: IDailyBody) => {
       />
       <DailyTodayCard day={day} rewards={rewards} onPlay={daily.handlePlay} />
       {daily.hasLogin ? <StreakCard streak={daily.streak} /> : null}
-      <DailyCalendar todayKey={daily.todayKey} wonDays={daily.wonDays} />
+      <DailyCalendar
+        todayKey={daily.todayKey}
+        wonDays={daily.wonDays}
+        {...(HAS_BACKEND && daily.hasLogin ? { onOpenDay: setSelectedDate } : {})}
+      />
+      {selectedDate !== null && (
+        <DailyHistoryResult date={selectedDate} onClose={() => setSelectedDate(null)} />
+      )}
       {daily.hasLogin && leaderboard !== undefined ? (
         <DayLeaderboard
           entries={leaderboard.entries}

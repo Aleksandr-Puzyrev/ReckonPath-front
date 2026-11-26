@@ -1,9 +1,12 @@
+import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
 import { StreakRestoreCard } from "@features/restore-streak";
+import { useCompetitionAvailable } from "@entities/competition";
 import { campaignLevelId, levelOfPublicBoard } from "@entities/level";
+import { Button } from "@shared/ui/button";
 import { Screen } from "@shared/ui/screen";
 import { Text } from "@shared/ui/text";
 import { Toast } from "@shared/ui/toast";
@@ -24,6 +27,7 @@ const HomeScreen = () => {
   const { t } = useTranslation();
   const { theme } = useUnistyles();
   const home = useHomeScreen();
+  const competitionAvailable = useCompetitionAvailable();
 
   return (
     <Screen style={styles.screen}>
@@ -55,6 +59,9 @@ const HomeScreen = () => {
             onShortOfEmeralds={home.handleShortOfEmeralds}
             onError={home.handleRestoreError}
           />
+        )}
+        {competitionAvailable && (
+          <Button label={t("competition.events")} onPress={() => router.push("/events")} />
         )}
         {home.isLoading ? (
           <HomeSkeleton />

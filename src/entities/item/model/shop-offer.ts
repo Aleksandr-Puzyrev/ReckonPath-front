@@ -1,4 +1,5 @@
 import type { Bundle, Price, Rarity, ShopItem, Slot } from "./item-type";
+import type { ProfileTextures } from "./shop-texture";
 
 export type ShopOffer =
   { kind: "item"; item: ShopItem } | { kind: "bundle"; bundle: Bundle; isComplete: boolean };
@@ -19,6 +20,7 @@ export interface OfferView {
   slot: Slot | "bundle";
   rarity: Rarity;
   preview: string;
+  profileTextures?: ProfileTextures;
   availableTo: string | null;
   isVisibleInMatch: boolean;
   price: Price;
@@ -56,6 +58,7 @@ export const offerViewOf = (card: ShopOffer): OfferView => {
     slot: item.slot,
     rarity: item.rarity,
     preview: item.preview,
+    ...(item.profileTextures === undefined ? {} : { profileTextures: item.profileTextures }),
     availableTo: item.availableTo,
     isVisibleInMatch: item.visibleInMatch,
     price: item.price,

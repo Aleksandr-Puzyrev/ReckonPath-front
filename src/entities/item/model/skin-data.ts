@@ -16,5 +16,31 @@ export const skinDataSchema = z.object({
   dark: themeSkinSchema.optional(),
 });
 
-export type SkinData = z.infer<typeof skinDataSchema>;
-export type ThemeSkin = z.infer<typeof themeSkinSchema>;
+type PackageThemeSkin = z.infer<typeof themeSkinSchema>;
+
+export type BoardTexture =
+  | "bg"
+  | "cell"
+  | "open"
+  | "fence"
+  | "water"
+  | "bridge"
+  | "heavy"
+  | "rock"
+  | "bomb"
+  | "buoy"
+  | "beacon"
+  | "marker";
+export type BoardTextureUrls = Partial<Record<BoardTexture, string>>;
+
+export type ThemeSkin = Omit<PackageThemeSkin, "frame" | "cell"> & {
+  frame?: { gradient: string[] };
+  cell?: { stops: string[] };
+  revealedTint?: string;
+  textures?: BoardTextureUrls;
+};
+
+export interface SkinData {
+  light?: ThemeSkin | undefined;
+  dark?: ThemeSkin | undefined;
+}

@@ -19,6 +19,7 @@ import BoardA11yOverlay from "./board-a11y-overlay";
 import BoardCanvas from "./board-canvas";
 import BoardCoordinates from "./board-coordinates";
 import { styles } from "./board-styles";
+import EquippedBoardEffects from "./equipped-board-effects";
 import BoardTooltip from "./board-tooltip";
 
 interface IBoard {
@@ -27,6 +28,7 @@ interface IBoard {
   size: number;
   fx: BoardFx;
   showHidden: boolean;
+  hasEquippedEffects?: boolean;
   highlight?: readonly Idx[] | null;
   onCellPress: (idx: Idx) => void;
   onCellLongPress: (idx: Idx) => void;
@@ -43,6 +45,7 @@ const Board = ({
   size,
   fx,
   showHidden,
+  hasEquippedEffects = false,
   highlight = null,
   onCellPress,
   onCellLongPress,
@@ -98,6 +101,7 @@ const Board = ({
         onCellPress={handleCellPress}
         onCellLongPress={onCellLongPress}
       />
+      {hasEquippedEffects ? <EquippedBoardEffects geometry={geometry} fx={fx} /> : null}
       {tooltip === null ? null : (
         <BoardTooltip geometry={geometry} idx={tooltip.idx} text={tooltip.text} />
       )}

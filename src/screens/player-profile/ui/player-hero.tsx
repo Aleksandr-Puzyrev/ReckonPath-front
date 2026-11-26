@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useUnistyles } from "react-native-unistyles";
 
+import { ProfilePortrait, profileTexturesOf } from "@entities/item";
 import type { PlayerProfile } from "@entities/player";
 import { formatNumber } from "@shared/lib";
 import { Gradient } from "@shared/ui/gradient";
@@ -22,12 +23,12 @@ const PlayerHero = ({ profile }: IPlayerHero) => {
   return (
     <View style={styles.hero}>
       <Gradient name="heroArena" radius={theme.radius.xl} />
-      <View style={styles.avatar}>
-        <Gradient name="primary" radius={theme.radius.xl} />
-        <Text variant="display.m" style={styles.onHero}>
-          {profile.name.slice(0, 1).toUpperCase()}
-        </Text>
-      </View>
+      <ProfilePortrait
+        name={profile.name}
+        avatar={profileTexturesOf(profile.look.avatar)}
+        frame={profileTexturesOf(profile.look.frame)}
+        radius={theme.radius.xl}
+      />
       <View style={styles.heroTexts}>
         {title === undefined ? null : (
           <Text variant="eyebrow" style={styles.onHero} numberOfLines={1}>

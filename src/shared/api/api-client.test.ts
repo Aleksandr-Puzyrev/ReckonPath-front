@@ -200,6 +200,21 @@ describe("apiClient", () => {
     expect(requests).toHaveLength(1);
   });
 
+  test("lets a guest preview an event without opening private event data", async () => {
+    setApiSession({ ...ACCOUNT_SESSION, hasAccount: () => false });
+    const preview = captureRequests("get", "/events/ABCDEF23/share");
+    const privateEvent = captureRequests("get", "/events/ABCDEF23");
+
+    await apiClient.GET("/events/{code}/share", { params: { path: { code: "ABCDEF23" } } });
+    const { response } = await apiClient.GET("/events/{code}", {
+      params: { path: { code: "ABCDEF23" } },
+    });
+
+    expect(preview).toHaveLength(1);
+    expect(privateEvent).toHaveLength(0);
+    expect(response.status).toBe(HTTP_UNAUTHORIZED);
+  });
+
   test("signals an update on 426", async () => {
     const listener = jest.fn();
     const unsubscribe = onSystemSignal(listener);

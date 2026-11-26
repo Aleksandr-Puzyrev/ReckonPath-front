@@ -7,6 +7,7 @@ import type { CellVisual } from "../model/cell-visuals";
 
 import {
   diagonalGradient,
+  drawTexture,
   drawCenteredText,
   drawIcon,
   radialGradient,
@@ -60,6 +61,8 @@ const drawMine = (
   alpha: number,
 ) => {
   "worklet";
+  if (drawTexture(canvas, scene.textures?.bomb, { x, y, width: size, height: size }, 0, alpha))
+    return;
   const { paths } = scene;
   drawIcon(canvas, paths.mineSpikes, paths.box, x, y, size, strokePaint(color, MINE_STROKE, alpha));
   const scale = size / paths.box;
@@ -80,6 +83,16 @@ const drawMine = (
 const drawPin = (canvas: SkCanvas, scene: BoardScene, cx: number, cy: number, alpha: number) => {
   "worklet";
   const radius = scene.geometry.cell * PIN_SHARE;
+  if (
+    drawTexture(
+      canvas,
+      scene.textures?.marker,
+      { x: cx - radius, y: cy - radius, width: radius * 2, height: radius * 2 },
+      0,
+      alpha,
+    )
+  )
+    return;
   const paint = radialGradient(cx, cy, radius, scene.skin.elements.pin);
   paint.setAlphaf(alpha);
   canvas.drawCircle(cx, cy, radius, paint);
@@ -96,6 +109,16 @@ const drawBuoy = (
   alpha: number,
 ) => {
   "worklet";
+  if (
+    drawTexture(
+      canvas,
+      scene.textures?.buoy,
+      { x: cx - r, y: cy - r, width: r * 2, height: r * 2 },
+      0,
+      alpha,
+    )
+  )
+    return;
   const [top = "", bottom = ""] = scene.skin.elements.buoy;
   canvas.drawCircle(cx, cy, r, solidPaint(bottom, alpha));
   canvas.save();
@@ -277,6 +300,7 @@ const drawRevealed = (
 
   if (scene.kinds[idx] === "open") {
     canvas.drawRRect(roundRect(x, y, cell, cell, radius), solidPaint(scene.skin.revealedTint));
+    drawTexture(canvas, scene.textures?.open, { x, y, width: cell, height: cell }, radius);
   }
   if (visual.isFogged) {
     canvas.drawRRect(roundRect(x, y, cell, cell, radius), solidPaint(elements.fog));
@@ -296,15 +320,17 @@ const drawRevealed = (
       strokePaint(elements.beaconRing, RING_WIDTH),
     );
     const size = cell * TOWER_SHARE;
-    drawIcon(
-      canvas,
-      scene.paths.beaconTower,
-      scene.paths.box,
-      x + BADGE_INSET,
-      y + BADGE_INSET,
-      size,
-      solidPaint(elements.beaconTower),
-    );
+    const badge = { x: x + BADGE_INSET, y: y + BADGE_INSET, width: size, height: size };
+    if (!drawTexture(canvas, scene.textures?.beacon, badge))
+      drawIcon(
+        canvas,
+        scene.paths.beaconTower,
+        scene.paths.box,
+        x + BADGE_INSET,
+        y + BADGE_INSET,
+        size,
+        solidPaint(elements.beaconTower),
+      );
   }
   if (visual.isBuoy) {
     const r = cell * BUOY_SHARE;

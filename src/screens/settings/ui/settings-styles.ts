@@ -37,6 +37,7 @@ export const styles = StyleSheet.create((theme, runtime) => ({
     borderColor: theme.colors.border.default,
     backgroundColor: theme.colors.bg.surface,
   },
+  historyCard: { gap: theme.space[2], padding: theme.space[4] },
   value: {
     color: theme.colors.text.secondary,
   },
